@@ -11,6 +11,7 @@ The description of all available commands as well as the admin levels and rights
 
 ### Environment
 - Python 2.7.x
+- Sqlite3 database
 - Linux platform (tested on Debian Wheezy 32-bit)
 - Urban Terror 4.1.1
 
