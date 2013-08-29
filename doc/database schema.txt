@@ -1,4 +1,4 @@
-## SPUNPY BOT DATABASE SCHEMA
+## SPUNKY BOT DATABASE SCHEMA ##
 
 
 CREATE TABLE xlrstats ("id" INTEGER PRIMARY KEY NOT NULL, "guid" TEXT NOT NULL, "name" TEXT NOT NULL, "ip_address" TEXT NOT NULL, "first_seen" DATETIME, "last_played" DATETIME, "num_played" INTEGER DEFAULT 1, "kills" INTEGER DEFAULT 0, "deaths" INTEGER DEFAULT 0, "headshots" INTEGER DEFAULT 0, "team_kills" INTEGER DEFAULT 0, "team_death" INTEGER DEFAULT 0, "max_kill_streak" INTEGER DEFAULT 0, "suicides" INTEGER DEFAULT 0, "ratio" REAL DEFAULT 0, "rounds" INTEGER DEFAULT 0, "admin_role" INTEGER DEFAULT 1);
