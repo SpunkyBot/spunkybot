@@ -1,7 +1,7 @@
 # Spunky Bot
 
 **Spunky Bot** is a lightweight game server administration bot and RCON tool.
-Its purpose is to administrate an Urban Terror 4.1 server and provide statistical data for players.
+Its purpose is to administrate an Urban Terror 4.1/4.2 server and provide statistical data for players.
 The code of the Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was released under the Beerware License.
 
 
@@ -9,7 +9,7 @@ The code of the Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which 
 - Python 2.6.x / 2.7.x
 - SQLite 3 database
 - Linux platform (tested on Debian Wheezy 32-bit and Lenny 64-bit)
-- Urban Terror 4.1.1
+- Urban Terror 4.1.1 / 4.2.014
 
 
 ## Resources
