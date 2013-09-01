@@ -122,7 +122,7 @@ class TaskManager(object):
         """
         with players_lock:
             for player in game.players.itervalues():
-                # warning player, Admins will never get the alert warning
+                # warn player with 2 warnings, Admins will never get the alert warning
                 if (player.get_warning() == 2 or player.get_spec_warning() == 2) and player.get_admin_role() < 40:
                     game.send_rcon("say ^1ALERT: ^7Player ^3" + player.get_name() + ", ^7auto-kick from warnings if not cleared")
 
@@ -192,7 +192,7 @@ class RconDispatcher(object):
 
     def push(self, msg):
         """
-        execute rcon command
+        execute RCON command
         """
         if self.live:
             with rcon_lock:
@@ -206,7 +206,7 @@ class RconDispatcher(object):
 
     def get_status(self):
         """
-        get rcon status
+        get RCON status
         """
         if self.live:
             with rcon_lock:
@@ -232,7 +232,7 @@ class RconDispatcher(object):
 
     def clear(self):
         """
-        clear rcon queue
+        clear RCON queue
         """
         self.queue.queue.clear()
 
@@ -367,6 +367,8 @@ class LogParser(object):
                     game.error("ERROR: Unknown log entry in parse_line(): " + repr(tmp))
         except IndexError:
             if '------' in tmp[0]:
+                self.handle_misc()
+            elif 'Session data initialised' in tmp[0]:
                 self.handle_misc()
             elif 'Bomb' in tmp[0]:
                 self.handle_misc()
@@ -1381,7 +1383,8 @@ class LogParser(object):
                             curs.execute("UPDATE `xlrstats` SET `admin_role` = ? WHERE `guid` = ?", values)
                             conn.commit()
                             # overwrite admin role in game, no reconnect of player required
-                            game.players[s['player_num']].get_guid().set_admin_role(100)
+                            game.players[s['player_num']].set_admin_role(100)
+                        game.send_rcon("tell " + str(s['player_num']) + " ^4[pm] ^7You are registered as Head Admin")
                     except Exception, err:
                         game.error("Exception in !iamgod: %s" % err)
 
