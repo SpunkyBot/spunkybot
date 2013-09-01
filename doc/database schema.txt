@@ -5,6 +5,6 @@ CREATE TABLE xlrstats ("id" INTEGER PRIMARY KEY NOT NULL, "guid" TEXT NOT NULL, 
 
 CREATE TABLE player ("id" INTEGER PRIMARY KEY NOT NULL, "guid" TEXT NOT NULL, "name" TEXT NOT NULL, "ip_address" TEXT NOT NULL, "time_joined" DATETIME, "aliases" TEXT);
 
-CREATE TABLE banlist ("id" INTEGER PRIMARY KEY NOT NULL, "guid" TEXT NOT NULL, "name" TEXT, "ip_address" TEXT, "expires" DATETIME DEFAULT 259200, "timestamp" DATETIME, "reason" TEXT);
+CREATE TABLE ban_list ("id" INTEGER PRIMARY KEY NOT NULL, "guid" TEXT NOT NULL, "name" TEXT, "ip_address" TEXT, "expires" DATETIME DEFAULT 259200, "timestamp" DATETIME, "reason" TEXT);
 
-CREATE TABLE banpoints ("id" INTEGER PRIMARY KEY NOT NULL, "guid" TEXT NOT NULL, "point_type" TEXT, "expires" DATETIME);
+CREATE TABLE ban_points ("id" INTEGER PRIMARY KEY NOT NULL, "guid" TEXT NOT NULL, "point_type" TEXT, "expires" DATETIME);
