@@ -5,8 +5,8 @@ Spunky Bot - automated game server bot
 Spunky Bot is a lightweight game server administration bot and RCON tool,
 inspired by the eb2k9 bot by Shawn Haggard.
 
-The purpose of Spunky Bot is to administrate an Urban Terror 4.1 server and
-provide statistical data for players.
+The purpose of Spunky Bot is to administrate an Urban Terror 4.1/4.2 server
+and provide statistical data for players.
 
 ## Installation ##
 # Modify the UrT server config as follows:
@@ -2023,7 +2023,7 @@ conn = sqlite3.connect('./data.sqlite')
 curs = conn.cursor()
 
 # create instance of LogParser
-LOGPARS = LogParser(settings['log_path'])
+LOGPARS = LogParser(settings['log_file'])
 
 # load the GEO database and store it globally in interpreter memory
 GEOIP = pygeoip.Database('./lib/GeoIP.dat')
