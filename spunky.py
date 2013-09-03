@@ -942,7 +942,8 @@ class LogParser(object):
                                     team = 'red'
                                 elif team == 'b' or team == 'bl' or team == 'blu':
                                     team = 'blue'
-                                game.send_rcon("forceteam " + victim.get_name() + " " + str(team))
+                                game.send_rcon("forceteam " + victim.get_name() + " " + team)
+                                game.send_rcon("tell " + str(victim.get_player_num()) + " ^4[pm] ^3You are forced to: ^7" + team)
                             else:
                                 game.send_rcon("tell " + str(s['player_num']) + " ^4[pm] ^7Usage: !force <name> <blue/red/spec>")
                     else:
