@@ -13,7 +13,7 @@ and provide statistical data for players.
 - seta g_logSync "1"
 - seta g_loghits "1"
 
-# Modify the files '/conf/settings.cfg' and '/conf/rules.cfg'
+# Modify the files '/conf/settings.conf' and '/conf/rules.conf'
 
 # Run the bot: python spunky.py
 """
@@ -145,12 +145,11 @@ class DisplayRules(object):
     """
     Display the rules
     """
-    def __init__(self):
+    def __init__(self, rules_frequency):
         """
         create a new instance of DisplayRules
         """
-        self.rules_frequency = int(settings['rules_frequency'])
-        self.file_name = settings['rules_file']
+        self.rules_frequency = rules_frequency
         # start Thread
         self.processor = Thread(target=self.process)
         self.processor.setDaemon(True)
@@ -163,7 +162,7 @@ class DisplayRules(object):
         # initial wait after bot restart
         time.sleep(30)
         while True:
-            filehandle = open(self.file_name, "r+")
+            filehandle = open('./conf/rules.conf', 'r+')
             for line in filehandle.readlines():
                 # display rule
                 game.send_rcon("say ^2" + line)
@@ -1881,7 +1880,7 @@ class Player(object):
 
 
 ### CLASS Game ###
-class Game:
+class Game(object):
     """
     Game class
     """
@@ -1893,7 +1892,7 @@ class Game:
         self.players = {}
         self.live = False
         self.rcon_handle = RconDispatcher()
-        self.rules_list = DisplayRules()
+        self.rules_list = DisplayRules(int(settings['rules_frequency']))
         self.verbose = False
         #self.gravity = 800
 
