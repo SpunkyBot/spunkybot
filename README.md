@@ -1,14 +1,14 @@
 # Spunky Bot
 
 **Spunky Bot** is a lightweight game server administration bot and RCON tool.
-Its purpose is to administrate an Urban Terror 4.1/4.2 server and provide statistical data for players.
+Its purpose is to administrate an Urban Terror 4.1 / 4.2 server and provide statistical data for players.
 The code of the Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was released under the Beerware License.
 
 
 ## Environment
 - Python 2.6.x / 2.7.x
 - SQLite 3 database
-- Linux platform (tested on Debian Wheezy 32-bit and Lenny 64-bit)
+- Linux platform (tested on Debian Wheezy 32-bit and Squeeze 64-bit)
 - Urban Terror 4.1.1 / 4.2.014
 
 
@@ -25,7 +25,7 @@ The code of the Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which 
 	- `seta g_loghits "1"`
 - The Spunky Bot settings are configured in the file `/conf/settings.conf`
 - In-game displayed rules are contained in the file `/conf/rules.conf`
-	- If you do not want to display rules, set the value `show_rules=0` in the file `/conf/settings.conf`
+	- If you do not want to display rules, set the value `show_rules=0` in the config file `/conf/settings.conf`
 - Run the bot: `python spunky.py`
 
 **_First start instruction:_**
