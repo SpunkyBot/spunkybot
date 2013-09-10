@@ -66,13 +66,10 @@ class TaskManager(object):
                 self.check_warn()
                 # check for spectators
                 self.check_spec()
-            except Exception, err:
-                game.error("Exception in Check Warn/Spec: %s" % err)
-            try:
                 # check for player with high ping
                 self.check_ping()
             except Exception, err:
-                game.error("Exception in Check Ping: %s" % err)
+                game.error("Exception in Check Warn/Spec/Ping: %s" % err)
             # wait for given delay in the config file
             time.sleep(self.frequency)
 
@@ -87,12 +84,11 @@ class TaskManager(object):
                 # if ping is too high, inform player and increase warn counter, Admins or higher leves will not get the warning
                 ping_value = player.ping
                 gameplayer = game.players[int(player.num)]
-                if ping_value.isdigit():
-                    if (int(ping_value) > int(settings['max_ping']) and int(ping_value) < 999 and gameplayer.get_admin_role() < 40):
-                        gameplayer.add_high_ping()
-                        game.send_rcon("tell " + str(player.num) + " ^1WARNING ^7[^3" + str(gameplayer.get_high_ping()) + "^7]: ^7Your ping is too high [^4" + str(ping_value) + "^7]. The maximum allowed is " + str(settings['max_ping']) + ".")
-                    else:
-                        gameplayer.clear_high_ping()
+                if (ping_value > int(settings['max_ping']) and ping_value < 999 and gameplayer.get_admin_role() < 40):
+                    gameplayer.add_high_ping()
+                    game.send_rcon("tell " + str(player.num) + " ^1WARNING ^7[^3" + str(gameplayer.get_high_ping()) + "^7]: ^7Your ping is too high [^4" + str(ping_value) + "^7]. The maximum allowed is " + str(settings['max_ping']) + ".")
+                else:
+                    gameplayer.clear_high_ping()
 
     def check_spec(self):
         """
@@ -1133,12 +1129,11 @@ class LogParser(object):
                         # update rcon status
                         game.rcon_handle.quake.rcon_update()
                         player_ping = game.rcon_handle.quake.players[victim.get_player_num()].ping
-                        if player_ping.isdigit():
-                            if int(player_ping) == 999:
-                                game.send_rcon("kick " + str(victim.get_player_num()))
-                                game.send_rcon("say ^2" + victim.get_name() + "^4 kicked by ^3" + game.players[s['player_num']].get_name() + "^4, connection interrupt")
-                            else:
-                                game.send_rcon("tell " + str(s['player_num']) + " ^4[pm] " + victim.get_name() + " has no connection interrupt")
+                        if player_ping == 999:
+                            game.send_rcon("kick " + str(victim.get_player_num()))
+                            game.send_rcon("say ^2" + victim.get_name() + "^4 kicked by ^3" + game.players[s['player_num']].get_name() + "^4, connection interrupt")
+                        else:
+                            game.send_rcon("tell " + str(s['player_num']) + " ^4[pm] " + victim.get_name() + " has no connection interrupt")
                 else:
                     game.send_rcon("tell " + str(s['player_num']) + " ^4[pm] ^7Usage: !ci <name>")
 
