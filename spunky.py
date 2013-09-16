@@ -265,7 +265,6 @@ class LogParser(object):
                 msg = re.search("(\d+:\d+)\s([A-Za-z]+\:)", line)
                 if msg is not None and msg.group(2) == 'InitGame:':
                     game_start = True
-                    #game_start_pos = lgf.tell()
                     # support of UrT 4.2.014
                     if 'g_modversion\\4.2.' in line:
                         self.hit_points = {0: "HEAD", 1: "HEAD", 2: "HELMET", 3: "TORSO", 4: "VEST", 5: "LEFT_ARM", 6: "RIGHT_ARM", 7: "GROIN", 8: "BUTT", 9: "LEFT_UPPER_LEG", 10: "RIGHT_UPPER_LEG", 11: "LEFT_LOWER_LEG", 12: "RIGHT_LOWER_LEG", 13: "LEFT_FOOT", 14: "RIGHT_FOOT"}
@@ -354,6 +353,8 @@ class LogParser(object):
                 elif tmp[0].lstrip() == 'Hotpotato':
                     self.handle_misc()
                 elif tmp[0].lstrip() == 'Warmup':
+                    self.handle_misc()
+                elif tmp[0].lstrip() == 'InitAuth':
                     self.handle_misc()
                 elif tmp[0].lstrip() == 'InitRound':
                     self.handle_misc()
