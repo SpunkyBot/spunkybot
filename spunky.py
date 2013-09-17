@@ -358,6 +358,8 @@ class LogParser(object):
                     self.handle_misc()
                 elif tmp[0].lstrip() == 'InitRound':
                     self.handle_misc()
+                elif tmp[0].lstrip() == 'Radio':
+                    self.handle_misc()
                 elif tmp[0].lstrip() == 'Exit':
                     self.handle_stats()
                     self.handle_awards()
