@@ -13,7 +13,7 @@ and provide statistical data for players.
 
 ## Configuration ##
 Modify the UrT server config as follows:
- * seta g_logSync "1"
+ * seta g_logsync "1"
  * seta g_loghits "1"
 Modify the files '/conf/settings.conf' and '/conf/rules.conf'
 Run the bot: python spunky.py
@@ -444,7 +444,7 @@ class LogParser(object):
             challenge = True if 'challenge' in values else False
             try:
                 guid = values['cl_guid'].rstrip('\n')
-                name = name = re.sub(r"\s+", "", values['name'])
+                name = re.sub(r"\s+", "", values['name'])
                 ip_port = values['ip']
             except KeyError:
                 if 'cl_guid' in values:
@@ -1305,7 +1305,13 @@ class LogParser(object):
                 result = curs.fetchall()
                 msg = ''
                 placeholder = ''
-                for item in range(4):
+                if len(result) > 4:
+                    limit = 4
+                elif len(result) == 0:
+                    limit = 0
+                else:
+                    limit = len(result)
+                for item in range(limit):
                     msg += placeholder + '[' + str(result[item][0]) + ']'  # ID
                     msg += result[item][2]  # Name
                     placeholder = ', '
@@ -1464,7 +1470,7 @@ class Player(object):
         """
         self.player_num = player_num
         self.guid = guid
-        self.name = re.sub(r"\s+", "", name)
+        self.name = "".join(name.split())
         self.aliases = []
         self.registered_user = 0
         self.num_played = 0
@@ -1499,6 +1505,11 @@ class Player(object):
         self.country = None
         #self.is_muted = 0
 
+        self.prettyname = "".join(name.split())
+        # remove color characters from name
+        for item in range(10):
+            self.prettyname = self.prettyname.replace('^%d' % item, '')
+
         # check ban_list
         now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         values = (self.guid, self.address, now)
@@ -1519,7 +1530,7 @@ class Player(object):
         unix_expiration = int(duration) + time.time()
         expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(unix_expiration))
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-        values = (self.guid, self.name, self.address, expire_date, timestamp, reason)
+        values = (self.guid, self.prettyname, self.address, expire_date, timestamp, reason)
         curs.execute("INSERT INTO `ban_list` (`guid`,`name`,`ip_address`,`expires`,`timestamp`,`reason`) VALUES (?,?,?,?,?,?)", values)
         conn.commit()
         game.kick_player(self)
@@ -1557,12 +1568,12 @@ class Player(object):
         values = (self.guid,)
         curs.execute("SELECT COUNT(*) FROM `player` WHERE `guid` = ?", values)
         if curs.fetchone()[0] < 1:
-            values = (self.guid, self.name, self.address, now, self.name)
+            values = (self.guid, self.prettyname, self.address, now, self.prettyname)
             curs.execute("INSERT INTO `player` (`guid`,`name`,`ip_address`,`time_joined`, `aliases`) VALUES (?,?,?,?,?)", values)
             conn.commit()
-            self.aliases.append(self.name)
+            self.aliases.append(self.prettyname)
         else:
-            values = (self.name, self.address, now, self.guid)
+            values = (self.prettyname, self.address, now, self.guid)
             curs.execute("UPDATE `player` SET `name` = ?,`ip_address` = ?,`time_joined` = ? WHERE `guid` = ?", values)
             conn.commit()
             # get known aliases
@@ -1571,10 +1582,10 @@ class Player(object):
             result = curs.fetchone()
             # create list of aliases
             self.aliases = result[0].split(', ')
-            if not self.name in self.aliases:
+            if not self.prettyname in self.aliases:
                 # add new alias to list
                 if len(self.aliases) < 11:
-                    self.aliases.append(self.name)
+                    self.aliases.append(self.prettyname)
                     alias_string = ', '.join(self.aliases)
                     values = (alias_string, self.guid)
                     curs.execute("UPDATE `player` SET `aliases` = ? WHERE `guid` = ?", values)
@@ -1601,14 +1612,14 @@ class Player(object):
             self.xlr_suicide = result[8]
             self.admin_role = result[9]
             # update name, last_played and increase num_played counter
-            values = (self.name, now, self.guid)
+            values = (self.prettyname, now, self.guid)
             curs.execute("UPDATE `xlrstats` SET `name` = ?,`last_played` = ?,`num_played` = `num_played` + 1 WHERE `guid` = ?", values)
             conn.commit()
 
     def register_user_db(self, role=1):
         if self.registered_user == 0:
             now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-            values = (self.guid, self.name, self.address, now, now, role)
+            values = (self.guid, self.prettyname, self.address, now, now, role)
             curs.execute("INSERT INTO `xlrstats` (`guid`,`name`,`ip_address`,`first_seen`,`last_played`,`num_played`,`admin_role`) VALUES (?,?,?,?,?,1,?)", values)
             conn.commit()
             self.registered_user = 1
@@ -1616,7 +1627,7 @@ class Player(object):
             self.welcome_msg = False
 
     def set_name(self, name):
-        self.name = re.sub(r"\s+", "", name)
+        self.name = "".join(name.split())
 
     def get_name(self):
         return self.name
