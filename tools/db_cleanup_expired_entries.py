@@ -5,19 +5,19 @@ import time
 
 ### Main ###
 # connect to database
-connnection = sqlite3.connect('../data.sqlite')
-cursor = connnection.cursor()
+connection = sqlite3.connect('../data.sqlite')
+cursor = connection.cursor()
 
 timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
 values = (timestamp,)
 
 # remove expired bans
 cursor.execute("DELETE FROM `ban_list` WHERE `expires` < ?", values)
-connnection.commit()
+connection.commit()
 
 # remove expired ban_points
 cursor.execute("DELETE FROM `ban_points` WHERE `expires` < ?", values)
-connnection.commit()
+connection.commit()
 
 # close database
-connnection.close()
+connection.close()
