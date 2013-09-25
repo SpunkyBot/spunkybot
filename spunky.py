@@ -36,7 +36,7 @@ from threading import RLock
 class TaskManager(object):
     """
     Tasks
-     - get rcon status
+     - get RCON status
      - display alert messages
      - check warnings
      - check for spectators on full server
@@ -80,10 +80,10 @@ class TaskManager(object):
             # rcon update status
             self.rcon_dispatcher.quake.rcon_update()
             for player in self.rcon_dispatcher.quake.players:
-                # if ping is too high, inform player and increase warn counter, Admins or higher leves will not get the warning
+                # if ping is too high, inform player and increase warn counter, Admins or higher levels will not get the warning
                 ping_value = player.ping
                 gameplayer = game.players[int(player.num)]
-                if (ping_value > int(settings['max_ping']) and ping_value < 999 and gameplayer.get_admin_role() < 40):
+                if int(settings['max_ping']) < ping_value < 999 and gameplayer.get_admin_role() < 40:
                     gameplayer.add_high_ping()
                     game.rcon_tell(player.num, "^1WARNING ^7[^3" + str(gameplayer.get_high_ping()) + "^7]: ^7Your ping is too high [^4" + str(ping_value) + "^7]. The maximum allowed is " + str(settings['max_ping']) + ".", False)
                 else:
@@ -105,7 +105,7 @@ class TaskManager(object):
                 if 'GTV-' in player.get_name():
                     gtv_connected = 1
                 # if player is spectator on full server (more than 10 players), inform player and increase warn counter, GTV or Moderator or higher levels will not get the warning
-                if (counter > 11 and player.get_team() == 3 and player.get_admin_role() < 20 and player.get_time_joined() < (time.time() - 30) and player.get_player_num() != 1022 and gtv_connected != 1):
+                if counter > 11 and player.get_team() == 3 and player.get_admin_role() < 20 and player.get_time_joined() < (time.time() - 30) and player.get_player_num() != 1022 and gtv_connected != 1:
                     player.add_spec_warning()
                     game.rcon_tell(player.get_player_num(), "^1WARNING ^7[^3" + str(player.get_spec_warning()) + "^7]: ^7You are spectator too long on full server", False)
                 else:
@@ -409,7 +409,6 @@ class LogParser(object):
                 return True
             else:
                 return False
-        return False
 
     def handle_game_init(self, line):
         """
@@ -498,7 +497,7 @@ class LogParser(object):
             if challenge:
                 game.debug("Player number: " + str(player_num) + " \"" + name + "\" is challenging the server and has the guid of: " + guid)
             else:
-                if ('name' in values and values['name'] != game.players[player_num].get_name()):
+                if 'name' in values and values['name'] != game.players[player_num].get_name():
                     game.players[player_num].set_name(values['name'])
 
     def handle_userinfo_changed(self, line):
@@ -584,7 +583,7 @@ class LogParser(object):
             hitter.set_all_hits()
 
             if hitpoint in self.hit_points:
-                if (self.hit_points[hitpoint] == 'HEAD' or self.hit_points[int(hitpoint)] == 'HELMET'):
+                if self.hit_points[hitpoint] == 'HEAD' or self.hit_points[int(hitpoint)] == 'HELMET':
                     hitter.headshot()
                     player_color = "^1" if (hitter.get_team() == 1) else "^4"
                     hs_plural = " headshots" if hitter.get_headshots() > 1 else " headshot"
@@ -633,7 +632,7 @@ class LogParser(object):
                     victim.team_death()
 
             # suicide counter
-            if (death_cause == 'MOD_SUICIDE' or death_cause == 'MOD_FALLING' or death_cause == "MOD_WATER" or death_cause == 'MOD_SPLODED' or (killer.get_player_num() == victim.get_player_num() and death_cause == 'UT_MOD_HEGRENADE')):
+            if death_cause == 'MOD_SUICIDE' or death_cause == 'MOD_FALLING' or death_cause == "MOD_WATER" or death_cause == 'MOD_SPLODED' or (killer.get_player_num() == victim.get_player_num() and death_cause == 'UT_MOD_HEGRENADE'):
                 killer.suicide()
 
             if int(info[2]) != 10:
@@ -676,7 +675,7 @@ class LogParser(object):
                 game.rcon_tell(s['player_num'], "^7" + str(game.players[s['player_num']].get_killing_streak()) + " ^7current kill streak")
                 game.rcon_tell(s['player_num'], "^7" + str(game.players[s['player_num']].get_all_hits()) + " ^7total hits")
 
-            elif (s['command'] == '!help' or s['command'] == '!h'):
+            elif s['command'] == '!help' or s['command'] == '!h':
                 ## TO DO - specific help for each command
                 if game.players[s['player_num']].get_admin_role() < 20:
                     game.rcon_tell(s['player_num'], "^7Available commands:")
@@ -796,7 +795,7 @@ class LogParser(object):
                     arg = str(line.split(s['command'])[1]).strip()
                     count = 0
                     for player in game.players.itervalues():
-                        if (arg.upper() in (player.get_name()).upper() or arg == str(player.get_player_num())):
+                        if arg.upper() in (player.get_name()).upper() or arg == str(player.get_player_num()):
                             victim = player
                             count += 1
                     if count == 0:
@@ -823,7 +822,7 @@ class LogParser(object):
                         reason = ' '.join(liste[1:])
                         count = 0
                         for player in game.players.itervalues():
-                            if (user.upper() in (player.get_name()).upper() or user == str(player.get_player_num())):
+                            if user.upper() in (player.get_name()).upper() or user == str(player.get_player_num()):
                                 victim = player
                                 count += 1
                         if count == 0:
@@ -869,7 +868,7 @@ class LogParser(object):
                     arg = str(line.split(s['command'])[1]).strip()
                     count = 0
                     for player in game.players.itervalues():
-                        if (arg.upper() in (player.get_name()).upper() or arg == str(player.get_player_num())):
+                        if arg.upper() in (player.get_name()).upper() or arg == str(player.get_player_num()):
                             victim = player
                             count += 1
                     if count == 0:
@@ -905,7 +904,7 @@ class LogParser(object):
                         teamlist = ['red', 'blue', 'spec', 'spectator', 'r', 'b', 's', 're', 'bl', 'blu', 'sp', 'spe']
                         count = 0
                         for player in game.players.itervalues():
-                            if (user.upper() in (player.get_name()).upper() or user == str(player.get_player_num())):
+                            if user.upper() in (player.get_name()).upper() or user == str(player.get_player_num()):
                                 victim = player
                                 count += 1
                         if count == 0:
@@ -935,7 +934,7 @@ class LogParser(object):
                     arg = str(line.split(s['command'])[1]).strip()
                     count = 0
                     for player in game.players.itervalues():
-                        if (arg.upper() in (player.get_name()).upper() or arg == str(player.get_player_num())):
+                        if arg.upper() in (player.get_name()).upper() or arg == str(player.get_player_num()):
                             victim = player
                             count += 1
                     if count == 0:
@@ -960,7 +959,7 @@ class LogParser(object):
                         reason = ' '.join(liste[1:])
                         count = 0
                         for player in game.players.itervalues():
-                            if (user.upper() in (player.get_name()).upper() or user == str(player.get_player_num())):
+                            if user.upper() in (player.get_name()).upper() or user == str(player.get_player_num()):
                                 victim = player
                                 count += 1
                         if count == 0:
@@ -985,7 +984,7 @@ class LogParser(object):
                     arg = str(line.split(s['command'])[1]).strip()
                     count = 0
                     for player in game.players.itervalues():
-                        if (arg.upper() in (player.get_name()).upper() or arg == str(player.get_player_num())):
+                        if arg.upper() in (player.get_name()).upper() or arg == str(player.get_player_num()):
                             victim = player
                             count += 1
                     if count == 0:
@@ -1028,7 +1027,7 @@ class LogParser(object):
                                 duration_output = "24 hours"
                             count = 0
                             for player in game.players.itervalues():
-                                if (user.upper() in (player.get_name()).upper() or user == str(player.get_player_num())):
+                                if user.upper() in (player.get_name()).upper() or user == str(player.get_player_num()):
                                     victim = player
                                     count += 1
                             if count == 0:
@@ -1075,7 +1074,7 @@ class LogParser(object):
                         number = 1
                     count = 0
                     for player in game.players.itervalues():
-                        if (user.upper() in (player.get_name()).upper() or user == str(player.get_player_num())):
+                        if user.upper() in (player.get_name()).upper() or user == str(player.get_player_num()):
                             victim = player
                             count += 1
                     if count == 0:
@@ -1101,7 +1100,7 @@ class LogParser(object):
                     arg = str(line.split(s['command'])[1]).strip()
                     count = 0
                     for player in game.players.itervalues():
-                        if (arg.upper() in (player.get_name()).upper() or arg == str(player.get_player_num())):
+                        if arg.upper() in (player.get_name()).upper() or arg == str(player.get_player_num()):
                             victim = player
                             count += 1
                     if count == 0:
@@ -1126,7 +1125,7 @@ class LogParser(object):
                     arg = str(line.split(s['command'])[1]).strip()
                     count = 0
                     for player in game.players.itervalues():
-                        if (arg.upper() in (player.get_name()).upper() or arg == str(player.get_player_num())):
+                        if arg.upper() in (player.get_name()).upper() or arg == str(player.get_player_num()):
                             victim = player
                             count += 1
                     if count == 0:
@@ -1149,7 +1148,7 @@ class LogParser(object):
                     arg = str(line.split(s['command'])[1]).strip()
                     count = 0
                     for player in game.players.itervalues():
-                        if (arg.upper() in (player.get_name()).upper() or arg == str(player.get_player_num())):
+                        if arg.upper() in (player.get_name()).upper() or arg == str(player.get_player_num()):
                             victim = player
                             count += 1
                     if count == 0:
@@ -1176,7 +1175,7 @@ class LogParser(object):
                         reason = reason_string + ", ban by " + game.players[s['player_num']].get_name()
                         count = 0
                         for player in game.players.itervalues():
-                            if (user.upper() in (player.get_name()).upper() or user == str(player.get_player_num())):
+                            if user.upper() in (player.get_name()).upper() or user == str(player.get_player_num()):
                                 victim = player
                                 count += 1
                         if count == 0:
@@ -1220,7 +1219,7 @@ class LogParser(object):
                         reason = reason_string + ", ban by " + game.players[s['player_num']].get_name()
                         count = 0
                         for player in game.players.itervalues():
-                            if (user.upper() in (player.get_name()).upper() or user == str(player.get_player_num())):
+                            if user.upper() in (player.get_name()).upper() or user == str(player.get_player_num()):
                                 victim = player
                                 count += 1
                         if count == 0:
@@ -1252,7 +1251,7 @@ class LogParser(object):
                         right = cmd.split(' ')[1]
                         count = 0
                         for player in game.players.itervalues():
-                            if (user.upper() in (player.get_name()).upper() or user == str(player.get_player_num())):
+                            if user.upper() in (player.get_name()).upper() or user == str(player.get_player_num()):
                                 victim = player
                                 count += 1
                         if count == 0:
@@ -1338,7 +1337,7 @@ class LogParser(object):
                     arg = str(line.split(s['command'])[1]).strip()
                     count = 0
                     for player in game.players.itervalues():
-                        if (arg.upper() in (player.get_name()).upper() or arg == str(player.get_player_num())):
+                        if arg.upper() in (player.get_name()).upper() or arg == str(player.get_player_num()):
                             victim = player
                             count += 1
                     if count == 0:
@@ -1346,7 +1345,7 @@ class LogParser(object):
                     elif count > 1:
                         game.rcon_tell(s['player_num'], "More than one Player found")
                     else:
-                        if victim.get_admin_role() > 1 and victim.get_admin_role() < 100:
+                        if 1 < victim.get_admin_role() < 100:
                             game.rcon_tell(s['player_num'], "" + victim.get_name() + " put in group User")
                             # update database and set admin_role to 1
                             values = (1, victim.get_guid())
@@ -1417,7 +1416,7 @@ class LogParser(object):
                 if player.get_kills() > most_kills:
                     most_kills = player.get_kills()
                     serialkiller = player.get_name()
-                if (player.get_max_kill_streak() > most_streak and player.get_name() != 'World'):
+                if player.get_max_kill_streak() > most_streak and player.get_name() != 'World':
                     most_streak = player.get_max_kill_streak()
                     streaker = player.get_name()
                 if player.get_headshots() > most_hs:
@@ -1440,7 +1439,7 @@ class LogParser(object):
         with players_lock:
             for player in game.players.itervalues():
                 # display personal stats, stats for players in spec will not be displayed
-                if (player.get_team() == 1 or player.get_team() == 2):
+                if player.get_team() == 1 or player.get_team() == 2:
                     game.rcon_tell(player.get_player_num(), "^7Stats " + player.get_name() + ": ^7K ^2" + str(player.get_kills()) + " ^7D ^3" + str(player.get_deaths()) + " ^7HS ^1" + str(player.get_headshots()) + " ^7TK ^1" + str(player.get_team_killer()))
 
     def explode_line2(self, line):
@@ -1976,7 +1975,7 @@ class Game(object):
                 return -1
         with players_lock:
             for player in self.players.itervalues():
-                if (player.get_team() == team1):
+                if player.get_team() == team1:
                     p_list.append(player)
             p_list.sort(cmp_ab)
             for player in p_list[:int(num_ptm)]:
