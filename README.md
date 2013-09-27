@@ -9,7 +9,7 @@ The code of the Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which 
 - Python 2.6.x / 2.7.x
 - SQLite 3 database
 - Linux platform (tested on Debian Wheezy 32-bit and Squeeze 64-bit)
-- Urban Terror 4.1.1 / 4.2.014
+- Urban Terror 4.1.1 / 4.2.015
 
 
 ## Resources
@@ -21,7 +21,7 @@ The code of the Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which 
 
 ## Configuration
 - Modify the Urban Terror server config file as follows:
-	- `seta g_logSync "1"`
+	- `seta g_logsync "1"`
 	- `seta g_loghits "1"`
 - The Spunky Bot settings are configured in the file `/conf/settings.conf`
 - In-game displayed rules are contained in the file `/conf/rules.conf`
