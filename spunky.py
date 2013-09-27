@@ -640,13 +640,13 @@ class LogParser(object):
             if int(info[2]) != 10:
                 killer.kill()
                 killer_color = "^1" if (killer.get_team() == 1) else "^4"
-                if killer.get_killing_streak() == 5:
+                if killer.get_killing_streak() == 5 and killer_name != 'World':
                     game.rcon_say(killer_color + killer_name + " ^7is on a killing spree!")
-                elif killer.get_killing_streak() == 10:
+                elif killer.get_killing_streak() == 10 and killer_name != 'World':
                     game.rcon_say(killer_color + killer_name + " ^7is on a rampage!")
-                elif killer.get_killing_streak() == 15:
+                elif killer.get_killing_streak() == 15 and killer_name != 'World':
                     game.rcon_say(killer_color + killer_name + " ^7is unstoppable!")
-                elif killer.get_killing_streak() == 20:
+                elif killer.get_killing_streak() == 20 and killer_name != 'World':
                     game.rcon_say(killer_color + killer_name + " ^7is godlike!")
 
                 victim_color = "^1" if (victim.get_team() == 1) else "^4"
