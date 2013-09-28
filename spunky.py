@@ -358,6 +358,8 @@ class LogParser(object):
                     self.handle_misc()
                 elif tmp[0].lstrip() == 'AccountValidated':
                     self.handle_misc()
+                elif tmp[0].lstrip() == 'AccountRejected':
+                    self.handle_misc()
                 elif tmp[0].lstrip() == 'AccountKick':
                     self.handle_misc()
                 elif tmp[0].lstrip() == 'InitRound':
