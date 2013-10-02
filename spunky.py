@@ -1899,7 +1899,8 @@ class Game(object):
         self.players = {}
         self.live = False
         self.rcon_handle = RconDispatcher()
-        self.rules_list = DisplayRules(int(settings['rules_frequency']))
+        if settings['show_rules'] == '1':
+            DisplayRules(int(settings['rules_frequency']))
         self.verbose = False
         self.gravity = 800
 
