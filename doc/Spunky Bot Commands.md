@@ -99,6 +99,8 @@
 	- Usage: `!banlist`
 - **kiss** - clear all player warnings
 	- Usage: `!kiss`
+- **kill** - kill a player
+	- Usage: `!kill <name>`
 - **map** - load given map
 	- Usage: `!map <ut4_name>`
 - **permban** - ban a player permanent
