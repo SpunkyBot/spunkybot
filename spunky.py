@@ -354,6 +354,14 @@ class LogParser(object):
                     self.handle_misc()
                 elif tmp[0].lstrip() == 'Warmup':
                     self.handle_misc()
+                elif tmp[0].lstrip() == 'Callvote':
+                    self.handle_misc()
+                elif tmp[0].lstrip() == 'Vote':
+                    self.handle_misc()
+                elif tmp[0].lstrip() == 'VotePassed':
+                    self.handle_misc()
+                elif tmp[0].lstrip() == 'VoteFailed':
+                    self.handle_misc()
                 elif tmp[0].lstrip() == 'InitAuth':
                     self.handle_misc()
                 elif tmp[0].lstrip() == 'AccountValidated':
