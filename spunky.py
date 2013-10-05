@@ -701,17 +701,18 @@ class LogParser(object):
                 # help for admins - additional commands
                 elif game.players[s['player_num']].get_admin_role() == 40:
                     game.rcon_tell(s['player_num'], "^7Admin commands:")
-                    game.rcon_tell(s['player_num'], "admins, aliases, bigtext, country, force, hs, kick, leveltest, list, mute, nuke, say, shuffleteams, stats, teams, tempban, time,", False)
-                    game.rcon_tell(s['player_num'], "warn, warnclear, xlrstats", False)
+                    game.rcon_tell(s['player_num'], "admins, aliases, bigtext, country, force, hs, kick, leveltest, list, mute, nuke, say, shuffleteams, stats, teams, tempban, time, warn,", False)
+                    game.rcon_tell(s['player_num'], "warnclear, xlrstats", False)
                 # help for full admins - additional commands
                 elif game.players[s['player_num']].get_admin_role() == 60:
                     game.rcon_tell(s['player_num'], "^7Full Admin commands:")
-                    game.rcon_tell(s['player_num'], "admins, afk, aliases, ban, bigtext, ci, country, force, hs, kick, leveltest, list, mute, nuke, say, scream, shuffleteams, slap,", False)
-                    game.rcon_tell(s['player_num'], "stats, teams, tempban, time, tk, veto, warn, warnclear, xlrstats", False)
+                    game.rcon_tell(s['player_num'], "admins, afk, aliases, ban, bigtext, ci, country, force, hs, kick, leveltest, list, mute, nuke, say, scream, shuffleteams, slap, stats,", False)
+                    game.rcon_tell(s['player_num'], "teams, tempban, time, tk, veto, warn, warnclear, xlrstats", False)
                 elif game.players[s['player_num']].get_admin_role() >= 80:
                     game.rcon_tell(s['player_num'], "^7Senior Admin commands:")
-                    game.rcon_tell(s['player_num'], "admins, afk, aliases, ban, banlist, bigtext, ci, country, force, hs, kick, kill, kiss, leveltest, list, map, mute, nuke, permban,", False)
-                    game.rcon_tell(s['player_num'], "putgroup, say, scream, shuffleteams, slap, stats, teams, tempban, time, tk, unban, ungroup, veto, warn, warnclear, xlrstats", False)
+                    game.rcon_tell(s['player_num'], "admins, afk, aliases, ban, banlist, bigtext, ci, country, cyclemap, force, hs, kick, kill, kiss, leveltest, list, map, mute, nuke,", False)
+                    game.rcon_tell(s['player_num'], "permban, putgroup, say, scream, setnextmap, shuffleteams, slap, stats, teams, tempban, time, tk, unban, ungroup, veto, warn, warnclear,", False)
+                    game.rcon_tell(s['player_num'], "xlrstats", False)
 
 # player commands
             # register - register yourself as a basic user
@@ -1221,6 +1222,17 @@ class LogParser(object):
                     game.send_rcon('map ' + str(line.split(s['command'])[1]).strip())
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !map <ut4_name>")
+
+            # cyclemap - start next map in rotation
+            elif s['command'] == '!cyclemap' and game.players[s['player_num']].get_admin_role() >= 80:
+                game.send_rcon('cyclemap')
+
+            # setnextmap - set the given map as nextmap
+            elif s['command'] == '!setnextmap' and game.players[s['player_num']].get_admin_role() >= 80:
+                if line.split(s['command'])[1]:
+                    game.send_rcon('g_nextmap ' + str(line.split(s['command'])[1]).strip())
+                else:
+                    game.rcon_tell(s['player_num'], "^7Usage: !setnextmap <ut4_name>")
 
             # kill - kill a player
             elif s['command'] == '!kill' and game.players[s['player_num']].get_admin_role() >= 80:

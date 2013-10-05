@@ -103,6 +103,10 @@
 	- Usage: `!kill <name>`
 - **map** - load given map
 	- Usage: `!map <ut4_name>`
+- **cyclemap** - start next map in rotation
+	- Usage: `!cyclemap`
+- **setnextmap** - set the given map as nextmap
+	- Usage: `!setnextmap <ut4_name>`
 - **permban** - ban a player permanent
 	- Usage: `!permban <name> <reason>`
 	- Short: `!pb <name> <reason>`
