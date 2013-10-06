@@ -1282,7 +1282,7 @@ class LogParser(object):
                                 game.rcon_say("^2" + victim.get_name() + "^4 banned by ^3" + game.players[s['player_num']].get_name() + "^4 permanent, ^3reason: " + reason_string)
                                 # add IP address to bot-banlist.txt
                                 banlist = open('./bot-banlist.txt', 'a+')
-                                banlist.write(str(victim.get_ip_address()) + ":-1\n")
+                                banlist.write(str(victim.get_ip_address()) + ":-1   // " + victim.get_name() + "    banned on  " + time.strftime("%d/%m/%Y (%H:%M)", time.localtime(time.time())) + ", reason : " + reason_string + "\n")
                                 banlist.close()
                     else:
                         game.rcon_tell(s['player_num'], "^7You need to enter a reason: ^3!permban <name> <reason>")
