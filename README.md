@@ -1,7 +1,7 @@
 # Spunky Bot
 
 **Spunky Bot** is a lightweight game server administration bot and RCON tool.
-Its purpose is to administrate an Urban Terror 4.1 / 4.2 server and provide statistical data for players.
+Its purpose is to administrate an [Urban Terror](http://www.urbanterror.info) 4.1 / 4.2 server and provide statistical data for players.
 The code of the Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was released under the Beerware License.
 
 
@@ -48,3 +48,5 @@ The Spunky Bot is released under the MIT License.
 	- The library has been modified to fix some error handling issues and fulfill the PEP8 conformance. This file is released under the GNU General Public License.
  - GeoIP: [pygeoip.py](https://github.com/urthub/pygeoip)
 	- The library has been extended with the list `GeoIP_country_name` to support full country names (e.g. Germany for country_code DE). This file is released under the MIT License.
+
+Urban Terror™ and FrozenSand™ are trademarks of 0870760 B.C. Ltd
