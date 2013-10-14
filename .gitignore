@@ -1,0 +1,13 @@
+# Python
+*.py[co]
+__pycache__
+
+# SVN
+.svn/
+
+# PyCharm
+.idea
+.iml
+
+# OSX
+.DS_Store
