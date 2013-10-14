@@ -72,7 +72,7 @@ class PyQuake3(object):
         try:
             self.address, self.port = server.split(':')
         except:
-            raise Exception('Server address format must be: "address:port"')
+            raise ValueError('Server address format must be: "address:port"')
         self.port = int(self.port)
         self.sock.connect((self.address, self.port))
 
