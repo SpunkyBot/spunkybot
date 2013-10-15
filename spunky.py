@@ -1,6 +1,6 @@
 """
 Spunky Bot - Automated game server bot
-http://urthub.github.io/spunky-bot
+http://urthub.github.io/spunkybot
 Author: Alexander Kress
 
 This program is released under the MIT License. See LICENSE for more details.
