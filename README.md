@@ -13,10 +13,10 @@ The code of the Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which 
 
 
 ## Resources
-* [Documentation](https://github.com/urthub/spunky-bot/wiki)
-* [Bug Tracker](https://github.com/urthub/spunky-bot/issues)
-* [Code](https://github.com/urthub/spunky-bot)
-* [Homepage](http://urthub.github.io/spunky-bot/)
+* [Documentation](https://github.com/urthub/spunkybot/wiki)
+* [Bug Tracker](https://github.com/urthub/spunkybot/issues)
+* [Code](https://github.com/urthub/spunkybot)
+* [Homepage](http://urthub.github.io/spunkybot/)
 
 
 ## Configuration
