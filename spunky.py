@@ -236,7 +236,7 @@ class LogParser(object):
     """
     log file parser
     """
-    def __init__(self, file_name):
+    def __init__(self, file_name, verbose_mode):
         """
         create a new instance of LogParser
         """
@@ -248,6 +248,8 @@ class LogParser(object):
         # go to the end of the file
         self.log_file.seek(0, 2)
         self.ffa_lms_gametype = False
+        # enable/disable debug output
+        self.verbose = True if verbose_mode == '1' else False
 
     def find_game_start(self):
         """
@@ -314,7 +316,7 @@ class LogParser(object):
             line = tmp[1].lstrip().rstrip()
             if tmp is not None:
                 if tmp[0].lstrip() == 'InitGame':
-                    game.debug("Starting game...")
+                    self.debug("Starting game...")
                     self.handle_game_init(line)
                 elif tmp[0].lstrip() == 'ClientConnect':
                     self.handle_misc()
@@ -380,7 +382,7 @@ class LogParser(object):
                 elif tmp[0].lstrip() == 'score':
                     self.handle_misc()
                 else:
-                    game.error("ERROR: Unknown log entry in parse_line(): " + repr(tmp))
+                    self.error("ERROR: Unknown log entry in parse_line(): " + repr(tmp))
         except IndexError:
             if '------' in tmp[0]:
                 self.handle_misc()
@@ -392,9 +394,9 @@ class LogParser(object):
                 self.handle_misc()
             else:
                 if tmp[0] != '':
-                    game.error("IndexError in parse_line(): " + str(tmp))
+                    self.error("IndexError in parse_line(): " + str(tmp))
         except Exception, err:
-            game.error("Exception in parse_line(): %s" % err)
+            self.error("Exception in parse_line(): %s" % err)
 
     def explode_line(self, line):
         """
@@ -439,7 +441,7 @@ class LogParser(object):
         handle game end/shutdown
         """
         with players_lock:
-            game.debug("Shutting down game...")
+            self.debug("Shutting down game...")
             game.rcon_handle.clear()
             for player in game.players.itervalues():
                 player.save_info()
@@ -502,14 +504,14 @@ class LogParser(object):
                     player = Player(player_num, address, guid, name)
                     game.add_player(player)
                 except UnboundLocalError as error:
-                    game.error("UnboundLocalError in handle_userinfo(): %s - %s" % (error, error.message))
-                    game.error(d_line)
+                    self.error("UnboundLocalError in handle_userinfo(): %s - %s" % (error, error.message))
+                    self.error(d_line)
             if game.players[player_num].get_guid() != guid:
                 game.players[player_num].set_guid(guid)
             if game.players[player_num].get_name() != name:
                 game.players[player_num].set_name(name)
             if challenge:
-                game.debug("Player number: " + str(player_num) + " \"" + name + "\" is challenging the server and has the guid of: " + guid)
+                self.debug("Player number: " + str(player_num) + " \"" + name + "\" is challenging the server and has the guid of: " + guid)
             else:
                 if 'name' in values and values['name'] != game.players[player_num].get_name():
                     game.players[player_num].set_name(values['name'])
@@ -539,7 +541,7 @@ class LogParser(object):
             name = re.sub(r"\s+", "", values['n'])
             if not(game.players[player_num].get_name() == name):
                 game.players[player_num].set_name(name)
-            game.debug("Player number: " + str(player_num) + " \"" + name + "\" is on the " + team + " team")
+            self.debug("Player number: " + str(player_num) + " \"" + name + "\" is on the " + team + " team")
 
     def handle_begin(self, line):
         """
@@ -557,7 +559,7 @@ class LogParser(object):
             except KeyError:
                 return -1
             else:
-                game.debug("Player number: " + str(player_num) + " \"" + player.get_name() + "\" has entered the game")
+                self.debug("Player number: " + str(player_num) + " \"" + player.get_name() + "\" has entered the game")
 
     def handle_disconnect(self, line):
         """
@@ -573,7 +575,7 @@ class LogParser(object):
             except KeyError:
                 return -1
             else:
-                game.debug("Player number: " + str(player_num) + " \"" + player.get_name() + "\" has left the game")
+                self.debug("Player number: " + str(player_num) + " \"" + player.get_name() + "\" has left the game")
 
     def handle_hit(self, line):
         """
@@ -604,7 +606,7 @@ class LogParser(object):
                     if game.live:
                         percentage = round(float(hitter.get_headshots()) / float(hitter.get_all_hits()), 3) * 100
                         game.send_rcon(player_color + hitter.get_name() + " ^7has " + str(hitter.get_headshots()) + "^7" + hs_plural + " (" + str(percentage) + " percent)")
-                game.debug("Player number: " + str(hitter_id) + " \"" + hitter_name + "\" hit " + str(victim_id) + " \"" + victim_name + "\" in the " + self.hit_points[hitpoint] + " with " + self.hit_item[hit_item])
+                self.debug("Player number: " + str(hitter_id) + " \"" + hitter_name + "\" hit " + str(victim_id) + " \"" + victim_name + "\" in the " + self.hit_points[hitpoint] + " with " + self.hit_item[hit_item])
 
     def handle_kill(self, line):
         """
@@ -671,9 +673,9 @@ class LogParser(object):
                 elif victim.get_killing_streak() >= 5 and killer_name != victim_name and killer_name != 'World':
                     game.rcon_say(victim_color + victim_name + "'s ^7killing spree was ended by " + killer_color + killer_name + "!")
                 victim.die()
-                game.debug("Player number: " + str(killer_id) + " \"" + killer_name + "\" killed " + str(victim_id) + " \"" + victim_name + "\" with " + death_cause)
+                self.debug("Player number: " + str(killer_id) + " \"" + killer_name + "\" killed " + str(victim_id) + " \"" + victim_name + "\" with " + death_cause)
             else:
-                game.debug("Player number: " + str(killer_id) + " \"" + killer_name + "\" has changed teams")
+                self.debug("Player number: " + str(killer_id) + " \"" + killer_name + "\" has changed teams")
 
     def handle_say(self, line):
         """
@@ -1505,6 +1507,22 @@ class LogParser(object):
             array = {"player_num": None, "name": None, "command": None}
         return array
 
+    def error(self, msg):
+        """
+        error logging
+        """
+        err_log = open('./error.log', 'a+')
+        err_log.write(time.ctime() + "   ---   " + repr(msg) + "\n")
+        err_log.close()
+        print msg
+
+    def debug(self, msg):
+        """
+        print debug messages
+        """
+        if self.verbose:
+            print msg
+
 
 ### CLASS Player ###
 class Player(object):
@@ -1568,8 +1586,7 @@ class Player(object):
             print("Player " + self.name + " BANNED - GUID: " + str(self.guid) + " - IP ADDRESS: " + str(self.address))
             game.send_rcon(self.name + " ^1banned")
             game.kick_player(self)
-        else:
-            game.debug("Player: " + self.name + " - GUID: " + str(self.guid) + " - IP ADDRESS: " + str(self.address))
+
         # GeoIP lookup
         info = GEOIP.lookup(ip_address)
         if info.country:
@@ -1925,7 +1942,6 @@ class Game(object):
         self.rcon_handle = RconDispatcher()
         if settings['show_rules'] == '1':
             DisplayRules(int(settings['rules_frequency']))
-        self.verbose = False
         self.gravity = 800
 
     def send_rcon(self, command):
@@ -2042,22 +2058,6 @@ class Game(object):
         self.rcon_handle.clear()
         self.rcon_handle.push("set g_gravity " + self.gravity)
 
-    def error(self, msg):
-        """
-        error logging
-        """
-        err_log = open('./error.log', 'a+')
-        err_log.write(time.ctime() + "   ---   " + repr(msg) + "\n")
-        err_log.close()
-        print msg
-
-    def debug(self, msg):
-        """
-        print debug messages
-        """
-        if self.verbose:
-            print msg
-
 
 ### Main ###
 
@@ -2080,16 +2080,13 @@ conn = sqlite3.connect('./data.sqlite')
 curs = conn.cursor()
 
 # create instance of LogParser
-LOGPARS = LogParser(settings['log_file'])
+LOGPARS = LogParser(settings['log_file'], settings['verbose'])
 
 # load the GEO database and store it globally in interpreter memory
 GEOIP = PyGeoIP.Database('./lib/GeoIP.dat')
 
 # create instance of Game
 game = Game()
-
-# enable/disable debug output
-game.verbose = True if settings['verbose'] == '1' else False
 
 WORLD = Player(1022, '127.0.0.1', 'NONE', 'World', 3)
 game.add_player(WORLD)
