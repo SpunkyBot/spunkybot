@@ -550,7 +550,7 @@ class LogParser(object):
             try:
                 player = game.players[player_num]
                 # Welcome message for registered players
-                if player.get_registered_user() == 1 and player.get_welcome_msg():
+                if player.get_registered_user() and player.get_welcome_msg():
                     game.rcon_tell(player_num, "^7[^2Authed^7] Welcome back " + player.get_name() + ", you are ^2" + str(player.roles[player.get_admin_role()]) + "^7, last visit " + str(player.get_last_visit()) + ", you played " + str(player.get_num_played()) + " times", False)
                     # disable welcome message for next rounds
                     player.disable_welcome_msg()
@@ -717,7 +717,7 @@ class LogParser(object):
 # player commands
             # register - register yourself as a basic user
             elif s['command'] == '!register':
-                if game.players[s['player_num']].get_registered_user() == 0:
+                if not game.players[s['player_num']].get_registered_user():
                     game.players[s['player_num']].register_user_db(role=1)
                     game.rcon_tell(s['player_num'], game.players[s['player_num']].get_name() + " ^7put in group User")
                 else:
@@ -751,7 +751,7 @@ class LogParser(object):
                     arg = str(line.split(s['command'])[1]).strip()
                     for player in game.players.itervalues():
                         if (arg.upper() in (player.get_name()).upper()) or arg == str(player.get_player_num()):
-                            if player.get_registered_user() == 1:
+                            if player.get_registered_user():
                                 if player.get_xlr_deaths() == 0:
                                     ratio = 1.0
                                 else:
@@ -760,7 +760,7 @@ class LogParser(object):
                             else:
                                 game.rcon_tell(s['player_num'], "^7Sorry, this player is not registered")
                 else:
-                    if game.players[s['player_num']].get_registered_user() == 1:
+                    if game.players[s['player_num']].get_registered_user():
                         if game.players[s['player_num']].get_xlr_deaths() == 0:
                             ratio = 1.0
                         else:
@@ -1310,7 +1310,7 @@ class LogParser(object):
                         elif count > 1:
                             game.rcon_tell(s['player_num'], "More than one Player found")
                         else:
-                            if victim.get_registered_user() == 1:
+                            if victim.get_registered_user():
                                 new_role = victim.get_admin_role()
                                 if right == "user" and victim.get_admin_role() < 80:
                                     game.rcon_tell(s['player_num'], "" + victim.get_name() + " put in group User")
@@ -1413,7 +1413,7 @@ class LogParser(object):
             # iamgod - register user as Head Admin
             elif s['command'] == '!iamgod':
                 if int(settings['iamgod']) == 1:
-                    if game.players[s['player_num']].get_registered_user() == 0:
+                    if not game.players[s['player_num']].get_registered_user():
                         # register new user in DB and set admin role to 100
                         game.players[s['player_num']].register_user_db(role=100)
                     else:
@@ -1522,7 +1522,7 @@ class Player(object):
         self.guid = guid
         self.name = "".join(name.split())
         self.aliases = []
-        self.registered_user = 0
+        self.registered_user = False
         self.num_played = 0
         self.last_visit = 0
         self.admin_role = 0
@@ -1603,7 +1603,7 @@ class Player(object):
         #self.is_muted = 0
 
     def save_info(self):
-        if self.registered_user == 1:
+        if self.registered_user:
             if self.xlr_deaths == 0:
                 ratio = 1.0
             else:
@@ -1644,9 +1644,9 @@ class Player(object):
         values = (self.guid,)
         curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `guid` = ?", values)
         if curs.fetchone()[0] < 1:
-            self.registered_user = 0
+            self.registered_user = False
         else:
-            self.registered_user = 1
+            self.registered_user = True
             # get DB DATA for XLRSTATS
             values = (self.guid,)
             curs.execute("SELECT `last_played`, `num_played`, `kills`, `deaths`, `headshots`, `team_kills`, `team_death`, `max_kill_streak`,`suicides`, `admin_role` FROM `xlrstats` WHERE `guid` = ?", values)
@@ -1667,12 +1667,12 @@ class Player(object):
             conn.commit()
 
     def register_user_db(self, role=1):
-        if self.registered_user == 0:
+        if not self.registered_user:
             now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
             values = (self.guid, self.prettyname, self.address, now, now, role)
             curs.execute("INSERT INTO `xlrstats` (`guid`,`name`,`ip_address`,`first_seen`,`last_played`,`num_played`,`admin_role`) VALUES (?,?,?,?,?,1,?)", values)
             conn.commit()
-            self.registered_user = 1
+            self.registered_user = True
             self.admin_role = role
             self.welcome_msg = False
 
