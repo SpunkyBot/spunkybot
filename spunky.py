@@ -24,7 +24,7 @@ import re
 import time
 import sqlite3
 import math
-import lib.pygeoip as pygeoip
+import lib.pygeoip as PyGeoIP
 
 from lib.pyquake3 import PyQuake3
 from Queue import Queue
@@ -2083,7 +2083,7 @@ curs = conn.cursor()
 LOGPARS = LogParser(settings['log_file'])
 
 # load the GEO database and store it globally in interpreter memory
-GEOIP = pygeoip.Database('./lib/GeoIP.dat')
+GEOIP = PyGeoIP.Database('./lib/GeoIP.dat')
 
 # create instance of Game
 game = Game()
