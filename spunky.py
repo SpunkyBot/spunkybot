@@ -26,7 +26,8 @@ import sqlite3
 import math
 import lib.pygeoip as PyGeoIP
 
-from lib.pyquake3 import PyQuake3
+from lib.rcon import Rcon
+from lib.rules import Rules
 from Queue import Queue
 from threading import Thread
 from threading import RLock
@@ -133,102 +134,6 @@ class TaskManager(object):
                 elif player.get_spec_warning() > 2 and player.get_admin_role() < 20:
                     game.rcon_say("^7Player ^3" + player.get_name() + " ^7kicked, because of spectator too long on full server")
                     game.kick_player(player)
-
-
-### CLASS DisplayRules ###
-class DisplayRules(object):
-    """
-    Display the rules
-    """
-    def __init__(self, rules_frequency):
-        """
-        create a new instance of DisplayRules
-        """
-        self.rules_frequency = rules_frequency
-        # start Thread
-        self.processor = Thread(target=self.process)
-        self.processor.setDaemon(True)
-        self.processor.start()
-
-    def process(self):
-        """
-        Thread process
-        """
-        # initial wait after bot restart
-        time.sleep(30)
-        while True:
-            filehandle = open('./conf/rules.conf', 'r+')
-            for line in filehandle.readlines():
-                # display rule
-                game.send_rcon("say ^2" + line)
-                time.sleep(30)
-            filehandle.close()
-            # wait for given delay in the config file
-            time.sleep(self.rules_frequency)
-
-
-### CLASS RCON ###
-class RconDispatcher(object):
-    """
-    RCON class
-    """
-    def __init__(self):
-        """
-        create a new instance of RconDispatcher
-        """
-        self.live = False
-        self.quake = PyQuake3(settings['server_ip'] + ":" + settings['server_port'], rcon_password=settings['rcon_password'])
-        self.queue = Queue()
-        # start Thread
-        self.processor = Thread(target=self.process)
-        self.processor.setDaemon(True)
-        self.processor.start()
-
-    def push(self, msg):
-        """
-        execute RCON command
-        """
-        if self.live:
-            with rcon_lock:
-                self.queue.put(msg)
-
-    def go_live(self):
-        """
-        go live
-        """
-        self.live = True
-
-    def get_status(self):
-        """
-        get RCON status
-        """
-        if self.live:
-            with rcon_lock:
-                self.push('status')
-
-    def process(self):
-        """
-        Thread process
-        """
-        while True:
-            if not self.queue.empty():
-                if self.live:
-                    with rcon_lock:
-                        try:
-                            command = self.queue.get()
-                            if command != 'status':
-                                self.quake.rcon(command)
-                            else:
-                                self.quake.rcon_update()
-                        except Exception:
-                            pass
-            time.sleep(1)
-
-    def clear(self):
-        """
-        clear RCON queue
-        """
-        self.queue.queue.clear()
 
 
 ### CLASS Log Parser ###
@@ -1940,16 +1845,17 @@ class Game(object):
         self.rcon_queue = Queue()
         self.players = {}
         self.live = False
-        self.rcon_handle = RconDispatcher()
+        self.rcon_lock = RLock()
+        self.rcon_handle = Rcon(settings['server_ip'], settings['server_port'], settings['rcon_password'])
         if settings['show_rules'] == '1':
-            DisplayRules(int(settings['rules_frequency']))
+            Rules('./conf/rules.conf', int(settings['rules_frequency']), self.rcon_handle)
         self.gravity = 800
 
     def send_rcon(self, command):
         """
         send RCON command
         """
-        with rcon_lock:
+        with self.rcon_lock:
             if self.live:
                 self.rcon_handle.push(command)
 
@@ -2074,7 +1980,6 @@ while CONFIG:
     settings[PARM[0]] = PARM[1].rstrip()
 
 players_lock = RLock()
-rcon_lock = RLock()
 
 # connect to database
 conn = sqlite3.connect('./data.sqlite')
