@@ -83,12 +83,8 @@
 	- Alternative: `!spank <name> [<amount>]`
 - **veto** - stop voting process
 	- Usage: `!veto`
-- **afk** - kick player who is away from keyboard
-	- Usage: `!afk <name>`
 - **ci** - kick player with connection interrupt
 	- Usage: `!ci <name>`
-- **tk** - kick player for teamkilling
-	- Usage: `!tk <name>`
 - **ban** - ban a player for 7 days
 	- Usage: `!ban <name> <reason>`
 
