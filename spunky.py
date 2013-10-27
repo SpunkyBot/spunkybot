@@ -144,6 +144,11 @@ class LogParser(object):
     def __init__(self, file_name, verbose_mode):
         """
         create a new instance of LogParser
+
+        @param file_name: The full path of the games log file
+        @type  file_name: String
+        @param verbose_mode: Enable or disable verbose mode to print debug messages
+        @type  verbose_mode: bool
         """
         # hit zone support for UrT > 4.2.013
         self.hit_points = {0: "HEAD", 1: "HEAD", 2: "HELMET", 3: "TORSO", 4: "VEST", 5: "LEFT_ARM", 6: "RIGHT_ARM", 7: "GROIN", 8: "BUTT", 9: "LEFT_UPPER_LEG", 10: "RIGHT_UPPER_LEG", 11: "LEFT_LOWER_LEG", 12: "RIGHT_LOWER_LEG", 13: "LEFT_FOOT", 14: "RIGHT_FOOT"}
@@ -1340,7 +1345,7 @@ class LogParser(object):
                 if player.get_flags_captured() > most_flags:
                     most_flags = player.get_flags_captured()
                     flagrunner = player.get_name()
-                if player.get_kills() > most_kills:
+                if player.get_kills() > most_kills and player.get_name() != 'World':
                     most_kills = player.get_kills()
                     serialkiller = player.get_name()
                 if player.get_max_kill_streak() > most_streak and player.get_name() != 'World':
