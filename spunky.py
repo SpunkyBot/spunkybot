@@ -1404,7 +1404,7 @@ class Player(object):
     Player class
     """
     teams = {1: "red", 2: "blue", 3: "spectators"}
-    roles = {1: "User", 2: "Regular", 20: "Moderator", 40: "Admin", 60: "Full Admin", 80: "Senior Admin", 100: "Head Admin"}
+    roles = {0: "Guest", 1: "User", 2: "Regular", 20: "Moderator", 40: "Admin", 60: "Full Admin", 80: "Senior Admin", 100: "Head Admin"}
 
     def __init__(self, player_num, ip_address, guid, name, team=0):
         """
