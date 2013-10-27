@@ -23,6 +23,13 @@ class Rcon(object):
     def __init__(self, host, port, passwd):
         """
         create a new instance of Rcon
+
+        @param host: The server IP address
+        @type  host: String
+        @param port: The server port
+        @type  port: String
+        @param passwd: The RCON password
+        @type  passwd: String
         """
         self.live = False
         self.quake = PyQuake3(host + ":" + port, passwd)
@@ -36,6 +43,9 @@ class Rcon(object):
     def push(self, msg):
         """
         execute RCON command
+
+        @param msg: The RCON command
+        @type  msg: String
         """
         if self.live:
             with self.rcon_lock:
