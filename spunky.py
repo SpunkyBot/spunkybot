@@ -1194,7 +1194,7 @@ class LogParser(object):
                                 new_role = victim.get_admin_role()
                             else:
                                 # register new user in DB and set role to 1
-                                game.players[s['player_num']].register_user_db(role=1)
+                                victim.register_user_db(role=1)
                                 new_role = 1
 
                             if right == "user" and victim.get_admin_role() < 80:
