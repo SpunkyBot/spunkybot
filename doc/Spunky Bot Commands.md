@@ -83,12 +83,8 @@
 	- Alternative: `!spank <name> [<amount>]`
 - **veto** - stop voting process
 	- Usage: `!veto`
-- **afk** - kick player who is away from keyboard
-	- Usage: `!afk <name>`
 - **ci** - kick player with connection interrupt
 	- Usage: `!ci <name>`
-- **tk** - kick player for teamkilling
-	- Usage: `!tk <name>`
 - **ban** - ban a player for 7 days
 	- Usage: `!ban <name> <reason>`
 
@@ -99,8 +95,16 @@
 	- Usage: `!banlist`
 - **kiss** - clear all player warnings
 	- Usage: `!kiss`
+- **kill** - kill a player
+	- Usage: `!kill <name>`
 - **map** - load given map
 	- Usage: `!map <ut4_name>`
+- **maprestart** - restart the map
+	- Usage: `!maprestart`
+- **cyclemap** - start next map in rotation
+	- Usage: `!cyclemap`
+- **setnextmap** - set the given map as nextmap
+	- Usage: `!setnextmap <ut4_name>`
 - **permban** - ban a player permanent
 	- Usage: `!permban <name> <reason>`
 	- Short: `!pb <name> <reason>`
