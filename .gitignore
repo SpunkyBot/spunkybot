@@ -11,3 +11,10 @@ __pycache__
 
 # OSX
 .DS_Store
+
+# Backup files
+*.*~
+
+# Test files / log files
+test*.*
+*.log
