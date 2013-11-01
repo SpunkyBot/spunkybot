@@ -44,12 +44,12 @@ class Rules(object):
         """
         # initial wait
         time.sleep(30)
-        while True:
+        while 1:
             filehandle = open(self.rules_file, 'r+')
             for line in filehandle.readlines():
                 # display rule
                 with self.rcon_lock:
-                    self.rcon_handle.push("say ^2" + line)
+                    self.rcon_handle.push("say ^2%s" % line)
                 time.sleep(30)
             filehandle.close()
             # wait for given delay in the config file

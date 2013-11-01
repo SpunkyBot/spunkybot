@@ -20,6 +20,7 @@ class Rcon(object):
     """
     RCON class
     """
+
     def __init__(self, host, port, passwd):
         """
         create a new instance of Rcon
@@ -69,7 +70,7 @@ class Rcon(object):
         """
         Thread process
         """
-        while True:
+        while 1:
             if not self.queue.empty():
                 if self.live:
                     with self.rcon_lock:
