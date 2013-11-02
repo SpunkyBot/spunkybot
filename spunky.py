@@ -143,14 +143,18 @@ class LogParser(object):
     """
     log file parser
     """
-    def __init__(self, file_name, verbose_mode):
+    def __init__(self, file_name, verbose_mode, tk_autokick, iamgod):
         """
         create a new instance of LogParser
 
         @param file_name: The full path of the games log file
         @type  file_name: String
         @param verbose_mode: Enable or disable verbose mode to print debug messages
-        @type  verbose_mode: bool
+        @type  verbose_mode: String
+        @param tk_autokick: Enable or disable autokick for team killing
+        @type  tk_autokick: String
+        @param iamgod: Enable or disable option the get Head Admin
+        @type  iamgod: String
         """
         # hit zone support for UrT > 4.2.013
         self.hit_points = {0: "HEAD", 1: "HEAD", 2: "HELMET", 3: "TORSO", 4: "VEST", 5: "LEFT_ARM", 6: "RIGHT_ARM", 7: "GROIN", 8: "BUTT", 9: "LEFT_UPPER_LEG", 10: "RIGHT_UPPER_LEG", 11: "LEFT_LOWER_LEG", 12: "RIGHT_LOWER_LEG", 13: "LEFT_FOOT", 14: "RIGHT_FOOT"}
@@ -165,6 +169,10 @@ class LogParser(object):
         self.ctf_gametype = False
         # enable/disable debug output
         self.verbose = True if verbose_mode == '1' else False
+        # enable/disable autokick for team killing
+        self.tk_autokick = True if tk_autokick == '1' else False
+        # enable/disable option to get Head Admin
+        self.iamgod = True if iamgod == '1' else False
 
     def find_game_start(self):
         """
@@ -520,21 +528,18 @@ class LogParser(object):
             # teamkill event - disabled for FFA and LMS, for all other game modes team kills are counted and punished
             if not self.ffa_lms_gametype:
                 if (victim.get_team() == killer.get_team() and victim.get_player_num() != killer.get_player_num()) and death_cause != "UT_MOD_BOMBED":
-                    if CONFIG.get('bot', 'teamkill_autokick') == '1':
+                    if self.tk_autokick:
                         game.send_rcon("%s ^1teamkilled ^7%s" % (killer_name, victim_name))
-                        autokick = True
-                    else:
-                        autokick = False
                     # increase team kill counter for killer and kick for too many team kills
-                    killer.team_kill(victim, autokick)
+                    killer.team_kill(victim, self.tk_autokick)
                     # increase team death counter for victim
                     victim.team_death()
 
             # suicide counter
-            if death_cause == 'MOD_SUICIDE' or death_cause == 'MOD_FALLING' or death_cause == 'MOD_WATER' or death_cause == 'MOD_SPLODED' or (killer.get_player_num() == victim.get_player_num() and death_cause == 'UT_MOD_HEGRENADE'):
+            if death_cause == 'MOD_SUICIDE' or death_cause == 'MOD_FALLING' or death_cause == 'MOD_WATER' or death_cause == 'MOD_SPLODED' or (killer.get_player_num() == victim.get_player_num() and (death_cause == 'UT_MOD_HEGRENADE' or death_cause == 'UT_MOD_HK69')):
                 killer.suicide()
 
-            if int(info[2]) != 10:
+            if int(info[2]) != 10:  # 10: MOD_CHANGE_TEAM
                 killer.kill()
                 killer_color = "^1" if (killer.get_team() == 1) else "^4"
                 if killer.get_killing_streak() == 5 and killer_name != 'World':
@@ -1257,7 +1262,7 @@ class LogParser(object):
 ## iamgod
             # iamgod - register user as Head Admin
             elif s['command'] == '!iamgod':
-                if int(CONFIG.get('bot', 'iamgod')) == 1:
+                if self.iamgod:
                     if not game.players[s['player_num']].get_registered_user():
                         # register new user in DB and set admin role to 100
                         game.players[s['player_num']].register_user_db(role=100)
@@ -1941,7 +1946,7 @@ conn = sqlite3.connect('./data.sqlite')
 curs = conn.cursor()
 
 # create instance of LogParser
-LOGPARS = LogParser(CONFIG.get('server', 'log_file'), CONFIG.get('bot', 'verbose'))
+LOGPARS = LogParser(CONFIG.get('server', 'log_file'), CONFIG.get('bot', 'verbose'), CONFIG.get('bot', 'teamkill_autokick'), CONFIG.get('bot', 'iamgod'))
 
 # load the GEO database and store it globally in interpreter memory
 GEOIP = PyGeoIP.Database('./lib/GeoIP.dat')
