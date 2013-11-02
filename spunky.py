@@ -31,6 +31,7 @@ from lib.rules import Rules
 from Queue import Queue
 from threading import Thread
 from threading import RLock
+from ConfigParser import ConfigParser
 
 
 ## CLASS TaskManager ###
@@ -43,11 +44,12 @@ class TaskManager(object):
      - check for spectators on full server
      - check player ping
     """
-    def __init__(self, frequency, rcon_dispatcher):
+    def __init__(self, frequency, max_ping, rcon_dispatcher):
         """
         create a new instance of TaskManager
         """
         self.frequency = frequency
+        self.max_ping = max_ping
         self.rcon_dispatcher = rcon_dispatcher
         # start Thread
         self.processor = Thread(target=self.process)
@@ -58,7 +60,7 @@ class TaskManager(object):
         """
         Thread process
         """
-        while True:
+        while 1:
             # wait for given delay in the config file
             time.sleep(self.frequency)
             # get rcon status
@@ -84,9 +86,9 @@ class TaskManager(object):
                 # if ping is too high, inform player and increase warn counter, Admins or higher levels will not get the warning
                 ping_value = player.ping
                 gameplayer = game.players[int(player.num)]
-                if int(settings['max_ping']) < ping_value < 999 and gameplayer.get_admin_role() < 40:
+                if self.max_ping < ping_value < 999 and gameplayer.get_admin_role() < 40:
                     gameplayer.add_high_ping()
-                    game.rcon_tell(player.num, "^1WARNING ^7[^3" + str(gameplayer.get_high_ping()) + "^7]: ^7Your ping is too high [^4" + str(ping_value) + "^7]. The maximum allowed is " + str(settings['max_ping']) + ".", False)
+                    game.rcon_tell(player.num, "^1WARNING ^7[^3%d^7]: ^7Your ping is too high [^4%d^7]. The maximum allowed is %d." % (gameplayer.get_high_ping(), ping_value, self.max_ping), False)
                 else:
                     gameplayer.clear_high_ping()
 
@@ -108,7 +110,7 @@ class TaskManager(object):
                 # if player is spectator on full server (more than 10 players), inform player and increase warn counter, GTV or Moderator or higher levels will not get the warning
                 if counter > 11 and player.get_team() == 3 and player.get_admin_role() < 20 and player.get_time_joined() < (time.time() - 30) and player.get_player_num() != 1022 and not gtv_connected:
                     player.add_spec_warning()
-                    game.rcon_tell(player.get_player_num(), "^1WARNING ^7[^3" + str(player.get_spec_warning()) + "^7]: ^7You are spectator too long on full server", False)
+                    game.rcon_tell(player.get_player_num(), "^1WARNING ^7[^3%d^7]: ^7You are spectator too long on full server" % player.get_spec_warning(), False)
                 else:
                     player.clear_spec_warning()
 
@@ -120,19 +122,19 @@ class TaskManager(object):
             for player in game.players.itervalues():
                 # warn player with 2 warnings, Admins will never get the alert warning
                 if (player.get_warning() == 2 or player.get_spec_warning() == 2) and player.get_admin_role() < 40:
-                    game.rcon_say("^1ALERT: ^7Player ^3" + player.get_name() + ", ^7auto-kick from warnings if not cleared")
+                    game.rcon_say("^1ALERT: ^7Player ^3%s, ^7auto-kick from warnings if not cleared" % player.get_name())
 
                 # kick player with 3 warnings, Admins will never get kicked
                 if player.get_warning() > 2 and player.get_admin_role() < 40:
-                    game.rcon_say("^7Player ^3" + player.get_name() + " ^7kicked, because of too many warnings")
+                    game.rcon_say("^7Player ^3%s ^7kicked, because of too many warnings" % player.get_name())
                     game.kick_player(player)
                 # kick player with high ping after 3 warnings, Admins will never get kicked
                 elif player.get_high_ping() > 2 and player.get_admin_role() < 40:
-                    game.rcon_say("^7Player ^3" + player.get_name() + " ^7kicked, because his ping was too high for this server")
+                    game.rcon_say("^7Player ^3%s ^7kicked, because his ping was too high for this server" % player.get_name())
                     game.kick_player(player)
                 # kick spectator after 3 warnings, Moderator or higher levels will not get kicked
                 elif player.get_spec_warning() > 2 and player.get_admin_role() < 20:
-                    game.rcon_say("^7Player ^3" + player.get_name() + " ^7kicked, because of spectator too long on full server")
+                    game.rcon_say("^7Player ^3%s ^7kicked, because of spectator too long on full server" % player.get_name())
                     game.kick_player(player)
 
 
@@ -160,6 +162,7 @@ class LogParser(object):
         # go to the end of the file
         self.log_file.seek(0, 2)
         self.ffa_lms_gametype = False
+        self.ctf_gametype = False
         # enable/disable debug output
         self.verbose = True if verbose_mode == '1' else False
 
@@ -188,6 +191,8 @@ class LogParser(object):
                     if 'g_gametype\\0' in line or 'g_gametype\\1' in line:
                         # disable teamkill event for FFA (0) and LMS (1) mode
                         self.ffa_lms_gametype = True
+                    if 'g_gametype\\7' in line:
+                        self.ctf_gametype = True
                 if lgf.tell() > end_pos:
                     break
                 elif len(line) == 0:
@@ -213,7 +218,7 @@ class LogParser(object):
             line = lgf.readline()
             if len(line) != 0:
                 self.parse_line(line)
-            if len(line) == 0:
+            else:
                 if not game.live:
                     print("Going Live...")
                     game.go_live()
@@ -223,16 +228,14 @@ class LogParser(object):
         """
         parse the logfile and search for specific action
         """
+        inactive = set(['ClientConnect', 'sayteam', 'tell', 'saytell', 'Item', 'red', 'Flag Return', 'SurvivorWinner', 'Hotpotato', 'Warmup', 'Callvote', 'Vote', 'VotePassed', 'VoteFailed', 'Radio', 'score', 'InitAuth', 'AccountValidated', 'AccountRejected', 'AccountKick', 'InitRound'])
         line = string[7:]
         tmp = line.split(":", 1)
         try:
-            line = tmp[1].lstrip().rstrip()
+            line = tmp[1].strip()
             if tmp is not None:
                 if tmp[0].lstrip() == 'InitGame':
-                    self.debug("Starting game...")
                     self.handle_game_init(line)
-                elif tmp[0].lstrip() == 'ClientConnect':
-                    self.handle_misc()
                 elif tmp[0].lstrip() == 'ClientUserinfo':
                     self.handle_userinfo(line)
                 elif tmp[0].lstrip() == 'ClientUserinfoChanged':
@@ -248,51 +251,12 @@ class LogParser(object):
                 elif tmp[0].lstrip() == 'ShutdownGame':
                     self.handle_shutdown()
                 elif tmp[0].lstrip() == 'say':
-                    self.handle_say(tmp[1].rstrip().lstrip())
-                elif tmp[0].lstrip() == 'sayteam':
-                    self.handle_misc()
-                elif tmp[0].lstrip() == 'tell':
-                    self.handle_misc()
-                elif tmp[0].lstrip() == 'saytell':
-                    self.handle_misc()
-                elif tmp[0].lstrip() == 'Item':
-                    self.handle_misc()
-                elif tmp[0].lstrip() == 'red':
-                    self.handle_misc()
+                    self.handle_say(line)
                 elif tmp[0].lstrip() == 'Flag':
-                    self.handle_flag(tmp[1].rstrip().lstrip())
-                elif tmp[0].lstrip() == 'Flag Return':
-                    self.handle_misc()
-                elif tmp[0].lstrip() == 'SurvivorWinner':
-                    self.handle_misc()
-                elif tmp[0].lstrip() == 'Hotpotato':
-                    self.handle_misc()
-                elif tmp[0].lstrip() == 'Warmup':
-                    self.handle_misc()
-                elif tmp[0].lstrip() == 'Callvote':
-                    self.handle_misc()
-                elif tmp[0].lstrip() == 'Vote':
-                    self.handle_misc()
-                elif tmp[0].lstrip() == 'VotePassed':
-                    self.handle_misc()
-                elif tmp[0].lstrip() == 'VoteFailed':
-                    self.handle_misc()
-                elif tmp[0].lstrip() == 'InitAuth':
-                    self.handle_misc()
-                elif tmp[0].lstrip() == 'AccountValidated':
-                    self.handle_misc()
-                elif tmp[0].lstrip() == 'AccountRejected':
-                    self.handle_misc()
-                elif tmp[0].lstrip() == 'AccountKick':
-                    self.handle_misc()
-                elif tmp[0].lstrip() == 'InitRound':
-                    self.handle_misc()
-                elif tmp[0].lstrip() == 'Radio':
-                    self.handle_misc()
+                    self.handle_flag(line)
                 elif tmp[0].lstrip() == 'Exit':
-                    self.handle_stats()
                     self.handle_awards()
-                elif tmp[0].lstrip() == 'score':
+                elif tmp[0].lstrip() in inactive:
                     self.handle_misc()
                 else:
                     self.error("ERROR: Unknown log entry in parse_line(): " + repr(tmp))
@@ -301,13 +265,11 @@ class LogParser(object):
                 self.handle_misc()
             elif 'Session data initialised' in tmp[0]:
                 self.handle_misc()
-            elif 'Bomb' in tmp[0]:
-                self.handle_misc()
-            elif 'Pop' in tmp[0]:
+            elif 'Bomb' in tmp[0] or 'Pop' in tmp[0]:
                 self.handle_misc()
             else:
                 if tmp[0] != '':
-                    self.error("IndexError in parse_line(): " + str(tmp))
+                    self.error("IndexError in parse_line(): %s" % tmp)
         except Exception:
             return -1
 
@@ -347,6 +309,11 @@ class LogParser(object):
             self.ffa_lms_gametype = True
         else:
             self.ffa_lms_gametype = False
+        if 'g_gametype\\7' in line:
+            self.ctf_gametype = True
+        else:
+            self.ctf_gametype = False
+        self.debug("Starting game...")
         game.new_game()
 
     def handle_shutdown(self):
@@ -365,7 +332,7 @@ class LogParser(object):
         handle player user information, auto-kick known cheater ports or guids
         """
         with players_lock:
-            player_num = int(line[:2].rstrip().lstrip())
+            player_num = int(line[:2].strip())
             line = line[2:].lstrip("\\").lstrip()
             values = self.explode_line(line.lstrip())
             challenge = True if 'challenge' in values else False
@@ -379,33 +346,33 @@ class LogParser(object):
                 else:
                     guid = "None"
                     game.send_rcon("Player with invalid GUID kicked")
-                    game.send_rcon("kick " + str(player_num))
+                    game.send_rcon("kick %d" % player_num)
                 if 'name' in values:
                     name = re.sub(r"\s+", "", values['name'])
                 else:
                     name = "UnnamedPlayer"
                     game.send_rcon("Player with invalid name kicked")
-                    game.send_rcon("kick " + str(player_num))
+                    game.send_rcon("kick %d" % player_num)
                 if 'ip' in values:
                     ip_port = values['ip']
                 else:
                     ip_port = "0.0.0.0"
                     game.send_rcon("Player with invalid IP address kicked")
-                    game.send_rcon("kick " + str(player_num))
+                    game.send_rcon("kick %d" % player_num)
 
-            address = ip_port.split(":")[0].lstrip().rstrip()
-            port = ip_port.split(":")[1].lstrip().rstrip()
+            address = ip_port.split(":")[0].strip()
+            port = ip_port.split(":")[1].strip()
 
             # kick player with hax port 1337 or 1024
             if port == "1337" or port == "1024":
-                game.send_rcon("Cheater Port detected for " + name + " -> Player kicked")
+                game.send_rcon("Cheater Port detected for %s -> Player kicked" % name)
                 game.send_rcon("kick " + str(player_num))
             # kick player with hax guid 'kemfew'
             if "KEMFEW" in guid.upper():
-                game.send_rcon("Cheater GUID detected for " + name + " -> Player kicked")
+                game.send_rcon("Cheater GUID detected for %s -> Player kicked" % name)
                 game.send_rcon("kick " + str(player_num))
             if "WORLD" in guid.upper() or "UNKNOWN" in guid.upper():
-                game.send_rcon("Invalid GUID detected for " + name + " -> Player kicked")
+                game.send_rcon("Invalid GUID detected for %s -> Player kicked" % name)
                 game.send_rcon("kick " + str(player_num))
 
             if not self.player_exists(player_num):
@@ -426,14 +393,14 @@ class LogParser(object):
 
             # kick banned player
             if game.players[player_num].get_banned_player():
-                game.send_rcon("kick " + str(player_num))
+                game.send_rcon("kick %d" % player_num)
 
     def handle_userinfo_changed(self, line):
         """
         handle player changes
         """
         with players_lock:
-            player_num = int(line[:2].rstrip().lstrip())
+            player_num = int(line[:2].strip())
             player = game.players[player_num]
             line = line[2:].lstrip("\\")
             try:
@@ -444,12 +411,12 @@ class LogParser(object):
                 player.set_team(3)
                 team_num = "3"
 
-            if team_num == "1":
-                team = "RED"
-            elif team_num == "2":
-                team = "BLUE"
+            team_dict = {1: "RED", 2: "BLUE", 3: "SPEC"}
+            if team_num in team_dict:
+                team = team_dict[team_num]
             else:
                 team = "SPEC"
+
             name = re.sub(r"\s+", "", values['n'])
             if not(game.players[player_num].get_name() == name):
                 game.players[player_num].set_name(name)
@@ -460,7 +427,7 @@ class LogParser(object):
         handle player entering game
         """
         with players_lock:
-            player_num = int(line[:2].rstrip().lstrip())
+            player_num = int(line[:2].strip())
             try:
                 player = game.players[player_num]
                 # Welcome message for registered players
@@ -478,7 +445,7 @@ class LogParser(object):
         handle player disconnect
         """
         with players_lock:
-            player_num = int(line[:2].rstrip().lstrip())
+            player_num = int(line[:2].strip())
             try:
                 player = game.players[player_num]
                 player.save_info()
@@ -527,7 +494,7 @@ class LogParser(object):
         with players_lock:
             parts = line.split(":", 1)
             info = parts[0].split(" ")
-            info1 = parts[1].lstrip().rstrip().split(" ")
+            info1 = parts[1].strip().split(" ")
             k_name = info1[0]
             killer_id = int(info[0])
             victim_id = int(info[1])
@@ -553,8 +520,8 @@ class LogParser(object):
             # teamkill event - disabled for FFA and LMS, for all other game modes team kills are counted and punished
             if not self.ffa_lms_gametype:
                 if (victim.get_team() == killer.get_team() and victim.get_player_num() != killer.get_player_num()) and death_cause != "UT_MOD_BOMBED":
-                    if settings['teamkill_autokick'] == '1':
-                        game.send_rcon(killer_name + " ^1teamkilled ^7" + victim_name)
+                    if CONFIG.get('bot', 'teamkill_autokick') == '1':
+                        game.send_rcon("%s ^1teamkilled ^7%s" % (killer_name, victim_name))
                         autokick = True
                     else:
                         autokick = False
@@ -597,17 +564,19 @@ class LogParser(object):
         """
         handle say commands
         """
-        reason_dict = {'obj': 'go for objective', 'tk': 'stop team killing', 'spec': 'spectator too long on full server', 'spam': 'do not spam, shut-up!', 'camp': 'stop camping', 'lang': 'bad language', 'ping': 'fix your ping', 'racism': 'racism is not tolerated', 'afk': 'away from keyboard'}
+        reason_dict = {'obj': 'go for objective', 'camp': 'stop camping', 'spam': 'do not spam, shut-up!', 'lang': 'bad language', 'racism': 'racism is not tolerated',
+                       'ping': 'fix your ping', 'afk': 'away from keyboard', 'tk': 'stop team killing', 'spec': 'spectator too long on full server', 'ci': 'connection interrupted'}
 
         with players_lock:
             s = self.explode_line2(line)
 
             if s['command'] == '!mapstats':
-                game.rcon_tell(s['player_num'], "^7" + str(game.players[s['player_num']].get_headshots()) + " ^7headshots")
                 game.rcon_tell(s['player_num'], "^7" + str(game.players[s['player_num']].get_kills()) + " ^7kills - " + str(game.players[s['player_num']].get_deaths()) + " ^7deaths")
                 game.rcon_tell(s['player_num'], "^7" + str(game.players[s['player_num']].get_team_killer()) + " ^7teamkills")
                 game.rcon_tell(s['player_num'], "^7" + str(game.players[s['player_num']].get_killing_streak()) + " ^7current kill streak")
-                game.rcon_tell(s['player_num'], "^7" + str(game.players[s['player_num']].get_all_hits()) + " ^7total hits")
+                game.rcon_tell(s['player_num'], "^7" + str(game.players[s['player_num']].get_all_hits()) + " ^7total hits - " + str(game.players[s['player_num']].get_headshots()) + " ^7headshots")
+                if self.ctf_gametype:
+                    game.rcon_tell(s['player_num'], "^7" + str(game.players[s['player_num']].get_flags_captured()) + " ^7flags captured - " + str(game.players[s['player_num']].get_flags_returned()) + " ^7flags returned")
 
             elif s['command'] == '!help' or s['command'] == '!h':
                 ## TO DO - specific help for each command
@@ -630,8 +599,8 @@ class LogParser(object):
                     game.rcon_tell(s['player_num'], "^3teams, tempban, time, veto, warn, warnclear, xlrstats", False)
                 elif game.players[s['player_num']].get_admin_role() >= 80:
                     game.rcon_tell(s['player_num'], "^7Senior Admin commands:")
-                    game.rcon_tell(s['player_num'], "^3admins, aliases, ban, banlist, bigtext, ci, country, cyclemap, force, hs, kick, kill, kiss, leveltest, list, map, maprestart, mute,", False)
-                    game.rcon_tell(s['player_num'], "^3nuke, permban, putgroup, say, scream, setnextmap, shuffleteams, slap, stats, teams, tempban, time, unban, ungroup, veto, warn,", False)
+                    game.rcon_tell(s['player_num'], "^3admins, aliases, ban, banlist, bigtext, ci, country, cyclemap, force, hs, kick, kill, kiss, leveltest, list, map, maprestart,", False)
+                    game.rcon_tell(s['player_num'], "^3mute, nuke, permban, putgroup, say, scream, setnextmap, shuffleteams, slap, stats, teams, tempban, time, unban, ungroup, veto, warn,", False)
                     game.rcon_tell(s['player_num'], "^3warnclear, xlrstats", False)
 
 ## player commands
@@ -836,7 +805,9 @@ class LogParser(object):
                     if ' ' in arg:
                         user = arg.split(' ')[0]
                         team = arg.split(' ')[1]
-                        teamlist = ['red', 'blue', 'spec', 'spectator', 'r', 'b', 's', 're', 'bl', 'blu', 'sp', 'spe']
+                        team_dict = {'red': 'red', 'r': 'red', 're': 'red',
+                                     'blue': 'blue', 'b': 'blue', 'bl': 'blue', 'blu': 'blue',
+                                     'spec': 'spectator', 'spectator': 'spectator', 's': 'spectator', 'sp': 'spectator', 'spe': 'spectator'}
                         count = 0
                         for player in game.players.itervalues():
                             if user.upper() in (player.get_name()).upper() or user == str(player.get_player_num()):
@@ -847,15 +818,9 @@ class LogParser(object):
                         elif count > 1:
                             game.rcon_tell(s['player_num'], "More than one Player found")
                         else:
-                            if team in teamlist:
-                                if team == 'spec' or team == 's' or team == 'sp' or team == 'spe':
-                                    team = 'spectator'
-                                elif team == 'r' or team == 're':
-                                    team = 'red'
-                                elif team == 'b' or team == 'bl' or team == 'blu':
-                                    team = 'blue'
-                                game.rcon_forceteam(victim.get_player_num(), team)
-                                game.rcon_tell(victim.get_player_num(), "^3You are forced to: ^7" + team)
+                            if team in team_dict:
+                                game.rcon_forceteam(victim.get_player_num(), team_dict[team])
+                                game.rcon_tell(victim.get_player_num(), "^3You are forced to: ^7%s" % team_dict[team])
                             else:
                                 game.rcon_tell(s['player_num'], "^7Usage: !force <name> <blue/red/spec>")
                     else:
@@ -1235,7 +1200,6 @@ class LogParser(object):
                 curs.execute("SELECT * FROM `ban_list` ORDER BY `id` DESC LIMIT 4")
                 result = curs.fetchall()
                 msg = ''
-                placeholder = ''
                 if len(result) > 4:
                     limit = 4
                 elif len(result) == 0:
@@ -1243,10 +1207,10 @@ class LogParser(object):
                 else:
                     limit = len(result)
                 for item in range(limit):
-                    msg += placeholder + '[' + str(result[item][0]) + ']'  # ID
-                    msg += result[item][2]  # Name
-                    placeholder = ', '
-                game.rcon_tell(s['player_num'], "^7Banlist: " + str(msg))
+                    msg += '[' + str(result[item][0]) + ']' + result[item][2] + ', '  # 0=ID, 2=Name
+                if not msg:
+                    msg = 'empty'
+                game.rcon_tell(s['player_num'], "^7Banlist: %s" % msg.rstrip(', '))
 
             # unban - unban a player from the database via ID
             elif s['command'] == '!unban' and game.players[s['player_num']].get_admin_role() >= 80:
@@ -1256,7 +1220,7 @@ class LogParser(object):
                         values = (int(arg),)
                         curs.execute("DELETE FROM `ban_list` WHERE `id` = ?", values)
                         conn.commit()
-                        game.rcon_tell(s['player_num'], "^7Player ID <" + arg + "> unbanned")
+                        game.rcon_tell(s['player_num'], "^7Player ID <%s> unbanned" % arg)
                     else:
                         game.rcon_tell(s['player_num'], "^7Usage: !unban <ID>")
                 else:
@@ -1278,7 +1242,7 @@ class LogParser(object):
                         game.rcon_tell(s['player_num'], "More than one Player found")
                     else:
                         if 1 < victim.get_admin_role() < 100:
-                            game.rcon_tell(s['player_num'], "" + victim.get_name() + " put in group User")
+                            game.rcon_tell(s['player_num'], "%s put in group User" % victim.get_name())
                             # update database and set admin_role to 1
                             values = (1, victim.get_guid())
                             curs.execute("UPDATE `xlrstats` SET `admin_role` = ? WHERE `guid` = ?", values)
@@ -1286,14 +1250,14 @@ class LogParser(object):
                             # overwrite admin role in game, no reconnect of player required
                             victim.set_admin_role(1)
                         else:
-                            game.rcon_tell(s['player_num'], "Sorry, you cannot put " + victim.get_name() + " in group User")
+                            game.rcon_tell(s['player_num'], "Sorry, you cannot put %s in group User" % victim.get_name())
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !ungroup <name>")
 
 ## iamgod
             # iamgod - register user as Head Admin
             elif s['command'] == '!iamgod':
-                if int(settings['iamgod']) == 1:
+                if int(CONFIG.get('bot', 'iamgod')) == 1:
                     if not game.players[s['player_num']].get_registered_user():
                         # register new user in DB and set admin role to 100
                         game.players[s['player_num']].register_user_db(role=100)
@@ -1310,8 +1274,8 @@ class LogParser(object):
         handle flag
         """
         tmp = line.split(" ")
-        player_num = int(tmp[0].lstrip().rstrip())
-        action = tmp[1].lstrip().rstrip()
+        player_num = int(tmp[0].strip())
+        action = tmp[1].strip()
         with players_lock:
             player = game.players[player_num]
             if action == '0:':
@@ -1329,7 +1293,7 @@ class LogParser(object):
 
     def handle_awards(self):
         """
-        display awards at the end of the round
+        display awards and personal stats at the end of the round
         """
         most_kills = 0
         most_flags = 0
@@ -1355,20 +1319,17 @@ class LogParser(object):
                     most_hs = player.get_headshots()
                     headshooter = player.get_name()
             if most_flags > 1:
-                msg += "^7" + flagrunner + ": ^2" + str(most_flags) + "^4 caps ^7- "
+                msg += "^7%s: ^2%d ^4caps ^7- " % (flagrunner, most_flags)
             if most_kills > 1:
-                msg += "^7" + serialkiller + ": ^2" + str(most_kills) + "^3 kills"
+                msg += "^7%s: ^2%d ^3kills" % (serialkiller, most_kills)
             if most_streak > 1:
-                msg += " ^7- " + streaker + ": ^2" + str(most_streak) + "^6 streaks"
+                msg += " ^7- %s: ^2%d ^6streaks" % (streaker, most_streak)
             if most_hs > 1:
-                msg += " ^7- " + headshooter + ": ^2" + str(most_hs) + "^1 heads"
-            game.rcon_say("^1AWARDS: " + msg)
+                msg += " ^7- %s: ^2%d ^1heads" % (headshooter, most_hs)
+            if msg:
+                game.rcon_say("^1AWARDS: %s" % msg)
 
-    def handle_stats(self):
-        """
-        display personal stats at the end of the round
-        """
-        with players_lock:
+            # display personal stats at the end of the round
             for player in game.players.itervalues():
                 # display personal stats, stats for players in spec will not be displayed
                 if player.get_team() == 1 or player.get_team() == 2:
@@ -1378,7 +1339,7 @@ class LogParser(object):
         """
         explode line
         """
-        line = line.lstrip().rstrip()
+        line = line.strip()
         try:
             tmp = line.split(" ")
             array = {"player_num": int(tmp[0]), "name": tmp[1], "command": tmp[2]}
@@ -1463,7 +1424,7 @@ class Player(object):
         curs.execute("SELECT COUNT(*) FROM `ban_list` WHERE (`guid` = ? OR `ip_address` = ?) AND `expires` > ?", values)
         if curs.fetchone()[0] > 0:
             print("Player " + self.name + " BANNED - GUID: " + str(self.guid) + " - IP ADDRESS: " + str(self.address))
-            game.send_rcon(self.name + " ^1banned")
+            game.send_rcon("%s ^1banned" % self.name)
             self.banned_player = True
 
         if not self.banned_player:
@@ -1471,7 +1432,7 @@ class Player(object):
             info = GEOIP.lookup(ip_address)
             if info.country:
                 self.country = info.country_name
-                game.rcon_say(name + " ^7connected from " + str(info.country_name))
+                game.rcon_say("%s ^7connected from %s" % (name, info.country_name))
 
     def ban(self, duration=900, reason='tk'):
         unix_expiration = int(duration) + time.time()
@@ -1752,14 +1713,13 @@ class Player(object):
                     # add TK ban points - 20 minutes
                     self.add_ban_point('tk, auto-kick', 1200)
                     game.kick_player(self)
-                    game.rcon_say("^7Player ^3" + self.name + " ^7kicked for team killing")
-                    print("KICK: TK autokick for " + self.name)
+                    game.rcon_say("^7Player ^3%s ^7kicked for team killing" % self.name)
+                    print("KICK: TK autokick for %s" % self.name)
             # slap player for team killing
             elif len(self.team_kills) >= (number_of_max_tk - 1):
                 tks = self.team_kills[len(self.team_kills) - (number_of_max_tk - 1)]
                 if tks > time.time() - 130:
-                    rcon_command = 'slap ' + str(self.player_num)
-                    game.send_rcon(rcon_command)
+                    game.send_rcon('slap %d' % self.player_num)
                     game.rcon_say("^1For team killing you will get kicked!")
             # warn player for team killing
             elif len(self.team_kills) >= (number_of_max_tk - 3):
@@ -1818,11 +1778,10 @@ class Game(object):
         self.players = {}
         self.live = False
         self.rcon_lock = RLock()
-        self.rcon_handle = Rcon(settings['server_ip'], settings['server_port'], settings['rcon_password'])
-        if settings['show_rules'] == '1':
+        self.rcon_handle = Rcon(CONFIG.get('server', 'server_ip'), CONFIG.get('server', 'server_port'), CONFIG.get('server', 'rcon_password'))
+        if CONFIG.get('rules', 'show_rules') == '1':
             # create instance of Rules to display the rules and advertisements
-            Rules('./conf/rules.conf', int(settings['rules_frequency']), self.rcon_handle)
-        self.gravity = 800
+            Rules('./conf/rules.conf', int(CONFIG.get('rules', 'rules_frequency')), self.rcon_handle)
 
     def send_rcon(self, command):
         """
@@ -1888,7 +1847,7 @@ class Game(object):
         @type  player: Instance
         """
         with players_lock:
-            self.send_rcon('kick ' + str(player.get_player_num()))
+            self.send_rcon('kick %d' % player.get_player_num())
 
     def go_live(self):
         """
@@ -1964,23 +1923,16 @@ class Game(object):
         """
         set-up a new game, set gravity according to config file
         """
-        self.gravity = settings['gravity']
+        gravity = CONFIG.get('bot', 'gravity')
         self.rcon_handle.clear()
-        self.rcon_handle.push("set g_gravity " + self.gravity)
+        self.rcon_handle.push("set g_gravity %s" % gravity)
 
 
 ### Main ###
 
-# open settings.conf file and read content in dictionary
-## TO DO: refactoring: ConfigParser
-CONFIG = open('./conf/settings.conf')
-settings = {}
-while CONFIG:
-    CFGLINE = CONFIG.readline()
-    if len(CFGLINE) == 0:
-        break
-    PARM = CFGLINE.split("=", 1)
-    settings[PARM[0]] = PARM[1].rstrip()
+# read settings.conf file
+CONFIG = ConfigParser()
+CONFIG.read('./conf/settings.conf')
 
 players_lock = RLock()
 
@@ -1989,7 +1941,7 @@ conn = sqlite3.connect('./data.sqlite')
 curs = conn.cursor()
 
 # create instance of LogParser
-LOGPARS = LogParser(settings['log_file'], settings['verbose'])
+LOGPARS = LogParser(CONFIG.get('server', 'log_file'), CONFIG.get('bot', 'verbose'))
 
 # load the GEO database and store it globally in interpreter memory
 GEOIP = PyGeoIP.Database('./lib/GeoIP.dat')
@@ -2001,7 +1953,7 @@ WORLD = Player(1022, '127.0.0.1', 'NONE', 'World', 3)
 game.add_player(WORLD)
 
 # create instance of TaskManager
-TASKS = TaskManager(int(settings['task_frequency']), game.rcon_handle)
+TaskManager(int(CONFIG.get('bot', 'task_frequency')), int(CONFIG.get('bot', 'max_ping')), game.rcon_handle)
 
 # read the logfile
 LOGPARS.read_log()
