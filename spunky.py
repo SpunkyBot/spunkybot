@@ -1004,7 +1004,7 @@ class LogParser(object):
             elif s['command'] == '!veto' and game.players[s['player_num']].get_admin_role() >= 60:
                 game.send_rcon('veto')
 
-            # ci - kick player with connection interrupt
+            # ci - kick player with connection interrupted
             elif s['command'] == '!ci' and game.players[s['player_num']].get_admin_role() >= 60:
                 if line.split(s['command'])[1]:
                     arg = str(line.split(s['command'])[1]).strip()
@@ -1020,12 +1020,14 @@ class LogParser(object):
                     else:
                         # update rcon status
                         game.rcon_handle.quake.rcon_update()
-                        player_ping = game.rcon_handle.quake.players[victim.get_player_num()].ping
+                        for player in game.rcon_handle.quake.players:
+                            if victim.get_player_num() == player.num:
+                                player_ping = player.ping
                         if player_ping == 999:
                             game.kick_player(victim)
-                            game.rcon_say("^2" + victim.get_name() + "^4 kicked by ^3" + game.players[s['player_num']].get_name() + "^4, connection interrupt")
+                            game.rcon_say("^2%s ^4kicked by ^3%s^4, connection interrupted" % (victim.get_name(), game.players[s['player_num']].get_name()))
                         else:
-                            game.rcon_tell(s['player_num'], "" + victim.get_name() + " has no connection interrupt")
+                            game.rcon_tell(s['player_num'], "%s has no connection interrupted" % victim.get_name())
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !ci <name>")
 
