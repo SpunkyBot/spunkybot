@@ -419,7 +419,7 @@ class LogParser(object):
                 player.set_team(3)
                 team_num = "3"
 
-            team_dict = {1: "RED", 2: "BLUE", 3: "SPEC"}
+            team_dict = {0: "GREEN", 1: "RED", 2: "BLUE", 3: "SPEC"}
             if team_num in team_dict:
                 team = team_dict[team_num]
             else:
@@ -1009,6 +1009,7 @@ class LogParser(object):
                 if line.split(s['command'])[1]:
                     arg = str(line.split(s['command'])[1]).strip()
                     count = 0
+                    player_ping = 0
                     for player in game.players.itervalues():
                         if arg.upper() in (player.get_name()).upper() or arg == str(player.get_player_num()):
                             victim = player
@@ -1339,7 +1340,7 @@ class LogParser(object):
             # display personal stats at the end of the round
             for player in game.players.itervalues():
                 # display personal stats, stats for players in spec will not be displayed
-                if player.get_team() == 1 or player.get_team() == 2:
+                if player.get_team() != 3:
                     game.rcon_tell(player.get_player_num(), "^7Stats " + player.get_name() + ": ^7K ^2" + str(player.get_kills()) + " ^7D ^3" + str(player.get_deaths()) + " ^7HS ^1" + str(player.get_headshots()) + " ^7TK ^1" + str(player.get_team_killer()))
 
     def explode_line2(self, line):
@@ -1376,7 +1377,7 @@ class Player(object):
     """
     Player class
     """
-    teams = {1: "red", 2: "blue", 3: "spectators"}
+    teams = {0: "green", 1: "red", 2: "blue", 3: "spectators"}
     roles = {0: "Guest", 1: "User", 2: "Regular", 20: "Moderator", 40: "Admin", 60: "Full Admin", 80: "Senior Admin", 100: "Head Admin"}
 
     def __init__(self, player_num, ip_address, guid, name, team=0):
