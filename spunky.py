@@ -1688,6 +1688,8 @@ class Player(object):
     def clear_warning(self):
         self.warn_counter = 0
         self.spec_warn_count = 0
+        self.team_kills = []
+        self.tk_mate_names = []
         # clear ban_points
         now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         values = (self.guid, now)
