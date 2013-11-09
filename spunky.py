@@ -538,8 +538,8 @@ class LogParser(object):
             # suicide counter
             if death_cause == 'MOD_SUICIDE' or death_cause == 'MOD_FALLING' or death_cause == 'MOD_WATER' or death_cause == 'MOD_SPLODED' or (killer.get_player_num() == victim.get_player_num() and (death_cause == 'UT_MOD_HEGRENADE' or death_cause == 'UT_MOD_HK69')):
                 killer.suicide()
-
-            if int(info[2]) != 10:  # 10: MOD_CHANGE_TEAM
+                victim.die()
+            elif int(info[2]) != 10:  # 10: MOD_CHANGE_TEAM
                 killer.kill()
                 killer_color = "^1" if (killer.get_team() == 1) else "^4"
                 if killer.get_killing_streak() == 5 and killer_name != 'World':
