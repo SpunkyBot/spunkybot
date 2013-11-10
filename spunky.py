@@ -24,6 +24,7 @@ import re
 import time
 import sqlite3
 import math
+import textwrap
 import lib.pygeoip as PyGeoIP
 
 from lib.rcon import Rcon
@@ -120,10 +121,6 @@ class TaskManager(object):
         """
         with players_lock:
             for player in game.players.itervalues():
-                # warn player with 2 warnings, Admins will never get the alert warning
-                if (player.get_warning() == 2 or player.get_spec_warning() == 2) and player.get_admin_role() < 40:
-                    game.rcon_say("^1ALERT: ^7Player ^3%s, ^7auto-kick from warnings if not cleared" % player.get_name())
-
                 # kick player with 3 warnings, Admins will never get kicked
                 if player.get_warning() > 2 and player.get_admin_role() < 40:
                     game.rcon_say("^7Player ^3%s ^7kicked, because of too many warnings" % player.get_name())
@@ -136,6 +133,13 @@ class TaskManager(object):
                 elif player.get_spec_warning() > 2 and player.get_admin_role() < 20:
                     game.rcon_say("^7Player ^3%s ^7kicked, because of spectator too long on full server" % player.get_name())
                     game.kick_player(player)
+
+                # warn player with 2 warnings, Admins will never get the alert warning
+                if (player.get_warning() == 2 or player.get_spec_warning() == 2) and player.get_admin_role() < 40:
+                    game.rcon_say("^1ALERT: ^7Player ^3%s, ^7auto-kick from warnings if not cleared" % player.get_name())
+                    # increase counter to kick player next cycle automatically
+                    player.add_spec_warning()
+                    player.add_warning()
 
 
 ### CLASS Log Parser ###
@@ -160,6 +164,19 @@ class LogParser(object):
         self.hit_points = {0: "HEAD", 1: "HEAD", 2: "HELMET", 3: "TORSO", 4: "VEST", 5: "LEFT_ARM", 6: "RIGHT_ARM", 7: "GROIN", 8: "BUTT", 9: "LEFT_UPPER_LEG", 10: "RIGHT_UPPER_LEG", 11: "LEFT_LOWER_LEG", 12: "RIGHT_LOWER_LEG", 13: "LEFT_FOOT", 14: "RIGHT_FOOT"}
         self.hit_item = {1: "UT_MOD_KNIFE", 2: "UT_MOD_BERETTA", 3: "UT_MOD_DEAGLE", 4: "UT_MOD_SPAS", 5: "UT_MOD_MP5K", 6: "UT_MOD_UMP45", 8: "UT_MOD_LR300", 9: "UT_MOD_G36", 10: "UT_MOD_PSG1", 14: "UT_MOD_SR8", 15: "UT_MOD_AK103", 17: "UT_MOD_NEGEV", 19: "UT_MOD_M4", 20: "UT_MOD_GLOCK", 21: "UT_MOD_COLT1911", 22: "UT_MOD_MAC11", 23: "UT_MOD_BLED", 24: "UT_MOD_KICKED", 25: "UT_MOD_KNIFE_THROWN"}
         self.death_cause = {1: "MOD_WATER", 5: "UT_MOD_TELEFRAG", 6: "MOD_FALLING", 7: "UT_MOD_SUICIDE", 9: "MOD_TRIGGER_HURT", 10: "MOD_CHANGE_TEAM", 12: "UT_MOD_KNIFE", 13: "UT_MOD_KNIFE_THROWN", 14: "UT_MOD_BERETTA", 15: "UT_MOD_KNIFE_DEAGLE", 16: "UT_MOD_SPAS", 17: "UT_MOD_UMP45", 18: "UT_MOD_MP5K", 19: "UT_MOD_LR300", 20: "UT_MOD_G36", 21: "UT_MOD_PSG1", 22: "UT_MOD_HK69", 23: "UT_MOD_BLED", 24: "UT_MOD_KICKED", 25: "UT_MOD_HEGRENADE", 28: "UT_MOD_SR8", 30: "UT_MOD_AK103", 31: "UT_MOD_SPLODED", 32: "UT_MOD_SLAPPED", 34: "UT_MOD_BOMBED", 35: "UT_MOD_NUKED", 36: "UT_MOD_NEGEV", 37: "UT_MOD_HK69_HIT", 38: "UT_MOD_M4", 39: "UT_MOD_GLOCK", 40: "UT_MOD_COLT1911", 41: "UT_MOD_MAC11", 42: "UT_MOD_FLAG"}
+
+        # RCON commands for the different admin roles
+        self.user_cmds = ['hs', 'register', 'stats', 'teams', 'time', 'xlrstats']
+        self.mod_cmds = self.user_cmds + ['country', 'leveltest', 'list', 'mute', 'shuffleteams', 'warn']
+        self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'force', 'kick', 'nuke', 'say', 'tempban', 'warnclear']
+        self.fulladmin_cmds = self.admin_cmds + ['ban', 'ci', 'scream', 'slap', 'veto']
+        self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'map', 'maprestart', 'permban', 'putgroup', 'setnextmap', 'unban', 'ungroup']
+
+        # alphabetic sort of the commands
+        self.mod_cmds.sort()
+        self.admin_cmds.sort()
+        self.fulladmin_cmds.sort()
+        self.senioradmin_cmds.sort()
 
         # open game log file
         self.log_file = open(file_name, 'r')
@@ -374,14 +391,14 @@ class LogParser(object):
             # kick player with hax port 1337 or 1024
             if port == "1337" or port == "1024":
                 game.send_rcon("Cheater Port detected for %s -> Player kicked" % name)
-                game.send_rcon("kick " + str(player_num))
+                game.send_rcon("kick %d" % player_num)
             # kick player with hax guid 'kemfew'
             if "KEMFEW" in guid.upper():
                 game.send_rcon("Cheater GUID detected for %s -> Player kicked" % name)
-                game.send_rcon("kick " + str(player_num))
+                game.send_rcon("kick %d" % player_num)
             if "WORLD" in guid.upper() or "UNKNOWN" in guid.upper():
                 game.send_rcon("Invalid GUID detected for %s -> Player kicked" % name)
-                game.send_rcon("kick " + str(player_num))
+                game.send_rcon("kick %d" % player_num)
 
             if not self.player_exists(player_num):
                 try:
@@ -415,9 +432,11 @@ class LogParser(object):
                 values = self.explode_line(line.lstrip())
                 team_num = values['t']
                 player.set_team(int(team_num))
+                name = re.sub(r"\s+", "", values['n'])
             except KeyError:
                 player.set_team(3)
                 team_num = "3"
+                name = "UnnamedPlayer"
 
             team_dict = {0: "GREEN", 1: "RED", 2: "BLUE", 3: "SPEC"}
             if team_num in team_dict:
@@ -425,7 +444,6 @@ class LogParser(object):
             else:
                 team = "SPEC"
 
-            name = re.sub(r"\s+", "", values['n'])
             if not(game.players[player_num].get_name() == name):
                 game.players[player_num].set_name(name)
             self.debug("Player number: " + str(player_num) + " \"" + name + "\" is on the " + team + " team")
@@ -536,7 +554,7 @@ class LogParser(object):
                     victim.team_death()
 
             # suicide counter
-            if death_cause == 'MOD_SUICIDE' or death_cause == 'MOD_FALLING' or death_cause == 'MOD_WATER' or death_cause == 'MOD_SPLODED' or (killer.get_player_num() == victim.get_player_num() and (death_cause == 'UT_MOD_HEGRENADE' or death_cause == 'UT_MOD_HK69')):
+            if death_cause == 'UT_MOD_SUICIDE' or death_cause == 'MOD_FALLING' or death_cause == 'MOD_WATER' or death_cause == 'UT_MOD_SPLODED' or (killer.get_player_num() == victim.get_player_num() and (death_cause == 'UT_MOD_HEGRENADE' or death_cause == 'UT_MOD_HK69' or death_cause == 'UT_MOD_NUKED' or death_cause == 'UT_MOD_SLAPPED')):
                 killer.suicide()
                 victim.die()
             elif int(info[2]) != 10:  # 10: MOD_CHANGE_TEAM
@@ -587,43 +605,39 @@ class LogParser(object):
                 ## TO DO - specific help for each command
                 if game.players[s['player_num']].get_admin_role() < 20:
                     game.rcon_tell(s['player_num'], "^7Available commands:")
-                    game.rcon_tell(s['player_num'], "^3hs, register, stats, teams, time, xlrstats", False)
+                    game.rcon_tell(s['player_num'], ", ".join(self.user_cmds), False)
                 # help for mods - additional commands
                 elif game.players[s['player_num']].get_admin_role() == 20:
                     game.rcon_tell(s['player_num'], "^7Moderator commands:")
-                    game.rcon_tell(s['player_num'], "^3country, hs, leveltest, list, mute, shuffleteams, stats, teams, time, warn, xlrstats", False)
+                    game.rcon_tell(s['player_num'], ", ".join(self.mod_cmds), False)
                 # help for admins - additional commands
                 elif game.players[s['player_num']].get_admin_role() == 40:
                     game.rcon_tell(s['player_num'], "^7Admin commands:")
-                    game.rcon_tell(s['player_num'], "^3admins, aliases, bigtext, country, force, hs, kick, leveltest, list, mute, nuke, say, shuffleteams, stats, teams, tempban, time, warn,", False)
-                    game.rcon_tell(s['player_num'], "^3warnclear, xlrstats", False)
+                    game.rcon_tell(s['player_num'], ", ".join(self.admin_cmds), False)
                 # help for full admins - additional commands
                 elif game.players[s['player_num']].get_admin_role() == 60:
                     game.rcon_tell(s['player_num'], "^7Full Admin commands:")
-                    game.rcon_tell(s['player_num'], "^3admins, aliases, ban, bigtext, ci, country, force, hs, kick, leveltest, list, mute, nuke, say, scream, shuffleteams, slap, stats,", False)
-                    game.rcon_tell(s['player_num'], "^3teams, tempban, time, veto, warn, warnclear, xlrstats", False)
+                    game.rcon_tell(s['player_num'], ", ".join(self.fulladmin_cmds), False)
                 elif game.players[s['player_num']].get_admin_role() >= 80:
                     game.rcon_tell(s['player_num'], "^7Senior Admin commands:")
-                    game.rcon_tell(s['player_num'], "^3admins, aliases, ban, banlist, bigtext, ci, country, cyclemap, force, hs, kick, kill, kiss, leveltest, list, map, maprestart,", False)
-                    game.rcon_tell(s['player_num'], "^3mute, nuke, permban, putgroup, say, scream, setnextmap, shuffleteams, slap, stats, teams, tempban, time, unban, ungroup, veto, warn,", False)
-                    game.rcon_tell(s['player_num'], "^3warnclear, xlrstats", False)
+                    game.rcon_tell(s['player_num'], ", ".join(self.senioradmin_cmds), False)
 
 ## player commands
             # register - register yourself as a basic user
             elif s['command'] == '!register':
                 if not game.players[s['player_num']].get_registered_user():
                     game.players[s['player_num']].register_user_db(role=1)
-                    game.rcon_tell(s['player_num'], game.players[s['player_num']].get_name() + " ^7put in group User")
+                    game.rcon_tell(s['player_num'], "%s ^7put in group User" % game.players[s['player_num']].get_name())
                 else:
-                    game.rcon_tell(s['player_num'], game.players[s['player_num']].get_name() + " ^7is already in group User")
+                    game.rcon_tell(s['player_num'], "%s ^7is already in group User" % game.players[s['player_num']].get_name())
 
             # hs - display headshot counter
             elif s['command'] == '!hs':
-                game.rcon_tell(s['player_num'], "^7" + str(game.players[s['player_num']].get_headshots()) + " ^7headshots")
+                game.rcon_tell(s['player_num'], "^7%d headshots" % game.players[s['player_num']].get_headshots())
 
             # time - display the servers current time
             elif s['command'] == '!time':
-                game.rcon_say("^7" + str(time.strftime("%H:%M", time.localtime(time.time()))) + " CET")
+                game.rcon_say("^7%s CET" % time.strftime("%H:%M", time.localtime(time.time())))
 
             # teams - balance teams
             elif s['command'] == '!teams' and not self.ffa_lms_gametype:
@@ -686,13 +700,11 @@ class LogParser(object):
 
             # list - list all connected players
             elif s['command'] == '!list' and game.players[s['player_num']].get_admin_role() >= 20:
-                msg = "^7Players online: ^3"
-                placeholder = ""
+                msg = "^7Players online: "
                 for player in game.players.itervalues():
                     if player.get_player_num() != 1022:
-                        msg += placeholder + player.get_name() + "[^2" + str(player.get_player_num()) + "^3]"
-                        placeholder = ", "
-                game.rcon_tell(s['player_num'], msg)
+                        msg += "^3%s[^2%d^3], " % (player.get_name(), player.get_player_num())
+                game.rcon_tell(s['player_num'], msg.rstrip(', '))
 
             # mute - mute or unmute a player
             elif s['command'] == '!mute' and game.players[s['player_num']].get_admin_role() >= 20:
@@ -708,7 +720,7 @@ class LogParser(object):
                     elif count > 1:
                         game.rcon_tell(s['player_num'], "More than one Player found")
                     else:
-                        game.send_rcon("mute " + str(victim.get_player_num()))
+                        game.send_rcon("mute %d" % victim.get_player_num())
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !mute <name>")
 
@@ -760,16 +772,14 @@ class LogParser(object):
 ## admin level 40
             # admins - list all the online admins
             elif (s['command'] == '!admins' or s['command'] == '@admins') and game.players[s['player_num']].get_admin_role() >= 40:
-                msg = "^7Admins online: ^3"
-                placeholder = ""
+                msg = "^7Admins online: "
                 for player in game.players.itervalues():
                     if player.get_admin_role() >= 20:
-                        msg += placeholder + player.get_name() + "[^2" + str(player.get_admin_role()) + "^3]"
-                        placeholder = ", "
+                        msg += "^3%s[^2%d^3], " % (player.get_name(), player.get_admin_role())
                 if '@' in s['command']:
-                    game.rcon_say(msg)
+                    game.rcon_say(msg.rstrip(', '))
                 else:
-                    game.rcon_tell(s['player_num'], msg)
+                    game.rcon_tell(s['player_num'], msg.rstrip(', '))
 
             # aliases - list the aliases of the player
             elif (s['command'] == '!aliases' or s['command'] == '!alias') and game.players[s['player_num']].get_admin_role() >= 40:
@@ -785,21 +795,21 @@ class LogParser(object):
                     elif count > 1:
                         game.rcon_tell(s['player_num'], "More than one Player found")
                     else:
-                        game.rcon_tell(s['player_num'], "Aliases of " + victim.get_name() + ": ^3" + str(victim.get_aliases()))
+                        game.rcon_tell(s['player_num'], "^7Aliases of ^5%s: ^3%s" % (victim.get_name(), str(victim.get_aliases())))
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !alias <name>")
 
             # bigtext - display big message on screen
             elif s['command'] == '!bigtext' and game.players[s['player_num']].get_admin_role() >= 40:
                 if line.split(s['command'])[1]:
-                    game.rcon_bigtext(str(line.split(s['command'])[1]).strip())
+                    game.rcon_bigtext("%s" % line.split(s['command'])[1].strip())
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !bigtext <text>")
 
             # say - say a message to all players
             elif s['command'] == '!say' and game.players[s['player_num']].get_admin_role() >= 40:
                 if line.split(s['command'])[1]:
-                    game.rcon_say("^7" + str(line.split(s['command'])[1]).strip())
+                    game.rcon_say("%s" % line.split(s['command'])[1].strip())
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !say <text>")
 
@@ -903,7 +913,7 @@ class LogParser(object):
                         game.rcon_tell(s['player_num'], "More than one Player found")
                     else:
                         victim.clear_warning()
-                        game.rcon_say("^1All warnings cleared for ^2" + victim.get_name())
+                        game.rcon_say("^1All warnings cleared for ^2%s" % victim.get_name())
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !warnclear <name>")
 
@@ -917,7 +927,7 @@ class LogParser(object):
                         if len(liste) == 2:
                             reason_string = liste[1]
                             duration_string = '1'
-                        elif len(liste) > 2:
+                        else:
                             reason_string = liste[1]
                             duration_string = liste[2]
                         if reason_string.isdigit():
@@ -959,10 +969,10 @@ class LogParser(object):
             # scream - scream a message in different colors to all players
             elif s['command'] == '!scream' and game.players[s['player_num']].get_admin_role() >= 60:
                 if line.split(s['command'])[1]:
-                    game.rcon_say("^1" + str(line.split(s['command'])[1]).strip())
-                    game.rcon_say("^2" + str(line.split(s['command'])[1]).strip())
-                    game.rcon_say("^3" + str(line.split(s['command'])[1]).strip())
-                    game.rcon_say("^5" + str(line.split(s['command'])[1]).strip())
+                    game.rcon_say("^1%s" % line.split(s['command'])[1].strip())
+                    game.rcon_say("^2%s" % line.split(s['command'])[1].strip())
+                    game.rcon_say("^3%s" % line.split(s['command'])[1].strip())
+                    game.rcon_say("^5%s" % line.split(s['command'])[1].strip())
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !scream <text>")
 
@@ -996,7 +1006,7 @@ class LogParser(object):
                             game.rcon_tell(s['player_num'], "You cannot slap an admin")
                         else:
                             for _ in range(0, number):
-                                game.send_rcon("slap " + str(victim.get_player_num()))
+                                game.send_rcon("slap %d" % victim.get_player_num())
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !slap <name> [<amount>]")
 
@@ -1072,7 +1082,7 @@ class LogParser(object):
             # map - load given map
             elif s['command'] == '!map' and game.players[s['player_num']].get_admin_role() >= 80:
                 if line.split(s['command'])[1]:
-                    game.send_rcon('map ' + str(line.split(s['command'])[1]).strip())
+                    game.send_rcon('map %s' % line.split(s['command'])[1].strip())
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !map <ut4_name>")
 
@@ -1087,7 +1097,7 @@ class LogParser(object):
             # setnextmap - set the given map as nextmap
             elif s['command'] == '!setnextmap' and game.players[s['player_num']].get_admin_role() >= 80:
                 if line.split(s['command'])[1]:
-                    game.send_rcon('g_nextmap ' + str(line.split(s['command'])[1]).strip())
+                    game.send_rcon('g_nextmap %s' % line.split(s['command'])[1].strip())
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !setnextmap <ut4_name>")
 
@@ -1108,7 +1118,7 @@ class LogParser(object):
                         if victim.get_admin_role() >= game.players[s['player_num']].get_admin_role():
                             game.rcon_tell(s['player_num'], "You cannot kill an admin")
                         else:
-                            game.send_rcon("smite " + str(victim.get_player_num()))
+                            game.send_rcon("smite %d" % victim.get_player_num())
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !kill <name>")
 
@@ -1203,13 +1213,13 @@ class LogParser(object):
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !putgroup <name> <group>")
 
-            # banlist - display the last 4 entries of the banlist
+            # banlist - display the last 6 entries of the banlist
             elif s['command'] == '!banlist' and game.players[s['player_num']].get_admin_role() >= 80:
-                curs.execute("SELECT * FROM `ban_list` ORDER BY `id` DESC LIMIT 4")
+                curs.execute("SELECT * FROM `ban_list` ORDER BY `id` DESC LIMIT 6")
                 result = curs.fetchall()
                 msg = ''
-                if len(result) > 4:
-                    limit = 4
+                if len(result) > 6:
+                    limit = 6
                 elif len(result) == 0:
                     limit = 0
                 else:
@@ -1217,7 +1227,7 @@ class LogParser(object):
                 for item in range(limit):
                     msg += '[' + str(result[item][0]) + ']' + result[item][2] + ', '  # 0=ID, 2=Name
                 if not msg:
-                    msg = 'empty'
+                    msg = 'Currently no one is banned'
                 game.rcon_tell(s['player_num'], "^7Banlist: %s" % msg.rstrip(', '))
 
             # unban - unban a player from the database via ID
@@ -1551,7 +1561,7 @@ class Player(object):
         return self.name
 
     def get_aliases(self):
-        return ', '.join(self.aliases)
+        return ", ".join(self.aliases)
 
     def set_guid(self, guid):
         self.guid = guid
@@ -1753,7 +1763,7 @@ class Player(object):
             # ban duration multiplied by 3
             ban_duration = duration * 3
             self.ban(duration=ban_duration, reason=point_type)
-            game.rcon_say(self.name + " ^7banned for ^1" + str(ban_duration / 60) + " minutes ^7for too many warnings")
+            game.rcon_say("%s ^7banned for ^1%d minutes ^7for too many warnings" % (self.name, (ban_duration / 60)))
 
 # CTF Mode
     def capture_flag(self):
@@ -1811,7 +1821,10 @@ class Game(object):
         @param msg: The message to display in global chat
         @type  msg: String
         """
-        self.send_rcon('say %s' % msg)
+        # wrap long messages into shorter list elements
+        lines = textwrap.wrap(msg, 145)
+        for line in lines:
+            self.send_rcon('say ^3%s' % line)
 
     def rcon_tell(self, player_num, msg, pm_tag=True):
         """
@@ -1824,10 +1837,14 @@ class Game(object):
         @param pm_tag: Display '[pm]' (private message) in front of the message
         @type  pm_tag: bool
         """
-        if pm_tag:
-            self.send_rcon('tell %d ^4[pm] %s' % (player_num, msg))
-        else:
-            self.send_rcon('tell %d %s' % (player_num, msg))
+        lines = textwrap.wrap(msg, 135)
+        prefix = "^4[pm]"
+        for line in lines:
+            if pm_tag:
+                self.send_rcon('tell %d %s ^3%s' % (player_num, prefix, line))
+                prefix = ""
+            else:
+                self.send_rcon('tell %d ^3%s' % (player_num, line))
 
     def rcon_bigtext(self, msg):
         """
