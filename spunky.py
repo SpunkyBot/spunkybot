@@ -929,8 +929,8 @@ class LogParser(object):
                             duration_string = '1'
                         else:
                             reason_string = liste[1]
-                            duration_string = liste[2]
-                        if reason_string.isdigit():
+                            duration_string = liste[2].rstrip('hm')
+                        if reason_string.rstrip('hm').isdigit():
                             game.rcon_tell(s['player_num'], "^7You need to enter a reason: ^3!tempban <name> <reason> [<duration in hours>]")
                         else:
                             reason = str(reason_string) + ", ban by " + game.players[s['player_num']].get_name()
