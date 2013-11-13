@@ -1228,7 +1228,7 @@ class LogParser(object):
                     msg += '[' + str(result[item][0]) + ']' + result[item][2] + ', '  # 0=ID, 2=Name
                 if not msg:
                     msg = 'Currently no one is banned'
-                game.rcon_tell(s['player_num'], "^7Banlist: %s" % msg.rstrip(', '))
+                game.rcon_tell(s['player_num'], "^7Banlist: %s" % str(msg.rstrip(', ')))
 
             # unban - unban a player from the database via ID
             elif s['command'] == '!unban' and game.players[s['player_num']].get_admin_role() >= 80:
