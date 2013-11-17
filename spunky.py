@@ -629,7 +629,7 @@ class LogParser(object):
                     game.players[s['player_num']].register_user_db(role=1)
                     game.rcon_tell(s['player_num'], "%s ^7put in group User" % game.players[s['player_num']].get_name())
                 else:
-                    game.rcon_tell(s['player_num'], "%s ^7is already in group User" % game.players[s['player_num']].get_name())
+                    game.rcon_tell(s['player_num'], "%s ^7is already in a higher level group" % game.players[s['player_num']].get_name())
 
             # hs - display headshot counter
             elif s['command'] == '!hs':
