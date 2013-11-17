@@ -147,7 +147,7 @@ class LogParser(object):
     """
     log file parser
     """
-    def __init__(self, file_name, verbose_mode, tk_autokick, iamgod):
+    def __init__(self, file_name, verbose_mode, tk_autokick):
         """
         create a new instance of LogParser
 
@@ -157,8 +157,6 @@ class LogParser(object):
         @type  verbose_mode: String
         @param tk_autokick: Enable or disable autokick for team killing
         @type  tk_autokick: String
-        @param iamgod: Enable or disable option the get Head Admin
-        @type  iamgod: String
         """
         # hit zone support for UrT > 4.2.013
         self.hit_points = {0: "HEAD", 1: "HEAD", 2: "HELMET", 3: "TORSO", 4: "VEST", 5: "LEFT_ARM", 6: "RIGHT_ARM", 7: "GROIN", 8: "BUTT", 9: "LEFT_UPPER_LEG", 10: "RIGHT_UPPER_LEG", 11: "LEFT_LOWER_LEG", 12: "RIGHT_LOWER_LEG", 13: "LEFT_FOOT", 14: "RIGHT_FOOT"}
@@ -188,8 +186,9 @@ class LogParser(object):
         self.verbose = True if verbose_mode == '1' else False
         # enable/disable autokick for team killing
         self.tk_autokick = True if tk_autokick == '1' else False
-        # enable/disable option to get Head Admin
-        self.iamgod = True if iamgod == '1' else False
+        # enable/disable option to get Head Admin by checking existence of head admin in database
+        curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `admin_role` = 100")
+        self.iamgod = True if curs.fetchone()[0] < 1 else False
 
     def find_game_start(self):
         """
@@ -1285,6 +1284,7 @@ class LogParser(object):
                         conn.commit()
                         # overwrite admin role in game, no reconnect of player required
                         game.players[s['player_num']].set_admin_role(100)
+                    self.iamgod = False
                     game.rcon_tell(s['player_num'], "^7You are registered as ^6Head Admin")
 
     def handle_flag(self, line):
@@ -1968,7 +1968,7 @@ conn = sqlite3.connect('./data.sqlite')
 curs = conn.cursor()
 
 # create instance of LogParser
-LOGPARS = LogParser(CONFIG.get('server', 'log_file'), CONFIG.get('bot', 'verbose'), CONFIG.get('bot', 'teamkill_autokick'), CONFIG.get('bot', 'iamgod'))
+LOGPARS = LogParser(CONFIG.get('server', 'log_file'), CONFIG.get('bot', 'verbose'), CONFIG.get('bot', 'teamkill_autokick'))
 
 # load the GEO database and store it globally in interpreter memory
 GEOIP = PyGeoIP.Database('./lib/GeoIP.dat')

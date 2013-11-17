@@ -31,9 +31,7 @@ The code of the Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which 
 
 **_First start instruction:_**
 
-- Set in the config file `/conf/settings.conf` the value `iamgod=1`
-- Start the Bot, connect to your game server and enter in the global chat `!iamgod`. This will give you the admin level "Head Admin".
-- Afterwards set the value `iamgod=0` and restart the Bot (important step!)
+- Connect to your game server and enter in global chat `!iamgod` to get the admin level "Head Admin". This command is only once available.
 
 
 ### Bot Commands
