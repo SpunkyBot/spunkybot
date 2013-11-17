@@ -86,7 +86,7 @@ class TaskManager(object):
             for player in self.rcon_dispatcher.quake.players:
                 # if ping is too high, inform player and increase warn counter, Admins or higher levels will not get the warning
                 ping_value = player.ping
-                gameplayer = game.players[int(player.num)]
+                gameplayer = game.players[player.num]
                 if self.max_ping < ping_value < 999 and gameplayer.get_admin_role() < 40:
                     gameplayer.add_high_ping()
                     game.rcon_tell(player.num, "^1WARNING ^7[^3%d^7]: ^7Your ping is too high [^4%d^7]. The maximum allowed is %d." % (gameplayer.get_high_ping(), ping_value, self.max_ping), False)
@@ -503,7 +503,7 @@ class LogParser(object):
             hitter.set_all_hits()
 
             if hitpoint in self.hit_points:
-                if self.hit_points[hitpoint] == 'HEAD' or self.hit_points[int(hitpoint)] == 'HELMET':
+                if self.hit_points[hitpoint] == 'HEAD' or self.hit_points[hitpoint] == 'HELMET':
                     hitter.headshot()
                     player_color = "^1" if (hitter.get_team() == 1) else "^4"
                     hs_plural = " headshots" if hitter.get_headshots() > 1 else " headshot"
@@ -1424,7 +1424,7 @@ class Player(object):
         self.flags_returned = 0
         self.flag_carriers_killed = 0
         self.address = ip_address
-        self.team = int(team)
+        self.team = team
         self.team_kills = []
         self.time_joined = time.time()
         self.welcome_msg = True
@@ -1441,7 +1441,7 @@ class Player(object):
         values = (self.guid, self.address, now)
         curs.execute("SELECT COUNT(*) FROM `ban_list` WHERE (`guid` = ? OR `ip_address` = ?) AND `expires` > ?", values)
         if curs.fetchone()[0] > 0:
-            print("Player " + self.name + " BANNED - GUID: " + str(self.guid) + " - IP ADDRESS: " + str(self.address))
+            print("Player %s BANNED - GUID: %s - IP ADDRESS: %s" % (self.name, self.guid, self.address))
             game.send_rcon("%s ^1banned" % self.name)
             self.banned_player = True
 
@@ -1453,14 +1453,14 @@ class Player(object):
                 game.rcon_say("%s ^7connected from %s" % (name, info.country_name))
 
     def ban(self, duration=900, reason='tk'):
-        unix_expiration = int(duration) + time.time()
+        unix_expiration = duration + time.time()
         expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(unix_expiration))
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         values = (self.guid, self.prettyname, self.address, expire_date, timestamp, reason)
         curs.execute("INSERT INTO `ban_list` (`guid`,`name`,`ip_address`,`expires`,`timestamp`,`reason`) VALUES (?,?,?,?,?,?)", values)
         conn.commit()
         game.kick_player(self)
-        print("BAN: Player " + self.name + " banned for " + reason + ", duration (in sec.): " + str(duration))
+        print("BAN: Player %s banned for %s, duration (in sec.): %d" % (self.name, reason, duration))
 
     def reset(self):
         self.kills = 0
@@ -1748,8 +1748,7 @@ class Player(object):
                     game.rcon_tell(self.player_num, "^1For team killing you will get kicked!")
 
     def add_ban_point(self, point_type, duration):
-        point_type = str(point_type)
-        unix_expiration = int(duration) + time.time()
+        unix_expiration = duration + time.time()
         expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(unix_expiration))
         values = (self.guid, point_type, expire_date)
         # add ban_point to database
