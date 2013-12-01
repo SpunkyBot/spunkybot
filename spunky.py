@@ -410,7 +410,7 @@ class LogParser(object):
             if game.players[player_num].get_name() != name:
                 game.players[player_num].set_name(name)
             if challenge:
-                self.debug("Player number: " + str(player_num) + " \"" + name + "\" is challenging the server and has the guid of: " + guid)
+                self.debug("Player %d %s is challenging the server and has the guid %s" % (player_num, name, guid))
             else:
                 if 'name' in values and values['name'] != game.players[player_num].get_name():
                     game.players[player_num].set_name(values['name'])
@@ -445,7 +445,7 @@ class LogParser(object):
 
             if not(game.players[player_num].get_name() == name):
                 game.players[player_num].set_name(name)
-            self.debug("Player number: " + str(player_num) + " \"" + name + "\" is on the " + team + " team")
+            self.debug("Player %d %s is on the %s team" % (player_num, name, team))
 
     def handle_begin(self, line):
         """
@@ -457,13 +457,13 @@ class LogParser(object):
                 player = game.players[player_num]
                 # Welcome message for registered players
                 if player.get_registered_user() and player.get_welcome_msg():
-                    game.rcon_tell(player_num, "^7[^2Authed^7] Welcome back " + player.get_name() + ", you are ^2" + str(player.roles[player.get_admin_role()]) + "^7, last visit " + str(player.get_last_visit()) + ", you played " + str(player.get_num_played()) + " times", False)
+                    game.rcon_tell(player_num, "^7[^2Authed^7] Welcome back %s, you are ^2%s^7, last visit %s, you played %s times" % (player.get_name(), player.roles[player.get_admin_role()], str(player.get_last_visit()), player.get_num_played()), False)
                     # disable welcome message for next rounds
                     player.disable_welcome_msg()
             except KeyError:
                 return -1
             else:
-                self.debug("Player number: " + str(player_num) + " \"" + player.get_name() + "\" has entered the game")
+                self.debug("Player %d %s has entered the game" % (player_num, player.get_name()))
 
     def handle_disconnect(self, line):
         """
@@ -479,7 +479,7 @@ class LogParser(object):
             except KeyError:
                 return -1
             else:
-                self.debug("Player number: " + str(player_num) + " \"" + player.get_name() + "\" has left the game")
+                self.debug("Player %d %s has left the game" % (player_num, player.get_name()))
 
     def handle_hit(self, line):
         """
@@ -578,9 +578,9 @@ class LogParser(object):
                 elif victim.get_killing_streak() >= 5 and killer_name != victim_name and killer_name != 'World':
                     game.rcon_say(victim_color + victim_name + "'s ^7killing spree was ended by " + killer_color + killer_name + "!")
                 victim.die()
-                self.debug("Player number: " + str(killer_id) + " \"" + killer_name + "\" killed " + str(victim_id) + " \"" + victim_name + "\" with " + death_cause)
+                self.debug("Player %d %s killed %d %s with %s" % (killer_id, killer_name, victim_id, victim_name, death_cause))
             else:
-                self.debug("Player number: " + str(killer_id) + " \"" + killer_name + "\" has changed teams")
+                self.debug("Player %d %s has changed teams" % (killer_id, killer_name))
 
     def handle_say(self, line):
         """
@@ -613,7 +613,6 @@ class LogParser(object):
                 elif game.players[s['player_num']].get_admin_role() == 40:
                     game.rcon_tell(s['player_num'], "^7Admin commands:")
                     game.rcon_tell(s['player_num'], ", ".join(self.admin_cmds), False)
-                # help for full admins - additional commands
                 elif game.players[s['player_num']].get_admin_role() == 60:
                     game.rcon_tell(s['player_num'], "^7Full Admin commands:")
                     game.rcon_tell(s['player_num'], ", ".join(self.fulladmin_cmds), False)
@@ -859,7 +858,7 @@ class LogParser(object):
                         if victim.get_admin_role() >= game.players[s['player_num']].get_admin_role():
                             game.rcon_tell(s['player_num'], "You cannot nuke an admin")
                         else:
-                            game.send_rcon("nuke " + str(victim.get_player_num()))
+                            game.send_rcon("nuke %d" % victim.get_player_num())
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !nuke <name>")
 
@@ -1237,7 +1236,7 @@ class LogParser(object):
                         values = (int(arg),)
                         curs.execute("DELETE FROM `ban_list` WHERE `id` = ?", values)
                         conn.commit()
-                        game.rcon_tell(s['player_num'], "^7Player ID <%s> unbanned" % arg)
+                        game.rcon_tell(s['player_num'], "^7Player ID #%s unbanned" % arg)
                     else:
                         game.rcon_tell(s['player_num'], "^7Usage: !unban <ID>")
                 else:
@@ -1351,7 +1350,7 @@ class LogParser(object):
             for player in game.players.itervalues():
                 # display personal stats, stats for players in spec will not be displayed
                 if player.get_team() != 3:
-                    game.rcon_tell(player.get_player_num(), "^7Stats " + player.get_name() + ": ^7K ^2" + str(player.get_kills()) + " ^7D ^3" + str(player.get_deaths()) + " ^7HS ^1" + str(player.get_headshots()) + " ^7TK ^1" + str(player.get_team_killer()))
+                    game.rcon_tell(player.get_player_num(), "^7Stats %s: ^7K ^2%d ^7D ^3%d ^7HS ^1%d ^7TK ^1%d" % (player.get_name(), player.get_kills(), player.get_deaths(), player.get_headshots(), player.get_team_killer()))
 
     def explode_line2(self, line):
         """
@@ -1441,8 +1440,11 @@ class Player(object):
         values = (self.guid, self.address, now)
         curs.execute("SELECT COUNT(*) FROM `ban_list` WHERE (`guid` = ? OR `ip_address` = ?) AND `expires` > ?", values)
         if curs.fetchone()[0] > 0:
+            values = (self.guid,)
+            curs.execute("SELECT `id` FROM `ban_list` WHERE `guid` = ?", values)
+            result = curs.fetchone()
             print("Player %s BANNED - GUID: %s - IP ADDRESS: %s" % (self.name, self.guid, self.address))
-            game.send_rcon("%s ^1banned" % self.name)
+            game.send_rcon("%s ^1banned ^7(ID #%s)" % (self.name, result[0]))
             self.banned_player = True
 
         if not self.banned_player:
@@ -1494,7 +1496,7 @@ class Player(object):
         curs.execute("SELECT COUNT(*) FROM `player` WHERE `guid` = ?", values)
         if curs.fetchone()[0] < 1:
             values = (self.guid, self.prettyname, self.address, now, self.prettyname)
-            curs.execute("INSERT INTO `player` (`guid`,`name`,`ip_address`,`time_joined`, `aliases`) VALUES (?,?,?,?,?)", values)
+            curs.execute("INSERT INTO `player` (`guid`,`name`,`ip_address`,`time_joined`,`aliases`) VALUES (?,?,?,?,?)", values)
             conn.commit()
             self.aliases.append(self.prettyname)
         else:
@@ -1524,7 +1526,7 @@ class Player(object):
             self.registered_user = True
             # get DB DATA for XLRSTATS
             values = (self.guid,)
-            curs.execute("SELECT `last_played`, `num_played`, `kills`, `deaths`, `headshots`, `team_kills`, `team_death`, `max_kill_streak`,`suicides`, `admin_role` FROM `xlrstats` WHERE `guid` = ?", values)
+            curs.execute("SELECT `last_played`,`num_played`,`kills`,`deaths`,`headshots`,`team_kills`,`team_death`,`max_kill_streak`,`suicides`,`admin_role` FROM `xlrstats` WHERE `guid` = ?", values)
             result = curs.fetchone()
             self.last_visit = result[0]
             self.num_played = result[1]
