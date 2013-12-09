@@ -252,7 +252,7 @@ class LogParser(object):
         """
         parse the logfile and search for specific action
         """
-        inactive = set(['ClientConnect', 'sayteam', 'tell', 'saytell', 'Item', 'red', 'Flag Return', 'SurvivorWinner', 'Hotpotato', 'Warmup', 'Callvote', 'Vote', 'VotePassed', 'VoteFailed', 'Radio', 'score', 'InitAuth', 'AccountValidated', 'AccountRejected', 'AccountKick', 'InitRound'])
+        inactive = set(['ClientConnect', 'sayteam', 'tell', 'saytell', 'Item', 'red', 'Flag Return', 'SurvivorWinner', 'Hotpotato', 'Warmup', 'Callvote', 'Vote', 'VotePassed', 'VoteFailed', 'Radio', 'score', 'InitAuth', 'AccountValidated', 'AccountRejected', 'AccountKick', 'InitRound', 'ClientSpawn', 'FlagCaptureTime'])
         line = string[7:]
         tmp = line.split(":", 1)
         try:
