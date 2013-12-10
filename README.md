@@ -6,11 +6,21 @@ The code of the Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which 
 
 <a href='https://travis-ci.org/urthub/spunkybot'><img src='https://secure.travis-ci.org/urthub/spunkybot.png?branch=master'></a>
 
+## Features
+
+- Fast, lightweight and feature rich
+- Real Time game statistics
+- Several admin levels
+- Support of all RCON commands
+- No other software requirements
+- Runs 'out of the box' 
+
 ## Environment
+- Urban Terror 4.1.1 and 4.2.016
 - Python 2.6.x / 2.7.x
 - SQLite 3 database
-- Linux platform (tested on Debian Wheezy 32-bit and Squeeze 64-bit)
-- Urban Terror 4.1.1 / 4.2.015
+- Linux platform (tested on Debian 6 & 7 and CentOS 6)
+- Support of 32-bit and 64-bit Linux system 
 
 
 ## Resources
@@ -25,9 +35,10 @@ The code of the Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which 
 	- `seta g_logsync "1"`
 	- `seta g_loghits "1"`
 - The Spunky Bot settings are configured in the file `/conf/settings.conf`
-- In-game displayed rules are contained in the file `/conf/rules.conf`
+- In-game displayed rules/advertisements are contained in the file `/conf/rules.conf`
 	- If you do not want to display rules, set the value `show_rules=0` in the config file `/conf/settings.conf`
-- Run the bot: `python spunky.py`
+- Run the bot manually: `python spunky.py`
+- Or use the provided initscript to run the Spunky Bot as daemon
 
 **_First start instruction:_**
 
@@ -48,4 +59,4 @@ The Spunky Bot is released under the MIT License.
  - GeoIP: [pygeoip.py](https://github.com/urthub/pygeoip)
 	- The library has been extended with the list `GeoIP_country_name` to support full country names (e.g. Germany for country_code DE). This file is released under the MIT License.
 
-Urban Terror™ and FrozenSand™ are trademarks of 0870760 B.C. Ltd
+Urban Terror™ and FrozenSand™ are trademarks of 0870760 B.C. Ltd.
