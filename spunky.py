@@ -204,7 +204,7 @@ class LogParser(object):
         while not game_start:
             while lgf:
                 line = lgf.readline()
-                msg = re.search("(\d+:\d+)\s([A-Za-z]+\:)", line)
+                msg = re.search("(\d+:\d+)\s([A-Za-z]+:)", line)
                 if msg is not None and msg.group(2) == 'InitGame:':
                     game_start = True
                     if 'g_modversion\\4.1' in line:
@@ -252,7 +252,6 @@ class LogParser(object):
         """
         parse the logfile and search for specific action
         """
-        inactive = set(['ClientConnect', 'sayteam', 'tell', 'saytell', 'Item', 'red', 'Flag Return', 'SurvivorWinner', 'Hotpotato', 'Warmup', 'Callvote', 'Vote', 'VotePassed', 'VoteFailed', 'Radio', 'score', 'InitAuth', 'AccountValidated', 'AccountRejected', 'AccountKick', 'InitRound', 'ClientSpawn', 'FlagCaptureTime'])
         line = string[7:]
         tmp = line.split(":", 1)
         try:
@@ -280,20 +279,6 @@ class LogParser(object):
                     self.handle_flag(line)
                 elif tmp[0].lstrip() == 'Exit':
                     self.handle_awards()
-                elif tmp[0].lstrip() in inactive:
-                    self.handle_misc()
-                else:
-                    self.error("ERROR: Unknown log entry in parse_line(): " + repr(tmp))
-        except IndexError:
-            if '------' in tmp[0]:
-                self.handle_misc()
-            elif 'Session data initialised' in tmp[0]:
-                self.handle_misc()
-            elif 'Bomb' in tmp[0] or 'Pop' in tmp[0]:
-                self.handle_misc()
-            else:
-                if tmp[0] != '':
-                    self.error("IndexError in parse_line(): %s" % tmp)
         except Exception:
             return -1
 
@@ -400,11 +385,8 @@ class LogParser(object):
                 game.send_rcon("kick %d" % player_num)
 
             if not self.player_exists(player_num):
-                try:
-                    player = Player(player_num, address, guid, name)
-                    game.add_player(player)
-                except UnboundLocalError as error:
-                    self.error("UnboundLocalError in handle_userinfo(): %s - %s" % (error, error.message))
+                player = Player(player_num, address, guid, name)
+                game.add_player(player)
             if game.players[player_num].get_guid() != guid:
                 game.players[player_num].set_guid(guid)
             if game.players[player_num].get_name() != name:
@@ -453,17 +435,13 @@ class LogParser(object):
         """
         with players_lock:
             player_num = int(line[:2].strip())
-            try:
-                player = game.players[player_num]
-                # Welcome message for registered players
-                if player.get_registered_user() and player.get_welcome_msg():
-                    game.rcon_tell(player_num, "^7[^2Authed^7] Welcome back %s, you are ^2%s^7, last visit %s, you played %s times" % (player.get_name(), player.roles[player.get_admin_role()], str(player.get_last_visit()), player.get_num_played()), False)
-                    # disable welcome message for next rounds
-                    player.disable_welcome_msg()
-            except KeyError:
-                return -1
-            else:
-                self.debug("Player %d %s has entered the game" % (player_num, player.get_name()))
+            player = game.players[player_num]
+            # Welcome message for registered players
+            if player.get_registered_user() and player.get_welcome_msg():
+                game.rcon_tell(player_num, "^7[^2Authed^7] Welcome back %s, you are ^2%s^7, last visit %s, you played %s times" % (player.get_name(), player.roles[player.get_admin_role()], str(player.get_last_visit()), player.get_num_played()), False)
+                # disable welcome message for next rounds
+                player.disable_welcome_msg()
+            self.debug("Player %d %s has entered the game" % (player_num, player.get_name()))
 
     def handle_disconnect(self, line):
         """
@@ -471,15 +449,11 @@ class LogParser(object):
         """
         with players_lock:
             player_num = int(line[:2].strip())
-            try:
-                player = game.players[player_num]
-                player.save_info()
-                player.reset()
-                del game.players[player_num]
-            except KeyError:
-                return -1
-            else:
-                self.debug("Player %d %s has left the game" % (player_num, player.get_name()))
+            player = game.players[player_num]
+            player.save_info()
+            player.reset()
+            del game.players[player_num]
+            self.debug("Player %d %s has left the game" % (player_num, player.get_name()))
 
     def handle_hit(self, line):
         """
@@ -490,13 +464,10 @@ class LogParser(object):
             info = parts[0].split(" ")
             hitter_id = int(info[1])
             victim_id = int(info[0])
-            try:
-                hitter = game.players[hitter_id]
-                victim = game.players[victim_id]
-                hitter_name = hitter.get_name()
-                victim_name = victim.get_name()
-            except KeyError:
-                return -1
+            hitter = game.players[hitter_id]
+            victim = game.players[victim_id]
+            hitter_name = hitter.get_name()
+            victim_name = victim.get_name()
             hitpoint = int(info[2])
             hit_item = int(info[3])
             # increase summary of all hits
@@ -524,17 +495,11 @@ class LogParser(object):
             killer_id = int(info[0])
             victim_id = int(info[1])
             death_cause = self.death_cause[int(info[2])]
-            try:
-                victim = game.players[victim_id]
-            except KeyError:
-                return -1
+            victim = game.players[victim_id]
 
             # do not count non-client kills
             if k_name != "<non-client>":
-                try:
-                    killer = game.players[killer_id]
-                except KeyError:
-                    return -1
+                killer = game.players[killer_id]
             else:
                 # killed by WORLD
                 killer = game.players[1022]
@@ -712,9 +677,9 @@ class LogParser(object):
                     for player in game.players.itervalues():
                         if (arg.upper() in (player.get_name()).upper()) or arg == str(player.get_player_num()):
                             if player.get_player_num() != 1022:
-                                game.rcon_tell(s['player_num'], "Level ^3" + player.get_name() + " [^2" + str(player.get_admin_role()) + "^3]: ^7" + str(player.roles[player.get_admin_role()]))
+                                game.rcon_tell(s['player_num'], "Level ^3%s [^2%d^3]: ^7%s" % (player.get_name(), player.get_admin_role(), player.roles[player.get_admin_role()]))
                 else:
-                    game.rcon_tell(s['player_num'], "Level ^3" + game.players[s['player_num']].get_name() + " [^2" + str(game.players[s['player_num']].get_admin_role()) + "^3]: ^7" + str(game.players[s['player_num']].roles[game.players[s['player_num']].get_admin_role()]))
+                    game.rcon_tell(s['player_num'], "Level ^3%s [^2%d^3]: ^7%s" % (game.players[s['player_num']].get_name(), game.players[s['player_num']].get_admin_role(), game.players[s['player_num']].roles[game.players[s['player_num']].get_admin_role()]))
 
             # list - list all connected players
             elif s['command'] == '!list' and game.players[s['player_num']].get_admin_role() >= 20:
@@ -909,7 +874,7 @@ class LogParser(object):
                         if reason_string.rstrip('hm').isdigit():
                             game.rcon_tell(s['player_num'], "^7You need to enter a reason: ^3!tempban <name> <reason> [<duration in hours>]")
                         else:
-                            reason = str(reason_string) + ", ban by " + game.players[s['player_num']].get_name()
+                            reason = str(reason_string) + ", ban by %s" % game.players[s['player_num']].get_name()
                             if duration_string.isdigit():
                                 duration = int(duration_string) * 3600
                             else:
@@ -1008,7 +973,7 @@ class LogParser(object):
                         liste = arg.split(' ')
                         user = liste[0]
                         reason_string = ' '.join(liste[1:])
-                        reason = reason_string + ", ban by " + game.players[s['player_num']].get_name()
+                        reason = reason_string + ", ban by %s" % game.players[s['player_num']].get_name()
                         found, victim, msg = self.player_found(user)
                         if not found:
                             game.rcon_tell(s['player_num'], msg)
@@ -1076,7 +1041,7 @@ class LogParser(object):
                         liste = arg.split(' ')
                         user = liste[0]
                         reason_string = ' '.join(liste[1:])
-                        reason = reason_string + ", ban by " + game.players[s['player_num']].get_name()
+                        reason = reason_string + ", ban by %s" % game.players[s['player_num']].get_name()
                         found, victim, msg = self.player_found(user)
                         if not found:
                             game.rcon_tell(s['player_num'], msg)
@@ -1232,12 +1197,6 @@ class LogParser(object):
             elif action == '2:':
                 player.capture_flag()
 
-    def handle_misc(self):
-        """
-        dummy handler
-        """
-        return
-
     def handle_awards(self):
         """
         display awards and personal stats at the end of the round
@@ -1293,15 +1252,6 @@ class LogParser(object):
         except IndexError:
             array = {"player_num": None, "name": None, "command": None}
         return array
-
-    def error(self, msg):
-        """
-        error logging
-        """
-        err_log = open('./error.log', 'a+')
-        err_log.write(time.ctime() + "   ---   " + repr(msg) + "\n")
-        err_log.close()
-        print msg
 
     def debug(self, msg):
         """
