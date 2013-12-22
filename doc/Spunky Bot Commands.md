@@ -7,6 +7,12 @@
 - **help** - display all available commands
 	- Usage: `!help`
 	- Short: `!h`
+- **forgiveprev** - forgive last team kill
+	- Usage: `!forgiveprev`
+	- Short: `!fp`
+- **forgiveall** - forgive all team kills
+	- Usage: `!forgiveall`
+	- Short: `!fa`
 - **hs** - display headshot counter
 	- Usage: `!hs`
 - **register** - register yourself as a basic user
