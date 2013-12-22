@@ -164,7 +164,7 @@ class LogParser(object):
         self.death_cause = {1: "MOD_WATER", 5: "UT_MOD_TELEFRAG", 6: "MOD_FALLING", 7: "UT_MOD_SUICIDE", 9: "MOD_TRIGGER_HURT", 10: "MOD_CHANGE_TEAM", 12: "UT_MOD_KNIFE", 13: "UT_MOD_KNIFE_THROWN", 14: "UT_MOD_BERETTA", 15: "UT_MOD_KNIFE_DEAGLE", 16: "UT_MOD_SPAS", 17: "UT_MOD_UMP45", 18: "UT_MOD_MP5K", 19: "UT_MOD_LR300", 20: "UT_MOD_G36", 21: "UT_MOD_PSG1", 22: "UT_MOD_HK69", 23: "UT_MOD_BLED", 24: "UT_MOD_KICKED", 25: "UT_MOD_HEGRENADE", 28: "UT_MOD_SR8", 30: "UT_MOD_AK103", 31: "UT_MOD_SPLODED", 32: "UT_MOD_SLAPPED", 34: "UT_MOD_BOMBED", 35: "UT_MOD_NUKED", 36: "UT_MOD_NEGEV", 37: "UT_MOD_HK69_HIT", 38: "UT_MOD_M4", 39: "UT_MOD_GLOCK", 40: "UT_MOD_COLT1911", 41: "UT_MOD_MAC11", 42: "UT_MOD_FLAG"}
 
         # RCON commands for the different admin roles
-        self.user_cmds = ['hs', 'register', 'stats', 'teams', 'time', 'xlrstats']
+        self.user_cmds = ['forgiveall, forgiveprev', 'hs', 'register', 'stats', 'teams', 'time', 'xlrstats']
         self.mod_cmds = self.user_cmds + ['country', 'leveltest', 'list', 'mute', 'shuffleteams', 'warn']
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'force', 'kick', 'nuke', 'say', 'tempban', 'warnclear']
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'ci', 'scream', 'slap', 'veto']
@@ -510,8 +510,6 @@ class LogParser(object):
             # teamkill event - disabled for FFA and LMS, for all other game modes team kills are counted and punished
             if not self.ffa_lms_gametype:
                 if (victim.get_team() == killer.get_team() and victim.get_player_num() != killer.get_player_num()) and death_cause != "UT_MOD_BOMBED":
-                    if self.tk_autokick:
-                        game.send_rcon("%s ^1teamkilled ^7%s" % (killer_name, victim_name))
                     # increase team kill counter for killer and kick for too many team kills
                     killer.team_kill(victim, self.tk_autokick)
                     # increase team death counter for victim
@@ -577,7 +575,7 @@ class LogParser(object):
 
             if s['command'] == '!mapstats':
                 game.rcon_tell(s['player_num'], "^7" + str(game.players[s['player_num']].get_kills()) + " ^7kills - " + str(game.players[s['player_num']].get_deaths()) + " ^7deaths")
-                game.rcon_tell(s['player_num'], "^7" + str(game.players[s['player_num']].get_team_killer()) + " ^7teamkills")
+                game.rcon_tell(s['player_num'], "^7" + str(game.players[s['player_num']].get_team_kill_count()) + " ^7teamkills")
                 game.rcon_tell(s['player_num'], "^7" + str(game.players[s['player_num']].get_killing_streak()) + " ^7current kill streak")
                 game.rcon_tell(s['player_num'], "^7" + str(game.players[s['player_num']].get_all_hits()) + " ^7total hits - " + str(game.players[s['player_num']].get_headshots()) + " ^7headshots")
                 if self.ctf_gametype:
@@ -632,7 +630,7 @@ class LogParser(object):
                     ratio = 1.0
                 else:
                     ratio = round(float(game.players[s['player_num']].get_kills()) / float(game.players[s['player_num']].get_deaths()), 2)
-                game.rcon_tell(s['player_num'], "^7Stats " + game.players[s['player_num']].get_name() + ": ^7K ^2" + str(game.players[s['player_num']].get_kills()) + " ^7D ^3" + str(game.players[s['player_num']].get_deaths()) + " ^7TK ^1" + str(game.players[s['player_num']].get_team_killer()) + " ^7Ratio ^5" + str(ratio) + " ^7HS ^2" + str(game.players[s['player_num']].get_headshots()))
+                game.rcon_tell(s['player_num'], "^7Stats " + game.players[s['player_num']].get_name() + ": ^7K ^2" + str(game.players[s['player_num']].get_kills()) + " ^7D ^3" + str(game.players[s['player_num']].get_deaths()) + " ^7TK ^1" + str(game.players[s['player_num']].get_team_kill_count()) + " ^7Ratio ^5" + str(ratio) + " ^7HS ^2" + str(game.players[s['player_num']].get_headshots()))
 
             # xlrstats - display full player stats
             elif s['command'] == '!xlrstats':
@@ -657,6 +655,35 @@ class LogParser(object):
                         game.rcon_tell(s['player_num'], "^7XLR Stats " + game.players[s['player_num']].get_name() + ": ^7K ^2" + str(game.players[s['player_num']].get_xlr_kills()) + " ^7D ^3" + str(game.players[s['player_num']].get_xlr_deaths()) + " ^7TK ^1" + str(game.players[s['player_num']].get_xlr_tks()) + " ^7Ratio ^5" + str(ratio) + " ^7HS ^2" + str(game.players[s['player_num']].get_xlr_headshots()))
                     else:
                         game.rcon_tell(s['player_num'], "^7You need to ^2!register ^7first")
+
+            # forgive last team kill
+            elif s['command'] == '!forgiveprev' or s['command'] == '!fp':
+                victim = game.players[s['player_num']]
+                if victim.get_killed_me():
+                    forgive_player_num = victim.get_killed_me()[-1]
+                    forgive_player = game.players[forgive_player_num]
+                    victim.clear_tk(forgive_player_num)
+                    forgive_player.clear_killed_me(victim.get_player_num())
+                    game.rcon_say("^7%s has forgiven %s's attack" % (victim.get_name(), forgive_player.get_name()))
+                else:
+                    game.rcon_tell(s['player_num'], "No one to forgive")
+
+            # forgive all team kills
+            elif s['command'] == '!forgiveall' or s['command'] == '!fa':
+                victim = game.players[s['player_num']]
+                msg = ''
+                if victim.get_killed_me():
+                    all_forgive_player_num_list = victim.get_killed_me()
+                    forgive_player_num_list = list(set(all_forgive_player_num_list))
+                    victim.clear_all_tk()
+                    for forgive_player_num in forgive_player_num_list:
+                        forgive_player = game.players[forgive_player_num]
+                        forgive_player.clear_killed_me(victim.get_player_num())
+                        msg += '%s, ' % forgive_player.get_name()
+                if msg:
+                    game.rcon_say("^7%s has forgiven: %s" % (victim.get_name(), msg.rstrip(', ')))
+                else:
+                    game.rcon_tell(s['player_num'], "No one to forgive")
 
 ## mod level 20
             # country
@@ -1239,7 +1266,7 @@ class LogParser(object):
             for player in game.players.itervalues():
                 # display personal stats, stats for players in spec will not be displayed
                 if player.get_team() != 3:
-                    game.rcon_tell(player.get_player_num(), "^7Stats %s: ^7K ^2%d ^7D ^3%d ^7HS ^1%d ^7TK ^1%d" % (player.get_name(), player.get_kills(), player.get_deaths(), player.get_headshots(), player.get_team_killer()))
+                    game.rcon_tell(player.get_player_num(), "^7Stats %s: ^7K ^2%d ^7D ^3%d ^7HS ^1%d ^7TK ^1%d" % (player.get_name(), player.get_kills(), player.get_deaths(), player.get_headshots(), player.get_team_kill_count()))
 
     def explode_line2(self, line):
         """
@@ -1292,10 +1319,11 @@ class Player(object):
         self.head_shots = 0
         self.xlr_head_shots = 0
         self.all_hits = 0
-        self.kill_mate = 0
-        self.xlr_kill_mate = 0
+        self.tk_count = 0
+        self.xlr_tk_count = 0
         self.xlr_team_death = 0
-        self.tk_mate_names = []
+        self.tk_victim_names = []
+        self.tk_killer_names = []
         self.high_ping_count = 0
         self.spec_warn_count = 0
         self.warn_counter = 0
@@ -1304,7 +1332,6 @@ class Player(object):
         self.flag_carriers_killed = 0
         self.address = ip_address
         self.team = team
-        self.team_kills = []
         self.time_joined = time.time()
         self.welcome_msg = True
         self.country = None
@@ -1351,13 +1378,13 @@ class Player(object):
         self.deaths = 0
         self.head_shots = 0
         self.all_hits = 0
-        self.kill_mate = 0
-        self.tk_mate_names = []
+        self.tk_count = 0
+        self.tk_victim_names = []
+        self.tk_killer_names = []
         self.warn_counter = 0
         self.flags_captured = 0
         self.flags_returned = 0
         self.flag_carriers_killed = 0
-        self.team_kills = []
 
     def save_info(self):
         if self.registered_user:
@@ -1365,7 +1392,7 @@ class Player(object):
                 ratio = 1.0
             else:
                 ratio = round(float(self.xlr_kills) / float(self.xlr_deaths), 2)
-            values = (self.xlr_kills, self.xlr_deaths, self.xlr_head_shots, self.xlr_kill_mate, self.xlr_team_death, self.xlr_killing_streak, self.xlr_suicide, ratio, self.guid)
+            values = (self.xlr_kills, self.xlr_deaths, self.xlr_head_shots, self.xlr_tk_count, self.xlr_team_death, self.xlr_killing_streak, self.xlr_suicide, ratio, self.guid)
             curs.execute("UPDATE `xlrstats` SET `kills` = ?,`deaths` = ?,`headshots` = ?,`team_kills` = ?,`team_death` = ?,`max_kill_streak` = ?,`suicides` = ?,`rounds` = `rounds` + 1,`ratio` = ? WHERE `guid` = ?", values)
             conn.commit()
 
@@ -1413,7 +1440,7 @@ class Player(object):
             self.xlr_kills = result[2]
             self.xlr_deaths = result[3]
             self.xlr_head_shots = result[4]
-            self.xlr_kill_mate = result[5]
+            self.xlr_tk_count = result[5]
             self.xlr_team_death = result[6]
             self.xlr_killing_streak = result[7]
             self.xlr_suicide = result[8]
@@ -1548,10 +1575,30 @@ class Player(object):
         return self.killing_streak
 
     def get_xlr_tks(self):
-        return self.xlr_kill_mate
+        return self.xlr_tk_count
 
-    def get_team_killer(self):
-        return self.kill_mate
+    def get_team_kill_count(self):
+        return self.tk_count
+
+    def add_killed_me(self, killer):
+        self.tk_killer_names.append(killer)
+
+    def get_killed_me(self):
+        return self.tk_killer_names
+
+    def clear_killed_me(self, victim):
+        while self.tk_victim_names.count(victim) > 0:
+            self.tk_victim_names.remove(victim)
+
+    def add_tk_victims(self, victim):
+        self.tk_victim_names.append(victim)
+
+    def clear_tk(self, killer):
+        while self.tk_killer_names.count(killer) > 0:
+            self.tk_killer_names.remove(killer)
+
+    def clear_all_tk(self):
+        self.tk_killer_names = []
 
     def add_high_ping(self):
         self.high_ping_count += 1
@@ -1580,8 +1627,8 @@ class Player(object):
     def clear_warning(self):
         self.warn_counter = 0
         self.spec_warn_count = 0
-        self.team_kills = []
-        self.tk_mate_names = []
+        self.tk_victim_names = []
+        self.tk_killer_names = []
         # clear ban_points
         now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         values = (self.guid, now)
@@ -1597,37 +1644,28 @@ class Player(object):
 
     def team_kill(self, victim, autokick=True):
         # increase teamkill counter
-        self.kill_mate += 1
-        self.xlr_kill_mate += 1
-
+        self.tk_count += 1
+        self.xlr_tk_count += 1
         # Regular and higher will not get punished
         if self.admin_role < 2 and autokick:
-            # list of names of TK victims
-            self.tk_mate_names.append(victim)
-            # append timestamp of last TK
-            self.team_kills.append(time.time())
-            # ban player with too many team kills (min value: 4)
-            number_of_max_tk = 5
-            # check number of TK entries
-            if len(self.team_kills) >= number_of_max_tk:
-                tks = self.team_kills[len(self.team_kills) - number_of_max_tk]
-                if tks > time.time() - 130:
-                    # add TK ban points - 20 minutes
-                    self.add_ban_point('tk, auto-kick', 1200)
-                    game.kick_player(self)
-                    game.rcon_say("^7Player ^3%s ^7kicked for team killing" % self.name)
-                    print("KICK: TK autokick for %s" % self.name)
-            # slap player for team killing
-            elif len(self.team_kills) >= (number_of_max_tk - 1):
-                tks = self.team_kills[len(self.team_kills) - (number_of_max_tk - 1)]
-                if tks > time.time() - 130:
-                    game.send_rcon('slap %d' % self.player_num)
-                    game.rcon_say("^1For team killing you will get kicked!")
-            # warn player for team killing
-            elif len(self.team_kills) >= (number_of_max_tk - 3):
-                tks = self.team_kills[len(self.team_kills) - (number_of_max_tk - 3)]
-                if tks > time.time() - 130:
-                    game.rcon_tell(self.player_num, "^1For team killing you will get kicked!")
+            # list of players of TK victim
+            self.add_tk_victims(victim.get_player_num())
+            # list of players who killed victim
+            victim.add_killed_me(self.player_num)
+            game.rcon_tell(self.player_num, "^7Do not attack teammates, you ^1killed ^7%s" % victim.get_name())
+            game.rcon_tell(victim.get_player_num(), "^7Type ^3!fp ^7to forgive ^3%s" % self.name)
+            if len(self.tk_victim_names) >= 5:
+                game.rcon_say("^7Player ^3%s ^7kicked for team killing" % self.name)
+                # add TK ban points - 15 minutes
+                self.add_ban_point('tk, auto-kick', 900)
+                game.kick_player(self)
+                print("KICK: TK autokick for %s" % self.name)
+            elif len(self.tk_victim_names) == 2:
+                game.rcon_tell(self.player_num, "^1WARNING ^7[^31^7]: ^7For team killing you will get kicked")
+            elif len(self.tk_victim_names) == 3:
+                game.rcon_tell(self.player_num, "^1WARNING ^7[^32^7]: ^7For team killing you will get kicked")
+            elif len(self.tk_victim_names) == 4:
+                game.rcon_tell(self.player_num, "^1WARNING ^7[^33^7]: ^7For team killing you will get kicked")
 
     def add_ban_point(self, point_type, duration):
         unix_expiration = duration + time.time()
