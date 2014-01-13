@@ -1,10 +1,13 @@
 """
 Library for Spunky Bot
-http://urthub.github.io/spunkybot
+http://www.spunkybot.de
 Author: Alexander Kress
 
 This program is released under the MIT License.
 """
+
+__version__ = '1.0.0'
+
 
 ### IMPORTS
 import time
