@@ -4,14 +4,15 @@
 Its purpose is to administrate an [Urban Terror](http://www.urbanterror.info) 4.1 / 4.2 server and provide statistical data for players.
 The code of the Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was released under the Beerware License.
 
-<a href='https://travis-ci.org/urthub/spunkybot'><img src='https://secure.travis-ci.org/urthub/spunkybot.png?branch=master'></a>
+[![Build Status](https://travis-ci.org/urthub/spunkybot.png?branch=master)](https://travis-ci.org/urthub/spunkybot)
+
 
 ## Features
 
-- Fast, lightweight and feature rich
+- Lightweight and fast
 - Real Time game statistics
 - Different user groups and levels
-- Support of all RCON commands
+- Supports all RCON commands
 - Supports temporary and permanent bans
 - No other software requirements
 - Runs 'out of the box' 
@@ -28,7 +29,7 @@ The code of the Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which 
 * [Documentation](https://github.com/urthub/spunkybot/wiki)
 * [Bug Tracker](https://github.com/urthub/spunkybot/issues)
 * [Code](https://github.com/urthub/spunkybot)
-* [Homepage](http://urthub.github.io/spunkybot/)
+* [Homepage](http://www.spunkybot.de)
 
 
 ## Configuration
@@ -43,7 +44,7 @@ The code of the Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which 
 
 **_First start instruction:_**
 
-- Connect to your game server and enter in global chat `!iamgod` to get the admin level "Head Admin". This command is only once available.
+- Connect to your game server and type `!iamgod` in global chat to get the admin level "Head Admin". This command is only once available.
 
 
 ### Bot Commands
