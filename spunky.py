@@ -1,6 +1,6 @@
 """
 Spunky Bot - Automated game server bot
-http://urthub.github.io/spunkybot
+http://www.spunkybot.de
 Author: Alexander Kress
 
 This program is released under the MIT License. See LICENSE for more details.
@@ -18,6 +18,9 @@ Modify the UrT server config as follows:
 Modify the files '/conf/settings.conf' and '/conf/rules.conf'
 Run the bot: python spunky.py
 """
+
+__version__ = '1.0.0'
+
 
 ### IMPORTS
 import re
@@ -507,19 +510,23 @@ class LogParser(object):
             killer_name = killer.get_name()
             victim_name = victim.get_name()
 
+            tk_event = False
+
             # teamkill event - disabled for FFA and LMS, for all other game modes team kills are counted and punished
             if not self.ffa_lms_gametype:
-                if (victim.get_team() == killer.get_team() and victim.get_player_num() != killer.get_player_num()) and death_cause != "UT_MOD_BOMBED":
+                if (victim.get_team() == killer.get_team() and victim_id != killer_id) and death_cause != "UT_MOD_BOMBED":
                     # increase team kill counter for killer and kick for too many team kills
                     killer.team_kill(victim, self.tk_autokick)
+                    tk_event = True
                     # increase team death counter for victim
                     victim.team_death()
 
             # suicide counter
-            if death_cause == 'UT_MOD_SUICIDE' or death_cause == 'MOD_FALLING' or death_cause == 'MOD_WATER' or death_cause == 'UT_MOD_SPLODED' or (killer.get_player_num() == victim.get_player_num() and (death_cause == 'UT_MOD_HEGRENADE' or death_cause == 'UT_MOD_HK69' or death_cause == 'UT_MOD_NUKED' or death_cause == 'UT_MOD_SLAPPED')):
+            if death_cause == 'UT_MOD_SUICIDE' or death_cause == 'MOD_FALLING' or death_cause == 'MOD_WATER' or death_cause == 'UT_MOD_SPLODED' or (killer_id == victim_id and (death_cause == 'UT_MOD_HEGRENADE' or death_cause == 'UT_MOD_HK69' or death_cause == 'UT_MOD_NUKED' or death_cause == 'UT_MOD_SLAPPED' or death_cause == 'UT_MOD_BOMBED')):
                 killer.suicide()
                 victim.die()
-            elif int(info[2]) != 10:  # 10: MOD_CHANGE_TEAM
+            # kill counter
+            elif not tk_event and int(info[2]) != 10:  # 10: MOD_CHANGE_TEAM
                 killer.kill()
                 killer_color = "^1" if (killer.get_team() == 1) else "^4"
                 if killer.get_killing_streak() == 5 and killer_id != 1022:
