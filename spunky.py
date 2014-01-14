@@ -170,7 +170,7 @@ class LogParser(object):
         self.user_cmds = ['forgiveall, forgiveprev', 'hs', 'register', 'stats', 'teams', 'time', 'xlrstats']
         self.mod_cmds = self.user_cmds + ['country', 'leveltest', 'list', 'mute', 'shuffleteams', 'warn']
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'force', 'kick', 'nuke', 'say', 'tempban', 'warnclear']
-        self.fulladmin_cmds = self.admin_cmds + ['ban', 'ci', 'scream', 'slap', 'swap', 'veto']
+        self.fulladmin_cmds = self.admin_cmds + ['ban', 'ci', 'scream', 'slap', 'swap', 'version', 'veto']
         self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'map', 'maprestart', 'permban', 'putgroup', 'setnextmap', 'unban', 'ungroup']
 
         # alphabetic sort of the commands
@@ -998,6 +998,10 @@ class LogParser(object):
                         game.rcon_tell(s['player_num'], "^7Usage: !swap <name1> <name2>")
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !swap <name1> <name2>")
+
+            # version - display the version of the bot
+            elif s['command'] == '!version' and game.players[s['player_num']].get_admin_role() >= 60:
+                game.rcon_tell(s['player_num'], "^7Spunky Bot ^2v%s" % __version__)
 
             # veto - stop voting process
             elif s['command'] == '!veto' and game.players[s['player_num']].get_admin_role() >= 60:
