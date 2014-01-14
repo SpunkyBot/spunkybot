@@ -87,6 +87,8 @@
 	- Default amount: 1
 	- Max amount: 10
 	- Alternative: `!spank <name> [<amount>]`
+- **swap** - swap teams for player A and B (if in different teams)
+	- Usage: `!swap <playerA> <playerB>`
 - **veto** - stop voting process
 	- Usage: `!veto`
 - **ci** - kick player with connection interrupt

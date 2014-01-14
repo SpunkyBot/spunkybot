@@ -170,7 +170,7 @@ class LogParser(object):
         self.user_cmds = ['forgiveall, forgiveprev', 'hs', 'register', 'stats', 'teams', 'time', 'xlrstats']
         self.mod_cmds = self.user_cmds + ['country', 'leveltest', 'list', 'mute', 'shuffleteams', 'warn']
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'force', 'kick', 'nuke', 'say', 'tempban', 'warnclear']
-        self.fulladmin_cmds = self.admin_cmds + ['ban', 'ci', 'scream', 'slap', 'veto']
+        self.fulladmin_cmds = self.admin_cmds + ['ban', 'ci', 'scream', 'slap', 'swap', 'veto']
         self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'map', 'maprestart', 'permban', 'putgroup', 'setnextmap', 'unban', 'ungroup']
 
         # alphabetic sort of the commands
@@ -973,6 +973,32 @@ class LogParser(object):
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !slap <name> [<amount>]")
 
+            # swap - swap teams for player 1 and 2 (if in different teams)
+            elif s['command'] == '!swap' and game.players[s['player_num']].get_admin_role() >= 60 and not self.ffa_lms_gametype:
+                if line.split(s['command'])[1]:
+                    arg = str(line.split(s['command'])[1]).strip()
+                    if ' ' in arg:
+                        player1 = arg.split(' ')[0]
+                        player2 = arg.split(' ')[1]
+                        found1, victim1, _ = self.player_found(player1)
+                        found2, victim2, _ = self.player_found(player2)
+                        if not found1 or not found2:
+                            game.rcon_tell(s['player_num'], 'Player not found')
+                        else:
+                            team1 = victim1.get_team()
+                            team2 = victim2.get_team()
+                            if team1 == team2:
+                                game.rcon_tell(s['player_num'], "^7Cannot swap, both players are in the same team")
+                            else:
+                                game.rcon_forceteam(victim1.get_player_num(), Player.teams[3])
+                                game.rcon_forceteam(victim2.get_player_num(), Player.teams[team1])
+                                game.rcon_forceteam(victim1.get_player_num(), Player.teams[team2])
+                                game.rcon_say('^7Swapped player ^3%s ^7with ^3%s' % (victim1.get_name(), victim2.get_name()))
+                    else:
+                        game.rcon_tell(s['player_num'], "^7Usage: !swap <name1> <name2>")
+                else:
+                    game.rcon_tell(s['player_num'], "^7Usage: !swap <name1> <name2>")
+
             # veto - stop voting process
             elif s['command'] == '!veto' and game.players[s['player_num']].get_admin_role() >= 60:
                 game.send_rcon('veto')
@@ -1300,7 +1326,7 @@ class Player(object):
     """
     Player class
     """
-    teams = {0: "green", 1: "red", 2: "blue", 3: "spectators"}
+    teams = {0: "green", 1: "red", 2: "blue", 3: "spectator"}
     roles = {0: "Guest", 1: "User", 2: "Regular", 20: "Moderator", 40: "Admin", 60: "Full Admin", 80: "Senior Admin", 100: "Head Admin"}
 
     def __init__(self, player_num, ip_address, guid, name, team=0):
