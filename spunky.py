@@ -821,7 +821,8 @@ class LogParser(object):
                         team = arg.split(' ')[1]
                         team_dict = {'red': 'red', 'r': 'red', 're': 'red',
                                      'blue': 'blue', 'b': 'blue', 'bl': 'blue', 'blu': 'blue',
-                                     'spec': 'spectator', 'spectator': 'spectator', 's': 'spectator', 'sp': 'spectator', 'spe': 'spectator'}
+                                     'spec': 'spectator', 'spectator': 'spectator', 's': 'spectator', 'sp': 'spectator', 'spe': 'spectator',
+                                     'green': 'green'}
                         found, victim, msg = self.player_found(user)
                         if not found:
                             game.rcon_tell(s['player_num'], msg)
