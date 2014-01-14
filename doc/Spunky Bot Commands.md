@@ -1,6 +1,6 @@
 # Spunky Bot
 
-## Admin Levels and Rights
+## Admin Levels and Bot Commands
 
 ### Guest [0]
 
@@ -89,6 +89,8 @@
 	- Alternative: `!spank <name> [<amount>]`
 - **swap** - swap teams for player A and B (if in different teams)
 	- Usage: `!swap <playerA> <playerB>`
+- **version** - display the version of the bot
+	- Usage: `!version`
 - **veto** - stop voting process
 	- Usage: `!veto`
 - **ci** - kick player with connection interrupt
