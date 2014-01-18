@@ -51,6 +51,13 @@ class TaskManager(object):
     def __init__(self, frequency, max_ping, rcon_dispatcher):
         """
         create a new instance of TaskManager
+
+        @param frequency: Interval for checking ping, warnings and spectators
+        @type  frequency: Integer
+        @param max_ping: Maximum allowed ping
+        @type  max_ping: Integer
+        @param rcon_dispatcher: The RCON instance
+        @type  rcon_dispatcher: Instance
         """
         self.frequency = frequency
         self.max_ping = max_ping
@@ -92,7 +99,7 @@ class TaskManager(object):
                 gameplayer = game.players[player.num]
                 if self.max_ping < ping_value < 999 and gameplayer.get_admin_role() < 40:
                     gameplayer.add_high_ping()
-                    game.rcon_tell(player.num, "^1WARNING ^7[^3%d^7]: ^7Your ping is too high [^4%d^7]. The maximum allowed is %d." % (gameplayer.get_high_ping(), ping_value, self.max_ping), False)
+                    game.rcon_tell(player.num, "^1WARNING ^7[^3%d^7]: ^7Your ping is too high [^4%d^7]. The maximum allowed ping is %d." % (gameplayer.get_high_ping(), ping_value, self.max_ping), False)
                 else:
                     gameplayer.clear_high_ping()
 
@@ -619,7 +626,11 @@ class LogParser(object):
 
             # hs - display headshot counter
             elif s['command'] == '!hs':
-                game.rcon_tell(s['player_num'], "^7%d headshots" % game.players[s['player_num']].get_headshots())
+                hs_count = game.players[s['player_num']].get_headshots()
+                if hs_count > 0:
+                    game.rcon_tell(s['player_num'], "^7You made ^2%d ^7headshot%s" % (hs_count, 's' if hs_count > 1 else ''))
+                else:
+                    game.rcon_tell(s['player_num'], "^7You made no headshot")
 
             # time - display the servers current time
             elif s['command'] == '!time':
