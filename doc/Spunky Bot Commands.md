@@ -109,6 +109,8 @@
 	- Usage: `!kill <name>`
 - **map** - load given map
 	- Usage: `!map <ut4_name>`
+- **maps** - display all available maps
+	- Usage: `!maps
 - **maprestart** - restart the map
 	- Usage: `!maprestart`
 - **cyclemap** - start next map in rotation

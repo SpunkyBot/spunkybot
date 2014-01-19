@@ -178,7 +178,7 @@ class LogParser(object):
         self.mod_cmds = self.user_cmds + ['country', 'leveltest', 'list', 'mute', 'shuffleteams', 'warn']
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'force', 'kick', 'nuke', 'say', 'tempban', 'warnclear']
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'ci', 'scream', 'slap', 'swap', 'version', 'veto']
-        self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'map', 'maprestart', 'permban', 'putgroup', 'setnextmap', 'unban', 'ungroup']
+        self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'map', 'maps', 'maprestart', 'permban', 'putgroup', 'setnextmap', 'unban', 'ungroup']
 
         # alphabetic sort of the commands
         self.mod_cmds.sort()
@@ -1079,6 +1079,9 @@ class LogParser(object):
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !map <ut4_name>")
 
+            elif s['command'] == '!maps' and game.players[s['player_num']].get_admin_role() >= 80:
+                game.rcon_tell(s['player_num'], "^7Available Maps: ^3%s" % ', '.join(game.get_all_maps()))
+
             # maprestart - restart the map
             elif s['command'] == '!maprestart' and game.players[s['player_num']].get_admin_role() >= 80:
                 game.send_rcon('restart')
@@ -1766,6 +1769,7 @@ class Game(object):
         """
         create a new instance of Game
         """
+        self.all_maps_list = []
         self.rcon_queue = Queue()
         self.players = {}
         self.live = False
@@ -1785,6 +1789,17 @@ class Game(object):
         with self.rcon_lock:
             if self.live:
                 self.rcon_handle.push(command)
+
+    def get_rcon_output(self, value):
+        """
+        get console output of RCON command
+
+        @param value: RCON value
+        @type  value: String
+        """
+        with self.rcon_lock:
+            if self.live:
+                return self.rcon_handle.get_rcon_output(value)
 
     def rcon_say(self, msg):
         """
@@ -1854,6 +1869,25 @@ class Game(object):
         """
         self.live = True
         self.rcon_handle.go_live()
+        self.set_all_maps()
+
+    def set_all_maps(self):
+        """
+        set a list of all available maps
+        """
+        all_maps = self.get_rcon_output("dir map bsp")[1].split()
+        all_maps.sort()
+        output = []
+        for maps in all_maps:
+            if maps.startswith("/"):
+                output.append(maps.replace("/", "").replace(".bsp", ""))
+        self.all_maps_list = output
+
+    def get_all_maps(self):
+        """
+        get a list of all available maps
+        """
+        return self.all_maps_list
 
     def add_player(self, player):
         """
