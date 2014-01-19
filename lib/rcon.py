@@ -92,7 +92,7 @@ class Rcon(object):
         """
         if self.live:
             with self.rcon_lock:
-                return self.quake.rcon(value)[1].split().split(':')[1].split('^7')[0].lstrip('"')
+                return self.quake.rcon(value)[1].split(':')[1].split('^7')[0].lstrip('"')
 
     def process(self):
         """
