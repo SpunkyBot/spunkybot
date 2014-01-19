@@ -1997,11 +1997,13 @@ class Game(object):
 
     def new_game(self):
         """
-        set-up a new game, set gravity according to config file
+        set-up a new game
         """
-        gravity = CONFIG.get('bot', 'gravity')
         self.rcon_handle.clear()
-        self.rcon_handle.push("set g_gravity %s" % gravity)
+        ## Example: set g_gravity according to the value in the config file
+        # uncomment the following 2 lines to enable this customization:
+        # gravity = CONFIG.get('custom', 'gravity')
+        # self.rcon_handle.push("set g_gravity %s" % gravity)
 
 
 ### Main ###
