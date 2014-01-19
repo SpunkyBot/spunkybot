@@ -651,8 +651,12 @@ class LogParser(object):
                     game.rcon_tell(s['player_num'], "^7You made no headshot")
 
             # time - display the servers current time
-            elif s['command'] == '!time':
-                game.rcon_say("^7%s CET" % time.strftime("%H:%M", time.localtime(time.time())))
+            elif s['command'] == '!time' or s['command'] == '@time':
+                msg = "^7%s CET" % time.strftime("%H:%M", time.localtime(time.time()))
+                if s['command'].startswith('@'):
+                    game.rcon_say(msg)
+                else:
+                    game.rcon_tell(s['player_num'], msg)
 
             # teams - balance teams
             elif s['command'] == '!teams' and not self.ffa_lms_gametype:
@@ -723,24 +727,30 @@ class LogParser(object):
 
 ## mod level 20
             # country
-            elif s['command'] == '!country' and game.players[s['player_num']].get_admin_role() >= 20:
+            elif (s['command'] == '!country' or s['command'] == '@country') and game.players[s['player_num']].get_admin_role() >= 20:
                 if line.split(s['command'])[1]:
-                    arg = str(line.split(s['command'])[1]).strip()
-                    for player in game.players.itervalues():
-                        if (arg.upper() in (player.get_name()).upper()) or arg == str(player.get_player_num()):
-                            if player.get_player_num() != 1022:
-                                game.rcon_tell(s['player_num'], "Country ^3%s: ^7%s" % (player.get_name(), player.get_country()))
+                    user = str(line.split(s['command'])[1]).strip()
+                    found, victim, msg = self.player_found(user)
+                    if not found:
+                        game.rcon_tell(s['player_num'], msg)
+                    else:
+                        msg = "Country ^3%s: ^7%s" % (victim.get_name(), victim.get_country())
+                        if s['command'].startswith('@'):
+                            game.rcon_say(msg)
+                        else:
+                            game.rcon_tell(s['player_num'], msg)
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !country <name>")
 
             # leveltest
             elif (s['command'] == '!leveltest' or s['command'] == '!lt') and game.players[s['player_num']].get_admin_role() >= 20:
                 if line.split(s['command'])[1]:
-                    arg = str(line.split(s['command'])[1]).strip()
-                    for player in game.players.itervalues():
-                        if (arg.upper() in (player.get_name()).upper()) or arg == str(player.get_player_num()):
-                            if player.get_player_num() != 1022:
-                                game.rcon_tell(s['player_num'], "Level ^3%s [^2%d^3]: ^7%s" % (player.get_name(), player.get_admin_role(), player.roles[player.get_admin_role()]))
+                    user = str(line.split(s['command'])[1]).strip()
+                    found, victim, msg = self.player_found(user)
+                    if not found:
+                        game.rcon_tell(s['player_num'], msg)
+                    else:
+                        game.rcon_tell(s['player_num'], "Level ^3%s [^2%d^3]: ^7%s" % (victim.get_name(), victim.get_admin_role(), victim.roles[victim.get_admin_role()]))
                 else:
                     game.rcon_tell(s['player_num'], "Level ^3%s [^2%d^3]: ^7%s" % (game.players[s['player_num']].get_name(), game.players[s['player_num']].get_admin_role(), game.players[s['player_num']].roles[game.players[s['player_num']].get_admin_role()]))
 
@@ -810,20 +820,24 @@ class LogParser(object):
                 for player in game.players.itervalues():
                     if player.get_admin_role() >= 20:
                         msg += "^3%s [^2%d^3], " % (player.get_name(), player.get_admin_role())
-                if '@' in s['command']:
+                if s['command'].startswith('@'):
                     game.rcon_say(msg.rstrip(', '))
                 else:
                     game.rcon_tell(s['player_num'], msg.rstrip(', '))
 
             # aliases - list the aliases of the player
-            elif (s['command'] == '!aliases' or s['command'] == '!alias') and game.players[s['player_num']].get_admin_role() >= 40:
+            elif (s['command'] == '!aliases' or s['command'] == '@aliases' or s['command'] == '!alias' or s['command'] == '@alias') and game.players[s['player_num']].get_admin_role() >= 40:
                 if line.split(s['command'])[1]:
                     user = str(line.split(s['command'])[1]).strip()
                     found, victim, msg = self.player_found(user)
                     if not found:
                         game.rcon_tell(s['player_num'], msg)
                     else:
-                        game.rcon_tell(s['player_num'], "^7Aliases of ^5%s: ^3%s" % (victim.get_name(), str(victim.get_aliases())))
+                        msg = "^7Aliases of ^5%s: ^3%s" % (victim.get_name(), str(victim.get_aliases()))
+                        if s['command'].startswith('@'):
+                            game.rcon_say(msg)
+                        else:
+                            game.rcon_tell(s['player_num'], msg)
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !alias <name>")
 
