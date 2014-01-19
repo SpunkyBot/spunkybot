@@ -1257,6 +1257,10 @@ class LogParser(object):
                     self.iamgod = False
                     game.rcon_tell(s['player_num'], "^7You are registered as ^6Head Admin")
 
+## unknown command
+            elif s['command'].startswith("!") and game.players[s['player_num']].get_admin_role() > 20:
+                game.rcon_tell(s['player_num'], "^7Unknown command ^3%s" % s['command'])
+
     def handle_flag(self, line):
         """
         handle flag
