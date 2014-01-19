@@ -577,6 +577,24 @@ class LogParser(object):
         else:
             return True, victim, None
 
+    def map_found(self, map_name):
+        """
+        return True and map name or False and message text
+        """
+        map_list = []
+        for maps in game.get_all_maps():
+            if map_name.lower() == maps:
+                map_list.append(maps)
+                break
+            elif map_name.lower() in maps:
+                map_list.append(maps)
+        if len(map_list) == 0:
+            return False, None, "Map not found"
+        elif len(map_list) > 1:
+            return False, None, "^7Maps matching %s: ^3%s" % (map_name, ', '.join(map_list))
+        else:
+            return True, map_list[0], None
+
     def handle_say(self, line):
         """
         handle say commands
@@ -1075,7 +1093,12 @@ class LogParser(object):
             # map - load given map
             elif s['command'] == '!map' and game.players[s['player_num']].get_admin_role() >= 80:
                 if line.split(s['command'])[1]:
-                    game.send_rcon('map %s' % line.split(s['command'])[1].strip())
+                    arg = str(line.split(s['command'])[1]).strip()
+                    found, newmap, msg = self.map_found(arg)
+                    if not found:
+                        game.rcon_tell(s['player_num'], msg)
+                    else:
+                        game.send_rcon('map %s' % newmap)
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !map <ut4_name>")
 
@@ -1093,7 +1116,13 @@ class LogParser(object):
             # setnextmap - set the given map as nextmap
             elif s['command'] == '!setnextmap' and game.players[s['player_num']].get_admin_role() >= 80:
                 if line.split(s['command'])[1]:
-                    game.send_rcon('g_nextmap %s' % line.split(s['command'])[1].strip())
+                    arg = str(line.split(s['command'])[1]).strip()
+                    found, nextmap, msg = self.map_found(arg)
+                    if not found:
+                        game.rcon_tell(s['player_num'], msg)
+                    else:
+                        game.send_rcon('g_nextmap %s' % nextmap)
+                        game.next_mapname = nextmap
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !setnextmap <ut4_name>")
 
