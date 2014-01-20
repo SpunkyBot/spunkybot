@@ -18,6 +18,8 @@ __pycache__
 # Backup files
 *.*~
 
-# Test files / log files
+# Test files
 test*.*
+
+# Log files
 *.log
