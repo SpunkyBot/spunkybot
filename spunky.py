@@ -652,7 +652,7 @@ class LogParser(object):
 
             # time - display the servers current time
             elif s['command'] == '!time' or s['command'] == '@time':
-                msg = "^7%s CET" % time.strftime("%H:%M", time.localtime(time.time()))
+                msg = "^7%s" % time.strftime("%H:%M", time.localtime(time.time()))
                 if s['command'].startswith('@'):
                     game.rcon_say(msg)
                 else:
