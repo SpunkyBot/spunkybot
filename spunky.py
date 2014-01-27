@@ -446,12 +446,13 @@ class LogParser(object):
         with players_lock:
             player_num = int(line[:2].strip())
             player = game.players[player_num]
+            player_name = player.get_name()
             # Welcome message for registered players
             if player.get_registered_user() and player.get_welcome_msg():
-                game.rcon_tell(player_num, "^7[^2Authed^7] Welcome back %s, you are ^2%s^7, last visit %s, you played %s times" % (player.get_name(), player.roles[player.get_admin_role()], str(player.get_last_visit()), player.get_num_played()), False)
+                game.rcon_tell(player_num, "^7[^2Authed^7] Welcome back %s, you are ^2%s^7, last visit %s, you played %s times" % (player_name, player.roles[player.get_admin_role()], str(player.get_last_visit()), player.get_num_played()), False)
                 # disable welcome message for next rounds
                 player.disable_welcome_msg()
-            self.debug("Player %d %s has entered the game" % (player_num, player.get_name()))
+            self.debug("Player %d %s has entered the game" % (player_num, player_name))
 
     def handle_disconnect(self, line):
         """
@@ -486,11 +487,12 @@ class LogParser(object):
             if hitpoint in self.hit_points:
                 if self.hit_points[hitpoint] == 'HEAD' or self.hit_points[hitpoint] == 'HELMET':
                     hitter.headshot()
+                    hitter_hs_count = hitter.get_headshots()
                     player_color = "^1" if (hitter.get_team() == 1) else "^4"
-                    hs_plural = " headshots" if hitter.get_headshots() > 1 else " headshot"
+                    hs_plural = " headshots" if hitter_hs_count > 1 else " headshot"
                     if game.live:
-                        percentage = int(round(float(hitter.get_headshots()) / float(hitter.get_all_hits()), 2) * 100)
-                        game.send_rcon(player_color + hitter.get_name() + " ^7has " + str(hitter.get_headshots()) + "^7" + hs_plural + " (" + str(percentage) + " percent)")
+                        percentage = int(round(float(hitter_hs_count) / float(hitter.get_all_hits()), 2) * 100)
+                        game.send_rcon(player_color + hitter_name + " ^7has " + str(hitter_hs_count) + "^7" + hs_plural + " (" + str(percentage) + " percent)")
                 self.debug("Player number: " + str(hitter_id) + " \"" + hitter_name + "\" hit " + str(victim_id) + " \"" + victim_name + "\" in the " + self.hit_points[hitpoint] + " with " + self.hit_item[hit_item])
 
     def handle_kill(self, line):
@@ -566,10 +568,12 @@ class LogParser(object):
         victim = None
         name_list = []
         for player in game.players.itervalues():
-            if user.upper() in (player.get_name()).upper() or user == str(player.get_player_num()):
-                if player.get_player_num() != 1022:
+            player_name = player.get_name()
+            player_num = player.get_player_num()
+            if user.upper() in player_name.upper() or user == str(player_num):
+                if player_num != 1022:
                     victim = player
-                    name_list.append("^3%s [^2%d^3]" % (player.get_name(), player.get_player_num()))
+                    name_list.append("^3%s [^2%d^3]" % (player_name, player_num))
         if len(name_list) == 0:
             return False, None, "No Player found"
         elif len(name_list) > 1:
@@ -910,7 +914,7 @@ class LogParser(object):
                             if victim.get_admin_role() >= game.players[s['player_num']].get_admin_role():
                                 game.rcon_tell(s['player_num'], "You cannot kick an admin")
                             else:
-                                game.kick_player(victim)
+                                game.kick_player(victim.get_player_num())
                                 msg = "^1%s ^7was kicked by %s:^4 " % (victim.get_name(), game.players[s['player_num']].get_name())
                                 if reason in reason_dict:
                                     msg += reason_dict[reason]
@@ -1066,7 +1070,7 @@ class LogParser(object):
                             if victim.get_player_num() == player.num:
                                 player_ping = player.ping
                         if player_ping == 999:
-                            game.kick_player(victim)
+                            game.kick_player(victim.get_player_num())
                             game.rcon_say("^1%s ^7was kicked by %s: ^4connection interrupted" % (victim.get_name(), game.players[s['player_num']].get_name()))
                         else:
                             game.rcon_tell(s['player_num'], "%s has no connection interrupted" % victim.get_name())
@@ -1467,7 +1471,7 @@ class Player(object):
         values = (self.guid, self.prettyname, self.address, expire_date, timestamp, reason)
         curs.execute("INSERT INTO `ban_list` (`guid`,`name`,`ip_address`,`expires`,`timestamp`,`reason`) VALUES (?,?,?,?,?,?)", values)
         conn.commit()
-        game.kick_player(self)
+        game.kick_player(self.player_num)
         print("BAN: Player %s banned for %s, duration (in sec.): %d" % (self.name, reason, duration))
 
     def reset(self):
@@ -1757,7 +1761,7 @@ class Player(object):
                 game.rcon_say("^7Player ^3%s ^7kicked for team killing" % self.name)
                 # add TK ban points - 15 minutes
                 self.add_ban_point('tk, auto-kick', 900)
-                game.kick_player(self)
+                game.kick_player(self.player_num)
                 print("KICK: TK autokick for %s" % self.name)
             elif len(self.tk_victim_names) == 2:
                 game.rcon_tell(self.player_num, "^1WARNING ^7[^31^7]: ^7For team killing you will get kicked")
@@ -1813,6 +1817,7 @@ class Game(object):
         create a new instance of Game
         """
         self.all_maps_list = []
+        self.next_mapname = None
         self.rcon_queue = Queue()
         self.players = {}
         self.live = False
@@ -1896,15 +1901,15 @@ class Game(object):
         """
         self.send_rcon('forceteam %d %s' % (player_num, team))
 
-    def kick_player(self, player):
+    def kick_player(self, player_num):
         """
         kick player
 
-        @param player: The instance of the player
-        @type  player: Instance
+        @param player_num: The player number
+        @type  player_num: Integer
         """
         with players_lock:
-            self.send_rcon('kick %d' % player.get_player_num())
+            self.send_rcon('kick %d' % player_num)
 
     def go_live(self):
         """
