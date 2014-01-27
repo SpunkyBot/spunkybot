@@ -14,11 +14,12 @@ The code of the Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which 
 - Different user groups and levels
 - Supports all RCON commands
 - Supports temporary and permanent bans
+- Stores all player related information in a SQLite database
 - No other software requirements
 - Runs 'out of the box' 
 
 ## Environment
-- Urban Terror 4.1.1 and 4.2.017
+- Urban Terror 4.1.1 and 4.2.018
 - Python 2.6.x / 2.7.x
 - SQLite 3 database
 - Linux platform (tested on Debian 6 & 7 and CentOS 6)
@@ -38,13 +39,13 @@ The code of the Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which 
 	- `seta g_loghits "1"`
 - The Spunky Bot settings are configured in the file `/conf/settings.conf`
 - In-game displayed rules/advertisements are contained in the file `/conf/rules.conf`
-	- If you do not want to display rules, set the value `show_rules=0` in the config file `/conf/settings.conf`
+	- If you do not want to display the rotation messages, set the value `show_rules=0` in the config file `/conf/settings.conf`
 - Run the bot manually: `python spunky.py`
 - Or use the provided initscript to run the Spunky Bot as daemon
 
 **_First start instruction:_**
 
-- Connect to your game server and type `!iamgod` in global chat to get the admin level "Head Admin". This command is only once available.
+- Connect to your game server and type `!iamgod` in the global chat to get the admin level "Head Admin". This command is only once available.
 
 
 ### Bot Commands
