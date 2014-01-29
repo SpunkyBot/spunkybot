@@ -131,22 +131,25 @@ class TaskManager(object):
         """
         with players_lock:
             for player in game.players.itervalues():
+                player_name = player.get_name()
+                player_num = player.get_player_num()
+                player_admin_role = player.get_admin_role()
                 # kick player with 3 warnings, Admins will never get kicked
-                if player.get_warning() > 2 and player.get_admin_role() < 40:
-                    game.rcon_say("^7Player ^3%s ^7kicked, because of too many warnings" % player.get_name())
-                    game.kick_player(player)
+                if player.get_warning() > 2 and player_admin_role < 40:
+                    game.rcon_say("^7Player ^3%s ^7kicked, because of too many warnings" % player_name)
+                    game.kick_player(player_num)
                 # kick player with high ping after 3 warnings, Admins will never get kicked
-                elif player.get_high_ping() > 2 and player.get_admin_role() < 40:
-                    game.rcon_say("^7Player ^3%s ^7kicked, because his ping was too high for this server" % player.get_name())
-                    game.kick_player(player)
+                elif player.get_high_ping() > 2 and player_admin_role < 40:
+                    game.rcon_say("^7Player ^3%s ^7kicked, because his ping was too high for this server" % player_name)
+                    game.kick_player(player_num)
                 # kick spectator after 3 warnings, Moderator or higher levels will not get kicked
-                elif player.get_spec_warning() > 2 and player.get_admin_role() < 20:
-                    game.rcon_say("^7Player ^3%s ^7kicked, because of spectator too long on full server" % player.get_name())
-                    game.kick_player(player)
+                elif player.get_spec_warning() > 2 and player_admin_role < 20:
+                    game.rcon_say("^7Player ^3%s ^7kicked, because of spectator too long on full server" % player_name)
+                    game.kick_player(player_num)
 
                 # warn player with 2 warnings, Admins will never get the alert warning
-                if (player.get_warning() == 2 or player.get_spec_warning() == 2) and player.get_admin_role() < 40:
-                    game.rcon_say("^1ALERT: ^7Player ^3%s, ^7auto-kick from warnings if not cleared" % player.get_name())
+                if (player.get_warning() == 2 or player.get_spec_warning() == 2) and player_admin_role < 40:
+                    game.rcon_say("^1ALERT: ^7Player ^3%s, ^7auto-kick from warnings if not cleared" % player_name)
                     # increase counter to kick player next cycle automatically
                     player.add_spec_warning()
                     player.add_warning()
@@ -1838,17 +1841,6 @@ class Game(object):
             if self.live:
                 self.rcon_handle.push(command)
 
-    def get_rcon_output(self, value):
-        """
-        get console output of RCON command
-
-        @param value: RCON value
-        @type  value: String
-        """
-        with self.rcon_lock:
-            if self.live:
-                return self.rcon_handle.get_rcon_output(value)
-
     def rcon_say(self, msg):
         """
         display message in global chat
@@ -1923,7 +1915,7 @@ class Game(object):
         """
         set a list of all available maps
         """
-        all_maps = self.get_rcon_output("dir map bsp")[1].split()
+        all_maps = self.rcon_handle.get_rcon_output("dir map bsp")[1].split()
         all_maps.sort()
         output = []
         for maps in all_maps:
