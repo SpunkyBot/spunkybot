@@ -39,6 +39,8 @@
 	- Short: `!lt [<name>]`
 - **list** - list all connected players
 	- Usage: `!list`
+- **nextmap** - display the next map in rotation
+	- Usage: `!nextmap`
 - **mute** - mute or unmute a player
 	- Usage: `!mute <name>`
 - **shuffleteams** - shuffle the teams
