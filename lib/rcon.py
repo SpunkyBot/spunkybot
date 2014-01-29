@@ -6,11 +6,12 @@ Author: Alexander Kress
 This program is released under the MIT License.
 """
 
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 
 
 ### IMPORTS
 import time
+import os.path
 
 from lib.pyquake3 import PyQuake3
 from Queue import Queue
@@ -75,6 +76,7 @@ class Rcon(object):
         """
         if self.live:
             with self.rcon_lock:
+                self.quake.rcon_update()
                 self.quake.update()
                 return self.quake.values[value]
 
@@ -93,6 +95,42 @@ class Rcon(object):
         if self.live:
             with self.rcon_lock:
                 return self.quake.rcon(value)[1].split(':')[1].split('^7')[0].lstrip('"')
+
+    def get_mapcycle_path(self):
+        """
+        get the full path of mapcycle.txe file
+        """
+        maplist = []
+        self.quake.rcon_update()
+        # get path of fs_homepath and fs_basepath
+        fs_homepath = self.get_cvar('fs_homepath')
+        fs_basepath = self.get_cvar('fs_basepath')
+        fs_game = self.get_cvar('fs_game')
+        # get file name of mapcycle.txt
+        mapcycle_file = self.get_cvar('g_mapcycle')
+        # set full path of mapcycle.txt
+        mc_home_path = os.path.join(fs_homepath, fs_game, mapcycle_file)
+        mc_base_path = os.path.join(fs_basepath, fs_game, mapcycle_file)
+        if os.path.isfile(mc_home_path):
+            mapcycle_path = mc_home_path
+        elif os.path.isfile(mc_base_path):
+            mapcycle_path = mc_base_path
+        else:
+            mapcycle_path = None
+        if mapcycle_path:
+            file_handle = open(mapcycle_path, 'r')
+            lines = file_handle.readlines()
+            try:
+                while True:
+                    tmp = lines.pop(0).strip()
+                    if tmp[0] == '{':
+                        while tmp[0] != '}':
+                            tmp = lines.pop(0).strip()
+                        tmp = lines.pop(0).strip()
+                    maplist.append(tmp)
+            except IndexError:
+                pass
+        return maplist
 
     def process(self):
         """
