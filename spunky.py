@@ -178,7 +178,7 @@ class LogParser(object):
 
         # RCON commands for the different admin roles
         self.user_cmds = ['forgiveall, forgiveprev', 'hs', 'register', 'stats', 'teams', 'time', 'xlrstats']
-        self.mod_cmds = self.user_cmds + ['country', 'leveltest', 'list', 'mute', 'shuffleteams', 'warn']
+        self.mod_cmds = self.user_cmds + ['country', 'leveltest', 'list', 'nextmap', 'mute', 'shuffleteams', 'warn']
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'force', 'kick', 'nuke', 'say', 'tempban', 'warnclear']
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'ci', 'scream', 'slap', 'swap', 'version', 'veto']
         self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'map', 'maps', 'maprestart', 'permban', 'putgroup', 'setnextmap', 'unban', 'ungroup']
@@ -272,6 +272,8 @@ class LogParser(object):
             if tmp is not None:
                 if tmp[0].lstrip() == 'InitGame':
                     self.handle_game_init(line)
+                elif tmp[0].lstrip() == 'Warmup':
+                    self.handle_warmup()
                 elif tmp[0].lstrip() == 'ClientUserinfo':
                     self.handle_userinfo(line)
                 elif tmp[0].lstrip() == 'ClientUserinfoChanged':
@@ -337,6 +339,12 @@ class LogParser(object):
             self.ctf_gametype = False
         self.debug("Starting game...")
         game.new_game()
+
+    def handle_warmup(self):
+        """
+        handle Warmup
+        """
+        game.set_current_map()
 
     def handle_shutdown(self):
         """
@@ -768,6 +776,14 @@ class LogParser(object):
                     if player.get_player_num() != 1022:
                         msg += "^3%s [^2%d^3], " % (player.get_name(), player.get_player_num())
                 game.rcon_tell(s['player_num'], msg.rstrip(', '))
+
+            # nextmap - display the next map in rotation
+            elif (s['command'] == '!nextmap' or s['command'] == '@nextmap') and game.players[s['player_num']].get_admin_role() >= 20:
+                msg = "^7Next Map: ^3%s" % game.next_mapname
+                if s['command'].startswith('@'):
+                    game.rcon_say(msg)
+                else:
+                    game.rcon_tell(s['player_num'], msg)
 
             # mute - mute or unmute a player
             elif s['command'] == '!mute' and game.players[s['player_num']].get_admin_role() >= 20:
@@ -1822,6 +1838,8 @@ class Game(object):
         """
         self.all_maps_list = []
         self.next_mapname = None
+        self.mapname = None
+        self.maplist = []
         self.rcon_queue = Queue()
         self.players = {}
         self.live = False
@@ -1911,6 +1929,23 @@ class Game(object):
         self.live = True
         self.rcon_handle.go_live()
         self.set_all_maps()
+        self.maplist = self.rcon_handle.get_mapcycle_path()
+        self.set_current_map()
+
+    def set_current_map(self):
+        """
+        set the current and next map in rotation
+        """
+        self.rcon_handle.quake.rcon_update()
+        self.mapname = self.rcon_handle.get_quake_value('mapname')
+        if self.maplist:
+            if self.mapname in self.maplist:
+                if self.maplist.index(self.mapname) < (len(self.maplist) - 1):
+                    self.next_mapname = self.maplist[self.maplist.index(self.mapname) + 1]
+                else:
+                    self.next_mapname = self.maplist[0]
+            else:
+                self.next_mapname = self.maplist[0]
 
     def set_all_maps(self):
         """
