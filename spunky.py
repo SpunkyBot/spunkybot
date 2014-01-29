@@ -1144,6 +1144,7 @@ class LogParser(object):
                     else:
                         game.send_rcon('g_nextmap %s' % nextmap)
                         game.next_mapname = nextmap
+                        game.rcon_tell(s['player_num'], "^7Next Map set to: ^3%s" % nextmap)
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !setnextmap <ut4_name>")
 
