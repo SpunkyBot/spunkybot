@@ -598,7 +598,7 @@ class LogParser(object):
         """
         map_list = []
         for maps in game.get_all_maps():
-            if map_name.lower() == maps:
+            if map_name.lower() == maps or ('ut4_%s' % map_name.lower()) == maps:
                 map_list.append(maps)
                 break
             elif map_name.lower() in maps:
