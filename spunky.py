@@ -712,7 +712,7 @@ class LogParser(object):
                         game.rcon_tell(s['player_num'], "^7You need to ^2!register ^7first")
 
             # forgive last team kill
-            elif s['command'] == '!forgiveprev' or s['command'] == '!fp':
+            elif s['command'] == '!forgiveprev' or s['command'] == '!fp' or s['command'] == '!f':
                 victim = game.players[s['player_num']]
                 if victim.get_killed_me():
                     forgive_player_num = victim.get_killed_me()[-1]
