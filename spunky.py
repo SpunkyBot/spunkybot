@@ -1135,7 +1135,10 @@ class LogParser(object):
                     if not found:
                         game.rcon_tell(s['player_num'], msg)
                     else:
-                        game.send_rcon('map %s' % newmap)
+                        game.send_rcon('g_nextmap %s' % newmap)
+                        game.next_mapname = newmap
+                        game.rcon_tell(s['player_num'], "^7Changing Map to: ^3%s" % newmap)
+                        game.send_rcon('cyclemap')
                 else:
                     game.rcon_tell(s['player_num'], "^7Usage: !map <ut4_name>")
 
