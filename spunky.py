@@ -274,6 +274,8 @@ class LogParser(object):
                     self.handle_game_init(line)
                 elif tmp[0].lstrip() == 'Warmup':
                     self.handle_warmup()
+                elif tmp[0].lstrip() == 'InitRound':
+                    self.handle_round_init()
                 elif tmp[0].lstrip() == 'ClientUserinfo':
                     self.handle_userinfo(line)
                 elif tmp[0].lstrip() == 'ClientUserinfoChanged':
@@ -344,18 +346,18 @@ class LogParser(object):
         """
         handle Warmup
         """
+        with players_lock:
+            for player in game.players.itervalues():
+                # reset player statistics
+                player.reset()
         game.set_current_map()
 
     def handle_shutdown(self):
         """
         handle game end/shutdown
         """
-        with players_lock:
-            self.debug("Shutting down game...")
-            game.rcon_handle.clear()
-            for player in game.players.itervalues():
-                player.save_info()
-                player.reset()
+        self.debug("Shutting down game...")
+        game.rcon_handle.clear()
 
     def handle_userinfo(self, line):
         """
@@ -1148,6 +1150,9 @@ class LogParser(object):
             # maprestart - restart the map
             elif s['command'] == '!maprestart' and game.players[s['player_num']].get_admin_role() >= 80:
                 game.send_rcon('restart')
+                for player in game.players.itervalues():
+                    # reset player statistics
+                    player.reset()
 
             # cyclemap - start next map in rotation
             elif s['command'] == '!cyclemap' and game.players[s['player_num']].get_admin_role() >= 80:
@@ -1393,6 +1398,17 @@ class LogParser(object):
                 # display personal stats, stats for players in spec will not be displayed
                 if player.get_team() != 3:
                     game.rcon_tell(player.get_player_num(), "^7Stats %s: ^7K ^2%d ^7D ^3%d ^7HS ^1%d ^7TK ^1%d" % (player.get_name(), player.get_kills(), player.get_deaths(), player.get_headshots(), player.get_team_kill_count()))
+                # store score in database
+                player.save_info()
+
+    def handle_round_init(self):
+        """
+        handle InitRound for CTF mode
+        """
+        if self.ctf_gametype:
+            with players_lock:
+                for player in game.players.itervalues():
+                    player.reset_flag_stats()
 
     def explode_line2(self, line):
         """
@@ -1511,6 +1527,10 @@ class Player(object):
         self.flags_captured = 0
         self.flags_returned = 0
         self.flag_carriers_killed = 0
+
+    def reset_flag_stats(self):
+        self.flags_captured = 0
+        self.flags_returned = 0
 
     def save_info(self):
         if self.registered_user:
