@@ -19,7 +19,7 @@ Modify the files '/conf/settings.conf' and '/conf/rules.conf'
 Run the bot: python spunky.py
 """
 
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 
 
 ### IMPORTS
