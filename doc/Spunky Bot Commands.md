@@ -17,6 +17,8 @@
 	- Usage: `!hs`
 - **register** - register yourself as a basic user
 	- Usage: `!register`
+- **spree** - display current kill streak
+	- Usage: `!spree`
 - **stats** - display current map stats
 	- Usage: `!stats`
 - **teams** - balance teams
