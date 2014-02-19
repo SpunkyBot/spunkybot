@@ -6,7 +6,7 @@ Author: Alexander Kress
 This program is released under the MIT License.
 """
 
-__version__ = '1.0.3'
+__version__ = '1.0.4'
 
 
 ### IMPORTS
@@ -76,7 +76,6 @@ class Rcon(object):
         """
         if self.live:
             with self.rcon_lock:
-                self.quake.rcon_update()
                 self.quake.update()
                 return self.quake.values[value]
 
