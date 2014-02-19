@@ -757,14 +757,22 @@ class LogParser(object):
             # mute - mute or unmute a player
             elif sar['command'] == '!mute' and game.players[sar['player_num']].get_admin_role() >= 20:
                 if line.split(sar['command'])[1]:
-                    user = line.split(sar['command'])[1].strip()
+                    arg = line.split(sar['command'])[1].strip().split(' ')
+                    if len(arg) > 1:
+                        user = arg[0]
+                        duration = arg[1]
+                        if not duration.isdigit():
+                            duration = ''
+                    else:
+                        user = arg[0]
+                        duration = ''
                     found, victim, msg = self.player_found(user)
                     if not found:
                         game.rcon_tell(sar['player_num'], msg)
                     else:
-                        game.send_rcon("mute %d" % victim.get_player_num())
+                        game.send_rcon("mute %d %s" % (victim.get_player_num(), duration))
                 else:
-                    game.rcon_tell(sar['player_num'], "^7Usage: !mute <name>")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !mute <name> [<seconds>]")
 
             # shuffleteams
             elif (sar['command'] == '!shuffleteams' or sar['command'] == '!shuffle') and game.players[sar['player_num']].get_admin_role() >= 20:

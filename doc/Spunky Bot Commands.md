@@ -44,7 +44,7 @@
 - **nextmap** - display the next map in rotation
 	- Usage: `!nextmap`
 - **mute** - mute or unmute a player
-	- Usage: `!mute <name>`
+	- Usage: `!mute <name> [<seconds>]`
 - **shuffleteams** - shuffle the teams
 	- Usage: `!shuffleteams`
 	- Short: `!shuffle`
