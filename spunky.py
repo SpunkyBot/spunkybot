@@ -28,7 +28,7 @@ import time
 import sqlite3
 import math
 import textwrap
-import lib.pygeoip as PyGeoIP
+import lib.pygeoip as pygeoip
 
 from lib.rcon import Rcon
 from lib.rules import Rules
@@ -77,10 +77,8 @@ class TaskManager(object):
             # get rcon status
             self.rcon_dispatcher.get_status()
             try:
-                # check amount of warnings and kick player if needed
-                self.check_warn()
-                # check for spectators
-                self.check_spec()
+                # check amount of warnings and kick player if needed, check for spectators
+                self.check_warnings_and_specs()
                 # check for player with high ping
                 self.check_ping()
             except Exception:
@@ -103,56 +101,48 @@ class TaskManager(object):
                 else:
                     gameplayer.clear_high_ping()
 
-    def check_spec(self):
+    def check_warnings_and_specs(self):
         """
-        check for spectators and set warning
+        - check warnings and kick players with too many warnings
+        - check for spectators and set warning
         """
-        counter = 0
         with players_lock:
             # get number of connected players
-            for _ in game.players.itervalues():
-                counter += 1
+            counter = len(game.players)
 
-            for player in game.players.itervalues():
-                gtv_connected = False
-                # search for player with name prefix GTV-
-                if 'GTV-' in player.get_name():
-                    gtv_connected = True
-                # if player is spectator on full server (more than 10 players), inform player and increase warn counter, GTV or Moderator or higher levels will not get the warning
-                if counter > 11 and player.get_team() == 3 and player.get_admin_role() < 20 and player.get_time_joined() < (time.time() - 30) and player.get_player_num() != 1022 and not gtv_connected:
-                    player.add_spec_warning()
-                    game.rcon_tell(player.get_player_num(), "^1WARNING ^7[^3%d^7]: ^7You are spectator too long on full server" % player.get_spec_warning(), False)
-                else:
-                    player.clear_spec_warning()
-
-    def check_warn(self):
-        """
-        check warnings and kick players with too many warnings
-        """
-        with players_lock:
             for player in game.players.itervalues():
                 player_name = player.get_name()
                 player_num = player.get_player_num()
                 player_admin_role = player.get_admin_role()
                 # kick player with 3 warnings, Admins will never get kicked
                 if player.get_warning() > 2 and player_admin_role < 40:
-                    game.rcon_say("^7Player ^3%s ^7kicked, because of too many warnings" % player_name)
+                    game.rcon_say("^7Player ^2%s ^7kicked, because of too many warnings" % player_name)
                     game.kick_player(player_num)
                 # kick player with high ping after 3 warnings, Admins will never get kicked
                 elif player.get_high_ping() > 2 and player_admin_role < 40:
-                    game.rcon_say("^7Player ^3%s ^7kicked, because his ping was too high for this server" % player_name)
+                    game.rcon_say("^7Player ^2%s ^7kicked, because his ping was too high for this server" % player_name)
                     game.kick_player(player_num)
                 # kick spectator after 3 warnings, Moderator or higher levels will not get kicked
                 elif player.get_spec_warning() > 2 and player_admin_role < 20:
-                    game.rcon_say("^7Player ^3%s ^7kicked, because of spectator too long on full server" % player_name)
+                    game.rcon_say("^7Player ^2%s ^7kicked, because of spectator too long on full server" % player_name)
                     game.kick_player(player_num)
 
                 # warn player with 2 warnings, Admins will never get the alert warning
                 if (player.get_warning() == 2 or player.get_spec_warning() == 2) and player_admin_role < 40:
-                    game.rcon_say("^1ALERT: ^7Player ^3%s, ^7auto-kick from warnings if not cleared" % player_name)
+                    game.rcon_say("^1ALERT: ^7Player ^2%s, ^7auto-kick from warnings if not cleared" % player_name)
                     # increase counter to kick player next cycle automatically
                     player.add_spec_warning()
                     player.add_warning()
+
+                # check for spectators and set warning
+                if 'GTV-' in player_name:
+                    continue  # ignore player with name prefix GTV-
+                # if player is spectator on full server (more than 10 players), inform player and increase warn counter, GTV or Moderator or higher levels will not get the warning
+                elif counter > 11 and player.get_team() == 3 and player_admin_role < 20 and player.get_time_joined() < (time.time() - 30) and player_num != 1022:
+                    player.add_spec_warning()
+                    game.rcon_tell(player_num, "^1WARNING ^7[^3%d^7]: ^7You are spectator too long on full server" % player.get_spec_warning(), False)
+                else:
+                    player.clear_spec_warning()
 
 
 ### CLASS Log Parser ###
@@ -174,7 +164,7 @@ class LogParser(object):
         # hit zone support for UrT > 4.2.013
         self.hit_points = {0: "HEAD", 1: "HEAD", 2: "HELMET", 3: "TORSO", 4: "VEST", 5: "LEFT_ARM", 6: "RIGHT_ARM", 7: "GROIN", 8: "BUTT", 9: "LEFT_UPPER_LEG", 10: "RIGHT_UPPER_LEG", 11: "LEFT_LOWER_LEG", 12: "RIGHT_LOWER_LEG", 13: "LEFT_FOOT", 14: "RIGHT_FOOT"}
         self.hit_item = {1: "UT_MOD_KNIFE", 2: "UT_MOD_BERETTA", 3: "UT_MOD_DEAGLE", 4: "UT_MOD_SPAS", 5: "UT_MOD_MP5K", 6: "UT_MOD_UMP45", 8: "UT_MOD_LR300", 9: "UT_MOD_G36", 10: "UT_MOD_PSG1", 14: "UT_MOD_SR8", 15: "UT_MOD_AK103", 17: "UT_MOD_NEGEV", 19: "UT_MOD_M4", 20: "UT_MOD_GLOCK", 21: "UT_MOD_COLT1911", 22: "UT_MOD_MAC11", 23: "UT_MOD_BLED", 24: "UT_MOD_KICKED", 25: "UT_MOD_KNIFE_THROWN"}
-        self.death_cause = {1: "MOD_WATER", 5: "UT_MOD_TELEFRAG", 6: "MOD_FALLING", 7: "UT_MOD_SUICIDE", 9: "MOD_TRIGGER_HURT", 10: "MOD_CHANGE_TEAM", 12: "UT_MOD_KNIFE", 13: "UT_MOD_KNIFE_THROWN", 14: "UT_MOD_BERETTA", 15: "UT_MOD_KNIFE_DEAGLE", 16: "UT_MOD_SPAS", 17: "UT_MOD_UMP45", 18: "UT_MOD_MP5K", 19: "UT_MOD_LR300", 20: "UT_MOD_G36", 21: "UT_MOD_PSG1", 22: "UT_MOD_HK69", 23: "UT_MOD_BLED", 24: "UT_MOD_KICKED", 25: "UT_MOD_HEGRENADE", 28: "UT_MOD_SR8", 30: "UT_MOD_AK103", 31: "UT_MOD_SPLODED", 32: "UT_MOD_SLAPPED", 34: "UT_MOD_BOMBED", 35: "UT_MOD_NUKED", 36: "UT_MOD_NEGEV", 37: "UT_MOD_HK69_HIT", 38: "UT_MOD_M4", 39: "UT_MOD_GLOCK", 40: "UT_MOD_COLT1911", 41: "UT_MOD_MAC11", 42: "UT_MOD_FLAG"}
+        self.death_cause = {1: "MOD_WATER", 3: "MOD_LAVA", 5: "UT_MOD_TELEFRAG", 6: "MOD_FALLING", 7: "UT_MOD_SUICIDE", 9: "MOD_TRIGGER_HURT", 10: "MOD_CHANGE_TEAM", 12: "UT_MOD_KNIFE", 13: "UT_MOD_KNIFE_THROWN", 14: "UT_MOD_BERETTA", 15: "UT_MOD_KNIFE_DEAGLE", 16: "UT_MOD_SPAS", 17: "UT_MOD_UMP45", 18: "UT_MOD_MP5K", 19: "UT_MOD_LR300", 20: "UT_MOD_G36", 21: "UT_MOD_PSG1", 22: "UT_MOD_HK69", 23: "UT_MOD_BLED", 24: "UT_MOD_KICKED", 25: "UT_MOD_HEGRENADE", 28: "UT_MOD_SR8", 30: "UT_MOD_AK103", 31: "UT_MOD_SPLODED", 32: "UT_MOD_SLAPPED", 34: "UT_MOD_BOMBED", 35: "UT_MOD_NUKED", 36: "UT_MOD_NEGEV", 37: "UT_MOD_HK69_HIT", 38: "UT_MOD_M4", 39: "UT_MOD_GLOCK", 40: "UT_MOD_COLT1911", 41: "UT_MOD_MAC11", 42: "UT_MOD_FLAG"}
 
         # RCON commands for the different admin roles
         self.user_cmds = ['forgiveall, forgiveprev', 'hs', 'register', 'spree', 'stats', 'teams', 'time', 'xlrstats']
@@ -217,14 +207,14 @@ class LogParser(object):
         while not game_start:
             while lgf:
                 line = lgf.readline()
-                msg = re.search("(\d+:\d+)\s([A-Za-z]+:)", line)
+                msg = re.search(r"(\d+:\d+)\s([A-Za-z]+:)", line)
                 if msg is not None and msg.group(2) == 'InitGame:':
                     game_start = True
                     if 'g_modversion\\4.1' in line:
                         # hit zone support for UrT 4.1
                         self.hit_points = {0: "HEAD", 1: "HELMET", 2: "TORSO", 3: "KEVLAR", 4: "ARMS", 5: "LEGS", 6: "BODY"}
                         self.hit_item = {1: "UT_MOD_KNIFE", 2: "UT_MOD_BERETTA", 3: "UT_MOD_DEAGLE", 4: "UT_MOD_SPAS", 5: "UT_MOD_MP5K", 6: "UT_MOD_UMP45", 8: "UT_MOD_LR300", 9: "UT_MOD_G36", 10: "UT_MOD_PSG1", 14: "UT_MOD_SR8", 15: "UT_MOD_AK103", 17: "UT_MOD_NEGEV", 19: "UT_MOD_M4", 21: "UT_MOD_KICKED", 22: "UT_MOD_KNIFE_THROWN"}
-                        self.death_cause = {1: "MOD_WATER", 5: "UT_MOD_TELEFRAG", 6: "MOD_FALLING", 7: "UT_MOD_SUICIDE", 9: "MOD_TRIGGER_HURT", 10: "MOD_CHANGE_TEAM", 12: "UT_MOD_KNIFE", 13: "UT_MOD_KNIFE_THROWN", 14: "UT_MOD_BERETTA", 15: "UT_MOD_KNIFE_DEAGLE", 16: "UT_MOD_SPAS", 17: "UT_MOD_UMP45", 18: "UT_MOD_MP5K", 19: "UT_MOD_LR300", 20: "UT_MOD_G36", 21: "UT_MOD_PSG1", 22: "UT_MOD_HK69", 23: "UT_MOD_BLED", 24: "UT_MOD_KICKED", 25: "UT_MOD_HEGRENADE", 28: "UT_MOD_SR8", 30: "UT_MOD_AK103", 31: "UT_MOD_SPLODED", 32: "UT_MOD_SLAPPED", 33: "UT_MOD_BOMBED", 34: "UT_MOD_NUKED", 35: "UT_MOD_NEGEV", 37: "UT_MOD_HK69_HIT", 38: "UT_MOD_M4", 39: "UT_MOD_FLAG", 40: "UT_MOD_GOOMBA"}
+                        self.death_cause = {1: "MOD_WATER", 3: "MOD_LAVA", 5: "UT_MOD_TELEFRAG", 6: "MOD_FALLING", 7: "UT_MOD_SUICIDE", 9: "MOD_TRIGGER_HURT", 10: "MOD_CHANGE_TEAM", 12: "UT_MOD_KNIFE", 13: "UT_MOD_KNIFE_THROWN", 14: "UT_MOD_BERETTA", 15: "UT_MOD_KNIFE_DEAGLE", 16: "UT_MOD_SPAS", 17: "UT_MOD_UMP45", 18: "UT_MOD_MP5K", 19: "UT_MOD_LR300", 20: "UT_MOD_G36", 21: "UT_MOD_PSG1", 22: "UT_MOD_HK69", 23: "UT_MOD_BLED", 24: "UT_MOD_KICKED", 25: "UT_MOD_HEGRENADE", 28: "UT_MOD_SR8", 30: "UT_MOD_AK103", 31: "UT_MOD_SPLODED", 32: "UT_MOD_SLAPPED", 33: "UT_MOD_BOMBED", 34: "UT_MOD_NUKED", 35: "UT_MOD_NEGEV", 37: "UT_MOD_HK69_HIT", 38: "UT_MOD_M4", 39: "UT_MOD_FLAG", 40: "UT_MOD_GOOMBA"}
                     if 'g_gametype\\0' in line or 'g_gametype\\1' in line:
                         # disable teamkill event for FFA (0) and LMS (1) mode
                         self.ffa_lms_gametype = True
@@ -257,7 +247,6 @@ class LogParser(object):
                 self.parse_line(line)
             else:
                 if not game.live:
-                    print("Going Live...")
                     game.go_live()
                 time.sleep(.125)
 
@@ -271,11 +260,20 @@ class LogParser(object):
             line = tmp[1].strip()
             if tmp is not None:
                 if tmp[0].lstrip() == 'InitGame':
-                    self.handle_game_init(line)
+                    self.ffa_lms_gametype = True if ('g_gametype\\0' in line or 'g_gametype\\1') in line else False
+                    self.ctf_gametype = True if 'g_gametype\\7' in line else False
+                    self.debug("Starting game...")
+                    game.rcon_handle.clear()
                 elif tmp[0].lstrip() == 'Warmup':
-                    self.handle_warmup()
+                    with players_lock:
+                        for player in game.players.itervalues():
+                            player.reset()
+                    game.set_current_map()
                 elif tmp[0].lstrip() == 'InitRound':
-                    self.handle_round_init()
+                    if self.ctf_gametype:
+                        with players_lock:
+                            for player in game.players.itervalues():
+                                player.reset_flag_stats()
                 elif tmp[0].lstrip() == 'ClientUserinfo':
                     self.handle_userinfo(line)
                 elif tmp[0].lstrip() == 'ClientUserinfoChanged':
@@ -289,7 +287,8 @@ class LogParser(object):
                 elif tmp[0].lstrip() == 'Hit':
                     self.handle_hit(line)
                 elif tmp[0].lstrip() == 'ShutdownGame':
-                    self.handle_shutdown()
+                    self.debug("Shutting down game...")
+                    game.rcon_handle.clear()
                 elif tmp[0].lstrip() == 'say':
                     self.handle_say(line)
                 elif tmp[0].lstrip() == 'Flag':
@@ -297,7 +296,7 @@ class LogParser(object):
                 elif tmp[0].lstrip() == 'Exit':
                     self.handle_awards()
         except Exception:
-            return -1
+            pass
 
     def explode_line(self, line):
         """
@@ -317,48 +316,6 @@ class LogParser(object):
                 key = True
         return values
 
-    def player_exists(self, player_num):
-        """
-        check if player exists
-        """
-        with players_lock:
-            if player_num in game.players:
-                return True
-            else:
-                return False
-
-    def handle_game_init(self, line):
-        """
-        handle Game Init
-        """
-        if 'g_gametype\\0' in line or 'g_gametype\\1' in line:
-            self.ffa_lms_gametype = True
-        else:
-            self.ffa_lms_gametype = False
-        if 'g_gametype\\7' in line:
-            self.ctf_gametype = True
-        else:
-            self.ctf_gametype = False
-        self.debug("Starting game...")
-        game.new_game()
-
-    def handle_warmup(self):
-        """
-        handle Warmup
-        """
-        with players_lock:
-            for player in game.players.itervalues():
-                # reset player statistics
-                player.reset()
-        game.set_current_map()
-
-    def handle_shutdown(self):
-        """
-        handle game end/shutdown
-        """
-        self.debug("Shutting down game...")
-        game.rcon_handle.clear()
-
     def handle_userinfo(self, line):
         """
         handle player user information, auto-kick known cheater ports or guids
@@ -366,7 +323,7 @@ class LogParser(object):
         with players_lock:
             player_num = int(line[:2].strip())
             line = line[2:].lstrip("\\").lstrip()
-            values = self.explode_line(line.lstrip())
+            values = self.explode_line(line)
             challenge = True if 'challenge' in values else False
             try:
                 guid = values['cl_guid'].rstrip('\n')
@@ -375,6 +332,9 @@ class LogParser(object):
             except KeyError:
                 if 'cl_guid' in values:
                     guid = values['cl_guid']
+                elif 'skill' in values:
+                    # bot connecting
+                    guid = "BOT%d" % player_num
                 else:
                     guid = "None"
                     game.send_rcon("Player with invalid GUID kicked")
@@ -388,9 +348,7 @@ class LogParser(object):
                 if 'ip' in values:
                     ip_port = values['ip']
                 else:
-                    ip_port = "0.0.0.0"
-                    game.send_rcon("Player with invalid IP address kicked")
-                    game.send_rcon("kick %d" % player_num)
+                    ip_port = "0.0.0.0:0"
 
             address = ip_port.split(":")[0].strip()
             port = ip_port.split(":")[1].strip()
@@ -407,7 +365,7 @@ class LogParser(object):
                 game.send_rcon("Invalid GUID detected for %s -> Player kicked" % name)
                 game.send_rcon("kick %d" % player_num)
 
-            if not self.player_exists(player_num):
+            if not player_num in game.players:
                 player = Player(player_num, address, guid, name)
                 game.add_player(player)
             if game.players[player_num].get_guid() != guid:
@@ -433,7 +391,7 @@ class LogParser(object):
             player = game.players[player_num]
             line = line[2:].lstrip("\\")
             try:
-                values = self.explode_line(line.lstrip())
+                values = self.explode_line(line)
                 team_num = values['t']
                 player.set_team(int(team_num))
                 name = re.sub(r"\s+", "", values['n'])
@@ -441,13 +399,8 @@ class LogParser(object):
                 player.set_team(3)
                 team_num = "3"
                 name = "UnnamedPlayer"
-
             team_dict = {0: "GREEN", 1: "RED", 2: "BLUE", 3: "SPEC"}
-            if team_num in team_dict:
-                team = team_dict[team_num]
-            else:
-                team = "SPEC"
-
+            team = team_dict[team_num] if team_num in team_dict else "SPEC"
             if not(game.players[player_num].get_name() == name):
                 game.players[player_num].set_name(name)
             self.debug("Player %d %s is on the %s team" % (player_num, name, team))
@@ -462,7 +415,7 @@ class LogParser(object):
             player_name = player.get_name()
             # Welcome message for registered players
             if player.get_registered_user() and player.get_welcome_msg():
-                game.rcon_tell(player_num, "^7[^2Authed^7] Welcome back %s, you are ^2%s^7, last visit %s, you played %s times" % (player_name, player.roles[player.get_admin_role()], str(player.get_last_visit()), player.get_num_played()), False)
+                game.rcon_tell(player_num, "^7[^2Authed^7] Welcome back %s, you are ^2%s^7, last visit %s, you played %s times" % (player_name, player.roles[player.get_admin_role()], player.get_last_visit(), player.get_num_played()), False)
                 # disable welcome message for next rounds
                 player.disable_welcome_msg()
             self.debug("Player %d %s has entered the game" % (player_num, player_name))
@@ -502,11 +455,11 @@ class LogParser(object):
                     hitter.headshot()
                     hitter_hs_count = hitter.get_headshots()
                     player_color = "^1" if (hitter.get_team() == 1) else "^4"
-                    hs_plural = " headshots" if hitter_hs_count > 1 else " headshot"
+                    hs_plural = "headshots" if hitter_hs_count > 1 else "headshot"
                     if game.live:
                         percentage = int(round(float(hitter_hs_count) / float(hitter.get_all_hits()), 2) * 100)
-                        game.send_rcon(player_color + hitter_name + " ^7has " + str(hitter_hs_count) + "^7" + hs_plural + " (" + str(percentage) + " percent)")
-                self.debug("Player number: " + str(hitter_id) + " \"" + hitter_name + "\" hit " + str(victim_id) + " \"" + victim_name + "\" in the " + self.hit_points[hitpoint] + " with " + self.hit_item[hit_item])
+                        game.send_rcon("%s%s ^7has %d %s (%d percent)" % (player_color, hitter_name, hitter_hs_count, hs_plural, percentage))
+                self.debug("Player %d %s hit %d %s in the %s with %s" % (hitter_id, hitter_name, victim_id, victim_name, self.hit_points[hitpoint], self.hit_item[hit_item]))
 
     def handle_kill(self, line):
         """
@@ -528,10 +481,8 @@ class LogParser(object):
             else:
                 # killed by WORLD
                 killer = game.players[1022]
-
             killer_name = killer.get_name()
             victim_name = victim.get_name()
-
             tk_event = False
 
             # teamkill event - disabled for FFA and LMS, for all other game modes team kills are counted and punished
@@ -543,8 +494,9 @@ class LogParser(object):
                     # increase team death counter for victim
                     victim.team_death()
 
+            suicide_reason = ['UT_MOD_SUICIDE', 'MOD_FALLING', 'MOD_WATER', 'MOD_LAVA', 'UT_MOD_SPLODED']
             # suicide counter
-            if death_cause == 'UT_MOD_SUICIDE' or death_cause == 'MOD_FALLING' or death_cause == 'MOD_WATER' or death_cause == 'UT_MOD_SPLODED' or (killer_id == victim_id and (death_cause == 'UT_MOD_HEGRENADE' or death_cause == 'UT_MOD_HK69' or death_cause == 'UT_MOD_NUKED' or death_cause == 'UT_MOD_SLAPPED' or death_cause == 'UT_MOD_BOMBED')):
+            if death_cause in suicide_reason or (killer_id == victim_id and (death_cause == 'UT_MOD_HEGRENADE' or death_cause == 'UT_MOD_HK69' or death_cause == 'UT_MOD_NUKED' or death_cause == 'UT_MOD_SLAPPED' or death_cause == 'UT_MOD_BOMBED')):
                 killer.suicide()
                 victim.die()
             # kill counter
@@ -552,27 +504,25 @@ class LogParser(object):
                 killer.kill()
                 killer_color = "^1" if (killer.get_team() == 1) else "^4"
                 if killer.get_killing_streak() == 5 and killer_id != 1022:
-                    game.rcon_say(killer_color + killer_name + " ^7is on a killing spree!")
+                    game.rcon_say("%s%s ^7is on a killing spree!" % (killer_color, killer_name))
                 elif killer.get_killing_streak() == 10 and killer_id != 1022:
-                    game.rcon_say(killer_color + killer_name + " ^7is on a rampage!")
+                    game.rcon_say("%s%s ^7is on a rampage!" % (killer_color, killer_name))
                 elif killer.get_killing_streak() == 15 and killer_id != 1022:
-                    game.rcon_say(killer_color + killer_name + " ^7is unstoppable!")
+                    game.rcon_say("%s%s ^7is unstoppable!" % (killer_color, killer_name))
                 elif killer.get_killing_streak() == 20 and killer_id != 1022:
-                    game.rcon_say(killer_color + killer_name + " ^7is godlike!")
+                    game.rcon_say("%s%s ^7is godlike!" % (killer_color, killer_name))
 
                 victim_color = "^1" if (victim.get_team() == 1) else "^4"
                 if victim.get_killing_streak() >= 20 and killer_name != victim_name and killer_id != 1022:
-                    game.rcon_say(victim_color + victim_name + "'s ^7godlike was ended by " + killer_color + killer_name + "!")
+                    game.rcon_say("%s%s's ^7godlike was ended by %s%s!" % (victim_color, victim_name, killer_color, killer_name))
                 elif victim.get_killing_streak() >= 15 and killer_name != victim_name and killer_id != 1022:
-                    game.rcon_say(victim_color + victim_name + "'s ^7unstoppable was ended by " + killer_color + killer_name + "!")
+                    game.rcon_say("%s%s's ^7unstoppable was ended by %s%s!" % (victim_color, victim_name, killer_color, killer_name))
                 elif victim.get_killing_streak() >= 10 and killer_name != victim_name and killer_id != 1022:
-                    game.rcon_say(victim_color + victim_name + "'s ^7rampage was ended by " + killer_color + killer_name + "!")
+                    game.rcon_say("%s%s's ^7rampage was ended by %s%s!" % (victim_color, victim_name, killer_color, killer_name))
                 elif victim.get_killing_streak() >= 5 and killer_name != victim_name and killer_id != 1022:
-                    game.rcon_say(victim_color + victim_name + "'s ^7killing spree was ended by " + killer_color + killer_name + "!")
+                    game.rcon_say("%s%s's ^7killing spree was ended by %s%s!" % (victim_color, victim_name, killer_color, killer_name))
                 victim.die()
                 self.debug("Player %d %s killed %d %s with %s" % (killer_id, killer_name, victim_id, victim_name, death_cause))
-            else:
-                self.debug("Player %d %s has changed teams" % (killer_id, killer_name))
 
     def player_found(self, user):
         """
@@ -583,10 +533,13 @@ class LogParser(object):
         for player in game.players.itervalues():
             player_name = player.get_name()
             player_num = player.get_player_num()
-            if user.upper() in player_name.upper() or user == str(player_num):
-                if player_num != 1022:
-                    victim = player
-                    name_list.append("^3%s [^2%d^3]" % (player_name, player_num))
+            if (user.upper() == player_name.upper() or user == str(player_num)) and player_num != 1022:
+                victim = player
+                name_list = ["^3%s [^2%d^3]" % (player_name, player_num)]
+                break
+            elif user.upper() in player_name.upper() and player_num != 1022:
+                victim = player
+                name_list.append("^3%s [^2%d^3]" % (player_name, player_num))
         if len(name_list) == 0:
             return False, None, "No Player found"
         elif len(name_list) > 1:
@@ -620,87 +573,92 @@ class LogParser(object):
                        'ping': 'fix your ping', 'afk': 'away from keyboard', 'tk': 'stop team killing', 'spec': 'spectator too long on full server', 'ci': 'connection interrupted'}
 
         with players_lock:
-            s = self.explode_line2(line)
+            line = line.strip()
+            try:
+                tmp = line.split(" ")
+                sar = {'player_num': int(tmp[0]), 'name': tmp[1], 'command': tmp[2]}
+            except IndexError:
+                sar = {'player_num': None, 'name': None, 'command': None}
 
-            if s['command'] == '!mapstats':
-                game.rcon_tell(s['player_num'], "^7" + str(game.players[s['player_num']].get_kills()) + " ^7kills - " + str(game.players[s['player_num']].get_deaths()) + " ^7deaths")
-                game.rcon_tell(s['player_num'], "^7" + str(game.players[s['player_num']].get_team_kill_count()) + " ^7teamkills")
-                game.rcon_tell(s['player_num'], "^7" + str(game.players[s['player_num']].get_killing_streak()) + " ^7current kill streak")
-                game.rcon_tell(s['player_num'], "^7" + str(game.players[s['player_num']].get_all_hits()) + " ^7total hits - " + str(game.players[s['player_num']].get_headshots()) + " ^7headshots")
+            if sar['command'] == '!mapstats':
+                game.rcon_tell(sar['player_num'], "^2%d ^7kills - ^2%d ^7deaths" % (game.players[sar['player_num']].get_kills(), game.players[sar['player_num']].get_deaths()))
+                game.rcon_tell(sar['player_num'], "^2%d ^7kills in a row - ^2%d ^7teamkills" % (game.players[sar['player_num']].get_killing_streak(), game.players[sar['player_num']].get_team_kill_count()))
+                game.rcon_tell(sar['player_num'], "^2%d ^7total hits - ^2%d ^7headshots" % (game.players[sar['player_num']].get_all_hits(), game.players[sar['player_num']].get_headshots()))
                 if self.ctf_gametype:
-                    game.rcon_tell(s['player_num'], "^7" + str(game.players[s['player_num']].get_flags_captured()) + " ^7flags captured - " + str(game.players[s['player_num']].get_flags_returned()) + " ^7flags returned")
+                    game.rcon_tell(sar['player_num'], "^2%d ^7flags captured - ^2%d ^7flags returned" % (game.players[sar['player_num']].get_flags_captured(), game.players[sar['player_num']].get_flags_returned()))
 
-            elif s['command'] == '!help' or s['command'] == '!h':
+            elif sar['command'] == '!help' or sar['command'] == '!h':
                 ## TO DO - specific help for each command
-                if game.players[s['player_num']].get_admin_role() < 20:
-                    game.rcon_tell(s['player_num'], "^7Available commands:")
-                    game.rcon_tell(s['player_num'], ", ".join(self.user_cmds), False)
+                if game.players[sar['player_num']].get_admin_role() < 20:
+                    game.rcon_tell(sar['player_num'], "^7Available commands:")
+                    game.rcon_tell(sar['player_num'], ", ".join(self.user_cmds), False)
                 # help for mods - additional commands
-                elif game.players[s['player_num']].get_admin_role() == 20:
-                    game.rcon_tell(s['player_num'], "^7Moderator commands:")
-                    game.rcon_tell(s['player_num'], ", ".join(self.mod_cmds), False)
+                elif game.players[sar['player_num']].get_admin_role() == 20:
+                    game.rcon_tell(sar['player_num'], "^7Moderator commands:")
+                    game.rcon_tell(sar['player_num'], ", ".join(self.mod_cmds), False)
                 # help for admins - additional commands
-                elif game.players[s['player_num']].get_admin_role() == 40:
-                    game.rcon_tell(s['player_num'], "^7Admin commands:")
-                    game.rcon_tell(s['player_num'], ", ".join(self.admin_cmds), False)
-                elif game.players[s['player_num']].get_admin_role() == 60:
-                    game.rcon_tell(s['player_num'], "^7Full Admin commands:")
-                    game.rcon_tell(s['player_num'], ", ".join(self.fulladmin_cmds), False)
-                elif game.players[s['player_num']].get_admin_role() >= 80:
-                    game.rcon_tell(s['player_num'], "^7Senior Admin commands:")
-                    game.rcon_tell(s['player_num'], ", ".join(self.senioradmin_cmds), False)
+                elif game.players[sar['player_num']].get_admin_role() == 40:
+                    game.rcon_tell(sar['player_num'], "^7Admin commands:")
+                    game.rcon_tell(sar['player_num'], ", ".join(self.admin_cmds), False)
+                elif game.players[sar['player_num']].get_admin_role() == 60:
+                    game.rcon_tell(sar['player_num'], "^7Full Admin commands:")
+                    game.rcon_tell(sar['player_num'], ", ".join(self.fulladmin_cmds), False)
+                elif game.players[sar['player_num']].get_admin_role() >= 80:
+                    game.rcon_tell(sar['player_num'], "^7Senior Admin commands:")
+                    game.rcon_tell(sar['player_num'], ", ".join(self.senioradmin_cmds), False)
 
 ## player commands
             # register - register yourself as a basic user
-            elif s['command'] == '!register':
-                if not game.players[s['player_num']].get_registered_user():
-                    game.players[s['player_num']].register_user_db(role=1)
-                    game.rcon_tell(s['player_num'], "%s ^7put in group User" % game.players[s['player_num']].get_name())
+            elif sar['command'] == '!register':
+                if not game.players[sar['player_num']].get_registered_user():
+                    game.players[sar['player_num']].register_user_db(role=1)
+                    game.rcon_tell(sar['player_num'], "%s ^7put in group User" % game.players[sar['player_num']].get_name())
                 else:
-                    game.rcon_tell(s['player_num'], "%s ^7is already in a higher level group" % game.players[s['player_num']].get_name())
+                    game.rcon_tell(sar['player_num'], "%s ^7is already in a higher level group" % game.players[sar['player_num']].get_name())
 
             # hs - display headshot counter
-            elif s['command'] == '!hs':
-                hs_count = game.players[s['player_num']].get_headshots()
+            elif sar['command'] == '!hs':
+                hs_count = game.players[sar['player_num']].get_headshots()
                 if hs_count > 0:
-                    game.rcon_tell(s['player_num'], "^7You made ^2%d ^7headshot%s" % (hs_count, 's' if hs_count > 1 else ''))
+                    game.rcon_tell(sar['player_num'], "^7You made ^2%d ^7headshot%s" % (hs_count, 's' if hs_count > 1 else ''))
                 else:
-                    game.rcon_tell(s['player_num'], "^7You made no headshot")
+                    game.rcon_tell(sar['player_num'], "^7You made no headshot")
 
             # spree - display kill streak counter
-            elif s['command'] == '!spree':
-                spree_count = game.players[s['player_num']].get_killing_streak()
+            elif sar['command'] == '!spree':
+                spree_count = game.players[sar['player_num']].get_killing_streak()
                 if spree_count > 0:
-                    game.rcon_tell(s['player_num'], "^7You have ^2%d ^7kill%s in a row" % (spree_count, 's' if spree_count > 1 else ''))
+                    game.rcon_tell(sar['player_num'], "^7You have ^2%d ^7kill%s in a row" % (spree_count, 's' if spree_count > 1 else ''))
                 else:
-                    game.rcon_tell(s['player_num'], "^7You are currently not having a killing spree")
+                    game.rcon_tell(sar['player_num'], "^7You are currently not having a killing spree")
 
             # time - display the servers current time
-            elif s['command'] == '!time' or s['command'] == '@time':
+            elif sar['command'] == '!time' or sar['command'] == '@time':
                 msg = "^7%s" % time.strftime("%H:%M", time.localtime(time.time()))
-                if s['command'].startswith('@'):
+                if sar['command'].startswith('@'):
                     game.rcon_say(msg)
                 else:
-                    game.rcon_tell(s['player_num'], msg)
+                    game.rcon_tell(sar['player_num'], msg)
 
             # teams - balance teams
-            elif s['command'] == '!teams' and not self.ffa_lms_gametype:
-                game_data = game.get_gamestats()
-                if (abs(game_data[Player.teams[1]] - game_data[Player.teams[2]]) + 3) > 1:
-                    game.balance_teams()
+            elif sar['command'] == '!teams':
+                if not self.ffa_lms_gametype:
+                    game_data = game.get_gamestats()
+                    if (abs(game_data[Player.teams[1]] - game_data[Player.teams[2]]) + 3) > 1:
+                        game.balance_teams()
 
             # stats - display current map stats
-            elif s['command'] == '!stats':
-                if game.players[s['player_num']].get_deaths() == 0:
+            elif sar['command'] == '!stats':
+                if game.players[sar['player_num']].get_deaths() == 0:
                     ratio = 1.0
                 else:
-                    ratio = round(float(game.players[s['player_num']].get_kills()) / float(game.players[s['player_num']].get_deaths()), 2)
-                game.rcon_tell(s['player_num'], "^7Stats " + game.players[s['player_num']].get_name() + ": ^7K ^2" + str(game.players[s['player_num']].get_kills()) + " ^7D ^3" + str(game.players[s['player_num']].get_deaths()) + " ^7TK ^1" + str(game.players[s['player_num']].get_team_kill_count()) + " ^7Ratio ^5" + str(ratio) + " ^7HS ^2" + str(game.players[s['player_num']].get_headshots()))
+                    ratio = round(float(game.players[sar['player_num']].get_kills()) / float(game.players[sar['player_num']].get_deaths()), 2)
+                game.rcon_tell(sar['player_num'], "^7Map Stats %s: ^7K ^2%d ^7D ^3%d ^7TK ^1%d ^7Ratio ^5%s ^7HS ^2%d" % (game.players[sar['player_num']].get_name(), game.players[sar['player_num']].get_kills(), game.players[sar['player_num']].get_deaths(), game.players[sar['player_num']].get_team_kill_count(), ratio, game.players[sar['player_num']].get_headshots()))
 
             # xlrstats - display full player stats
-            elif s['command'] == '!xlrstats':
-                if line.split(s['command'])[1]:
-                    arg = str(line.split(s['command'])[1]).strip()
+            elif sar['command'] == '!xlrstats':
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip()
                     for player in game.players.itervalues():
                         if (arg.upper() in (player.get_name()).upper()) or arg == str(player.get_player_num()):
                             if player.get_registered_user():
@@ -708,22 +666,22 @@ class LogParser(object):
                                     ratio = 1.0
                                 else:
                                     ratio = round(float(player.get_xlr_kills()) / float(player.get_xlr_deaths()), 2)
-                                game.rcon_tell(s['player_num'], "^7XLR Stats " + player.get_name() + ": ^7K ^2" + str(player.get_xlr_kills()) + " ^7D ^3" + str(player.get_xlr_deaths()) + " ^7TK ^1" + str(player.get_xlr_tks()) + " ^7Ratio ^5" + str(ratio) + " ^7HS ^2" + str(player.get_xlr_headshots()))
+                                game.rcon_tell(sar['player_num'], "^Stats %s: ^7K ^2%d ^7D ^3%d ^7TK ^1%d ^7Ratio ^5%s ^7HS ^2%d" % (player.get_name(), player.get_xlr_kills(), player.get_xlr_deaths(), player.get_xlr_tks(), ratio, player.get_xlr_headshots()))
                             else:
-                                game.rcon_tell(s['player_num'], "^7Sorry, this player is not registered")
+                                game.rcon_tell(sar['player_num'], "^7Sorry, this player is not registered")
                 else:
-                    if game.players[s['player_num']].get_registered_user():
-                        if game.players[s['player_num']].get_xlr_deaths() == 0:
+                    if game.players[sar['player_num']].get_registered_user():
+                        if game.players[sar['player_num']].get_xlr_deaths() == 0:
                             ratio = 1.0
                         else:
-                            ratio = round(float(game.players[s['player_num']].get_xlr_kills()) / float(game.players[s['player_num']].get_xlr_deaths()), 2)
-                        game.rcon_tell(s['player_num'], "^7XLR Stats " + game.players[s['player_num']].get_name() + ": ^7K ^2" + str(game.players[s['player_num']].get_xlr_kills()) + " ^7D ^3" + str(game.players[s['player_num']].get_xlr_deaths()) + " ^7TK ^1" + str(game.players[s['player_num']].get_xlr_tks()) + " ^7Ratio ^5" + str(ratio) + " ^7HS ^2" + str(game.players[s['player_num']].get_xlr_headshots()))
+                            ratio = round(float(game.players[sar['player_num']].get_xlr_kills()) / float(game.players[sar['player_num']].get_xlr_deaths()), 2)
+                        game.rcon_tell(sar['player_num'], "^Stats %s: ^7K ^2%d ^7D ^3%d ^7TK ^1%d ^7Ratio ^5%s ^7HS ^2%d" % (game.players[sar['player_num']].get_name(), game.players[sar['player_num']].get_xlr_kills(), game.players[sar['player_num']].get_xlr_deaths(), game.players[sar['player_num']].get_xlr_tks(), ratio, game.players[sar['player_num']].get_xlr_headshots()))
                     else:
-                        game.rcon_tell(s['player_num'], "^7You need to ^2!register ^7first")
+                        game.rcon_tell(sar['player_num'], "^7You need to ^2!register ^7first")
 
             # forgive last team kill
-            elif s['command'] == '!forgiveprev' or s['command'] == '!fp' or s['command'] == '!f':
-                victim = game.players[s['player_num']]
+            elif sar['command'] == '!forgiveprev' or sar['command'] == '!fp' or sar['command'] == '!f':
+                victim = game.players[sar['player_num']]
                 if victim.get_killed_me():
                     forgive_player_num = victim.get_killed_me()[-1]
                     forgive_player = game.players[forgive_player_num]
@@ -731,11 +689,11 @@ class LogParser(object):
                     forgive_player.clear_killed_me(victim.get_player_num())
                     game.rcon_say("^7%s has forgiven %s's attack" % (victim.get_name(), forgive_player.get_name()))
                 else:
-                    game.rcon_tell(s['player_num'], "No one to forgive")
+                    game.rcon_tell(sar['player_num'], "No one to forgive")
 
             # forgive all team kills
-            elif s['command'] == '!forgiveall' or s['command'] == '!fa':
-                victim = game.players[s['player_num']]
+            elif sar['command'] == '!forgiveall' or sar['command'] == '!fa':
+                victim = game.players[sar['player_num']]
                 msg = ''
                 if victim.get_killed_me():
                     all_forgive_player_num_list = victim.get_killed_me()
@@ -748,244 +706,245 @@ class LogParser(object):
                 if msg:
                     game.rcon_say("^7%s has forgiven: %s" % (victim.get_name(), msg.rstrip(', ')))
                 else:
-                    game.rcon_tell(s['player_num'], "No one to forgive")
+                    game.rcon_tell(sar['player_num'], "No one to forgive")
 
 ## mod level 20
             # country
-            elif (s['command'] == '!country' or s['command'] == '@country') and game.players[s['player_num']].get_admin_role() >= 20:
-                if line.split(s['command'])[1]:
-                    user = str(line.split(s['command'])[1]).strip()
+            elif (sar['command'] == '!country' or sar['command'] == '@country') and game.players[sar['player_num']].get_admin_role() >= 20:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
                     found, victim, msg = self.player_found(user)
                     if not found:
-                        game.rcon_tell(s['player_num'], msg)
+                        game.rcon_tell(sar['player_num'], msg)
                     else:
                         msg = "Country ^3%s: ^7%s" % (victim.get_name(), victim.get_country())
-                        if s['command'].startswith('@'):
+                        if sar['command'].startswith('@'):
                             game.rcon_say(msg)
                         else:
-                            game.rcon_tell(s['player_num'], msg)
+                            game.rcon_tell(sar['player_num'], msg)
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !country <name>")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !country <name>")
 
             # leveltest
-            elif (s['command'] == '!leveltest' or s['command'] == '!lt') and game.players[s['player_num']].get_admin_role() >= 20:
-                if line.split(s['command'])[1]:
-                    user = str(line.split(s['command'])[1]).strip()
+            elif (sar['command'] == '!leveltest' or sar['command'] == '!lt') and game.players[sar['player_num']].get_admin_role() >= 20:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
                     found, victim, msg = self.player_found(user)
                     if not found:
-                        game.rcon_tell(s['player_num'], msg)
+                        game.rcon_tell(sar['player_num'], msg)
                     else:
-                        game.rcon_tell(s['player_num'], "Level ^3%s [^2%d^3]: ^7%s" % (victim.get_name(), victim.get_admin_role(), victim.roles[victim.get_admin_role()]))
+                        game.rcon_tell(sar['player_num'], "Level ^3%s [^2%d^3]: ^7%s" % (victim.get_name(), victim.get_admin_role(), victim.roles[victim.get_admin_role()]))
                 else:
-                    game.rcon_tell(s['player_num'], "Level ^3%s [^2%d^3]: ^7%s" % (game.players[s['player_num']].get_name(), game.players[s['player_num']].get_admin_role(), game.players[s['player_num']].roles[game.players[s['player_num']].get_admin_role()]))
+                    game.rcon_tell(sar['player_num'], "Level ^3%s [^2%d^3]: ^7%s" % (game.players[sar['player_num']].get_name(), game.players[sar['player_num']].get_admin_role(), game.players[sar['player_num']].roles[game.players[sar['player_num']].get_admin_role()]))
 
             # list - list all connected players
-            elif s['command'] == '!list' and game.players[s['player_num']].get_admin_role() >= 20:
-                msg = "^7Players online: "
-                for player in game.players.itervalues():
-                    if player.get_player_num() != 1022:
-                        msg += "^3%s [^2%d^3], " % (player.get_name(), player.get_player_num())
-                game.rcon_tell(s['player_num'], msg.rstrip(', '))
+            elif sar['command'] == '!list' and game.players[sar['player_num']].get_admin_role() >= 20:
+                msg = "^7Players online: %s" % ", ".join(["^3%s [^2%d^3]" % (player.get_name(), player.get_player_num()) for player in game.players.itervalues() if player.get_player_num() != 1022])
+                game.rcon_tell(sar['player_num'], msg)
 
             # nextmap - display the next map in rotation
-            elif (s['command'] == '!nextmap' or s['command'] == '@nextmap') and game.players[s['player_num']].get_admin_role() >= 20:
-                msg = "^7Next Map: ^3%s" % game.next_mapname
-                if s['command'].startswith('@'):
+            elif (sar['command'] == '!nextmap' or sar['command'] == '@nextmap') and game.players[sar['player_num']].get_admin_role() >= 20:
+                g_nextmap = game.rcon_handle.get_cvar('g_nextmap')
+                if g_nextmap:
+                    msg = "^7Next Map: ^3%s" % g_nextmap
+                else:
+                    msg = "^7Next Map: ^3%s" % game.next_mapname
+                if sar['command'].startswith('@'):
                     game.rcon_say(msg)
                 else:
-                    game.rcon_tell(s['player_num'], msg)
+                    game.rcon_tell(sar['player_num'], msg)
 
             # mute - mute or unmute a player
-            elif s['command'] == '!mute' and game.players[s['player_num']].get_admin_role() >= 20:
-                if line.split(s['command'])[1]:
-                    user = str(line.split(s['command'])[1]).strip()
+            elif sar['command'] == '!mute' and game.players[sar['player_num']].get_admin_role() >= 20:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
                     found, victim, msg = self.player_found(user)
                     if not found:
-                        game.rcon_tell(s['player_num'], msg)
+                        game.rcon_tell(sar['player_num'], msg)
                     else:
                         game.send_rcon("mute %d" % victim.get_player_num())
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !mute <name>")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !mute <name>")
 
             # shuffleteams
-            elif (s['command'] == '!shuffleteams' or s['command'] == '!shuffle') and not self.ffa_lms_gametype and game.players[s['player_num']].get_admin_role() >= 20:
-                game.send_rcon('shuffleteams')
+            elif (sar['command'] == '!shuffleteams' or sar['command'] == '!shuffle') and game.players[sar['player_num']].get_admin_role() >= 20:
+                if not self.ffa_lms_gametype:
+                    game.send_rcon('shuffleteams')
+                else:
+                    game.rcon_tell(sar['player_num'], "^7Command is disabled for this game mode")
 
             # warn - warn user
-            elif (s['command'] == '!warn' or s['command'] == '!w') and game.players[s['player_num']].get_admin_role() >= 20:
-                if line.split(s['command'])[1]:
-                    arg = str(line.split(s['command'])[1]).strip()
-                    if ' ' in arg:
-                        liste = arg.split(' ')
-                        user = liste[0]
-                        reason = ' '.join(liste[1:])
+            elif (sar['command'] == '!warn' or sar['command'] == '!w') and game.players[sar['player_num']].get_admin_role() >= 20:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip().split(' ')
+                    if len(arg) > 1:
+                        user = arg[0]
+                        reason = ' '.join(arg[1:])
                         found, victim, msg = self.player_found(user)
                         if not found:
-                            game.rcon_tell(s['player_num'], msg)
+                            game.rcon_tell(sar['player_num'], msg)
                         else:
-                            if victim.get_admin_role() >= game.players[s['player_num']].get_admin_role():
-                                game.rcon_tell(s['player_num'], "You cannot warn an admin")
+                            if victim.get_admin_role() >= game.players[sar['player_num']].get_admin_role():
+                                game.rcon_tell(sar['player_num'], "You cannot warn an admin")
                             else:
-                                victim.add_warning()
-                                msg = "^1WARNING ^7[^3%d^7]: ^2%s^7: " % (victim.get_warning(), victim.get_name())
-                                if reason in reason_dict:
-                                    msg += reason_dict[reason]
-                                    if reason == 'tk' and victim.get_warning() > 1:
-                                        victim.add_ban_point('tk, ban by %s' % game.players[s['player_num']].get_name(), 600)
-                                    elif reason == 'lang' and victim.get_warning() > 1:
-                                        victim.add_ban_point('lang', 300)
-                                    elif reason == 'spam' and victim.get_warning() > 1:
-                                        victim.add_ban_point('spam', 300)
-                                    elif reason == 'racism' and victim.get_warning() > 1:
-                                        victim.add_ban_point('racism', 300)
+                                if victim.get_warning() > 2:
+                                    game.kick_player(victim.get_player_num())
+                                    msg = "^7Player ^2%s ^7kicked, because of too many warnings" % victim.get_name()
                                 else:
-                                    msg += reason
+                                    victim.add_warning()
+                                    msg = "^1WARNING ^7[^3%d^7]: ^2%s^7: " % (victim.get_warning(), victim.get_name())
+                                    if reason in reason_dict:
+                                        msg = "%s%s" % (msg, reason_dict[reason])
+                                        if reason == 'tk' and victim.get_warning() > 1:
+                                            victim.add_ban_point('tk, ban by %s' % game.players[sar['player_num']].get_name(), 600)
+                                        elif reason == 'lang' and victim.get_warning() > 1:
+                                            victim.add_ban_point('lang', 300)
+                                        elif reason == 'spam' and victim.get_warning() > 1:
+                                            victim.add_ban_point('spam', 300)
+                                        elif reason == 'racism' and victim.get_warning() > 1:
+                                            victim.add_ban_point('racism', 300)
+                                    else:
+                                        msg = "%s%s" % (msg, reason)
                                 game.rcon_say(msg)
                     else:
-                        game.rcon_tell(s['player_num'], "^7You need to enter a reason: ^3!warn <name> <reason>")
+                        game.rcon_tell(sar['player_num'], "^7You need to enter a reason: ^3!warn <name> <reason>")
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !warn <name> <reason>")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !warn <name> <reason>")
 
 ## admin level 40
             # admins - list all the online admins
-            elif (s['command'] == '!admins' or s['command'] == '@admins') and game.players[s['player_num']].get_admin_role() >= 40:
-                msg = "^7Admins online: "
-                for player in game.players.itervalues():
-                    if player.get_admin_role() >= 20:
-                        msg += "^3%s [^2%d^3], " % (player.get_name(), player.get_admin_role())
-                if s['command'].startswith('@'):
-                    game.rcon_say(msg.rstrip(', '))
+            elif (sar['command'] == '!admins' or sar['command'] == '@admins') and game.players[sar['player_num']].get_admin_role() >= 40:
+                msg = "^7Admins online: %s" % ", ".join(["^3%s [^2%d^3]" % (player.get_name(), player.get_admin_role()) for player in game.players.itervalues() if player.get_admin_role() >= 20])
+                if sar['command'].startswith('@'):
+                    game.rcon_say(msg)
                 else:
-                    game.rcon_tell(s['player_num'], msg.rstrip(', '))
+                    game.rcon_tell(sar['player_num'], msg)
 
             # aliases - list the aliases of the player
-            elif (s['command'] == '!aliases' or s['command'] == '@aliases' or s['command'] == '!alias' or s['command'] == '@alias') and game.players[s['player_num']].get_admin_role() >= 40:
-                if line.split(s['command'])[1]:
-                    user = str(line.split(s['command'])[1]).strip()
+            elif (sar['command'] == '!aliases' or sar['command'] == '@aliases' or sar['command'] == '!alias' or sar['command'] == '@alias') and game.players[sar['player_num']].get_admin_role() >= 40:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
                     found, victim, msg = self.player_found(user)
                     if not found:
-                        game.rcon_tell(s['player_num'], msg)
+                        game.rcon_tell(sar['player_num'], msg)
                     else:
-                        msg = "^7Aliases of ^5%s: ^3%s" % (victim.get_name(), str(victim.get_aliases()))
-                        if s['command'].startswith('@'):
+                        msg = "^7Aliases of ^5%s: ^3%s" % (victim.get_name(), victim.get_aliases())
+                        if sar['command'].startswith('@'):
                             game.rcon_say(msg)
                         else:
-                            game.rcon_tell(s['player_num'], msg)
+                            game.rcon_tell(sar['player_num'], msg)
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !alias <name>")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !alias <name>")
 
             # bigtext - display big message on screen
-            elif s['command'] == '!bigtext' and game.players[s['player_num']].get_admin_role() >= 40:
-                if line.split(s['command'])[1]:
-                    game.rcon_bigtext("%s" % line.split(s['command'])[1].strip())
+            elif sar['command'] == '!bigtext' and game.players[sar['player_num']].get_admin_role() >= 40:
+                if line.split(sar['command'])[1]:
+                    game.rcon_bigtext("%s" % line.split(sar['command'])[1].strip())
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !bigtext <text>")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !bigtext <text>")
 
             # say - say a message to all players
-            elif s['command'] == '!say' and game.players[s['player_num']].get_admin_role() >= 40:
-                if line.split(s['command'])[1]:
-                    game.rcon_say("%s" % line.split(s['command'])[1].strip())
+            elif sar['command'] == '!say' and game.players[sar['player_num']].get_admin_role() >= 40:
+                if line.split(sar['command'])[1]:
+                    game.rcon_say("%s" % line.split(sar['command'])[1].strip())
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !say <text>")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !say <text>")
 
             # force - force a player to the given team
-            elif s['command'] == '!force' and game.players[s['player_num']].get_admin_role() >= 40:
-                if line.split(s['command'])[1]:
-                    arg = str(line.split(s['command'])[1]).strip()
-                    if ' ' in arg:
-                        user = arg.split(' ')[0]
-                        team = arg.split(' ')[1]
+            elif sar['command'] == '!force' and game.players[sar['player_num']].get_admin_role() >= 40:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip().split(' ')
+                    if len(arg) > 1:
+                        user = arg[0]
+                        team = arg[1]
                         team_dict = {'red': 'red', 'r': 'red', 're': 'red',
                                      'blue': 'blue', 'b': 'blue', 'bl': 'blue', 'blu': 'blue',
                                      'spec': 'spectator', 'spectator': 'spectator', 's': 'spectator', 'sp': 'spectator', 'spe': 'spectator',
                                      'green': 'green'}
                         found, victim, msg = self.player_found(user)
                         if not found:
-                            game.rcon_tell(s['player_num'], msg)
+                            game.rcon_tell(sar['player_num'], msg)
                         else:
                             if team in team_dict:
-                                game.rcon_forceteam(victim.get_player_num(), team_dict[team])
-                                game.rcon_tell(victim.get_player_num(), "^3You are forced to: ^7%s" % team_dict[team])
+                                victim_player_num = victim.get_player_num()
+                                game.rcon_forceteam(victim_player_num, team_dict[team])
+                                game.rcon_tell(victim_player_num, "^3You are forced to: ^7%s" % team_dict[team])
                             else:
-                                game.rcon_tell(s['player_num'], "^7Usage: !force <name> <blue/red/spec>")
+                                game.rcon_tell(sar['player_num'], "^7Usage: !force <name> <blue/red/spec>")
                     else:
-                        game.rcon_tell(s['player_num'], "^7Usage: !force <name> <blue/red/spec>")
+                        game.rcon_tell(sar['player_num'], "^7Usage: !force <name> <blue/red/spec>")
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !force <name> <blue/red/spec>")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !force <name> <blue/red/spec>")
 
             # nuke - nuke a player
-            elif s['command'] == '!nuke' and game.players[s['player_num']].get_admin_role() >= 40:
-                if line.split(s['command'])[1]:
-                    user = str(line.split(s['command'])[1]).strip()
+            elif sar['command'] == '!nuke' and game.players[sar['player_num']].get_admin_role() >= 40:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
                     found, victim, msg = self.player_found(user)
                     if not found:
-                        game.rcon_tell(s['player_num'], msg)
+                        game.rcon_tell(sar['player_num'], msg)
                     else:
-                        if victim.get_admin_role() >= game.players[s['player_num']].get_admin_role():
-                            game.rcon_tell(s['player_num'], "You cannot nuke an admin")
+                        if victim.get_admin_role() >= game.players[sar['player_num']].get_admin_role():
+                            game.rcon_tell(sar['player_num'], "You cannot nuke an admin")
                         else:
                             game.send_rcon("nuke %d" % victim.get_player_num())
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !nuke <name>")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !nuke <name>")
 
             # kick - kick a player
-            elif (s['command'] == '!kick' or s['command'] == '!k') and game.players[s['player_num']].get_admin_role() >= 40:
-                if line.split(s['command'])[1]:
-                    arg = str(line.split(s['command'])[1]).strip()
-                    if ' ' in arg:
-                        liste = arg.split(' ')
-                        user = liste[0]
-                        reason = ' '.join(liste[1:])
+            elif (sar['command'] == '!kick' or sar['command'] == '!k') and game.players[sar['player_num']].get_admin_role() >= 40:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip().split(' ')
+                    if len(arg) > 1:
+                        user = arg[0]
+                        reason = ' '.join(arg[1:])
                         found, victim, msg = self.player_found(user)
                         if not found:
-                            game.rcon_tell(s['player_num'], msg)
+                            game.rcon_tell(sar['player_num'], msg)
                         else:
-                            if victim.get_admin_role() >= game.players[s['player_num']].get_admin_role():
-                                game.rcon_tell(s['player_num'], "You cannot kick an admin")
+                            if victim.get_admin_role() >= game.players[sar['player_num']].get_admin_role():
+                                game.rcon_tell(sar['player_num'], "You cannot kick an admin")
                             else:
                                 game.kick_player(victim.get_player_num())
-                                msg = "^1%s ^7was kicked by %s:^4 " % (victim.get_name(), game.players[s['player_num']].get_name())
+                                msg = "^2%s ^7was kicked by %s: ^4" % (victim.get_name(), game.players[sar['player_num']].get_name())
                                 if reason in reason_dict:
-                                    msg += reason_dict[reason]
+                                    msg = "%s%s" % (msg, reason_dict[reason])
                                 else:
-                                    msg += reason
+                                    msg = "%s%s" % (msg, reason)
                                 game.rcon_say(msg)
-                                print("KICK: %s" % msg)
                     else:
-                        game.rcon_tell(s['player_num'], "^7You need to enter a reason: ^3!kick <name> <reason>")
+                        game.rcon_tell(sar['player_num'], "^7You need to enter a reason: ^3!kick <name> <reason>")
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !kick <name> <reason>")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !kick <name> <reason>")
 
             # warnclear - clear the user warnings
-            elif (s['command'] == '!warnclear' or s['command'] == '!wc' or s['command'] == '!wr') and game.players[s['player_num']].get_admin_role() >= 40:
-                if line.split(s['command'])[1]:
-                    user = str(line.split(s['command'])[1]).strip()
+            elif (sar['command'] == '!warnclear' or sar['command'] == '!wc' or sar['command'] == '!wr') and game.players[sar['player_num']].get_admin_role() >= 40:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
                     found, victim, msg = self.player_found(user)
                     if not found:
-                        game.rcon_tell(s['player_num'], msg)
+                        game.rcon_tell(sar['player_num'], msg)
                     else:
                         victim.clear_warning()
                         game.rcon_say("^1All warnings cleared for ^2%s" % victim.get_name())
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !warnclear <name>")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !warnclear <name>")
 
             # tempban - ban a player temporary for given period in hours (1-24 hrs)
-            elif (s['command'] == '!tempban' or s['command'] == '!tb') and game.players[s['player_num']].get_admin_role() >= 40:
-                if line.split(s['command'])[1]:
-                    arg = str(line.split(s['command'])[1]).strip()
-                    if ' ' in arg:
-                        liste = arg.split(' ')
-                        user = liste[0]
-                        if len(liste) == 2:
-                            reason_string = liste[1]
+            elif (sar['command'] == '!tempban' or sar['command'] == '!tb') and game.players[sar['player_num']].get_admin_role() >= 40:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip().split(' ')
+                    if len(arg) > 1:
+                        user = arg[0]
+                        if len(arg) == 2:
+                            reason = arg[1]
                             duration_string = '1'
                         else:
-                            reason_string = liste[1]
-                            duration_string = liste[2].rstrip('hm')
-                        if reason_string.rstrip('hm').isdigit():
-                            game.rcon_tell(s['player_num'], "^7You need to enter a reason: ^3!tempban <name> <reason> [<duration in hours>]")
+                            reason = arg[1]
+                            duration_string = arg[2].rstrip('hm')
+                        if reason.rstrip('hm').isdigit():
+                            game.rcon_tell(sar['player_num'], "^7You need to enter a reason: ^3!tempban <name> <reason> [<duration in hours>]")
                         else:
-                            reason = str(reason_string) + ", ban by %s" % game.players[s['player_num']].get_name()
                             if duration_string.isdigit():
                                 duration = int(duration_string) * 3600
                             else:
@@ -993,42 +952,42 @@ class LogParser(object):
                             if duration == 3600:
                                 duration_output = "1 hour"
                             else:
-                                duration_output = str(duration_string) + " hours"
+                                duration_output = "%s hours" % duration_string
                             if duration > 86400:
                                 duration = 86400
                                 duration_output = "24 hours"
                             found, victim, msg = self.player_found(user)
                             if not found:
-                                game.rcon_tell(s['player_num'], msg)
+                                game.rcon_tell(sar['player_num'], msg)
                             else:
-                                if victim.get_admin_role() >= game.players[s['player_num']].get_admin_role():
-                                    game.rcon_tell(s['player_num'], "You cannot ban an admin")
+                                if victim.get_admin_role() >= game.players[sar['player_num']].get_admin_role():
+                                    game.rcon_tell(sar['player_num'], "You cannot ban an admin")
                                 else:
-                                    victim.ban(duration=duration, reason=reason)
-                                    game.rcon_say("^2" + victim.get_name() + "^4 banned by ^3" + game.players[s['player_num']].get_name() + "^4 for " + duration_output + ", ^3reason: " + str(reason_string))
+                                    victim.ban(duration=duration, reason=reason, admin=game.players[sar['player_num']].get_name())
+                                    game.rcon_say("^2%s ^1banned for %s ^7by %s: ^4%s" % (victim.get_name(), duration_output, game.players[sar['player_num']].get_name(), reason))
                     else:
-                        game.rcon_tell(s['player_num'], "^7You need to enter a reason: ^3!tempban <name> <reason> [<duration in hours>]")
+                        game.rcon_tell(sar['player_num'], "^7You need to enter a reason: ^3!tempban <name> <reason> [<duration in hours>]")
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !tempban <name> <reason> [<duration in hours>]")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !tempban <name> <reason> [<duration in hours>]")
 
 ## full admin level 60
             # scream - scream a message in different colors to all players
-            elif s['command'] == '!scream' and game.players[s['player_num']].get_admin_role() >= 60:
-                if line.split(s['command'])[1]:
-                    game.rcon_say("^1%s" % line.split(s['command'])[1].strip())
-                    game.rcon_say("^2%s" % line.split(s['command'])[1].strip())
-                    game.rcon_say("^3%s" % line.split(s['command'])[1].strip())
-                    game.rcon_say("^5%s" % line.split(s['command'])[1].strip())
+            elif sar['command'] == '!scream' and game.players[sar['player_num']].get_admin_role() >= 60:
+                if line.split(sar['command'])[1]:
+                    game.rcon_say("^1%s" % line.split(sar['command'])[1].strip())
+                    game.rcon_say("^2%s" % line.split(sar['command'])[1].strip())
+                    game.rcon_say("^3%s" % line.split(sar['command'])[1].strip())
+                    game.rcon_say("^5%s" % line.split(sar['command'])[1].strip())
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !scream <text>")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !scream <text>")
 
             # slap - slap a player (a number of times); (1-10 times)
-            elif (s['command'] == '!slap' or s['command'] == '!spank') and game.players[s['player_num']].get_admin_role() >= 60:
-                if line.split(s['command'])[1]:
-                    arg = str(line.split(s['command'])[1]).strip()
-                    if ' ' in arg:
-                        user = arg.split(' ')[0]
-                        number = arg.split(' ')[1]
+            elif (sar['command'] == '!slap' or sar['command'] == '!spank') and game.players[sar['player_num']].get_admin_role() >= 60:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip().split(' ')
+                    if len(arg) > 1:
+                        user = arg[0]
+                        number = arg[1]
                         if not number.isdigit():
                             number = 1
                         else:
@@ -1036,62 +995,65 @@ class LogParser(object):
                         if number > 10:
                             number = 10
                     else:
-                        user = arg
+                        user = arg[0]
                         number = 1
                     found, victim, msg = self.player_found(user)
                     if not found:
-                        game.rcon_tell(s['player_num'], msg)
+                        game.rcon_tell(sar['player_num'], msg)
                     else:
-                        if victim.get_admin_role() >= game.players[s['player_num']].get_admin_role():
-                            game.rcon_tell(s['player_num'], "You cannot slap an admin")
+                        if victim.get_admin_role() >= game.players[sar['player_num']].get_admin_role():
+                            game.rcon_tell(sar['player_num'], "You cannot slap an admin")
                         else:
-                            for _ in range(0, number):
+                            for _ in xrange(0, number):
                                 game.send_rcon("slap %d" % victim.get_player_num())
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !slap <name> [<amount>]")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !slap <name> [<amount>]")
 
             # swap - swap teams for player 1 and 2 (if in different teams)
-            elif s['command'] == '!swap' and game.players[s['player_num']].get_admin_role() >= 60 and not self.ffa_lms_gametype:
-                if line.split(s['command'])[1]:
-                    arg = str(line.split(s['command'])[1]).strip()
-                    if ' ' in arg:
-                        player1 = arg.split(' ')[0]
-                        player2 = arg.split(' ')[1]
-                        found1, victim1, _ = self.player_found(player1)
-                        found2, victim2, _ = self.player_found(player2)
-                        if not found1 or not found2:
-                            game.rcon_tell(s['player_num'], 'Player not found')
-                        else:
-                            team1 = victim1.get_team()
-                            team2 = victim2.get_team()
-                            if team1 == team2:
-                                game.rcon_tell(s['player_num'], "^7Cannot swap, both players are in the same team")
+            elif sar['command'] == '!swap' and game.players[sar['player_num']].get_admin_role() >= 60:
+                if not self.ffa_lms_gametype:
+                    if line.split(sar['command'])[1]:
+                        arg = line.split(sar['command'])[1].strip().split(' ')
+                        if len(arg) > 1:
+                            player1 = arg[0]
+                            player2 = arg[1]
+                            found1, victim1, _ = self.player_found(player1)
+                            found2, victim2, _ = self.player_found(player2)
+                            if not found1 or not found2:
+                                game.rcon_tell(sar['player_num'], 'Player not found')
                             else:
-                                game.rcon_forceteam(victim1.get_player_num(), Player.teams[3])
-                                game.rcon_forceteam(victim2.get_player_num(), Player.teams[team1])
-                                game.rcon_forceteam(victim1.get_player_num(), Player.teams[team2])
-                                game.rcon_say('^7Swapped player ^3%s ^7with ^3%s' % (victim1.get_name(), victim2.get_name()))
+                                team1 = victim1.get_team()
+                                team2 = victim2.get_team()
+                                if team1 == team2:
+                                    game.rcon_tell(sar['player_num'], "^7Cannot swap, both players are in the same team")
+                                else:
+                                    game.rcon_forceteam(victim1.get_player_num(), Player.teams[3])
+                                    game.rcon_forceteam(victim2.get_player_num(), Player.teams[team1])
+                                    game.rcon_forceteam(victim1.get_player_num(), Player.teams[team2])
+                                    game.rcon_say('^7Swapped player ^3%s ^7with ^3%s' % (victim1.get_name(), victim2.get_name()))
+                        else:
+                            game.rcon_tell(sar['player_num'], "^7Usage: !swap <name1> <name2>")
                     else:
-                        game.rcon_tell(s['player_num'], "^7Usage: !swap <name1> <name2>")
+                        game.rcon_tell(sar['player_num'], "^7Usage: !swap <name1> <name2>")
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !swap <name1> <name2>")
+                    game.rcon_tell(sar['player_num'], "^7Command is disabled for this game mode")
 
             # version - display the version of the bot
-            elif s['command'] == '!version' and game.players[s['player_num']].get_admin_role() >= 60:
-                game.rcon_tell(s['player_num'], "^7Spunky Bot ^2v%s" % __version__)
+            elif sar['command'] == '!version' and game.players[sar['player_num']].get_admin_role() >= 60:
+                game.rcon_tell(sar['player_num'], "^7Spunky Bot ^2v%s" % __version__)
 
             # veto - stop voting process
-            elif s['command'] == '!veto' and game.players[s['player_num']].get_admin_role() >= 60:
+            elif sar['command'] == '!veto' and game.players[sar['player_num']].get_admin_role() >= 60:
                 game.send_rcon('veto')
 
             # ci - kick player with connection interrupted
-            elif s['command'] == '!ci' and game.players[s['player_num']].get_admin_role() >= 60:
-                if line.split(s['command'])[1]:
-                    user = str(line.split(s['command'])[1]).strip()
+            elif sar['command'] == '!ci' and game.players[sar['player_num']].get_admin_role() >= 60:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
                     player_ping = 0
                     found, victim, msg = self.player_found(user)
                     if not found:
-                        game.rcon_tell(s['player_num'], msg)
+                        game.rcon_tell(sar['player_num'], msg)
                     else:
                         # update rcon status
                         game.rcon_handle.quake.rcon_update()
@@ -1100,139 +1062,135 @@ class LogParser(object):
                                 player_ping = player.ping
                         if player_ping == 999:
                             game.kick_player(victim.get_player_num())
-                            game.rcon_say("^1%s ^7was kicked by %s: ^4connection interrupted" % (victim.get_name(), game.players[s['player_num']].get_name()))
+                            game.rcon_say("^1%s ^7was kicked by %s: ^4connection interrupted" % (victim.get_name(), game.players[sar['player_num']].get_name()))
                         else:
-                            game.rcon_tell(s['player_num'], "%s has no connection interrupted" % victim.get_name())
+                            game.rcon_tell(sar['player_num'], "%s has no connection interrupted" % victim.get_name())
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !ci <name>")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !ci <name>")
 
             # ban - ban a player for 7 days
-            elif (s['command'] == '!ban' or s['command'] == '!b') and game.players[s['player_num']].get_admin_role() >= 60:
-                if line.split(s['command'])[1]:
-                    arg = str(line.split(s['command'])[1]).strip()
-                    if ' ' in arg:
-                        liste = arg.split(' ')
-                        user = liste[0]
-                        reason_string = ' '.join(liste[1:])
-                        reason = reason_string + ", ban by %s" % game.players[s['player_num']].get_name()
+            elif (sar['command'] == '!ban' or sar['command'] == '!b') and game.players[sar['player_num']].get_admin_role() >= 60:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip().split(' ')
+                    if len(arg) > 1:
+                        user = arg[0]
+                        reason = ' '.join(arg[1:])
                         found, victim, msg = self.player_found(user)
                         if not found:
-                            game.rcon_tell(s['player_num'], msg)
+                            game.rcon_tell(sar['player_num'], msg)
                         else:
-                            if victim.get_admin_role() >= game.players[s['player_num']].get_admin_role():
-                                game.rcon_tell(s['player_num'], "You cannot ban an admin")
+                            if victim.get_admin_role() >= game.players[sar['player_num']].get_admin_role():
+                                game.rcon_tell(sar['player_num'], "You cannot ban an admin")
                             else:
                                 # ban for 7 days
-                                victim.ban(duration=604800, reason=reason)
-                                game.rcon_say("^2" + victim.get_name() + "^4 banned by ^3" + game.players[s['player_num']].get_name() + "^4 for 7 days, ^3reason: " + reason_string)
+                                victim.ban(duration=604800, reason=reason, admin=game.players[sar['player_num']].get_name())
+                                game.rcon_say("^2%s ^1banned for 7 days ^7by %s: ^4%s" % (victim.get_name(), game.players[sar['player_num']].get_name(), reason))
                     else:
-                        game.rcon_tell(s['player_num'], "^7You need to enter a reason: ^3!ban <name> <reason>")
+                        game.rcon_tell(sar['player_num'], "^7You need to enter a reason: ^3!ban <name> <reason>")
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !ban <name> <reason>")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !ban <name> <reason>")
 
 ## senior admin level 80
             # kiss - clear all player warnings
-            elif (s['command'] == '!kiss' or s['command'] == '!clear') and game.players[s['player_num']].get_admin_role() >= 80:
+            elif (sar['command'] == '!kiss' or sar['command'] == '!clear') and game.players[sar['player_num']].get_admin_role() >= 80:
                 for player in game.players.itervalues():
                     player.clear_warning()
                 game.rcon_say("^1All player warnings cleared")
 
             # map - load given map
-            elif s['command'] == '!map' and game.players[s['player_num']].get_admin_role() >= 80:
-                if line.split(s['command'])[1]:
-                    arg = str(line.split(s['command'])[1]).strip()
+            elif sar['command'] == '!map' and game.players[sar['player_num']].get_admin_role() >= 80:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip()
                     found, newmap, msg = self.map_found(arg)
                     if not found:
-                        game.rcon_tell(s['player_num'], msg)
+                        game.rcon_tell(sar['player_num'], msg)
                     else:
                         game.send_rcon('g_nextmap %s' % newmap)
                         game.next_mapname = newmap
-                        game.rcon_tell(s['player_num'], "^7Changing Map to: ^3%s" % newmap)
+                        game.rcon_tell(sar['player_num'], "^7Changing Map to: ^3%s" % newmap)
                         game.send_rcon('cyclemap')
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !map <ut4_name>")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !map <ut4_name>")
 
-            elif s['command'] == '!maps' and game.players[s['player_num']].get_admin_role() >= 80:
-                game.rcon_tell(s['player_num'], "^7Available Maps: ^3%s" % ', '.join(game.get_all_maps()))
+            elif sar['command'] == '!maps' and game.players[sar['player_num']].get_admin_role() >= 80:
+                game.rcon_tell(sar['player_num'], "^7Available Maps: ^3%s" % ', '.join(game.get_all_maps()))
 
             # maprestart - restart the map
-            elif s['command'] == '!maprestart' and game.players[s['player_num']].get_admin_role() >= 80:
+            elif sar['command'] == '!maprestart' and game.players[sar['player_num']].get_admin_role() >= 80:
                 game.send_rcon('restart')
                 for player in game.players.itervalues():
                     # reset player statistics
                     player.reset()
 
             # cyclemap - start next map in rotation
-            elif s['command'] == '!cyclemap' and game.players[s['player_num']].get_admin_role() >= 80:
+            elif sar['command'] == '!cyclemap' and game.players[sar['player_num']].get_admin_role() >= 80:
                 game.send_rcon('cyclemap')
 
             # setnextmap - set the given map as nextmap
-            elif s['command'] == '!setnextmap' and game.players[s['player_num']].get_admin_role() >= 80:
-                if line.split(s['command'])[1]:
-                    arg = str(line.split(s['command'])[1]).strip()
+            elif sar['command'] == '!setnextmap' and game.players[sar['player_num']].get_admin_role() >= 80:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip()
                     found, nextmap, msg = self.map_found(arg)
                     if not found:
-                        game.rcon_tell(s['player_num'], msg)
+                        game.rcon_tell(sar['player_num'], msg)
                     else:
                         game.send_rcon('g_nextmap %s' % nextmap)
                         game.next_mapname = nextmap
-                        game.rcon_tell(s['player_num'], "^7Next Map set to: ^3%s" % nextmap)
+                        game.rcon_tell(sar['player_num'], "^7Next Map set to: ^3%s" % nextmap)
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !setnextmap <ut4_name>")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !setnextmap <ut4_name>")
 
             # kill - kill a player
-            elif s['command'] == '!kill' and game.players[s['player_num']].get_admin_role() >= 80:
-                if line.split(s['command'])[1]:
-                    user = str(line.split(s['command'])[1]).strip()
+            elif sar['command'] == '!kill' and game.players[sar['player_num']].get_admin_role() >= 80:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
                     found, victim, msg = self.player_found(user)
                     if not found:
-                        game.rcon_tell(s['player_num'], msg)
+                        game.rcon_tell(sar['player_num'], msg)
                     else:
-                        if victim.get_admin_role() >= game.players[s['player_num']].get_admin_role():
-                            game.rcon_tell(s['player_num'], "You cannot kill an admin")
+                        if victim.get_admin_role() >= game.players[sar['player_num']].get_admin_role():
+                            game.rcon_tell(sar['player_num'], "You cannot kill an admin")
                         else:
                             game.send_rcon("smite %d" % victim.get_player_num())
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !kill <name>")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !kill <name>")
 
             # permban - ban a player permanent
-            elif (s['command'] == '!permban' or s['command'] == '!pb') and game.players[s['player_num']].get_admin_role() >= 80:
-                if line.split(s['command'])[1]:
-                    arg = str(line.split(s['command'])[1]).strip()
-                    if ' ' in arg:
-                        liste = arg.split(' ')
-                        user = liste[0]
-                        reason_string = ' '.join(liste[1:])
-                        reason = reason_string + ", ban by %s" % game.players[s['player_num']].get_name()
+            elif (sar['command'] == '!permban' or sar['command'] == '!pb') and game.players[sar['player_num']].get_admin_role() >= 80:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip().split(' ')
+                    if len(arg) > 1:
+                        user = arg[0]
+                        reason = ' '.join(arg[1:])
                         found, victim, msg = self.player_found(user)
                         if not found:
-                            game.rcon_tell(s['player_num'], msg)
+                            game.rcon_tell(sar['player_num'], msg)
                         else:
-                            if victim.get_admin_role() >= game.players[s['player_num']].get_admin_role():
-                                game.rcon_tell(s['player_num'], "You cannot ban an admin")
+                            if victim.get_admin_role() >= game.players[sar['player_num']].get_admin_role():
+                                game.rcon_tell(sar['player_num'], "You cannot ban an admin")
                             else:
                                 # ban for 20 years
-                                victim.ban(duration=630720000, reason=reason)
-                                game.rcon_say("^2" + victim.get_name() + "^4 banned by ^3" + game.players[s['player_num']].get_name() + "^4 permanent, ^3reason: " + reason_string)
+                                victim.ban(duration=630720000, reason=reason, admin=game.players[sar['player_num']].get_name())
+                                game.rcon_say("^2%s ^1banned permanently ^7by %s: ^4%s" % (victim.get_name(), game.players[sar['player_num']].get_name(), reason))
                                 # add IP address to bot-banlist.txt
                                 banlist = open('./bot-banlist.txt', 'a+')
-                                banlist.write(str(victim.get_ip_address()) + ":-1   // " + victim.get_name() + "    banned on  " + time.strftime("%d/%m/%Y (%H:%M)", time.localtime(time.time())) + ", reason : " + reason_string + "\n")
+                                banlist.write("%s:-1   // %s    banned on  %s, reason : %s\n" % (victim.get_ip_address(), victim.get_name(), time.strftime("%d/%m/%Y (%H:%M)", time.localtime(time.time())), reason))
                                 banlist.close()
                     else:
-                        game.rcon_tell(s['player_num'], "^7You need to enter a reason: ^3!permban <name> <reason>")
+                        game.rcon_tell(sar['player_num'], "^7You need to enter a reason: ^3!permban <name> <reason>")
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !permban <name> <reason>")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !permban <name> <reason>")
 
             # putgroup - add a client to a group
-            elif s['command'] == '!putgroup' and game.players[s['player_num']].get_admin_role() >= 80:
-                if line.split(s['command'])[1]:
-                    cmd = str(line.split(s['command'])[1]).strip()
-                    if ' ' in cmd:
-                        user = cmd.split(' ')[0]
-                        right = cmd.split(' ')[1]
+            elif sar['command'] == '!putgroup' and game.players[sar['player_num']].get_admin_role() >= 80:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip().split(' ')
+                    if len(arg) > 1:
+                        user = arg[0]
+                        right = arg[1]
                         found, victim, msg = self.player_found(user)
                         if not found:
-                            game.rcon_tell(s['player_num'], msg)
+                            game.rcon_tell(sar['player_num'], msg)
                         else:
                             if victim.get_registered_user():
                                 new_role = victim.get_admin_role()
@@ -1242,26 +1200,26 @@ class LogParser(object):
                                 new_role = 1
 
                             if right == "user" and victim.get_admin_role() < 80:
-                                game.rcon_tell(s['player_num'], "%s put in group User" % victim.get_name())
+                                game.rcon_tell(sar['player_num'], "%s put in group User" % victim.get_name())
                                 new_role = 1
                             elif right == "regular" and victim.get_admin_role() < 80:
-                                game.rcon_tell(s['player_num'], "%s put in group Regular" % victim.get_name())
+                                game.rcon_tell(sar['player_num'], "%s put in group Regular" % victim.get_name())
                                 new_role = 2
                             elif (right == "mod" or right == "moderator") and victim.get_admin_role() < 80:
-                                game.rcon_tell(s['player_num'], "%s added as Moderator" % victim.get_name())
+                                game.rcon_tell(sar['player_num'], "%s added as Moderator" % victim.get_name())
                                 new_role = 20
                             elif right == "admin" and victim.get_admin_role() < 80:
-                                game.rcon_tell(s['player_num'], "%s added as Admin" % victim.get_name())
+                                game.rcon_tell(sar['player_num'], "%s added as Admin" % victim.get_name())
                                 new_role = 40
                             elif right == "fulladmin" and victim.get_admin_role() < 80:
-                                game.rcon_tell(s['player_num'], "%s added as Full Admin" % victim.get_name())
+                                game.rcon_tell(sar['player_num'], "%s added as Full Admin" % victim.get_name())
                                 new_role = 60
                             # Note: senioradmin level can only be set by head admin
-                            elif right == "senioradmin" and game.players[s['player_num']].get_admin_role() == 100 and victim.get_player_num() != s['player_num']:
-                                game.rcon_tell(s['player_num'], "%s added as ^6Senior Admin" % victim.get_name())
+                            elif right == "senioradmin" and game.players[sar['player_num']].get_admin_role() == 100 and victim.get_player_num() != sar['player_num']:
+                                game.rcon_tell(sar['player_num'], "%s added as ^6Senior Admin" % victim.get_name())
                                 new_role = 80
                             else:
-                                game.rcon_tell(s['player_num'], "Sorry, you cannot put %s in group <%s>" % (victim.get_name(), right))
+                                game.rcon_tell(sar['player_num'], "Sorry, you cannot put %s in group <%s>" % (victim.get_name(), right))
 
                             # update database and set admin_role
                             values = (new_role, victim.get_guid())
@@ -1270,52 +1228,56 @@ class LogParser(object):
                             # overwrite admin role in game, no reconnect of player required
                             victim.set_admin_role(new_role)
                     else:
-                        game.rcon_tell(s['player_num'], "^7Usage: !putgroup <name> <group>")
+                        game.rcon_tell(sar['player_num'], "^7Usage: !putgroup <name> <group>")
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !putgroup <name> <group>")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !putgroup <name> <group>")
 
             # banlist - display the last 6 entries of the banlist
-            elif s['command'] == '!banlist' and game.players[s['player_num']].get_admin_role() >= 80:
+            elif sar['command'] == '!banlist' and game.players[sar['player_num']].get_admin_role() >= 80:
                 curs.execute("SELECT * FROM `ban_list` ORDER BY `id` DESC LIMIT 6")
                 result = curs.fetchall()
-                msg = ''
                 if len(result) > 6:
                     limit = 6
                 elif len(result) == 0:
                     limit = 0
                 else:
                     limit = len(result)
-                for item in range(limit):
-                    msg += '[' + str(result[item][0]) + ']' + result[item][2] + ', '  # 0=ID, 2=Name
-                if not msg:
-                    msg = 'Currently no one is banned'
-                game.rcon_tell(s['player_num'], "^7Banlist: %s" % str(msg.rstrip(', ')))
+                banlist = ['^7[^2%s^7]%s' % (result[item][0], result[item][2]) for item in xrange(limit)]  # 0=ID, 2=Name
+                msg = 'Currently no one is banned' if not banlist else str(", ".join(banlist))
+                game.rcon_tell(sar['player_num'], "^7Banlist: %s" % msg)
 
             # unban - unban a player from the database via ID
-            elif s['command'] == '!unban' and game.players[s['player_num']].get_admin_role() >= 80:
-                if line.split(s['command'])[1]:
-                    arg = str(line.split(s['command'])[1]).strip()
+            elif sar['command'] == '!unban' and game.players[sar['player_num']].get_admin_role() >= 80:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip()
                     if arg.isdigit():
                         values = (int(arg),)
-                        curs.execute("DELETE FROM `ban_list` WHERE `id` = ?", values)
-                        conn.commit()
-                        game.rcon_tell(s['player_num'], "^7Player ID #%s unbanned" % arg)
+                        curs.execute("SELECT COUNT(*) FROM `ban_list` WHERE `id` = ?", values)
+                        if curs.fetchone()[0] > 0:
+                            curs.execute("SELECT `name` FROM `ban_list` WHERE `id` = ?", values)
+                            result = curs.fetchone()
+                            name = str(result[0])
+                            curs.execute("DELETE FROM `ban_list` WHERE `id` = ?", values)
+                            conn.commit()
+                            game.rcon_tell(sar['player_num'], "^7Player ^2%s ^7unbanned" % name)
+                        else:
+                            game.rcon_tell(sar['player_num'], "^7Invalid ID, no Player found")
                     else:
-                        game.rcon_tell(s['player_num'], "^7Usage: !unban <ID>")
+                        game.rcon_tell(sar['player_num'], "^7Usage: !unban <ID>")
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !unban <ID>")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !unban <ID>")
 
 ## head admin level 100
             # ungroup - remove the admin level from a player
-            elif s['command'] == '!ungroup' and game.players[s['player_num']].get_admin_role() == 100:
-                if line.split(s['command'])[1]:
-                    user = str(line.split(s['command'])[1]).strip()
+            elif sar['command'] == '!ungroup' and game.players[sar['player_num']].get_admin_role() == 100:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
                     found, victim, msg = self.player_found(user)
                     if not found:
-                        game.rcon_tell(s['player_num'], msg)
+                        game.rcon_tell(sar['player_num'], msg)
                     else:
                         if 1 < victim.get_admin_role() < 100:
-                            game.rcon_tell(s['player_num'], "%s put in group User" % victim.get_name())
+                            game.rcon_tell(sar['player_num'], "%s put in group User" % victim.get_name())
                             # update database and set admin_role to 1
                             values = (1, victim.get_guid())
                             curs.execute("UPDATE `xlrstats` SET `admin_role` = ? WHERE `guid` = ?", values)
@@ -1323,29 +1285,29 @@ class LogParser(object):
                             # overwrite admin role in game, no reconnect of player required
                             victim.set_admin_role(1)
                         else:
-                            game.rcon_tell(s['player_num'], "Sorry, you cannot put %s in group User" % victim.get_name())
+                            game.rcon_tell(sar['player_num'], "Sorry, you cannot put %s in group User" % victim.get_name())
                 else:
-                    game.rcon_tell(s['player_num'], "^7Usage: !ungroup <name>")
+                    game.rcon_tell(sar['player_num'], "^7Usage: !ungroup <name>")
 
 ## iamgod
             # iamgod - register user as Head Admin
-            elif s['command'] == '!iamgod':
+            elif sar['command'] == '!iamgod':
                 if self.iamgod:
-                    if not game.players[s['player_num']].get_registered_user():
+                    if not game.players[sar['player_num']].get_registered_user():
                         # register new user in DB and set admin role to 100
-                        game.players[s['player_num']].register_user_db(role=100)
+                        game.players[sar['player_num']].register_user_db(role=100)
                     else:
-                        values = (100, game.players[s['player_num']].get_guid())
+                        values = (100, game.players[sar['player_num']].get_guid())
                         curs.execute("UPDATE `xlrstats` SET `admin_role` = ? WHERE `guid` = ?", values)
                         conn.commit()
                         # overwrite admin role in game, no reconnect of player required
-                        game.players[s['player_num']].set_admin_role(100)
+                        game.players[sar['player_num']].set_admin_role(100)
                     self.iamgod = False
-                    game.rcon_tell(s['player_num'], "^7You are registered as ^6Head Admin")
+                    game.rcon_tell(sar['player_num'], "^7You are registered as ^6Head Admin")
 
 ## unknown command
-            elif s['command'].startswith("!") and game.players[s['player_num']].get_admin_role() > 20:
-                game.rcon_tell(s['player_num'], "^7Unknown command ^3%s" % s['command'])
+            elif sar['command'].startswith('!') and game.players[sar['player_num']].get_admin_role() > 20:
+                game.rcon_tell(sar['player_num'], "^7Unknown command ^3%s" % sar['command'])
 
     def handle_flag(self, line):
         """
@@ -1390,6 +1352,13 @@ class LogParser(object):
                 if player.get_headshots() > most_hs:
                     most_hs = player.get_headshots()
                     headshooter = player.get_name()
+                # display personal stats at the end of the round, stats for players in spec will not be displayed
+                if player.get_team() != 3:
+                    game.rcon_tell(player.get_player_num(), "^7Stats %s: ^7K ^2%d ^7D ^3%d ^7HS ^1%d ^7TK ^1%d" % (player.get_name(), player.get_kills(), player.get_deaths(), player.get_headshots(), player.get_team_kill_count()))
+                # store score in database
+                player.save_info()
+
+            # display Awards
             if most_flags > 1:
                 msg += "^7%s: ^2%d ^4caps ^7- " % (flagrunner, most_flags)
             if most_kills > 1:
@@ -1400,35 +1369,6 @@ class LogParser(object):
                 msg += " ^7- %s: ^2%d ^1heads" % (headshooter, most_hs)
             if msg:
                 game.rcon_say("^1AWARDS: %s" % msg)
-
-            # display personal stats at the end of the round
-            for player in game.players.itervalues():
-                # display personal stats, stats for players in spec will not be displayed
-                if player.get_team() != 3:
-                    game.rcon_tell(player.get_player_num(), "^7Stats %s: ^7K ^2%d ^7D ^3%d ^7HS ^1%d ^7TK ^1%d" % (player.get_name(), player.get_kills(), player.get_deaths(), player.get_headshots(), player.get_team_kill_count()))
-                # store score in database
-                player.save_info()
-
-    def handle_round_init(self):
-        """
-        handle InitRound for CTF mode
-        """
-        if self.ctf_gametype:
-            with players_lock:
-                for player in game.players.itervalues():
-                    player.reset_flag_stats()
-
-    def explode_line2(self, line):
-        """
-        explode line
-        """
-        line = line.strip()
-        try:
-            tmp = line.split(" ")
-            array = {"player_num": int(tmp[0]), "name": tmp[1], "command": tmp[2]}
-        except IndexError:
-            array = {"player_num": None, "name": None, "command": None}
-        return array
 
     def debug(self, msg):
         """
@@ -1487,9 +1427,9 @@ class Player(object):
         self.country = None
         self.banned_player = False
 
-        self.prettyname = "".join(name.split())
+        self.prettyname = self.name
         # remove color characters from name
-        for item in range(10):
+        for item in xrange(10):
             self.prettyname = self.prettyname.replace('^%d' % item, '')
 
         # check ban_list
@@ -1500,8 +1440,7 @@ class Player(object):
             values = (self.guid,)
             curs.execute("SELECT `id` FROM `ban_list` WHERE `guid` = ?", values)
             result = curs.fetchone()
-            print("Player %s BANNED - GUID: %s - IP ADDRESS: %s" % (self.name, self.guid, self.address))
-            game.send_rcon("%s ^1banned ^7(ID #%s)" % (self.name, result[0]))
+            game.send_rcon("^7%s ^1banned ^7(ID #%s)" % (self.name, result[0]))
             self.banned_player = True
 
         if not self.banned_player:
@@ -1511,7 +1450,9 @@ class Player(object):
                 self.country = info.country_name
                 game.rcon_say("^7%s ^7connected from %s" % (name, info.country_name))
 
-    def ban(self, duration=900, reason='tk'):
+    def ban(self, duration=900, reason='tk', admin=None):
+        if admin:
+            reason = "%s, ban by %s" % (reason, admin)
         unix_expiration = duration + time.time()
         expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(unix_expiration))
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
@@ -1519,7 +1460,6 @@ class Player(object):
         curs.execute("INSERT INTO `ban_list` (`guid`,`name`,`ip_address`,`expires`,`timestamp`,`reason`) VALUES (?,?,?,?,?,?)", values)
         conn.commit()
         game.kick_player(self.player_num)
-        print("BAN: Player %s banned for %s, duration (in sec.): %d" % (self.name, reason, duration))
 
     def reset(self):
         self.kills = 0
@@ -1624,7 +1564,7 @@ class Player(object):
         return self.name
 
     def get_aliases(self):
-        return ", ".join(self.aliases)
+        return str(", ".join(self.aliases))
 
     def set_guid(self, guid):
         self.guid = guid
@@ -1645,7 +1585,7 @@ class Player(object):
         return self.num_played
 
     def get_last_visit(self):
-        return self.last_visit
+        return str(self.last_visit)
 
     def get_xlr_kills(self):
         return self.xlr_kills
@@ -1809,11 +1749,10 @@ class Player(object):
             game.rcon_tell(self.player_num, "^7Do not attack teammates, you ^1killed ^7%s" % victim.get_name())
             game.rcon_tell(victim.get_player_num(), "^7Type ^3!fp ^7to forgive ^3%s" % self.name)
             if len(self.tk_victim_names) >= 5:
-                game.rcon_say("^7Player ^3%s ^7kicked for team killing" % self.name)
+                game.rcon_say("^7Player ^2%s ^7kicked for team killing" % self.name)
                 # add TK ban points - 15 minutes
                 self.add_ban_point('tk, auto-kick', 900)
                 game.kick_player(self.player_num)
-                print("KICK: TK autokick for %s" % self.name)
             elif len(self.tk_victim_names) == 2:
                 game.rcon_tell(self.player_num, "^1WARNING ^7[^31^7]: ^7For team killing you will get kicked")
             elif len(self.tk_victim_names) == 3:
@@ -1950,8 +1889,7 @@ class Game(object):
         @param player_num: The player number
         @type  player_num: Integer
         """
-        with players_lock:
-            self.send_rcon('kick %d' % player_num)
+        self.send_rcon('kick %d' % player_num)
 
     def go_live(self):
         """
@@ -1967,7 +1905,7 @@ class Game(object):
         """
         set the current and next map in rotation
         """
-        self.rcon_handle.quake.rcon_update()
+        time.sleep(4)
         self.mapname = self.rcon_handle.get_quake_value('mapname')
         if self.maplist:
             if self.mapname in self.maplist:
@@ -1977,6 +1915,8 @@ class Game(object):
                     self.next_mapname = self.maplist[0]
             else:
                 self.next_mapname = self.maplist[0]
+        else:
+            self.next_mapname = self.mapname
 
     def set_all_maps(self):
         """
@@ -1984,11 +1924,7 @@ class Game(object):
         """
         all_maps = self.rcon_handle.get_rcon_output("dir map bsp")[1].split()
         all_maps.sort()
-        output = []
-        for maps in all_maps:
-            if maps.startswith("/"):
-                output.append(maps.replace("/", "").replace(".bsp", ""))
-        self.all_maps_list = output
+        self.all_maps_list = [maps.replace("/", "").replace(".bsp", "") for maps in all_maps if maps.startswith("/")]
 
     def get_all_maps(self):
         """
@@ -2011,19 +1947,18 @@ class Game(object):
         """
         get number of players in red team, blue team and spectator
         """
-        with players_lock:
-            game_data = {Player.teams[1]: 0, Player.teams[2]: 0, Player.teams[3]: 0}
-            for player in self.players.itervalues():
-                # red team
-                if player.get_team() == 1:
-                    game_data[Player.teams[1]] += 1
-                # blue team
-                elif player.get_team() == 2:
-                    game_data[Player.teams[2]] += 1
-                # spectators
-                elif player.get_team() == 3:
-                    game_data[Player.teams[3]] += 1
-            return game_data
+        game_data = {Player.teams[1]: 0, Player.teams[2]: 0, Player.teams[3]: 0}
+        for player in self.players.itervalues():
+            # red team
+            if player.get_team() == 1:
+                game_data[Player.teams[1]] += 1
+            # blue team
+            elif player.get_team() == 2:
+                game_data[Player.teams[2]] += 1
+            # spectators
+            elif player.get_team() == 3:
+                game_data[Player.teams[3]] += 1
+        return game_data
 
     def balance_teams(self):
         """
@@ -2059,16 +1994,6 @@ class Game(object):
                 self.rcon_forceteam(player.get_player_num(), Player.teams[team2])
         self.rcon_say("^7Autobalance complete!")
 
-    def new_game(self):
-        """
-        set-up a new game
-        """
-        self.rcon_handle.clear()
-        ## Example: set g_gravity according to the value in the config file
-        # uncomment the following 2 lines to enable this customization:
-        # gravity = CONFIG.get('custom', 'gravity')
-        # self.rcon_handle.push("set g_gravity %s" % gravity)
-
 
 ### Main ###
 
@@ -2092,7 +2017,7 @@ curs.execute('CREATE TABLE IF NOT EXISTS ban_points (id INTEGER PRIMARY KEY NOT 
 LOGPARS = LogParser(CONFIG.get('server', 'log_file'), CONFIG.get('bot', 'verbose'), CONFIG.get('bot', 'teamkill_autokick'))
 
 # load the GEO database and store it globally in interpreter memory
-GEOIP = PyGeoIP.Database('./lib/GeoIP.dat')
+GEOIP = pygeoip.Database('./lib/GeoIP.dat')
 
 # create instance of Game
 game = Game()
