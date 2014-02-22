@@ -48,7 +48,7 @@ class TaskManager(object):
      - check for spectators on full server
      - check player ping
     """
-    def __init__(self, frequency, max_ping, rcon_dispatcher):
+    def __init__(self, frequency, max_ping, num_kick_specs, rcon_dispatcher):
         """
         create a new instance of TaskManager
 
@@ -56,11 +56,14 @@ class TaskManager(object):
         @type  frequency: Integer
         @param max_ping: Maximum allowed ping
         @type  max_ping: Integer
+        @param num_kick_specs: Number of players for kicking spectators on full server
+        @type num_kick_specs: Integer
         @param rcon_dispatcher: The RCON instance
         @type  rcon_dispatcher: Instance
         """
         self.frequency = frequency
         self.max_ping = max_ping
+        self.num_kick_specs = num_kick_specs
         self.rcon_dispatcher = rcon_dispatcher
         # start Thread
         self.processor = Thread(target=self.process)
@@ -108,7 +111,7 @@ class TaskManager(object):
         """
         with players_lock:
             # get number of connected players
-            counter = len(game.players)
+            counter = len(game.players) - 1  # bot is counted as player
 
             for player in game.players.itervalues():
                 player_name = player.get_name()
@@ -135,14 +138,15 @@ class TaskManager(object):
                     player.add_warning()
 
                 # check for spectators and set warning
-                if 'GTV-' in player_name:
-                    continue  # ignore player with name prefix GTV-
-                # if player is spectator on full server (more than 10 players), inform player and increase warn counter, GTV or Moderator or higher levels will not get the warning
-                elif counter > 11 and player.get_team() == 3 and player_admin_role < 20 and player.get_time_joined() < (time.time() - 30) and player_num != 1022:
-                    player.add_spec_warning()
-                    game.rcon_tell(player_num, "^1WARNING ^7[^3%d^7]: ^7You are spectator too long on full server" % player.get_spec_warning(), False)
-                else:
-                    player.clear_spec_warning()
+                if self.num_kick_specs > 0:
+                    if 'GTV-' in player_name:
+                        continue  # ignore player with name prefix GTV-
+                    # if player is spectator on full server, inform player and increase warn counter, GTV or Moderator or higher levels will not get the warning
+                    elif counter > self.num_kick_specs and player.get_team() == 3 and player_admin_role < 20 and player.get_time_joined() < (time.time() - 30) and player_num != 1022:
+                        player.add_spec_warning()
+                        game.rcon_tell(player_num, "^1WARNING ^7[^3%d^7]: ^7You are spectator too long on full server" % player.get_spec_warning(), False)
+                    else:
+                        player.clear_spec_warning()
 
 
 ### CLASS Log Parser ###
@@ -2034,7 +2038,7 @@ WORLD = Player(1022, '127.0.0.1', 'NONE', 'World', 3)
 game.add_player(WORLD)
 
 # create instance of TaskManager
-TaskManager(int(CONFIG.get('bot', 'task_frequency')), int(CONFIG.get('bot', 'max_ping')), game.rcon_handle)
+TaskManager(int(CONFIG.get('bot', 'task_frequency')), int(CONFIG.get('bot', 'max_ping')), int(CONFIG.get('bot', 'kick_spec_full_server')), game.rcon_handle)
 
 # read the logfile
 LOGPARS.read_log()
