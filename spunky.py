@@ -36,6 +36,7 @@ from Queue import Queue
 from threading import Thread
 from threading import RLock
 from ConfigParser import ConfigParser
+from urllib2 import urlopen, URLError
 
 
 ## CLASS TaskManager ###
@@ -1053,6 +1054,12 @@ class LogParser(object):
             # version - display the version of the bot
             elif sar['command'] == '!version' and game.players[sar['player_num']].get_admin_role() >= 60:
                 game.rcon_tell(sar['player_num'], "^7Spunky Bot ^2v%s" % __version__)
+                try:
+                    get_latest = urlopen('http://master.spunkybot.de/version.txt').read().strip()
+                except URLError:
+                    get_latest = __version__
+                if __version__ < get_latest:
+                    game.rcon_tell(sar['player_num'], "^7A newer release ^6%s ^7is available, check ^3www.spunkybot.de" % get_latest)
 
             # veto - stop voting process
             elif sar['command'] == '!veto' and game.players[sar['player_num']].get_admin_role() >= 60:
