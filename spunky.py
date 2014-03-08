@@ -1,5 +1,5 @@
 """
-Spunky Bot - Automated game server bot
+Spunky Bot - An automated game server bot
 http://www.spunkybot.de
 Author: Alexander Kress
 
@@ -28,15 +28,15 @@ import time
 import sqlite3
 import math
 import textwrap
+import urllib2
 import lib.pygeoip as pygeoip
+import lib.schedule as schedule
 
 from lib.rcon import Rcon
 from lib.rules import Rules
-from Queue import Queue
-from threading import Thread
+from lib.heartbeat import HeartBeat
 from threading import RLock
 from ConfigParser import ConfigParser
-from urllib2 import urlopen, URLError
 
 
 ## CLASS TaskManager ###
@@ -49,12 +49,10 @@ class TaskManager(object):
      - check for spectators on full server
      - check player ping
     """
-    def __init__(self, frequency, max_ping, num_kick_specs, rcon_dispatcher):
+    def __init__(self, max_ping, num_kick_specs, rcon_dispatcher):
         """
         create a new instance of TaskManager
 
-        @param frequency: Interval for checking ping, warnings and spectators
-        @type  frequency: Integer
         @param max_ping: Maximum allowed ping
         @type  max_ping: Integer
         @param num_kick_specs: Number of players for kicking spectators on full server
@@ -62,31 +60,24 @@ class TaskManager(object):
         @param rcon_dispatcher: The RCON instance
         @type  rcon_dispatcher: Instance
         """
-        self.frequency = frequency
         self.max_ping = max_ping
         self.num_kick_specs = num_kick_specs
         self.rcon_dispatcher = rcon_dispatcher
-        # start Thread
-        self.processor = Thread(target=self.process)
-        self.processor.setDaemon(True)
-        self.processor.start()
 
     def process(self):
         """
-        Thread process
+        start process
         """
-        while 1:
-            # wait for given delay in the config file
-            time.sleep(self.frequency)
-            # get rcon status
-            self.rcon_dispatcher.get_status()
-            try:
-                # check amount of warnings and kick player if needed, check for spectators
-                self.check_warnings_and_specs()
+        # get rcon status
+        self.rcon_dispatcher.get_status()
+        try:
+            # check amount of warnings and kick player if needed, check for spectators
+            self.check_warnings_and_specs()
+            if self.max_ping > 0:
                 # check for player with high ping
                 self.check_ping()
-            except Exception:
-                continue
+        except Exception, err:
+            print "%s: %s" % (err.__class__.__name__, err)
 
     def check_ping(self):
         """
@@ -96,14 +87,18 @@ class TaskManager(object):
             # rcon update status
             self.rcon_dispatcher.quake.rcon_update()
             for player in self.rcon_dispatcher.quake.players:
-                # if ping is too high, inform player and increase warn counter, Admins or higher levels will not get the warning
-                ping_value = player.ping
-                gameplayer = game.players[player.num]
-                if self.max_ping < ping_value < 999 and gameplayer.get_admin_role() < 40:
-                    gameplayer.add_high_ping()
-                    game.rcon_tell(player.num, "^1WARNING ^7[^3%d^7]: ^7Your ping is too high [^4%d^7]. The maximum allowed ping is %d." % (gameplayer.get_high_ping(), ping_value, self.max_ping), False)
+                # if ping is too high, increase warn counter, Admins or higher levels will not get the warning
+                try:
+                    ping_value = player.ping
+                    gameplayer = game.players[player.num]
+                except KeyError:
+                    continue
                 else:
-                    gameplayer.clear_high_ping()
+                    if self.max_ping < ping_value < 999 and gameplayer.get_admin_role() < 40:
+                        gameplayer.add_high_ping()
+                        game.rcon_tell(player.num, "^1WARNING ^7[^3%d^7]: ^7Your ping is too high [^4%d^7]. The maximum allowed ping is %d." % (gameplayer.get_high_ping(), ping_value, self.max_ping), False)
+                    else:
+                        gameplayer.clear_high_ping()
 
     def check_warnings_and_specs(self):
         """
@@ -140,12 +135,15 @@ class TaskManager(object):
 
                 # check for spectators and set warning
                 if self.num_kick_specs > 0:
+                    # ignore player with name prefix GTV-
                     if 'GTV-' in player_name:
-                        continue  # ignore player with name prefix GTV-
-                    # if player is spectator on full server, inform player and increase warn counter, GTV or Moderator or higher levels will not get the warning
+                        continue
+                    # if player is spectator on full server, inform player and increase warn counter
+                    # GTV or Moderator or higher levels will not get the warning
                     elif counter > self.num_kick_specs and player.get_team() == 3 and player_admin_role < 20 and player.get_time_joined() < (time.time() - 30) and player_num != 1022:
                         player.add_spec_warning()
                         game.rcon_tell(player_num, "^1WARNING ^7[^3%d^7]: ^7You are spectator too long on full server" % player.get_spec_warning(), False)
+                    # reset spec warning
                     else:
                         player.clear_spec_warning()
 
@@ -162,9 +160,9 @@ class LogParser(object):
         @param file_name: The full path of the games log file
         @type  file_name: String
         @param verbose_mode: Enable or disable verbose mode to print debug messages
-        @type  verbose_mode: String
+        @type  verbose_mode: Boolean
         @param tk_autokick: Enable or disable autokick for team killing
-        @type  tk_autokick: String
+        @type  tk_autokick: Boolean
         """
         # hit zone support for UrT > 4.2.013
         self.hit_points = {0: "HEAD", 1: "HEAD", 2: "HELMET", 3: "TORSO", 4: "VEST", 5: "LEFT_ARM", 6: "RIGHT_ARM", 7: "GROIN", 8: "BUTT", 9: "LEFT_UPPER_LEG", 10: "RIGHT_UPPER_LEG", 11: "LEFT_LOWER_LEG", 12: "RIGHT_LOWER_LEG", 13: "LEFT_FOOT", 14: "RIGHT_FOOT"}
@@ -190,10 +188,11 @@ class LogParser(object):
         self.log_file.seek(0, 2)
         self.ffa_lms_gametype = False
         self.ctf_gametype = False
+        self.urt42_modversion = True
         # enable/disable debug output
-        self.verbose = True if verbose_mode == '1' else False
+        self.verbose = verbose_mode
         # enable/disable autokick for team killing
-        self.tk_autokick = True if tk_autokick == '1' else False
+        self.tk_autokick = tk_autokick
         # enable/disable option to get Head Admin by checking existence of head admin in database
         curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `admin_role` = 100")
         self.iamgod = True if curs.fetchone()[0] < 1 else False
@@ -202,16 +201,15 @@ class LogParser(object):
         """
         find InitGame start
         """
-        lgf = self.log_file
         seek_amount = 768
         # search within the specified range for the InitGame message
-        start_pos = lgf.tell() - seek_amount
+        start_pos = self.log_file.tell() - seek_amount
         end_pos = start_pos + seek_amount
-        lgf.seek(start_pos)
+        self.log_file.seek(start_pos)
         game_start = False
         while not game_start:
-            while lgf:
-                line = lgf.readline()
+            while self.log_file:
+                line = self.log_file.readline()
                 msg = re.search(r"(\d+:\d+)\s([A-Za-z]+:)", line)
                 if msg is not None and msg.group(2) == 'InitGame:':
                     game_start = True
@@ -220,34 +218,44 @@ class LogParser(object):
                         self.hit_points = {0: "HEAD", 1: "HELMET", 2: "TORSO", 3: "KEVLAR", 4: "ARMS", 5: "LEGS", 6: "BODY"}
                         self.hit_item = {1: "UT_MOD_KNIFE", 2: "UT_MOD_BERETTA", 3: "UT_MOD_DEAGLE", 4: "UT_MOD_SPAS", 5: "UT_MOD_MP5K", 6: "UT_MOD_UMP45", 8: "UT_MOD_LR300", 9: "UT_MOD_G36", 10: "UT_MOD_PSG1", 14: "UT_MOD_SR8", 15: "UT_MOD_AK103", 17: "UT_MOD_NEGEV", 19: "UT_MOD_M4", 21: "UT_MOD_KICKED", 22: "UT_MOD_KNIFE_THROWN"}
                         self.death_cause = {1: "MOD_WATER", 3: "MOD_LAVA", 5: "UT_MOD_TELEFRAG", 6: "MOD_FALLING", 7: "UT_MOD_SUICIDE", 9: "MOD_TRIGGER_HURT", 10: "MOD_CHANGE_TEAM", 12: "UT_MOD_KNIFE", 13: "UT_MOD_KNIFE_THROWN", 14: "UT_MOD_BERETTA", 15: "UT_MOD_KNIFE_DEAGLE", 16: "UT_MOD_SPAS", 17: "UT_MOD_UMP45", 18: "UT_MOD_MP5K", 19: "UT_MOD_LR300", 20: "UT_MOD_G36", 21: "UT_MOD_PSG1", 22: "UT_MOD_HK69", 23: "UT_MOD_BLED", 24: "UT_MOD_KICKED", 25: "UT_MOD_HEGRENADE", 28: "UT_MOD_SR8", 30: "UT_MOD_AK103", 31: "UT_MOD_SPLODED", 32: "UT_MOD_SLAPPED", 33: "UT_MOD_BOMBED", 34: "UT_MOD_NUKED", 35: "UT_MOD_NEGEV", 37: "UT_MOD_HK69_HIT", 38: "UT_MOD_M4", 39: "UT_MOD_FLAG", 40: "UT_MOD_GOOMBA"}
+                        self.urt42_modversion = False
+                        self.debug("Game modversion 4.1 detected")
                     if 'g_gametype\\0' in line or 'g_gametype\\1' in line:
                         # disable teamkill event for FFA (0) and LMS (1) mode
                         self.ffa_lms_gametype = True
                     if 'g_gametype\\7' in line:
                         self.ctf_gametype = True
-                if lgf.tell() > end_pos:
+                if self.log_file.tell() > end_pos:
                     break
                 elif len(line) == 0:
                     break
-            if lgf.tell() < seek_amount:
-                lgf.seek(0, 0)
+            if self.log_file.tell() < seek_amount:
+                self.log_file.seek(0, 0)
             else:
                 cur_pos = start_pos - seek_amount
                 end_pos = start_pos
                 start_pos = cur_pos
                 if start_pos < 0:
                     start_pos = 0
-                lgf.seek(start_pos)
+                self.log_file.seek(start_pos)
 
     def read_log(self):
         """
         read the logfile
         """
+        # create instance of TaskManager
+        tasks = TaskManager(CONFIG.getint('bot', 'max_ping'), CONFIG.getint('bot', 'kick_spec_full_server'), game.rcon_handle)
+        # create instance of HeartBeat
+        ping = HeartBeat(__version__, CONFIG.get('server', 'server_port'))
+        # schedule the tasks
+        schedule.every(CONFIG.getint('bot', 'task_frequency')).seconds.do(tasks.process)
+        schedule.every(12).hours.do(ping.process)
+
         self.find_game_start()
-        lgf = self.log_file
-        lgf.seek(0, 2)
-        while lgf:
-            line = lgf.readline()
+        self.log_file.seek(0, 2)
+        while self.log_file:
+            schedule.run_pending()
+            line = self.log_file.readline()
             if len(line) != 0:
                 self.parse_line(line)
             else:
@@ -300,8 +308,10 @@ class LogParser(object):
                     self.handle_flag(line)
                 elif tmp[0].lstrip() == 'Exit':
                     self.handle_awards()
-        except Exception:
+        except (IndexError, KeyError):
             pass
+        except Exception, err:
+            print "%s: %s" % (err.__class__.__name__, err)
 
     def explode_line(self, line):
         """
@@ -473,19 +483,14 @@ class LogParser(object):
         with players_lock:
             parts = line.split(":", 1)
             info = parts[0].split(" ")
-            info1 = parts[1].strip().split(" ")
-            k_name = info1[0]
+            k_name = parts[1].strip().split(" ")[0]
             killer_id = int(info[0])
             victim_id = int(info[1])
             death_cause = self.death_cause[int(info[2])]
             victim = game.players[victim_id]
 
-            # do not count non-client kills
-            if k_name != "<non-client>":
-                killer = game.players[killer_id]
-            else:
-                # killed by WORLD
-                killer = game.players[1022]
+            killer = game.players[killer_id] if k_name != "<non-client>" else game.players[1022]
+
             killer_name = killer.get_name()
             victim_name = victim.get_name()
             tk_event = False
@@ -504,6 +509,7 @@ class LogParser(object):
             if death_cause in suicide_reason or (killer_id == victim_id and (death_cause == 'UT_MOD_HEGRENADE' or death_cause == 'UT_MOD_HK69' or death_cause == 'UT_MOD_NUKED' or death_cause == 'UT_MOD_SLAPPED' or death_cause == 'UT_MOD_BOMBED')):
                 killer.suicide()
                 victim.die()
+                self.debug("Player %d %s committed suicide with %s" % (killer_id, killer_name, death_cause))
             # kill counter
             elif not tk_event and int(info[2]) != 10:  # 10: MOD_CHANGE_TEAM
                 killer.kill()
@@ -667,20 +673,20 @@ class LogParser(object):
                     for player in game.players.itervalues():
                         if (arg.upper() in (player.get_name()).upper()) or arg == str(player.get_player_num()):
                             if player.get_registered_user():
-                                if player.get_xlr_deaths() == 0:
+                                if player.get_db_deaths() == 0:
                                     ratio = 1.0
                                 else:
-                                    ratio = round(float(player.get_xlr_kills()) / float(player.get_xlr_deaths()), 2)
-                                game.rcon_tell(sar['player_num'], "^Stats %s: ^7K ^2%d ^7D ^3%d ^7TK ^1%d ^7Ratio ^5%s ^7HS ^2%d" % (player.get_name(), player.get_xlr_kills(), player.get_xlr_deaths(), player.get_xlr_tks(), ratio, player.get_xlr_headshots()))
+                                    ratio = round(float(player.get_db_kills()) / float(player.get_db_deaths()), 2)
+                                game.rcon_tell(sar['player_num'], "^7Stats %s: ^7K ^2%d ^7D ^3%d ^7TK ^1%d ^7Ratio ^5%s ^7HS ^2%d" % (player.get_name(), player.get_db_kills(), player.get_db_deaths(), player.get_db_tks(), ratio, player.get_db_headshots()))
                             else:
                                 game.rcon_tell(sar['player_num'], "^7Sorry, this player is not registered")
                 else:
                     if game.players[sar['player_num']].get_registered_user():
-                        if game.players[sar['player_num']].get_xlr_deaths() == 0:
+                        if game.players[sar['player_num']].get_db_deaths() == 0:
                             ratio = 1.0
                         else:
-                            ratio = round(float(game.players[sar['player_num']].get_xlr_kills()) / float(game.players[sar['player_num']].get_xlr_deaths()), 2)
-                        game.rcon_tell(sar['player_num'], "^Stats %s: ^7K ^2%d ^7D ^3%d ^7TK ^1%d ^7Ratio ^5%s ^7HS ^2%d" % (game.players[sar['player_num']].get_name(), game.players[sar['player_num']].get_xlr_kills(), game.players[sar['player_num']].get_xlr_deaths(), game.players[sar['player_num']].get_xlr_tks(), ratio, game.players[sar['player_num']].get_xlr_headshots()))
+                            ratio = round(float(game.players[sar['player_num']].get_db_kills()) / float(game.players[sar['player_num']].get_db_deaths()), 2)
+                        game.rcon_tell(sar['player_num'], "^7Stats %s: ^7K ^2%d ^7D ^3%d ^7TK ^1%d ^7Ratio ^5%s ^7HS ^2%d" % (game.players[sar['player_num']].get_name(), game.players[sar['player_num']].get_db_kills(), game.players[sar['player_num']].get_db_deaths(), game.players[sar['player_num']].get_db_tks(), ratio, game.players[sar['player_num']].get_db_headshots()))
                     else:
                         game.rcon_tell(sar['player_num'], "^7You need to ^2!register ^7first")
 
@@ -699,7 +705,7 @@ class LogParser(object):
             # forgive all team kills
             elif sar['command'] == '!forgiveall' or sar['command'] == '!fa':
                 victim = game.players[sar['player_num']]
-                msg = ''
+                msg = []
                 if victim.get_killed_me():
                     all_forgive_player_num_list = victim.get_killed_me()
                     forgive_player_num_list = list(set(all_forgive_player_num_list))
@@ -707,9 +713,9 @@ class LogParser(object):
                     for forgive_player_num in forgive_player_num_list:
                         forgive_player = game.players[forgive_player_num]
                         forgive_player.clear_killed_me(victim.get_player_num())
-                        msg += '%s, ' % forgive_player.get_name()
+                        msg.append(forgive_player.get_name())
                 if msg:
-                    game.rcon_say("^7%s has forgiven: %s" % (victim.get_name(), msg.rstrip(', ')))
+                    game.rcon_say("^7%s has forgiven: %s" % (victim.get_name(), ", ".join(msg)))
                 else:
                     game.rcon_tell(sar['player_num'], "No one to forgive")
 
@@ -1055,8 +1061,8 @@ class LogParser(object):
             elif sar['command'] == '!version' and game.players[sar['player_num']].get_admin_role() >= 60:
                 game.rcon_tell(sar['player_num'], "^7Spunky Bot ^2v%s" % __version__)
                 try:
-                    get_latest = urlopen('http://master.spunkybot.de/version.txt').read().strip()
-                except URLError:
+                    get_latest = urllib2.urlopen('http://master.spunkybot.de/version.txt').read().strip()
+                except urllib2.URLError:
                     get_latest = __version__
                 if __version__ < get_latest:
                     game.rcon_tell(sar['player_num'], "^7A newer release ^6%s ^7is available, check ^3www.spunkybot.de" % get_latest)
@@ -1160,7 +1166,7 @@ class LogParser(object):
                     game.rcon_tell(sar['player_num'], "^7Usage: !setnextmap <ut4_name>")
 
             # kill - kill a player
-            elif sar['command'] == '!kill' and game.players[sar['player_num']].get_admin_role() >= 80:
+            elif sar['command'] == '!kill' and self.urt42_modversion and game.players[sar['player_num']].get_admin_role() >= 80:
                 if line.split(sar['command'])[1]:
                     user = line.split(sar['command'])[1].strip()
                     found, victim, msg = self.player_found(user)
@@ -1251,17 +1257,17 @@ class LogParser(object):
                 else:
                     game.rcon_tell(sar['player_num'], "^7Usage: !putgroup <name> <group>")
 
-            # banlist - display the last 6 entries of the banlist
+            # banlist - display the last 10 entries of the banlist
             elif sar['command'] == '!banlist' and game.players[sar['player_num']].get_admin_role() >= 80:
-                curs.execute("SELECT * FROM `ban_list` ORDER BY `id` DESC LIMIT 6")
+                curs.execute("SELECT * FROM `ban_list` ORDER BY `id` DESC LIMIT 10")
                 result = curs.fetchall()
-                if len(result) > 6:
-                    limit = 6
+                if len(result) > 10:
+                    limit = 10
                 elif len(result) == 0:
                     limit = 0
                 else:
                     limit = len(result)
-                banlist = ['^7[^2%s^7]%s' % (result[item][0], result[item][2]) for item in xrange(limit)]  # 0=ID, 2=Name
+                banlist = ['^7[^2%s^7]%s' % (result[item][0], result[item][2]) for item in xrange(limit)]  # 0=ID,2=Name
                 msg = 'Currently no one is banned' if not banlist else str(", ".join(banlist))
                 game.rcon_tell(sar['player_num'], "^7Banlist: %s" % msg)
 
@@ -1356,7 +1362,7 @@ class LogParser(object):
         serialkiller = ""
         streaker = ""
         headshooter = ""
-        msg = ""
+        msg = []
         with players_lock:
             for player in game.players.itervalues():
                 if player.get_flags_captured() > most_flags:
@@ -1379,15 +1385,15 @@ class LogParser(object):
 
             # display Awards
             if most_flags > 1:
-                msg += "^7%s: ^2%d ^4caps ^7- " % (flagrunner, most_flags)
+                msg.append("^7%s: ^2%d ^4caps" % (flagrunner, most_flags))
             if most_kills > 1:
-                msg += "^7%s: ^2%d ^3kills" % (serialkiller, most_kills)
+                msg.append("^7%s: ^2%d ^3kills" % (serialkiller, most_kills))
             if most_streak > 1:
-                msg += " ^7- %s: ^2%d ^6streaks" % (streaker, most_streak)
+                msg.append("^7%s: ^2%d ^6streaks" % (streaker, most_streak))
             if most_hs > 1:
-                msg += " ^7- %s: ^2%d ^1heads" % (headshooter, most_hs)
+                msg.append("^7%s: ^2%d ^1heads" % (headshooter, most_hs))
             if msg:
-                game.rcon_say("^1AWARDS: %s" % msg)
+                game.rcon_say("^1AWARDS: %s" % " ^7- ".join(msg))
 
     def debug(self, msg):
         """
@@ -1405,7 +1411,7 @@ class Player(object):
     teams = {0: "green", 1: "red", 2: "blue", 3: "spectator"}
     roles = {0: "Guest", 1: "User", 2: "Regular", 20: "Moderator", 40: "Admin", 60: "Full Admin", 80: "Senior Admin", 100: "Head Admin"}
 
-    def __init__(self, player_num, ip_address, guid, name, team=0):
+    def __init__(self, player_num, ip_address, guid, name):
         """
         create a new instance of Player
         """
@@ -1418,19 +1424,19 @@ class Player(object):
         self.last_visit = 0
         self.admin_role = 0
         self.kills = 0
-        self.xlr_kills = 0
+        self.db_kills = 0
         self.killing_streak = 0
         self.max_kill_streak = 0
-        self.xlr_killing_streak = 0
+        self.db_killing_streak = 0
         self.deaths = 0
-        self.xlr_deaths = 0
-        self.xlr_suicide = 0
+        self.db_deaths = 0
+        self.db_suicide = 0
         self.head_shots = 0
-        self.xlr_head_shots = 0
+        self.db_head_shots = 0
         self.all_hits = 0
         self.tk_count = 0
-        self.xlr_tk_count = 0
-        self.xlr_team_death = 0
+        self.db_tk_count = 0
+        self.db_team_death = 0
         self.tk_victim_names = []
         self.tk_killer_names = []
         self.high_ping_count = 0
@@ -1440,7 +1446,7 @@ class Player(object):
         self.flags_returned = 0
         self.flag_carriers_killed = 0
         self.address = ip_address
-        self.team = team
+        self.team = 3
         self.time_joined = time.time()
         self.welcome_msg = True
         self.country = None
@@ -1501,11 +1507,11 @@ class Player(object):
 
     def save_info(self):
         if self.registered_user:
-            if self.xlr_deaths == 0:
+            if self.db_deaths == 0:
                 ratio = 1.0
             else:
-                ratio = round(float(self.xlr_kills) / float(self.xlr_deaths), 2)
-            values = (self.xlr_kills, self.xlr_deaths, self.xlr_head_shots, self.xlr_tk_count, self.xlr_team_death, self.xlr_killing_streak, self.xlr_suicide, ratio, self.guid)
+                ratio = round(float(self.db_kills) / float(self.db_deaths), 2)
+            values = (self.db_kills, self.db_deaths, self.db_head_shots, self.db_tk_count, self.db_team_death, self.db_killing_streak, self.db_suicide, ratio, self.guid)
             curs.execute("UPDATE `xlrstats` SET `kills` = ?,`deaths` = ?,`headshots` = ?,`team_kills` = ?,`team_death` = ?,`max_kill_streak` = ?,`suicides` = ?,`rounds` = `rounds` + 1,`ratio` = ? WHERE `guid` = ?", values)
             conn.commit()
 
@@ -1550,13 +1556,13 @@ class Player(object):
             result = curs.fetchone()
             self.last_visit = result[0]
             self.num_played = result[1]
-            self.xlr_kills = result[2]
-            self.xlr_deaths = result[3]
-            self.xlr_head_shots = result[4]
-            self.xlr_tk_count = result[5]
-            self.xlr_team_death = result[6]
-            self.xlr_killing_streak = result[7]
-            self.xlr_suicide = result[8]
+            self.db_kills = result[2]
+            self.db_deaths = result[3]
+            self.db_head_shots = result[4]
+            self.db_tk_count = result[5]
+            self.db_team_death = result[6]
+            self.db_killing_streak = result[7]
+            self.db_suicide = result[8]
             self.admin_role = result[9]
             # update name, last_played and increase num_played counter
             values = (self.prettyname, now, self.guid)
@@ -1606,20 +1612,20 @@ class Player(object):
     def get_last_visit(self):
         return str(self.last_visit)
 
-    def get_xlr_kills(self):
-        return self.xlr_kills
+    def get_db_kills(self):
+        return self.db_kills
 
     def get_kills(self):
         return self.kills
 
-    def get_xlr_deaths(self):
-        return self.xlr_deaths
+    def get_db_deaths(self):
+        return self.db_deaths
 
     def get_deaths(self):
         return self.deaths
 
-    def get_xlr_headshots(self):
-        return self.xlr_head_shots
+    def get_db_headshots(self):
+        return self.db_head_shots
 
     def get_headshots(self):
         return self.head_shots
@@ -1651,32 +1657,32 @@ class Player(object):
     def get_max_kill_streak(self):
         return self.max_kill_streak
 
-    def get_xlr_killing_streak(self):
-        return self.xlr_killing_streak
+    def get_db_killing_streak(self):
+        return self.db_killing_streak
 
-    def get_xlr_suicide(self):
-        return self.xlr_suicide
+    def get_db_suicide(self):
+        return self.db_suicide
 
     def kill(self):
         self.killing_streak += 1
         self.kills += 1
-        self.xlr_kills += 1
+        self.db_kills += 1
 
     def die(self):
         if self.killing_streak > self.max_kill_streak:
             self.max_kill_streak = self.killing_streak
-        if self.max_kill_streak > self.xlr_killing_streak:
-            self.xlr_killing_streak = self.max_kill_streak
+        if self.max_kill_streak > self.db_killing_streak:
+            self.db_killing_streak = self.max_kill_streak
         self.killing_streak = 0
         self.deaths += 1
-        self.xlr_deaths += 1
+        self.db_deaths += 1
 
     def suicide(self):
-        self.xlr_suicide += 1
+        self.db_suicide += 1
 
     def headshot(self):
         self.head_shots += 1
-        self.xlr_head_shots += 1
+        self.db_head_shots += 1
 
     def set_all_hits(self):
         self.all_hits += 1
@@ -1687,8 +1693,8 @@ class Player(object):
     def get_killing_streak(self):
         return self.killing_streak
 
-    def get_xlr_tks(self):
-        return self.xlr_tk_count
+    def get_db_tks(self):
+        return self.db_tk_count
 
     def get_team_kill_count(self):
         return self.tk_count
@@ -1750,15 +1756,15 @@ class Player(object):
 
     def team_death(self):
         # increase team death counter
-        self.xlr_team_death += 1
+        self.db_team_death += 1
 
-    def get_xlr_team_death(self):
-        return self.xlr_team_death
+    def get_db_team_death(self):
+        return self.db_team_death
 
     def team_kill(self, victim, autokick=True):
         # increase teamkill counter
         self.tk_count += 1
-        self.xlr_tk_count += 1
+        self.db_tk_count += 1
         # Regular and higher will not get punished
         if self.admin_role < 2 and autokick:
             # list of players of TK victim
@@ -1829,14 +1835,16 @@ class Game(object):
         self.next_mapname = None
         self.mapname = None
         self.maplist = []
-        self.rcon_queue = Queue()
         self.players = {}
         self.live = False
-        self.rcon_lock = RLock()
         self.rcon_handle = Rcon(CONFIG.get('server', 'server_ip'), CONFIG.get('server', 'server_port'), CONFIG.get('server', 'rcon_password'))
-        if CONFIG.get('rules', 'show_rules') == '1':
-            # create instance of Rules to display the rules and advertisements
-            Rules('./conf/rules.conf', int(CONFIG.get('rules', 'rules_frequency')), self.rcon_handle)
+        if CONFIG.getboolean('rules', 'show_rules'):
+            # create instance of Rules to display the rules and rotation messages
+            Rules('./conf/rules.conf', CONFIG.getint('rules', 'rules_frequency'), self.rcon_handle)
+
+        # add Spunky Bot as player 'World' to the game
+        spunky_bot = Player(1022, '127.0.0.1', 'NONE', 'World')
+        self.add_player(spunky_bot)
 
     def send_rcon(self, command):
         """
@@ -1845,9 +1853,8 @@ class Game(object):
         @param command: The RCON command
         @type  command: String
         """
-        with self.rcon_lock:
-            if self.live:
-                self.rcon_handle.push(command)
+        if self.live:
+            self.rcon_handle.push(command)
 
     def rcon_say(self, msg):
         """
@@ -2033,19 +2040,13 @@ curs.execute('CREATE TABLE IF NOT EXISTS ban_list (id INTEGER PRIMARY KEY NOT NU
 curs.execute('CREATE TABLE IF NOT EXISTS ban_points (id INTEGER PRIMARY KEY NOT NULL, guid TEXT NOT NULL, point_type TEXT, expires DATETIME)')
 
 # create instance of LogParser
-LOGPARS = LogParser(CONFIG.get('server', 'log_file'), CONFIG.get('bot', 'verbose'), CONFIG.get('bot', 'teamkill_autokick'))
+LOGPARS = LogParser(CONFIG.get('server', 'log_file'), CONFIG.getboolean('bot', 'verbose'), CONFIG.getboolean('bot', 'teamkill_autokick'))
 
 # load the GEO database and store it globally in interpreter memory
 GEOIP = pygeoip.Database('./lib/GeoIP.dat')
 
 # create instance of Game
 game = Game()
-
-WORLD = Player(1022, '127.0.0.1', 'NONE', 'World', 3)
-game.add_player(WORLD)
-
-# create instance of TaskManager
-TaskManager(int(CONFIG.get('bot', 'task_frequency')), int(CONFIG.get('bot', 'max_ping')), int(CONFIG.get('bot', 'kick_spec_full_server')), game.rcon_handle)
 
 # read the logfile
 LOGPARS.read_log()
