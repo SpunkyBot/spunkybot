@@ -1,29 +1,28 @@
 # Spunky Bot
 
 **Spunky Bot** is a lightweight game server administration bot and RCON tool.
-Its purpose is to administrate an [Urban Terror](http://www.urbanterror.info) 4.1 / 4.2 server and provide real time statistical data for players.
+Its purpose is to administrate an [Urban Terror](http://www.urbanterror.info) 4.1 / 4.2 server and to provide real time statistical data for players.
 The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was released under the Beerware License.
 
 [![Build Status](https://travis-ci.org/urthub/spunkybot.png?branch=master)](https://travis-ci.org/urthub/spunkybot)
 
 
 ## Features
-
 - Lightweight and fast
 - Real Time game statistics
 - Different user groups and levels
 - Supports all RCON commands
 - Supports temporary and permanent bans
+- Supports rotation messages
 - Stores all player related information in a SQLite database
-- No other software requirements
-- Runs 'out of the box' 
+- Runs 'out of the box', no other software requirements
 
 ## Environment
 - Urban Terror 4.1.1 and 4.2.018
 - Python 2.6.x / 2.7.x
 - SQLite 3 database
 - Linux platform (tested on Debian 6 & 7 and CentOS 6)
-- Support of 32-bit and 64-bit Linux system 
+- Supporting Linux 32-bit and 64-bit operating system
 
 
 ## Resources
@@ -37,11 +36,12 @@ The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was 
 - Modify the Urban Terror server config file as follows:
 	- `seta g_logsync "1"`
 	- `seta g_loghits "1"`
-- The Spunky Bot settings are configured in the file `/conf/settings.conf`
+- Restart the Urban Terror server
+- Modify the Spunky Bot configuration file `/conf/settings.conf`
 - In-game displayed rules/advertisements are contained in the file `/conf/rules.conf`
 	- If you do not want to display the rotation messages, set the value `show_rules=0` in the config file `/conf/settings.conf`
 - Run the bot manually: `python spunky.py`
-- Or use the provided initscript to run the Spunky Bot as daemon
+- Or use the provided initscript to run Spunky Bot as daemon
 
 **_First start instruction:_**
 
