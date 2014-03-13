@@ -1931,7 +1931,7 @@ class Game(object):
         """
         set the current and next map in rotation
         """
-        time.sleep(4)
+        time.sleep(6)
         self.mapname = self.rcon_handle.get_quake_value('mapname')
         if self.maplist:
             if self.mapname in self.maplist:
