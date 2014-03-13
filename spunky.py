@@ -2022,10 +2022,12 @@ class Game(object):
 
 
 ### Main ###
+print "\n\nStarting Spunky Bot:"
 
 # read settings.conf file
 CONFIG = ConfigParser()
 CONFIG.read('./conf/settings.conf')
+print "- Imported config file 'settings.conf' successful."
 
 players_lock = RLock()
 
@@ -2038,15 +2040,20 @@ curs.execute('CREATE TABLE IF NOT EXISTS xlrstats (id INTEGER PRIMARY KEY NOT NU
 curs.execute('CREATE TABLE IF NOT EXISTS player (id INTEGER PRIMARY KEY NOT NULL, guid TEXT NOT NULL, name TEXT NOT NULL, ip_address TEXT NOT NULL, time_joined DATETIME, aliases TEXT)')
 curs.execute('CREATE TABLE IF NOT EXISTS ban_list (id INTEGER PRIMARY KEY NOT NULL, guid TEXT NOT NULL, name TEXT, ip_address TEXT, expires DATETIME DEFAULT 259200, timestamp DATETIME, reason TEXT)')
 curs.execute('CREATE TABLE IF NOT EXISTS ban_points (id INTEGER PRIMARY KEY NOT NULL, guid TEXT NOT NULL, point_type TEXT, expires DATETIME)')
+print "- Connected to database 'data.sqlite' successful."
 
 # create instance of LogParser
 LOGPARS = LogParser(CONFIG.get('server', 'log_file'), CONFIG.getboolean('bot', 'verbose'), CONFIG.getboolean('bot', 'teamkill_autokick'))
+print "- Parsing games log file '%s' successful." % CONFIG.get('server', 'log_file')
 
 # load the GEO database and store it globally in interpreter memory
 GEOIP = pygeoip.Database('./lib/GeoIP.dat')
 
 # create instance of Game
 game = Game()
+print "- Added Spunky Bot successful to the game.\n"
+print "Spunky Bot is running until you are closing this session or pressing CTRL + C to abort this process."
+print "Note: Use the provided initscript to run Spunky Bot as daemon.\n"
 
 # read the logfile
 LOGPARS.read_log()
