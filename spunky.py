@@ -95,8 +95,8 @@ class TaskManager(object):
                     continue
                 else:
                     if self.max_ping < ping_value < 999 and gameplayer.get_admin_role() < 40:
-                        gameplayer.add_high_ping()
-                        game.rcon_tell(player.num, "^1WARNING ^7[^3%d^7]: ^7Your ping is too high [^4%d^7]. The maximum allowed ping is %d." % (gameplayer.get_high_ping(), ping_value, self.max_ping), False)
+                        gameplayer.add_high_ping(ping_value)
+                        game.rcon_tell(player.num, "^1WARNING ^7[^3%d^7]: ^7Your ping is too high [^4%d^7]. ^3The maximum allowed ping is %d." % (gameplayer.get_high_ping(), ping_value, self.max_ping), False)
                     else:
                         gameplayer.clear_high_ping()
 
@@ -119,11 +119,11 @@ class TaskManager(object):
                     game.kick_player(player_num)
                 # kick player with high ping after 3 warnings, Admins will never get kicked
                 elif player.get_high_ping() > 2 and player_admin_role < 40:
-                    game.rcon_say("^7Player ^2%s ^7kicked, because his ping was too high for this server" % player_name)
+                    game.rcon_say("^7Player ^2%s ^7kicked, ping was too high for this server ^7[^4%s^7]" % (player_name, player.get_ping_value()))
                     game.kick_player(player_num)
                 # kick spectator after 3 warnings, Moderator or higher levels will not get kicked
                 elif player.get_spec_warning() > 2 and player_admin_role < 20:
-                    game.rcon_say("^7Player ^2%s ^7kicked, because of spectator too long on full server" % player_name)
+                    game.rcon_say("^7Player ^2%s ^7kicked, spectator too long on full server" % player_name)
                     game.kick_player(player_num)
 
                 # warn player with 2 warnings, Admins will never get the alert warning
@@ -1446,6 +1446,7 @@ class Player(object):
         self.db_team_death = 0
         self.tk_victim_names = []
         self.tk_killer_names = []
+        self.ping_value = 0
         self.high_ping_count = 0
         self.spec_warn_count = 0
         self.warn_counter = 0
@@ -1726,14 +1727,18 @@ class Player(object):
     def clear_all_tk(self):
         self.tk_killer_names = []
 
-    def add_high_ping(self):
+    def add_high_ping(self, value):
         self.high_ping_count += 1
+        self.ping_value = value
 
     def clear_high_ping(self):
         self.high_ping_count = 0
 
     def get_high_ping(self):
         return self.high_ping_count
+
+    def get_ping_value(self):
+        return self.ping_value
 
     def add_spec_warning(self):
         self.spec_warn_count += 1
