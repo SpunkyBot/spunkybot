@@ -1053,9 +1053,13 @@ class LogParser(object):
                                 if team1 == team2:
                                     game.rcon_tell(sar['player_num'], "^7Cannot swap, both players are in the same team")
                                 else:
-                                    game.rcon_forceteam(victim1.get_player_num(), Player.teams[3])
-                                    game.rcon_forceteam(victim2.get_player_num(), Player.teams[team1])
-                                    game.rcon_forceteam(victim1.get_player_num(), Player.teams[team2])
+                                    game_data = game.get_gamestats()
+                                    if game_data[Player.teams[team1]] < game_data[Player.teams[team2]]:
+                                        game.rcon_forceteam(victim2.get_player_num(), Player.teams[team1])
+                                        game.rcon_forceteam(victim1.get_player_num(), Player.teams[team2])
+                                    else:
+                                        game.rcon_forceteam(victim1.get_player_num(), Player.teams[team2])
+                                        game.rcon_forceteam(victim2.get_player_num(), Player.teams[team1])
                                     game.rcon_say('^7Swapped player ^3%s ^7with ^3%s' % (victim1.get_name(), victim2.get_name()))
                         else:
                             game.rcon_tell(sar['player_num'], "^7Usage: !swap <name1> <name2>")
