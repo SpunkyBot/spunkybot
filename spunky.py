@@ -243,12 +243,19 @@ class LogParser(object):
         """
         read the logfile
         """
-        # create instance of TaskManager
-        tasks = TaskManager(CONFIG.getint('bot', 'max_ping'), CONFIG.getint('bot', 'kick_spec_full_server'), game.rcon_handle)
+        task_frequency = CONFIG.getint('bot', 'task_frequency')
+        if task_frequency > 0:
+            # create instance of TaskManager
+            tasks = TaskManager(CONFIG.getint('bot', 'max_ping'), CONFIG.getint('bot', 'kick_spec_full_server'), game.rcon_handle)
+            # schedule the task
+            if task_frequency < 10:
+                # avoid flooding with too less delay
+                schedule.every(10).seconds.do(tasks.process)
+            else:
+                schedule.every(task_frequency).seconds.do(tasks.process)
         # create instance of HeartBeat
         ping = HeartBeat(__version__, CONFIG.get('server', 'server_port'))
-        # schedule the tasks
-        schedule.every(CONFIG.getint('bot', 'task_frequency')).seconds.do(tasks.process)
+        # schedule the task
         schedule.every(12).hours.do(ping.process)
 
         self.find_game_start()
