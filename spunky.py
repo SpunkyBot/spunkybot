@@ -653,10 +653,7 @@ class LogParser(object):
             # time - display the servers current time
             elif sar['command'] == '!time' or sar['command'] == '@time':
                 msg = "^7%s" % time.strftime("%H:%M", time.localtime(time.time()))
-                if sar['command'].startswith('@'):
-                    game.rcon_say(msg)
-                else:
-                    game.rcon_tell(sar['player_num'], msg)
+                self.tell_say_message(sar, msg)
 
             # teams - balance teams
             elif sar['command'] == '!teams':
@@ -736,10 +733,7 @@ class LogParser(object):
                         game.rcon_tell(sar['player_num'], msg)
                     else:
                         msg = "Country ^3%s: ^7%s" % (victim.get_name(), victim.get_country())
-                        if sar['command'].startswith('@'):
-                            game.rcon_say(msg)
-                        else:
-                            game.rcon_tell(sar['player_num'], msg)
+                        self.tell_say_message(sar, msg)
                 else:
                     game.rcon_tell(sar['player_num'], "^7Usage: !country <name>")
 
@@ -767,10 +761,7 @@ class LogParser(object):
                     msg = "^7Next Map: ^3%s" % g_nextmap
                 else:
                     msg = "^7Next Map: ^3%s" % game.next_mapname
-                if sar['command'].startswith('@'):
-                    game.rcon_say(msg)
-                else:
-                    game.rcon_tell(sar['player_num'], msg)
+                self.tell_say_message(sar, msg)
 
             # mute - mute or unmute a player
             elif sar['command'] == '!mute' and game.players[sar['player_num']].get_admin_role() >= 20:
@@ -841,10 +832,7 @@ class LogParser(object):
             # admins - list all the online admins
             elif (sar['command'] == '!admins' or sar['command'] == '@admins') and game.players[sar['player_num']].get_admin_role() >= 40:
                 msg = "^7Admins online: %s" % ", ".join(["^3%s [^2%d^3]" % (player.get_name(), player.get_admin_role()) for player in game.players.itervalues() if player.get_admin_role() >= 20])
-                if sar['command'].startswith('@'):
-                    game.rcon_say(msg)
-                else:
-                    game.rcon_tell(sar['player_num'], msg)
+                self.tell_say_message(sar, msg)
 
             # aliases - list the aliases of the player
             elif (sar['command'] == '!aliases' or sar['command'] == '@aliases' or sar['command'] == '!alias' or sar['command'] == '@alias') and game.players[sar['player_num']].get_admin_role() >= 40:
@@ -855,10 +843,7 @@ class LogParser(object):
                         game.rcon_tell(sar['player_num'], msg)
                     else:
                         msg = "^7Aliases of ^5%s: ^3%s" % (victim.get_name(), victim.get_aliases())
-                        if sar['command'].startswith('@'):
-                            game.rcon_say(msg)
-                        else:
-                            game.rcon_tell(sar['player_num'], msg)
+                        self.tell_say_message(sar, msg)
                 else:
                     game.rcon_tell(sar['player_num'], "^7Usage: !alias <name>")
 
@@ -1148,6 +1133,7 @@ class LogParser(object):
                 else:
                     game.rcon_tell(sar['player_num'], "^7Usage: !map <ut4_name>")
 
+            # maps - display all available maps
             elif sar['command'] == '!maps' and game.players[sar['player_num']].get_admin_role() >= 80:
                 game.rcon_tell(sar['player_num'], "^7Available Maps: ^3%s" % ', '.join(game.get_all_maps()))
 
@@ -1256,13 +1242,7 @@ class LogParser(object):
                                 new_role = 80
                             else:
                                 game.rcon_tell(sar['player_num'], "Sorry, you cannot put %s in group <%s>" % (victim.get_name(), right))
-
-                            # update database and set admin_role
-                            values = (new_role, victim.get_guid())
-                            curs.execute("UPDATE `xlrstats` SET `admin_role` = ? WHERE `guid` = ?", values)
-                            conn.commit()
-                            # overwrite admin role in game, no reconnect of player required
-                            victim.set_admin_role(new_role)
+                            self.update_db_admin_role(victim, new_role)
                     else:
                         game.rcon_tell(sar['player_num'], "^7Usage: !putgroup <name> <group>")
                 else:
@@ -1314,12 +1294,7 @@ class LogParser(object):
                     else:
                         if 1 < victim.get_admin_role() < 100:
                             game.rcon_tell(sar['player_num'], "%s put in group User" % victim.get_name())
-                            # update database and set admin_role to 1
-                            values = (1, victim.get_guid())
-                            curs.execute("UPDATE `xlrstats` SET `admin_role` = ? WHERE `guid` = ?", values)
-                            conn.commit()
-                            # overwrite admin role in game, no reconnect of player required
-                            victim.set_admin_role(1)
+                            self.update_db_admin_role(player=victim, role=1)
                         else:
                             game.rcon_tell(sar['player_num'], "Sorry, you cannot put %s in group User" % victim.get_name())
                 else:
@@ -1333,17 +1308,32 @@ class LogParser(object):
                         # register new user in DB and set admin role to 100
                         game.players[sar['player_num']].register_user_db(role=100)
                     else:
-                        values = (100, game.players[sar['player_num']].get_guid())
-                        curs.execute("UPDATE `xlrstats` SET `admin_role` = ? WHERE `guid` = ?", values)
-                        conn.commit()
-                        # overwrite admin role in game, no reconnect of player required
-                        game.players[sar['player_num']].set_admin_role(100)
+                        self.update_db_admin_role(player=game.players[sar['player_num']], role=100)
                     self.iamgod = False
                     game.rcon_tell(sar['player_num'], "^7You are registered as ^6Head Admin")
 
 ## unknown command
             elif sar['command'].startswith('!') and game.players[sar['player_num']].get_admin_role() > 20:
                 game.rcon_tell(sar['player_num'], "^7Unknown command ^3%s" % sar['command'])
+
+    def tell_say_message(self, sar, msg):
+        """
+        display message in private or global chat
+        """
+        if sar['command'].startswith('@'):
+            game.rcon_say(msg)
+        else:
+            game.rcon_tell(sar['player_num'], msg)
+
+    def update_db_admin_role(self, player, role):
+        """
+        update database and set admin_role
+        """
+        values = (role, player.get_guid())
+        curs.execute("UPDATE `xlrstats` SET `admin_role` = ? WHERE `guid` = ?", values)
+        conn.commit()
+        # overwrite admin role in game, no reconnect of player required
+        player.set_admin_role(role)
 
     def handle_flag(self, line):
         """
@@ -1354,9 +1344,7 @@ class LogParser(object):
         action = tmp[1].strip()
         with players_lock:
             player = game.players[player_num]
-            if action == '0:':
-                player.kill_flag_carrier()
-            elif action == '1:':
+            if action == '1:':
                 player.return_flag()
             elif action == '2:':
                 player.capture_flag()
@@ -1456,7 +1444,6 @@ class Player(object):
         self.warn_counter = 0
         self.flags_captured = 0
         self.flags_returned = 0
-        self.flag_carriers_killed = 0
         self.address = ip_address
         self.team = 3
         self.time_joined = time.time()
@@ -1511,7 +1498,6 @@ class Player(object):
         self.warn_counter = 0
         self.flags_captured = 0
         self.flags_returned = 0
-        self.flag_carriers_killed = 0
 
     def reset_flag_stats(self):
         self.flags_captured = 0
@@ -1669,12 +1655,6 @@ class Player(object):
     def get_max_kill_streak(self):
         return self.max_kill_streak
 
-    def get_db_killing_streak(self):
-        return self.db_killing_streak
-
-    def get_db_suicide(self):
-        return self.db_suicide
-
     def kill(self):
         self.killing_streak += 1
         self.kills += 1
@@ -1774,9 +1754,6 @@ class Player(object):
         # increase team death counter
         self.db_team_death += 1
 
-    def get_db_team_death(self):
-        return self.db_team_death
-
     def team_kill(self, victim, autokick=True):
         # increase teamkill counter
         self.tk_count += 1
@@ -1830,12 +1807,6 @@ class Player(object):
 
     def get_flags_returned(self):
         return self.flags_returned
-
-    def kill_flag_carrier(self):
-        self.flag_carriers_killed += 1
-
-    def get_flag_carriers_killed(self):
-        return self.flag_carriers_killed
 
 
 ### CLASS Game ###
