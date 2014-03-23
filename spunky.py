@@ -496,7 +496,12 @@ class LogParser(object):
             death_cause = self.death_cause[int(info[2])]
             victim = game.players[victim_id]
 
-            killer = game.players[killer_id] if k_name != "<non-client>" else game.players[1022]
+            if k_name != "<non-client>":
+                killer = game.players[killer_id]
+            else:
+                # killed by World
+                killer = game.players[1022]
+                killer_id = 1022
 
             killer_name = killer.get_name()
             victim_name = victim.get_name()
