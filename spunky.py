@@ -174,7 +174,7 @@ class LogParser(object):
         self.mod_cmds = self.user_cmds + ['country', 'leveltest', 'list', 'nextmap', 'mute', 'shuffleteams', 'warn']
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'force', 'kick', 'nuke', 'say', 'tempban', 'warnclear']
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'ci', 'scream', 'slap', 'swap', 'version', 'veto']
-        self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'map', 'maps', 'maprestart', 'permban', 'putgroup', 'setnextmap', 'unban', 'ungroup']
+        self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'map', 'maps', 'maprestart', 'moon', 'permban', 'putgroup', 'setnextmap', 'unban', 'ungroup']
 
         # alphabetic sort of the commands
         self.mod_cmds.sort()
@@ -1149,6 +1149,21 @@ class LogParser(object):
                 for player in game.players.itervalues():
                     # reset player statistics
                     player.reset()
+
+            # moon - activate Moon mode (low gravity)
+            elif sar['command'] == '!moon' and game.players[sar['player_num']].get_admin_role() >= 80:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip()
+                    if arg == "off":
+                        game.send_rcon('g_gravity 800')
+                        game.rcon_tell(sar['player_num'], "^7Moon mode: ^1Off")
+                    elif arg == "on":
+                        game.send_rcon('g_gravity 100')
+                        game.rcon_tell(sar['player_num'], "^7Moon mode: ^2On")
+                    else:
+                        game.rcon_tell(sar['player_num'], "^7Usage: !moon <on/off>")
+                else:
+                    game.rcon_tell(sar['player_num'], "^7Usage: !moon <on/off>")
 
             # cyclemap - start next map in rotation
             elif sar['command'] == '!cyclemap' and game.players[sar['player_num']].get_admin_role() >= 80:

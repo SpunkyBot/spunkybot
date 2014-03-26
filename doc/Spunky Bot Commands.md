@@ -117,6 +117,8 @@
 	- Usage: `!maps
 - **maprestart** - restart the map
 	- Usage: `!maprestart`
+- **moon** - activate Moon mode (low gravity)
+	- Usage: `!moon <on/off>`
 - **cyclemap** - start next map in rotation
 	- Usage: `!cyclemap`
 - **setnextmap** - set the given map as nextmap
