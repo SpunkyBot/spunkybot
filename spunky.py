@@ -764,6 +764,7 @@ class LogParser(object):
                 g_nextmap = game.rcon_handle.get_cvar('g_nextmap').split(" ")[0].strip()
                 if g_nextmap in game.get_all_maps():
                     msg = "^7Next Map: ^3%s" % g_nextmap
+                    game.next_mapname = g_nextmap
                 else:
                     msg = "^7Next Map: ^3%s" % game.next_mapname
                 self.tell_say_message(sar, msg)
@@ -1923,8 +1924,12 @@ class Game(object):
         """
         set the current and next map in rotation
         """
-        time.sleep(6)
-        self.mapname = self.rcon_handle.get_quake_value('mapname')
+        time.sleep(4)
+        try:
+            self.mapname = self.rcon_handle.get_quake_value('mapname')
+        except KeyError:
+            self.mapname = self.next_mapname
+
         if self.maplist:
             if self.mapname in self.maplist:
                 if self.maplist.index(self.mapname) < (len(self.maplist) - 1):
