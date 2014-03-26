@@ -387,7 +387,7 @@ class LogParser(object):
                 game.send_rcon("Invalid GUID detected for %s -> Player kicked" % name)
                 game.send_rcon("kick %d" % player_num)
 
-            if not player_num in game.players:
+            if player_num not in game.players:
                 player = Player(player_num, address, guid, name)
                 game.add_player(player)
             if game.players[player_num].get_guid() != guid:
@@ -1539,7 +1539,7 @@ class Player(object):
             result = curs.fetchone()
             # create list of aliases
             self.aliases = result[0].split(', ')
-            if not self.prettyname in self.aliases:
+            if self.prettyname not in self.aliases:
                 # add new alias to list
                 if len(self.aliases) < 11:
                     self.aliases.append(self.prettyname)
