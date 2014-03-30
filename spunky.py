@@ -28,13 +28,14 @@ import time
 import sqlite3
 import math
 import textwrap
+import urllib
 import urllib2
+import platform
 import lib.pygeoip as pygeoip
 import lib.schedule as schedule
 
 from lib.rcon import Rcon
 from lib.rules import Rules
-from lib.heartbeat import HeartBeat
 from threading import RLock
 from ConfigParser import ConfigParser
 
@@ -153,12 +154,14 @@ class LogParser(object):
     """
     log file parser
     """
-    def __init__(self, file_name, verbose_mode, tk_autokick):
+    def __init__(self, file_name, server_port, verbose_mode, tk_autokick):
         """
         create a new instance of LogParser
 
         @param file_name: The full path of the games log file
         @type  file_name: String
+        @param server_port: Port of the game server
+        @type  server_port: String
         @param verbose_mode: Enable or disable verbose mode to print debug messages
         @type  verbose_mode: Boolean
         @param tk_autokick: Enable or disable autokick for team killing
@@ -196,6 +199,12 @@ class LogParser(object):
         # enable/disable option to get Head Admin by checking existence of head admin in database
         curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `admin_role` = 100")
         self.iamgod = True if curs.fetchone()[0] < 1 else False
+        # Master Server
+        self.base_url = 'http://master.spunkybot.de'
+        # Heartbeat packet
+        data = {'v': __version__, 'p': server_port, 'o': platform.platform()}
+        values = urllib.urlencode(data)
+        self.ping_url = '%s/ping.php?%s' % (self.base_url, values)
 
     def find_game_start(self):
         """
@@ -253,10 +262,8 @@ class LogParser(object):
                 schedule.every(10).seconds.do(tasks.process)
             else:
                 schedule.every(task_frequency).seconds.do(tasks.process)
-        # create instance of HeartBeat
-        ping = HeartBeat(__version__, CONFIG.get('server', 'server_port'))
         # schedule the task
-        schedule.every(12).hours.do(ping.process)
+        schedule.every(12).hours.do(self.send_heartbeat)
 
         self.find_game_start()
         self.log_file.seek(0, 2)
@@ -269,6 +276,15 @@ class LogParser(object):
                 if not game.live:
                     game.go_live()
                 time.sleep(.125)
+
+    def send_heartbeat(self):
+        """
+        send heartbeat packet
+        """
+        try:
+            urllib2.urlopen(self.ping_url)
+        except urllib2.URLError:
+            pass
 
     def parse_line(self, string):
         """
@@ -1063,7 +1079,7 @@ class LogParser(object):
             elif sar['command'] == '!version' and game.players[sar['player_num']].get_admin_role() >= 60:
                 game.rcon_tell(sar['player_num'], "^7Spunky Bot ^2v%s" % __version__)
                 try:
-                    get_latest = urllib2.urlopen('http://master.spunkybot.de/version.txt').read().strip()
+                    get_latest = urllib2.urlopen('%s/version.txt' % self.base_url).read().strip()
                 except urllib2.URLError:
                     get_latest = __version__
                 if __version__ < get_latest:
@@ -2066,7 +2082,7 @@ curs.execute('CREATE TABLE IF NOT EXISTS ban_points (id INTEGER PRIMARY KEY NOT 
 print "- Connected to database 'data.sqlite' successful."
 
 # create instance of LogParser
-LOGPARS = LogParser(CONFIG.get('server', 'log_file'), CONFIG.getboolean('bot', 'verbose'), CONFIG.getboolean('bot', 'teamkill_autokick'))
+LOGPARS = LogParser(CONFIG.get('server', 'log_file'), CONFIG.get('server', 'server_port'), CONFIG.getboolean('bot', 'verbose'), CONFIG.getboolean('bot', 'teamkill_autokick'))
 print "- Parsing games log file '%s' successful." % CONFIG.get('server', 'log_file')
 
 # load the GEO database and store it globally in interpreter memory
