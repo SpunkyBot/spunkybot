@@ -283,7 +283,7 @@ class LogParser(object):
                     self.ffa_lms_gametype = True if ('g_gametype\\0' in line or 'g_gametype\\1' in line or 'g_gametype\\9' in line) else False
                     self.ctf_gametype = True if 'g_gametype\\7' in line else False
                     self.debug("Starting game...")
-                    game.rcon_handle.clear()
+                    game.new_game()
                 elif tmp[0].lstrip() == 'Warmup':
                     with players_lock:
                         for player in game.players.itervalues():
@@ -2031,6 +2031,17 @@ class Game(object):
             for player in p_list[:int(num_ptm)]:
                 self.rcon_forceteam(player.get_player_num(), Player.teams[team2])
         self.rcon_say("^7Autobalance complete!")
+
+    def new_game(self):
+        """
+        set-up a new game
+        """
+        self.rcon_handle.clear()
+        # support for low gravity server
+        if CONFIG.has_section('lowgrav'):
+            if CONFIG.getboolean('lowgrav', 'support_lowgravity'):
+                gravity = CONFIG.getint('lowgrav', 'gravity')
+                self.rcon_handle.push("set g_gravity %d" % gravity)
 
 
 ### Main ###
