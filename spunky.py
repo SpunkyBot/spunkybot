@@ -232,7 +232,7 @@ class LogParser(object):
                     if 'g_gametype\\0' in line or 'g_gametype\\1' in line or 'g_gametype\\9' in line:
                         # disable teamkill event and some commands for FFA (0), LMS (1) and Jump (9) mode
                         self.ffa_lms_gametype = True
-                    if 'g_gametype\\7' in line:
+                    elif 'g_gametype\\7' in line:
                         self.ctf_gametype = True
                 if self.log_file.tell() > end_pos:
                     break
