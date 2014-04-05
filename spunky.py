@@ -191,6 +191,9 @@ class LogParser(object):
         self.log_file.seek(0, 2)
         self.ffa_lms_gametype = False
         self.ctf_gametype = False
+        self.ts_gametype = False
+        self.ts_do_team_balance = False
+        self.allow_cmd_teams = True
         self.urt42_modversion = True
         # enable/disable debug output
         self.verbose = verbose_mode
@@ -234,6 +237,8 @@ class LogParser(object):
                         self.ffa_lms_gametype = True
                     elif 'g_gametype\\7' in line:
                         self.ctf_gametype = True
+                    elif 'g_gametype\\4' in line:
+                        self.ts_gametype = True
                 if self.log_file.tell() > end_pos:
                     break
                 elif len(line) == 0:
@@ -298,6 +303,7 @@ class LogParser(object):
                 if tmp[0].lstrip() == 'InitGame':
                     self.ffa_lms_gametype = True if ('g_gametype\\0' in line or 'g_gametype\\1' in line or 'g_gametype\\9' in line) else False
                     self.ctf_gametype = True if 'g_gametype\\7' in line else False
+                    self.ts_gametype = True if 'g_gametype\\4' in line else False
                     self.debug("Starting game...")
                     game.new_game()
                 elif tmp[0].lstrip() == 'Warmup':
@@ -305,11 +311,14 @@ class LogParser(object):
                         for player in game.players.itervalues():
                             player.reset()
                     game.set_current_map()
+                    self.allow_cmd_teams = True
                 elif tmp[0].lstrip() == 'InitRound':
                     if self.ctf_gametype:
                         with players_lock:
                             for player in game.players.itervalues():
                                 player.reset_flag_stats()
+                    elif self.ts_gametype:
+                        self.allow_cmd_teams = False
                 elif tmp[0].lstrip() == 'ClientUserinfo':
                     self.handle_userinfo(line)
                 elif tmp[0].lstrip() == 'ClientUserinfoChanged':
@@ -331,6 +340,9 @@ class LogParser(object):
                     self.handle_flag(line)
                 elif tmp[0].lstrip() == 'Exit':
                     self.handle_awards()
+                    self.allow_cmd_teams = True
+                elif tmp[0].lstrip() == 'SurvivorWinner':
+                    self.handle_teams_ts_mode()
         except (IndexError, KeyError):
             pass
         except Exception, err:
@@ -679,9 +691,7 @@ class LogParser(object):
             # teams - balance teams
             elif sar['command'] == '!teams':
                 if not self.ffa_lms_gametype:
-                    game_data = game.get_gamestats()
-                    if (abs(game_data[Player.teams[1]] - game_data[Player.teams[2]])) > 1:
-                        game.balance_teams(game_data)
+                    self.handle_team_balance()
 
             # stats - display current map stats
             elif sar['command'] == '!stats':
@@ -1385,6 +1395,32 @@ class LogParser(object):
                 player.return_flag()
             elif action == '2:':
                 player.capture_flag()
+
+    def handle_teams_ts_mode(self):
+        """
+        handle team balance in Team Survivor mode
+        """
+        if self.ts_gametype:
+            if self.ts_do_team_balance:
+                self.allow_cmd_teams = True
+                self.handle_team_balance()
+                self.allow_cmd_teams = False
+                self.ts_do_team_balance = False
+
+    def handle_team_balance(self):
+        """
+        balance teams if needed
+        """
+        game_data = game.get_gamestats()
+        if (abs(game_data[Player.teams[1]] - game_data[Player.teams[2]])) > 1:
+            if self.allow_cmd_teams:
+                game.balance_teams(game_data)
+            else:
+                if self.ts_gametype:
+                    self.ts_do_team_balance = True
+                    game.rcon_say("^7Teams will be balanced at the end of the round!")
+        else:
+            game.rcon_say("^7Teams are already balanced")
 
     def handle_awards(self):
         """
