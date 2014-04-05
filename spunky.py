@@ -680,8 +680,8 @@ class LogParser(object):
             elif sar['command'] == '!teams':
                 if not self.ffa_lms_gametype:
                     game_data = game.get_gamestats()
-                    if (abs(game_data[Player.teams[1]] - game_data[Player.teams[2]]) + 3) > 1:
-                        game.balance_teams()
+                    if (abs(game_data[Player.teams[1]] - game_data[Player.teams[2]])) > 1:
+                        game.balance_teams(game_data)
 
             # stats - display current map stats
             elif sar['command'] == '!stats':
@@ -2014,11 +2014,13 @@ class Game(object):
                 game_data[Player.teams[3]] += 1
         return game_data
 
-    def balance_teams(self):
+    def balance_teams(self, game_data):
         """
         balance teams if needed
+
+        @param game_data: Dictionary of players in each team
+        @type  game_data: dict
         """
-        game_data = self.get_gamestats()
         if (game_data[Player.teams[1]] - game_data[Player.teams[2]]) > 1:
             team1 = 1
             team2 = 2
