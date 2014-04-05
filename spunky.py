@@ -537,7 +537,7 @@ class LogParser(object):
             if death_cause in suicide_reason or (killer_id == victim_id and (death_cause == 'UT_MOD_HEGRENADE' or death_cause == 'UT_MOD_HK69' or death_cause == 'UT_MOD_NUKED' or death_cause == 'UT_MOD_SLAPPED' or death_cause == 'UT_MOD_BOMBED')):
                 victim.suicide()
                 victim.die()
-                self.debug("Player %d %s committed suicide with %s" % (killer_id, killer_name, death_cause))
+                self.debug("Player %d %s committed suicide with %s" % (victim_id, victim_name, death_cause))
             # kill counter
             elif not tk_event and int(info[2]) != 10:  # 10: MOD_CHANGE_TEAM
                 killer.kill()
