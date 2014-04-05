@@ -535,7 +535,7 @@ class LogParser(object):
             suicide_reason = ['UT_MOD_SUICIDE', 'MOD_FALLING', 'MOD_WATER', 'MOD_LAVA', 'MOD_TRIGGER_HURT', 'UT_MOD_SPLODED']
             # suicide counter
             if death_cause in suicide_reason or (killer_id == victim_id and (death_cause == 'UT_MOD_HEGRENADE' or death_cause == 'UT_MOD_HK69' or death_cause == 'UT_MOD_NUKED' or death_cause == 'UT_MOD_SLAPPED' or death_cause == 'UT_MOD_BOMBED')):
-                killer.suicide()
+                victim.suicide()
                 victim.die()
                 self.debug("Player %d %s committed suicide with %s" % (killer_id, killer_name, death_cause))
             # kill counter
