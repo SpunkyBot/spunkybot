@@ -6,7 +6,7 @@ Author: Alexander Kress
 This program is released under the MIT License.
 """
 
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 
 
 ### IMPORTS
@@ -33,7 +33,11 @@ class Rules(object):
         @type  rcon_handle: Instance
         """
         self.rules_file = rules_file
-        self.rules_frequency = rules_frequency
+        if rules_frequency < 5:
+            # avoid flooding with too less delay
+            self.rules_frequency = 5
+        else:
+            self.rules_frequency = rules_frequency
         self.rcon_handle = rcon_handle
         self.rcon_lock = RLock()
         # start Thread
@@ -53,7 +57,6 @@ class Rules(object):
                 # display rule
                 with self.rcon_lock:
                     self.rcon_handle.push("say ^2%s" % line)
-                time.sleep(30)
+                # wait for given delay in the config file
+                time.sleep(self.rules_frequency)
             filehandle.close()
-            # wait for given delay in the config file
-            time.sleep(self.rules_frequency)
