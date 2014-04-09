@@ -1608,7 +1608,7 @@ class Player(object):
             self.aliases = result[0].split(', ')
             if self.prettyname not in self.aliases:
                 # add new alias to list
-                if len(self.aliases) < 16:
+                if len(self.aliases) < 15:
                     self.aliases.append(self.prettyname)
                     alias_string = ', '.join(self.aliases)
                     values = (alias_string, self.guid)
@@ -1660,6 +1660,8 @@ class Player(object):
         return self.name
 
     def get_aliases(self):
+        if len(self.aliases) == 15:
+            self.aliases.append("and more...")
         return str(", ".join(self.aliases))
 
     def set_guid(self, guid):
