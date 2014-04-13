@@ -828,7 +828,7 @@ class LogParser(object):
                     arg = line.split(sar['command'])[1].strip().split(' ')
                     if len(arg) > 1:
                         user = arg[0]
-                        reason = ' '.join(arg[1:])
+                        reason = ' '.join(arg[1:])[:40].strip()
                         found, victim, msg = self.player_found(user)
                         if not found:
                             game.rcon_tell(sar['player_num'], msg)
@@ -943,7 +943,7 @@ class LogParser(object):
                         reason = '.'
                     elif len(arg) > 1:
                         user = arg[0]
-                        reason = ' '.join(arg[1:])
+                        reason = ' '.join(arg[1:])[:40].strip()
                     else:
                         user = reason = None
                     if user and reason:
@@ -1137,7 +1137,7 @@ class LogParser(object):
                     arg = line.split(sar['command'])[1].strip().split(' ')
                     if len(arg) > 1:
                         user = arg[0]
-                        reason = ' '.join(arg[1:])
+                        reason = ' '.join(arg[1:])[:40].strip()
                         found, victim, msg = self.player_found(user)
                         if not found:
                             game.rcon_tell(sar['player_num'], msg)
@@ -1240,7 +1240,7 @@ class LogParser(object):
                     arg = line.split(sar['command'])[1].strip().split(' ')
                     if len(arg) > 1:
                         user = arg[0]
-                        reason = ' '.join(arg[1:])
+                        reason = ' '.join(arg[1:])[:40].strip()
                         found, victim, msg = self.player_found(user)
                         if not found:
                             game.rcon_tell(sar['player_num'], msg)
