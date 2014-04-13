@@ -938,9 +938,15 @@ class LogParser(object):
             elif (sar['command'] == '!kick' or sar['command'] == '!k') and game.players[sar['player_num']].get_admin_role() >= 40:
                 if line.split(sar['command'])[1]:
                     arg = line.split(sar['command'])[1].strip().split(' ')
-                    if len(arg) > 1:
+                    if game.players[sar['player_num']].get_admin_role() >= 80 and len(arg) == 1:
+                        user = arg[0]
+                        reason = '.'
+                    elif len(arg) > 1:
                         user = arg[0]
                         reason = ' '.join(arg[1:])
+                    else:
+                        user = reason = None
+                    if user and reason:
                         found, victim, msg = self.player_found(user)
                         if not found:
                             game.rcon_tell(sar['player_num'], msg)
@@ -952,6 +958,8 @@ class LogParser(object):
                                 if reason in reason_dict:
                                     kick_reason = reason_dict[reason]
                                     msg = "%s: ^3%s" % (msg, kick_reason)
+                                elif reason == '.':
+                                    kick_reason = ''
                                 else:
                                     kick_reason = reason
                                     msg = "%s: ^3%s" % (msg, kick_reason)
