@@ -837,7 +837,7 @@ class LogParser(object):
                                 game.rcon_tell(sar['player_num'], "You cannot warn an admin")
                             else:
                                 if victim.get_warning() > 2:
-                                    game.kick_player(victim.get_player_num())
+                                    game.kick_player(victim.get_player_num(), reason='too many warnings', show=self.urt42_modversion)
                                     msg = "^7Player ^2%s ^7kicked, because of too many warnings" % victim.get_name()
                                 else:
                                     victim.add_warning()
@@ -948,12 +948,14 @@ class LogParser(object):
                             if victim.get_admin_role() >= game.players[sar['player_num']].get_admin_role():
                                 game.rcon_tell(sar['player_num'], "You cannot kick an admin")
                             else:
-                                game.kick_player(victim.get_player_num())
-                                msg = "^2%s ^7was kicked by %s: ^4" % (victim.get_name(), game.players[sar['player_num']].get_name())
+                                msg = "^2%s ^7was kicked by %s" % (victim.get_name(), game.players[sar['player_num']].get_name())
                                 if reason in reason_dict:
-                                    msg = "%s%s" % (msg, reason_dict[reason])
+                                    kick_reason = reason_dict[reason]
+                                    msg = "%s: ^3%s" % (msg, kick_reason)
                                 else:
-                                    msg = "%s%s" % (msg, reason)
+                                    kick_reason = reason
+                                    msg = "%s: ^3%s" % (msg, kick_reason)
+                                game.kick_player(victim.get_player_num(), reason=kick_reason, show=self.urt42_modversion)
                                 game.rcon_say(msg)
                     else:
                         game.rcon_tell(sar['player_num'], "^7You need to enter a reason: ^3!kick <name> <reason>")
@@ -1114,7 +1116,7 @@ class LogParser(object):
                             if victim.get_player_num() == player.num:
                                 player_ping = player.ping
                         if player_ping == 999:
-                            game.kick_player(victim.get_player_num())
+                            game.kick_player(victim.get_player_num(), reason='connection interrupted, try to reconnect', show=self.urt42_modversion)
                             game.rcon_say("^1%s ^7was kicked by %s: ^4connection interrupted" % (victim.get_name(), game.players[sar['player_num']].get_name()))
                         else:
                             game.rcon_tell(sar['player_num'], "%s has no connection interrupted" % victim.get_name())
@@ -1970,14 +1972,21 @@ class Game(object):
         """
         self.send_rcon('forceteam %d %s' % (player_num, team))
 
-    def kick_player(self, player_num):
+    def kick_player(self, player_num, reason='', show=False):
         """
         kick player
 
         @param player_num: The player number
         @type  player_num: Integer
+        @param reason: Reason for kick
+        @type  reason: String
+        @param show: Show kick reason
+        @type  show: Boolean
         """
-        self.send_rcon('kick %d' % player_num)
+        if reason and show:
+            self.send_rcon('kick %d "%s"' % (player_num, reason))
+        else:
+            self.send_rcon('kick %d' % player_num)
 
     def go_live(self):
         """
