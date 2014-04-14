@@ -129,7 +129,7 @@ class TaskManager(object):
 
                 # warn player with 2 warnings, Admins will never get the alert warning
                 if (player.get_warning() == 2 or player.get_spec_warning() == 2) and player_admin_role < 40:
-                    game.rcon_say("^1ALERT: ^7Player ^2%s, ^7auto-kick from warnings if not cleared" % player_name)
+                    game.rcon_say("^1ALERT: ^2%s ^7auto-kick from warnings if not cleared" % player_name)
                     # increase counter to kick player next cycle automatically
                     player.add_spec_warning()
                     player.add_warning()
