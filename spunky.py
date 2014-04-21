@@ -1530,6 +1530,7 @@ class Player(object):
         self.player_num = player_num
         self.guid = guid
         self.name = "".join(name.split())
+        self.player_id = ''
         self.aliases = []
         self.registered_user = False
         self.num_played = 0
@@ -1576,8 +1577,7 @@ class Player(object):
         if curs.fetchone()[0] > 0:
             values = (self.guid,)
             curs.execute("SELECT `id` FROM `ban_list` WHERE `guid` = ?", values)
-            result = curs.fetchone()
-            self.ban_id = result[0]
+            self.ban_id = curs.fetchone()[0]
 
     def ban(self, duration=900, reason='tk', admin=None):
         if admin:
@@ -1649,12 +1649,14 @@ class Player(object):
         # check player table
         values = (self.guid,)
         curs.execute("SELECT COUNT(*) FROM `player` WHERE `guid` = ?", values)
-        if curs.fetchone()[0] < 1:
+        if curs.fetchone()[0] == 0:
+            # add new player to database
             values = (self.guid, self.prettyname, self.address, now, self.prettyname)
             curs.execute("INSERT INTO `player` (`guid`,`name`,`ip_address`,`time_joined`,`aliases`) VALUES (?,?,?,?,?)", values)
             conn.commit()
             self.aliases.append(self.prettyname)
         else:
+            # update name, IP address and last join date
             values = (self.prettyname, self.address, now, self.guid)
             curs.execute("UPDATE `player` SET `name` = ?,`ip_address` = ?,`time_joined` = ? WHERE `guid` = ?", values)
             conn.commit()
@@ -1672,10 +1674,14 @@ class Player(object):
                     values = (alias_string, self.guid)
                     curs.execute("UPDATE `player` SET `aliases` = ? WHERE `guid` = ?", values)
                     conn.commit()
+        # get player-id
+        values = (self.guid,)
+        curs.execute("SELECT `id` FROM `player` WHERE `guid` = ?", values)
+        self.player_id = curs.fetchone()[0]
         # check XLRSTATS table
         values = (self.guid,)
         curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `guid` = ?", values)
-        if curs.fetchone()[0] < 1:
+        if curs.fetchone()[0] == 0:
             self.registered_user = False
         else:
             self.registered_user = True
