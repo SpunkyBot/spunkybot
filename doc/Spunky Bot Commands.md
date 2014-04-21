@@ -111,6 +111,9 @@
 	- Usage: `!kiss`
 - **kill** - kill a player
 	- Usage: `!kill <name>`
+- **lookup** - search for player in database
+	- Usage: `!lookup <name>`
+	- Short: `!l <name>`
 - **map** - load given map
 	- Usage: `!map <ut4_name>`
 - **maps** - display all available maps

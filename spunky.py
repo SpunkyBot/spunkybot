@@ -1269,6 +1269,20 @@ class LogParser(object):
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !kill <name>")
 
+            # lookup - search for player in database
+            elif (sar['command'] == '!lookup' or sar['command'] == '!l') and self.game.players[sar['player_num']].get_admin_role() >= 80:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip()
+                    search = '%' + arg + '%'
+                    lookup = (search,)
+                    curs.execute("SELECT * FROM `player` WHERE `name` like", lookup)
+                    result = curs.fetchall()
+                    [self.game.rcon_tell(sar['player_num'], "^7[^2@%s^7] %s ^7[^1%s^7]" % (str(row[0]), str(row[2]), str(row[4])), False) for row in result]  # 0=ID, 1=GUID, 2=Name, 3=IP, 4=Date
+                    if not result:
+                        self.game.rcon_tell(sar['player_num'], "No Player found matching %s" % arg)
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7Usage: !lookup <name>")
+
             # permban - ban a player permanent
             elif (sar['command'] == '!permban' or sar['command'] == '!pb') and self.game.players[sar['player_num']].get_admin_role() >= 80:
                 if line.split(sar['command'])[1]:
