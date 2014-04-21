@@ -1602,8 +1602,8 @@ class Player(object):
         values = (self.guid, expire_date)
         curs.execute("SELECT COUNT(*) FROM `ban_list` WHERE `guid` = ? AND `expires` > ?", values)
         if curs.fetchone()[0] > 0:
-            values = (expire_date, self.guid)
-            curs.execute("UPDATE `ban_list` SET `expires` = ? WHERE `guid` = ?", values)
+            values = (self.address, expire_date, self.guid)
+            curs.execute("UPDATE `ban_list` SET `ip_address`,`expires` = ? WHERE `guid` = ?", values)
             conn.commit()
         else:
             values = (self.guid, self.prettyname, self.address, expire_date, timestamp, reason)
