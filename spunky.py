@@ -1275,7 +1275,7 @@ class LogParser(object):
                     arg = line.split(sar['command'])[1].strip()
                     search = '%' + arg + '%'
                     lookup = (search,)
-                    curs.execute("SELECT * FROM `player` WHERE `name` like", lookup)
+                    curs.execute("SELECT * FROM `player` WHERE `name` like ?", lookup)
                     result = curs.fetchall()
                     [self.game.rcon_tell(sar['player_num'], "^7[^2@%s^7] %s ^7[^1%s^7]" % (str(row[0]), str(row[2]), str(row[4])), False) for row in result]  # 0=ID, 1=GUID, 2=Name, 3=IP, 4=Date
                     if not result:
