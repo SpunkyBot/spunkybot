@@ -1149,7 +1149,7 @@ class LogParser(object):
                     else:
                         # update rcon status
                         self.game.get_rcon_handle().quake.rcon_update()
-                        for player in self.game.ge_rcon_handle().quake.players:
+                        for player in self.game.get_rcon_handle().quake.players:
                             if victim.get_player_num() == player.num:
                                 player_ping = player.ping
                         if player_ping == 999:
@@ -1272,7 +1272,8 @@ class LogParser(object):
                     lookup = (search,)
                     curs.execute("SELECT * FROM `player` WHERE `name` like ?", lookup)
                     result = curs.fetchall()
-                    [self.game.rcon_tell(sar['player_num'], "^7[^2@%s^7] %s ^7[^1%s^7]" % (str(row[0]), str(row[2]), str(row[4])), False) for row in result]  # 0=ID, 1=GUID, 2=Name, 3=IP, 4=Date
+                    for row in result:
+                        self.game.rcon_tell(sar['player_num'], "^7[^2@%s^7] %s ^7[^1%s^7]" % (str(row[0]), str(row[2]), str(row[4])), False)  # 0=ID, 1=GUID, 2=Name, 3=IP, 4=Date
                     if not result:
                         self.game.rcon_tell(sar['player_num'], "No Player found matching %s" % arg)
                 else:
