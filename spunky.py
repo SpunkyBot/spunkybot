@@ -62,7 +62,7 @@ class LogParser(object):
         self.mod_cmds = self.user_cmds + ['country', 'leveltest', 'list', 'nextmap', 'mute', 'shuffleteams', 'warn']
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'force', 'kick', 'nuke', 'say', 'tempban', 'warnclear']
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'ci', 'scream', 'slap', 'swap', 'version', 'veto']
-        self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'map', 'maps', 'maprestart', 'moon', 'permban', 'putgroup', 'setnextmap', 'unban', 'ungroup']
+        self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'lookup', 'map', 'maps', 'maprestart', 'moon', 'permban', 'putgroup', 'setnextmap', 'unban', 'ungroup']
         # alphabetic sort of the commands
         self.mod_cmds.sort()
         self.admin_cmds.sort()
