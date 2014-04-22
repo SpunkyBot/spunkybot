@@ -59,7 +59,7 @@ class LogParser(object):
 
         # RCON commands for the different admin roles
         self.user_cmds = ['forgiveall, forgiveprev', 'hs', 'register', 'spree', 'stats', 'teams', 'time', 'xlrstats']
-        self.mod_cmds = self.user_cmds + ['country', 'leveltest', 'list', 'nextmap', 'mute', 'shuffleteams', 'warn']
+        self.mod_cmds = self.user_cmds + ['country', 'leveltest', 'list', 'nextmap', 'mute', 'seen', 'shuffleteams', 'warn']
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'force', 'kick', 'nuke', 'say', 'tempban', 'warnclear']
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'ci', 'scream', 'slap', 'swap', 'version', 'veto']
         self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'lookup', 'map', 'maps', 'maprestart', 'moon', 'permban', 'putgroup', 'setnextmap', 'unban', 'ungroup']
@@ -852,6 +852,18 @@ class LogParser(object):
                         self.game.send_rcon("mute %d %s" % (victim.get_player_num(), duration))
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !mute <name> [<seconds>]")
+
+            # seen - display when the player was last seen
+            elif sar['command'] == '!seen' and self.game.players[sar['player_num']].get_admin_role() >= 20:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
+                    found, victim, msg = self.player_found(user)
+                    if not found:
+                        self.game.rcon_tell(sar['player_num'], msg)
+                    else:
+                        self.game.rcon_tell(sar['player_num'], "%s ^7was last seen on %s" % (victim.get_name(), victim.get_last_visit()))
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7Usage: !seen <name>")
 
             # shuffleteams
             elif (sar['command'] == '!shuffleteams' or sar['command'] == '!shuffle') and self.game.players[sar['player_num']].get_admin_role() >= 20:
