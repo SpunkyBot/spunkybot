@@ -1051,7 +1051,7 @@ class LogParser(object):
                                 else:
                                     victim.ban(duration=duration, reason=reason, admin=self.game.players[sar['player_num']].get_name())
                                     self.game.rcon_say("^2%s ^1banned for %s ^7by %s: ^4%s" % (victim.get_name(), duration_output, self.game.players[sar['player_num']].get_name(), reason))
-                                    self.game.kick_player(sar['player_num'])
+                                    self.game.kick_player(victim.get_player_num())
                     else:
                         self.game.rcon_tell(sar['player_num'], "^7You need to enter a reason: ^3!tempban <name> <reason> [<duration in hours>]")
                 else:
@@ -1182,7 +1182,7 @@ class LogParser(object):
                                 # ban for 7 days
                                 victim.ban(duration=604800, reason=reason, admin=self.game.players[sar['player_num']].get_name())
                                 self.game.rcon_say("^2%s ^1banned for 7 days ^7by %s: ^4%s" % (victim.get_name(), self.game.players[sar['player_num']].get_name(), reason))
-                                self.game.kick_player(sar['player_num'])
+                                self.game.kick_player(victim.get_player_num())
                     else:
                         self.game.rcon_tell(sar['player_num'], "^7You need to enter a reason: ^3!ban <name> <reason>")
                 else:
@@ -1300,7 +1300,7 @@ class LogParser(object):
                                 # ban for 20 years
                                 victim.ban(duration=630720000, reason=reason, admin=self.game.players[sar['player_num']].get_name())
                                 self.game.rcon_say("^2%s ^1banned permanently ^7by %s: ^4%s" % (victim.get_name(), self.game.players[sar['player_num']].get_name(), reason))
-                                self.game.kick_player(sar['player_num'])
+                                self.game.kick_player(victim.get_player_num())
                                 # add IP address to bot-banlist.txt
                                 banlist = open('./bot-banlist.txt', 'a+')
                                 banlist.write("%s:-1   // %s    banned on  %s, reason : %s\n" % (victim.get_ip_address(), victim.get_name(), time.strftime("%d/%m/%Y (%H:%M)", time.localtime(time.time())), reason))
