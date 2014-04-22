@@ -419,7 +419,7 @@ class LogParser(object):
                 # kick banned player
                 if self.game.players[player_num].get_ban_id():
                     self.game.send_rcon("kick %d" % player_num)
-                    self.game.send_rcon("^7%s ^1banned ^7(ID #%s)" % (name, self.game.players[player_num].get_ban_id()))
+                    self.game.send_rcon("^7%s ^1banned ^7(ID #%d)" % (name, self.game.players[player_num].get_ban_id()))
                 else:
                     self.game.rcon_say("^7%s ^7connected from %s" % (name, self.game.players[player_num].get_country()))
             else:
@@ -600,7 +600,7 @@ class LogParser(object):
         for player in self.game.players.itervalues():
             player_name = player.get_name()
             player_num = player.get_player_num()
-            player_id = "@%s" % player.get_player_id()
+            player_id = "@%d" % player.get_player_id()
             if (user.upper() == player_name.upper() or user == str(player_num) or user == player_id) and player_num != 1022:
                 victim = player
                 name_list = ["^3%s [^2%d^3]" % (player_name, player_num)]
@@ -1540,7 +1540,7 @@ class Player(object):
         self.player_num = player_num
         self.guid = guid
         self.name = "".join(name.split())
-        self.player_id = ''
+        self.player_id = 0
         self.aliases = []
         self.registered_user = False
         self.num_played = 0
@@ -1573,7 +1573,7 @@ class Player(object):
         self.time_joined = time.time()
         self.welcome_msg = True
         self.country = None
-        self.ban_id = ''
+        self.ban_id = 0
 
         self.prettyname = self.name
         # remove color characters from name
