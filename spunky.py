@@ -113,8 +113,6 @@ class LogParser(object):
         data = {'v': __version__, 'p': config.get('server', 'server_port'), 'o': platform.platform()}
         values = urllib.urlencode(data)
         self.ping_url = '%s/ping.php?%s' % (self.base_url, values)
-        # load the GEO database and store it globally in interpreter memory
-        self.geoip = pygeoip.Database('./lib/GeoIP.dat')
 
         # start parsing the games logfile
         self.read_log()
@@ -423,11 +421,7 @@ class LogParser(object):
                     self.game.send_rcon("kick %d" % player_num)
                     self.game.send_rcon("^7%s ^1banned ^7(ID #%s)" % (name, self.game.players[player_num].get_ban_id()))
                 else:
-                    # GeoIP lookup
-                    info = self.geoip.lookup(ip_address)
-                    if info.country:
-                        self.game.players[player_num].set_country(info.country_name)
-                        self.game.rcon_say("^7%s ^7connected from %s" % (name, info.country_name))
+                    self.game.rcon_say("^7%s ^7connected from %s" % (name, self.game.players[player_num].get_country()))
             else:
                 if 'name' in values and values['name'] != self.game.players[player_num].get_name():
                     self.game.players[player_num].set_name(values['name'])
@@ -1585,6 +1579,11 @@ class Player(object):
         for item in xrange(10):
             self.prettyname = self.prettyname.replace('^%d' % item, '')
 
+        # GeoIP lookup
+        info = GEOIP.lookup(ip_address)
+        if info.country:
+            self.country = info.country_name
+
         # check ban_list
         now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         values = (self.guid, self.address, now)
@@ -1797,9 +1796,6 @@ class Player(object):
 
     def get_welcome_msg(self):
         return self.welcome_msg
-
-    def set_country(self, country):
-        self.country = country
 
     def get_country(self):
         return self.country
@@ -2174,6 +2170,9 @@ class Game(object):
 
 ### Main ###
 print "\n\nStarting Spunky Bot:"
+
+# load the GEO database and store it globally in interpreter memory
+GEOIP = pygeoip.Database('./lib/GeoIP.dat')
 
 # connect to database
 conn = sqlite3.connect('./data.sqlite')
