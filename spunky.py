@@ -606,7 +606,8 @@ class LogParser(object):
         for player in self.game.players.itervalues():
             player_name = player.get_name()
             player_num = player.get_player_num()
-            if (user.upper() == player_name.upper() or user == str(player_num)) and player_num != 1022:
+            player_id = "@%s" % player.get_player_id()
+            if (user.upper() == player_name.upper() or user == str(player_num) or user == player_id) and player_num != 1022:
                 victim = player
                 name_list = ["^3%s [^2%d^3]" % (player_name, player_num)]
                 break
@@ -1757,6 +1758,9 @@ class Player(object):
 
     def get_player_num(self):
         return self.player_num
+
+    def get_player_id(self):
+        return self.player_id
 
     def set_team(self, team):
         self.team = team
