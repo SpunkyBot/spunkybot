@@ -609,11 +609,32 @@ class LogParser(object):
                 victim = player
                 name_list.append("^3%s [^2%d^3]" % (player_name, player_num))
         if len(name_list) == 0:
-            return False, None, "No Player found"
+            if user.startswith('@'):
+                return self.offline_player(user)
+            else:
+                return False, None, "No Player found"
         elif len(name_list) > 1:
             return False, None, "^7Players matching %s: ^3%s" % (user, ', '.join(name_list))
         else:
             return True, victim, None
+
+    def offline_player(self, user_id):
+        player_id = user_id.lstrip('@')
+        if player_id.isdigit():
+            if int(player_id) > 1:
+                values = (player_id,)
+                curs.execute("SELECT * FROM `player` WHERE `id` = ?", values)
+                result = curs.fetchone()
+                if result:
+                    victim = Player(player_num=1023, ip_address=str(result[3]), guid=str(result[1]), name=str(result[2]))
+                    victim.define_offline_player()
+                    return True, victim, None
+                else:
+                    return False, None, "No Player found"
+            else:
+                return False, None, "No Player found"
+        else:
+            return False, None, "No Player found"
 
     def map_found(self, map_name):
         """
@@ -1718,6 +1739,24 @@ class Player(object):
             values = (self.prettyname, now, self.guid)
             curs.execute("UPDATE `xlrstats` SET `name` = ?,`last_played` = ?,`num_played` = `num_played` + 1 WHERE `guid` = ?", values)
             conn.commit()
+
+    def define_offline_player(self):
+        values = (self.guid,)
+        # get known aliases
+        curs.execute("SELECT `aliases` FROM `player` WHERE `guid` = ?", values)
+        result = curs.fetchone()
+        # create list of aliases
+        self.aliases = result[0].split(', ')
+        curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `guid` = ?", values)
+        if curs.fetchone()[0] == 0:
+            self.admin_role = 0
+            self.registered_user = False
+        else:
+            curs.execute("SELECT `last_played`,`admin_role` FROM `xlrstats` WHERE `guid` = ?", values)
+            result = curs.fetchone()
+            self.last_visit = result[0]
+            self.admin_role = result[1]
+            self.registered_user = True
 
     def register_user_db(self, role=1):
         if not self.registered_user:
