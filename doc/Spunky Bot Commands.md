@@ -21,6 +21,8 @@
 	- Usage: `!spree`
 - **stats** - display current map stats
 	- Usage: `!stats`
+- **bombstats** - display bomb stats
+	- Usage: `!bombstats`
 - **teams** - balance teams
 	- Usage: `!teams`
 - **time** - display the current server time
