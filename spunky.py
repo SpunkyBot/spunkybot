@@ -58,7 +58,7 @@ class LogParser(object):
         self.death_cause = {1: "MOD_WATER", 3: "MOD_LAVA", 5: "UT_MOD_TELEFRAG", 6: "MOD_FALLING", 7: "UT_MOD_SUICIDE", 9: "MOD_TRIGGER_HURT", 10: "MOD_CHANGE_TEAM", 12: "UT_MOD_KNIFE", 13: "UT_MOD_KNIFE_THROWN", 14: "UT_MOD_BERETTA", 15: "UT_MOD_KNIFE_DEAGLE", 16: "UT_MOD_SPAS", 17: "UT_MOD_UMP45", 18: "UT_MOD_MP5K", 19: "UT_MOD_LR300", 20: "UT_MOD_G36", 21: "UT_MOD_PSG1", 22: "UT_MOD_HK69", 23: "UT_MOD_BLED", 24: "UT_MOD_KICKED", 25: "UT_MOD_HEGRENADE", 28: "UT_MOD_SR8", 30: "UT_MOD_AK103", 31: "UT_MOD_SPLODED", 32: "UT_MOD_SLAPPED", 34: "UT_MOD_BOMBED", 35: "UT_MOD_NUKED", 36: "UT_MOD_NEGEV", 37: "UT_MOD_HK69_HIT", 38: "UT_MOD_M4", 39: "UT_MOD_GLOCK", 40: "UT_MOD_COLT1911", 41: "UT_MOD_MAC11", 42: "UT_MOD_FLAG"}
 
         # RCON commands for the different admin roles
-        self.user_cmds = ['forgiveall, forgiveprev', 'hs', 'register', 'spree', 'stats', 'teams', 'time', 'xlrstats']
+        self.user_cmds = ['bombstats', 'forgiveall, forgiveprev', 'hs', 'register', 'spree', 'stats', 'teams', 'time', 'xlrstats']
         self.mod_cmds = self.user_cmds + ['country', 'leveltest', 'list', 'nextmap', 'mute', 'seen', 'shuffleteams', 'warn']
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'force', 'kick', 'nuke', 'say', 'tempban', 'warnclear']
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'ci', 'scream', 'slap', 'swap', 'version', 'veto']
@@ -84,6 +84,7 @@ class LogParser(object):
         self.ffa_lms_gametype = False
         self.ctf_gametype = False
         self.ts_gametype = False
+        self.bomb_gametype = False
         self.ts_do_team_balance = False
         self.allow_cmd_teams = True
         self.urt42_modversion = True
@@ -147,6 +148,8 @@ class LogParser(object):
                         self.ctf_gametype = True
                     elif 'g_gametype\\4' in line:
                         self.ts_gametype = True
+                    elif 'g_gametype\\8' in line:
+                        self.bomb_gametype = True
                 if self.log_file.tell() > end_pos:
                     break
                 elif len(line) == 0:
@@ -278,8 +281,11 @@ class LogParser(object):
         """
         line = string[7:]
         tmp = line.split(":", 1)
-        try:
+        if len(tmp) > 1:
             line = tmp[1].strip()
+        else:
+            line = tmp[0].strip()
+        try:
             if tmp is not None:
                 if tmp[0].lstrip() == 'InitGame':
                     self.new_game(line)
@@ -320,6 +326,10 @@ class LogParser(object):
                     self.allow_cmd_teams = True
                 elif tmp[0].lstrip() == 'SurvivorWinner':
                     self.handle_teams_ts_mode()
+                elif 'Bomb' in tmp[0]:
+                    self.handle_bomb(line)
+                elif 'Pop' in tmp[0]:
+                    self.handle_teams_ts_mode()
         except (IndexError, KeyError):
             pass
         except Exception, err:
@@ -350,6 +360,7 @@ class LogParser(object):
         self.ffa_lms_gametype = True if ('g_gametype\\0' in line or 'g_gametype\\1' in line or 'g_gametype\\9' in line) else False
         self.ctf_gametype = True if 'g_gametype\\7' in line else False
         self.ts_gametype = True if 'g_gametype\\4' in line else False
+        self.bomb_gametype = True if 'g_gametype\\8' in line else False
         self.debug("Starting game...")
         self.game.rcon_clear()
 
@@ -569,6 +580,13 @@ class LogParser(object):
             # kill counter
             elif not tk_event and int(info[2]) != 10:  # 10: MOD_CHANGE_TEAM
                 killer.kill()
+                if self.bomb_gametype:
+                    # bomb carrier killed
+                    if victim.get_bombholder():
+                        killer.kill_bomb_carrier()
+                    # killed with bomb
+                    if death_cause == 'UT_MOD_BOMBED':
+                        killer.kills_with_bomb()
                 killer_color = "^1" if (killer.get_team() == 1) else "^4"
                 if killer.get_killing_streak() == 5 and killer_id != 1022:
                     self.game.rcon_say("%s%s ^7is on a killing spree!" % (killer_color, killer_name))
@@ -720,6 +738,11 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7You have ^2%d ^7kill%s in a row" % (spree_count, 's' if spree_count > 1 else ''))
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7You are currently not having a killing spree")
+
+            # bombstats - display bomb statistics
+            elif sar['command'] == '!bombstats':
+                self.game.rcon_tell(sar['player_num'], "^7planted: ^2%d ^7- defused: ^2%d" % (self.game.players[sar['player_num']].get_planted_bomb(), self.game.players[sar['player_num']].get_defused_bomb()))
+                self.game.rcon_tell(sar['player_num'], "^7bomb carrier killed: ^2%d ^7- enemies bombed: ^2%d" % (self.game.players[sar['player_num']].get_bomb_carrier_kills(), self.game.players[sar['player_num']].get_kills_with_bomb()))
 
             # time - display the servers current time
             elif sar['command'] == '!time' or sar['command'] == '@time':
@@ -1478,6 +1501,32 @@ class LogParser(object):
             elif action == '2:':
                 player.capture_flag()
 
+    def handle_bomb(self, line):
+        """
+        handle bomb
+        """
+        if "Bombholder" in line:
+            tmp = line.split("is")
+        else:
+            tmp = line.split("by")
+        action = tmp[0].strip()
+        player_num = int(tmp[1].rstrip('!').strip())
+        with self.players_lock:
+            player = self.game.players[player_num]
+            if action == 'Bomb was defused':
+                player.defused_bomb()
+                self.debug("Player %d defused the bomb." % player_num)
+                self.handle_teams_ts_mode()
+            elif action == 'Bomb was planted':
+                player.planted_bomb()
+                self.debug("Player %d planted the bomb." % player_num)
+            elif action == 'Bomb was tossed':
+                player.bomb_tossed()
+            elif action == 'Bomb has been collected':
+                player.is_bombholder()
+            elif action == 'Bombholder':
+                player.is_bombholder()
+
     def handle_teams_ts_mode(self):
         """
         handle team balance in Team Survivor mode
@@ -1513,10 +1562,12 @@ class LogParser(object):
         most_flags = 0
         most_streak = 0
         most_hs = 0
+        most_defused = 0
         flagrunner = ""
         serialkiller = ""
         streaker = ""
         headshooter = ""
+        defuser = ""
         msg = []
         with self.players_lock:
             for player in self.game.players.itervalues():
@@ -1532,6 +1583,9 @@ class LogParser(object):
                 if player.get_headshots() > most_hs:
                     most_hs = player.get_headshots()
                     headshooter = player.get_name()
+                if player.get_defused_bomb() > most_defused:
+                    most_defused = player.get_defused_bomb()
+                    defuser = player.get_name()
                 # display personal stats at the end of the round, stats for players in spec will not be displayed
                 if player.get_team() != 3:
                     self.game.rcon_tell(player.get_player_num(), "^7Stats %s: ^7K ^2%d ^7D ^3%d ^7HS ^1%d ^7TK ^1%d" % (player.get_name(), player.get_kills(), player.get_deaths(), player.get_headshots(), player.get_team_kill_count()))
@@ -1541,6 +1595,8 @@ class LogParser(object):
             # display Awards
             if most_flags > 1:
                 msg.append("^7%s: ^2%d ^4caps" % (flagrunner, most_flags))
+            if most_defused > 1:
+                msg.append("^7%s: ^2%d ^4defuses" % (defuser, most_defused))
             if most_kills > 1:
                 msg.append("^7%s: ^2%d ^3kills" % (serialkiller, most_kills))
             if most_streak > 1:
@@ -1601,6 +1657,11 @@ class Player(object):
         self.warn_counter = 0
         self.flags_captured = 0
         self.flags_returned = 0
+        self.bombholder = False
+        self.bomb_carrier_killed = 0
+        self.killed_with_bomb = 0
+        self.bomb_planted = 0
+        self.bomb_defused = 0
         self.address = ip_address
         self.team = 3
         self.time_joined = time.time()
@@ -1677,6 +1738,11 @@ class Player(object):
         self.warn_counter = 0
         self.flags_captured = 0
         self.flags_returned = 0
+        self.bombholder = False
+        self.bomb_carrier_killed = 0
+        self.killed_with_bomb = 0
+        self.bomb_planted = 0
+        self.bomb_defused = 0
 
     def reset_flag_stats(self):
         self.flags_captured = 0
@@ -1989,6 +2055,41 @@ class Player(object):
 
     def get_flags_returned(self):
         return self.flags_returned
+
+# Bomb Mode
+    def is_bombholder(self):
+        self.bombholder = True
+
+    def bomb_tossed(self):
+        self.bombholder = False
+
+    def get_bombholder(self):
+        return self.bombholder
+
+    def kill_bomb_carrier(self):
+        self.bomb_carrier_killed += 1
+
+    def get_bomb_carrier_kills(self):
+        return self.bomb_carrier_killed
+
+    def kills_with_bomb(self):
+        self.killed_with_bomb += 1
+
+    def get_kills_with_bomb(self):
+        return self.killed_with_bomb
+
+    def planted_bomb(self):
+        self.bomb_planted += 1
+        self.bombholder = False
+
+    def get_planted_bomb(self):
+        return self.bomb_planted
+
+    def defused_bomb(self):
+        self.bomb_defused += 1
+
+    def get_defused_bomb(self):
+        return self.bomb_defused
 
 
 ### CLASS Game ###
