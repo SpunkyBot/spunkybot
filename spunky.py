@@ -1012,7 +1012,7 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
                         if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
-                            self.game.rcon_tell(sar['player_num'], "You cannot nuke an admin")
+                            self.game.rcon_tell(sar['player_num'], "Insufficient privileges to nuke an admin")
                         else:
                             self.game.send_rcon("nuke %d" % victim.get_player_num())
                 else:
@@ -1036,7 +1036,7 @@ class LogParser(object):
                             self.game.rcon_tell(sar['player_num'], msg)
                         else:
                             if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
-                                self.game.rcon_tell(sar['player_num'], "You cannot kick an admin")
+                                self.game.rcon_tell(sar['player_num'], "Insufficient privileges to kick an admin")
                             else:
                                 msg = "^2%s ^7was kicked by %s" % (victim.get_name(), self.game.players[sar['player_num']].get_name())
                                 if reason in reason_dict:
@@ -1098,7 +1098,7 @@ class LogParser(object):
                                 self.game.rcon_tell(sar['player_num'], msg)
                             else:
                                 if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
-                                    self.game.rcon_tell(sar['player_num'], "You cannot ban an admin")
+                                    self.game.rcon_tell(sar['player_num'], "Insufficient privileges to ban an admin")
                                 else:
                                     victim.ban(duration=duration, reason=reason, admin=self.game.players[sar['player_num']].get_name())
                                     self.game.rcon_say("^2%s ^1banned for %s ^7by %s: ^4%s" % (victim.get_name(), duration_output, self.game.players[sar['player_num']].get_name(), reason))
@@ -1140,7 +1140,7 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
                         if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
-                            self.game.rcon_tell(sar['player_num'], "You cannot slap an admin")
+                            self.game.rcon_tell(sar['player_num'], "Insufficient privileges to slap an admin")
                         else:
                             for _ in xrange(0, number):
                                 self.game.send_rcon("slap %d" % victim.get_player_num())
@@ -1228,7 +1228,7 @@ class LogParser(object):
                             self.game.rcon_tell(sar['player_num'], msg)
                         else:
                             if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
-                                self.game.rcon_tell(sar['player_num'], "You cannot ban an admin")
+                                self.game.rcon_tell(sar['player_num'], "Insufficient privileges to ban an admin")
                             else:
                                 # ban for 7 days
                                 victim.ban(duration=604800, reason=reason, admin=self.game.players[sar['player_num']].get_name())
@@ -1314,7 +1314,7 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
                         if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
-                            self.game.rcon_tell(sar['player_num'], "You cannot kill an admin")
+                            self.game.rcon_tell(sar['player_num'], "Insufficient privileges to kill an admin")
                         else:
                             self.game.send_rcon("smite %d" % victim.get_player_num())
                 else:
@@ -1347,7 +1347,7 @@ class LogParser(object):
                             self.game.rcon_tell(sar['player_num'], msg)
                         else:
                             if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
-                                self.game.rcon_tell(sar['player_num'], "You cannot ban an admin")
+                                self.game.rcon_tell(sar['player_num'], "Insufficient privileges to ban an admin")
                             else:
                                 # ban for 20 years
                                 victim.ban(duration=630720000, reason=reason, admin=self.game.players[sar['player_num']].get_name())
