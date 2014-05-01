@@ -1498,8 +1498,10 @@ class LogParser(object):
             player = self.game.players[player_num]
             if action == '1:':
                 player.return_flag()
+                self.debug("Player %d returned the flag" % player_num)
             elif action == '2:':
                 player.capture_flag()
+                self.debug("Player %d captured the flag" % player_num)
 
     def handle_bomb(self, line):
         """
@@ -1515,11 +1517,11 @@ class LogParser(object):
             player = self.game.players[player_num]
             if action == 'Bomb was defused':
                 player.defused_bomb()
-                self.debug("Player %d defused the bomb." % player_num)
+                self.debug("Player %d defused the bomb" % player_num)
                 self.handle_teams_ts_mode()
             elif action == 'Bomb was planted':
                 player.planted_bomb()
-                self.debug("Player %d planted the bomb." % player_num)
+                self.debug("Player %d planted the bomb" % player_num)
             elif action == 'Bomb was tossed':
                 player.bomb_tossed()
             elif action == 'Bomb has been collected':
