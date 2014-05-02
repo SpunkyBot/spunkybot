@@ -303,7 +303,7 @@ class LogParser(object):
                         with self.players_lock:
                             for player in self.game.players.itervalues():
                                 player.reset_flag_stats()
-                    elif self.ts_gametype:
+                    elif self.ts_gametype or self.bomb_gametype:
                         self.allow_cmd_teams = False
                 elif tmp[0].lstrip() == 'ClientUserinfo':
                     self.handle_userinfo(line)
@@ -1554,7 +1554,7 @@ class LogParser(object):
                     self.ts_do_team_balance = False
                     self.debug("Balance teams by user request")
                 else:
-                    if self.ts_gametype:
+                    if self.ts_gametype or self.bomb_gametype:
                         self.ts_do_team_balance = True
                         self.game.rcon_say("^7Teams will be balanced at the end of the round!")
             else:
