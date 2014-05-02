@@ -101,6 +101,8 @@ class LogParser(object):
         self.num_kick_specs = config.getint('bot', 'kick_spec_full_server')
         # set task frequency
         self.task_frequency = config.getint('bot', 'task_frequency')
+        # set teams autobalancer
+        self.teams_autobalancer = config.getboolean('bot', 'autobalancer')
         # support for low gravity server
         if config.has_section('lowgrav'):
             self.support_lowgravity = config.getboolean('lowgrav', 'support_lowgravity')
@@ -295,6 +297,7 @@ class LogParser(object):
                             player.reset()
                     self.game.set_current_map()
                     self.allow_cmd_teams = True
+                    self.autobalancer()
                 elif tmp[0].lstrip() == 'InitRound':
                     if self.ctf_gametype:
                         with self.players_lock:
@@ -1533,12 +1536,11 @@ class LogParser(object):
         """
         handle team balance in Team Survivor mode
         """
-        if self.ts_gametype:
-            if self.ts_do_team_balance:
-                self.allow_cmd_teams = True
-                self.handle_team_balance()
-                self.allow_cmd_teams = False
-                self.ts_do_team_balance = False
+        self.autobalancer()
+        if self.ts_do_team_balance:
+            self.allow_cmd_teams = True
+            self.handle_team_balance()
+            self.allow_cmd_teams = False
 
     def handle_team_balance(self):
         """
@@ -1549,12 +1551,27 @@ class LogParser(object):
             if (abs(game_data[Player.teams[1]] - game_data[Player.teams[2]])) > 1:
                 if self.allow_cmd_teams:
                     self.game.balance_teams(game_data)
+                    self.ts_do_team_balance = False
+                    self.debug("Balance teams by user request")
                 else:
                     if self.ts_gametype:
                         self.ts_do_team_balance = True
                         self.game.rcon_say("^7Teams will be balanced at the end of the round!")
             else:
                 self.game.rcon_say("^7Teams are already balanced")
+                self.ts_do_team_balance = False
+
+    def autobalancer(self):
+        """
+        auto balance teams at the end of the round if needed
+        """
+        if self.teams_autobalancer:
+            with self.players_lock:
+                game_data = self.game.get_gamestats()
+                if (abs(game_data[Player.teams[1]] - game_data[Player.teams[2]])) > 1:
+                    self.game.balance_teams(game_data)
+                    self.debug("Autobalancer performed team balance")
+                self.ts_do_team_balance = False
 
     def handle_awards(self):
         """
