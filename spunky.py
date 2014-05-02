@@ -299,6 +299,7 @@ class LogParser(object):
                     self.allow_cmd_teams = True
                     self.autobalancer()
                 elif tmp[0].lstrip() == 'InitRound':
+                    self.debug("Round started...")
                     if self.ctf_gametype:
                         with self.players_lock:
                             for player in self.game.players.itervalues():
@@ -325,6 +326,7 @@ class LogParser(object):
                 elif tmp[0].lstrip() == 'Flag':
                     self.handle_flag(line)
                 elif tmp[0].lstrip() == 'Exit':
+                    self.debug("Match ended!")
                     self.handle_awards()
                     self.allow_cmd_teams = True
                 elif tmp[0].lstrip() == 'SurvivorWinner':
@@ -332,6 +334,7 @@ class LogParser(object):
                 elif 'Bomb' in tmp[0]:
                     self.handle_bomb(line)
                 elif 'Pop' in tmp[0]:
+                    self.debug("Bomb exploded!")
                     self.handle_teams_ts_mode()
         except (IndexError, KeyError):
             pass
