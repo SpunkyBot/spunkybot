@@ -295,7 +295,6 @@ class LogParser(object):
                     with self.players_lock:
                         for player in self.game.players.itervalues():
                             player.reset()
-                    self.game.set_current_map()
                     self.allow_cmd_teams = True
                     self.autobalancer()
                 elif tmp[0].lstrip() == 'InitRound':
@@ -369,6 +368,9 @@ class LogParser(object):
         self.bomb_gametype = True if 'g_gametype\\8' in line else False
         self.debug("Starting game...")
         self.game.rcon_clear()
+
+        # set the current map
+        self.game.set_current_map()
 
         # support for low gravity server
         if self.support_lowgravity:
