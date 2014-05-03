@@ -211,9 +211,9 @@ class LogParser(object):
         - check for spectators and set warning
         - check ping of all players and set warning for high ping user
         """
-        # get rcon status
-        self.game.get_rcon_handle().get_status()
         try:
+            # get rcon status
+            self.game.get_rcon_handle().get_status()
             with self.players_lock:
                 # get number of connected players
                 counter = len(self.game.players) - 1  # bot is counted as player
