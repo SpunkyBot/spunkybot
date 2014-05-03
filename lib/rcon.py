@@ -6,7 +6,7 @@ Author: Alexander Kress
 This program is released under the MIT License.
 """
 
-__version__ = '1.0.5'
+__version__ = '1.0.6'
 
 
 ### IMPORTS
@@ -37,7 +37,7 @@ class Rcon(object):
         @type  passwd: String
         """
         self.live = False
-        self.quake = PyQuake3(host + ":" + port, passwd)
+        self.quake = PyQuake3("%s:%s" % (host, port), passwd)
         self.queue = Queue()
         self.rcon_lock = RLock()
         # start Thread
@@ -66,9 +66,7 @@ class Rcon(object):
         """
         get RCON status
         """
-        if self.live:
-            with self.rcon_lock:
-                self.push('status')
+        self.push('status')
 
     def get_quake_value(self, value):
         """
@@ -120,7 +118,7 @@ class Rcon(object):
             file_handle = open(mapcycle_path, 'r')
             lines = file_handle.readlines()
             try:
-                while True:
+                while 1:
                     tmp = lines.pop(0).strip()
                     if tmp[0] == '{':
                         while tmp[0] != '}':
