@@ -369,8 +369,13 @@ class LogParser(object):
         self.debug("Starting game...")
         self.game.rcon_clear()
 
+        # wait for server loading the new map
+        time.sleep(4)
+
         # set the current map
         self.game.set_current_map()
+        # load all available maps
+        self.game.set_all_maps()
 
         # support for low gravity server
         if self.support_lowgravity:
@@ -2251,7 +2256,6 @@ class Game(object):
         """
         set the current and next map in rotation
         """
-        time.sleep(4)
         try:
             self.mapname = self.rcon_handle.get_quake_value('mapname')
         except KeyError:
@@ -2274,7 +2278,9 @@ class Game(object):
         """
         all_maps = self.rcon_handle.get_rcon_output("dir map bsp")[1].split()
         all_maps.sort()
-        self.all_maps_list = [maps.replace("/", "").replace(".bsp", "") for maps in all_maps if maps.startswith("/")]
+        all_maps_list = [maps.replace("/", "").replace(".bsp", "") for maps in all_maps if maps.startswith("/")]
+        if all_maps_list:
+            self.all_maps_list = all_maps_list
 
     def get_all_maps(self):
         """
