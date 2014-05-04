@@ -658,7 +658,7 @@ class LogParser(object):
                 result = curs.fetchone()
                 if result:
                     victim = Player(player_num=1023, ip_address=str(result[3]), guid=str(result[1]), name=str(result[2]))
-                    victim.define_offline_player()
+                    victim.define_offline_player(player_id=int(player_id))
                     return True, victim, None
                 else:
                     return False, None, "No Player found"
@@ -1860,7 +1860,8 @@ class Player(object):
             curs.execute("UPDATE `xlrstats` SET `name` = ?,`last_played` = ?,`num_played` = `num_played` + 1 WHERE `guid` = ?", values)
             conn.commit()
 
-    def define_offline_player(self):
+    def define_offline_player(self, player_id):
+        self.player_id = player_id
         values = (self.guid,)
         # get known aliases
         curs.execute("SELECT `aliases` FROM `player` WHERE `guid` = ?", values)
