@@ -1113,8 +1113,10 @@ class LogParser(object):
                                 if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
                                     self.game.rcon_tell(sar['player_num'], "Insufficient privileges to ban an admin")
                                 else:
-                                    victim.ban(duration=duration, reason=reason, admin=self.game.players[sar['player_num']].get_name())
-                                    self.game.rcon_say("^2%s ^1banned for %s ^7by %s: ^4%s" % (victim.get_name(), duration_output, self.game.players[sar['player_num']].get_name(), reason))
+                                    if victim.ban(duration=duration, reason=reason, admin=self.game.players[sar['player_num']].get_name()):
+                                        self.game.rcon_say("^2%s ^1banned for %s ^7by %s: ^4%s" % (victim.get_name(), duration_output, self.game.players[sar['player_num']].get_name(), reason))
+                                    else:
+                                        self.game.rcon_tell(sar['player_num'], "^7This player has already a longer ban")
                                     self.game.kick_player(victim.get_player_num())
                     else:
                         self.game.rcon_tell(sar['player_num'], "^7You need to enter a reason: ^3!tempban <name> <reason> [<duration in hours>]")
@@ -1244,8 +1246,10 @@ class LogParser(object):
                                 self.game.rcon_tell(sar['player_num'], "Insufficient privileges to ban an admin")
                             else:
                                 # ban for 7 days
-                                victim.ban(duration=604800, reason=reason, admin=self.game.players[sar['player_num']].get_name())
-                                self.game.rcon_say("^2%s ^1banned for 7 days ^7by %s: ^4%s" % (victim.get_name(), self.game.players[sar['player_num']].get_name(), reason))
+                                if victim.ban(duration=604800, reason=reason, admin=self.game.players[sar['player_num']].get_name()):
+                                    self.game.rcon_say("^2%s ^1banned for 7 days ^7by %s: ^4%s" % (victim.get_name(), self.game.players[sar['player_num']].get_name(), reason))
+                                else:
+                                    self.game.rcon_tell(sar['player_num'], "^7This player has already a longer ban")
                                 self.game.kick_player(victim.get_player_num())
                     else:
                         self.game.rcon_tell(sar['player_num'], "^7You need to enter a reason: ^3!ban <name> <reason>")
@@ -1723,16 +1727,26 @@ class Player(object):
         unix_expiration = duration + time.time()
         expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(unix_expiration))
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-        values = (self.guid, expire_date)
-        curs.execute("SELECT COUNT(*) FROM `ban_list` WHERE `guid` = ? AND `expires` > ?", values)
-        if curs.fetchone()[0] > 0:
-            values = (self.address, expire_date, self.guid)
-            curs.execute("UPDATE `ban_list` SET `ip_address`,`expires` = ? WHERE `guid` = ?", values)
-            conn.commit()
+        values = (self.guid,)
+        curs.execute("SELECT `expires` FROM `ban_list` WHERE `guid` = ?", values)
+        result = curs.fetchone()
+        if result:
+            if result[0] < expire_date:
+                values = (self.address, expire_date, self.guid)
+                curs.execute("UPDATE `ban_list` SET `ip_address` = ?,`expires` = ? WHERE `guid` = ?", values)
+                conn.commit()
+                ban_status = True
+            else:
+                values = (self.address, self.guid)
+                curs.execute("UPDATE `ban_list` SET `ip_address` = ? WHERE `guid` = ?", values)
+                conn.commit()
+                ban_status = False
         else:
-            values = (self.guid, self.prettyname, self.address, expire_date, timestamp, reason)
-            curs.execute("INSERT INTO `ban_list` (`guid`,`name`,`ip_address`,`expires`,`timestamp`,`reason`) VALUES (?,?,?,?,?,?)", values)
+            values = (self.player_id, self.guid, self.prettyname, self.address, expire_date, timestamp, reason)
+            curs.execute("INSERT INTO `ban_list` (`id`,`guid`,`name`,`ip_address`,`expires`,`timestamp`,`reason`) VALUES (?,?,?,?,?,?,?)", values)
             conn.commit()
+            ban_status = True
+        return ban_status
 
     def add_ban_point(self, point_type, duration):
         unix_expiration = duration + time.time()
