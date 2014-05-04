@@ -1441,13 +1441,12 @@ class LogParser(object):
             # unban - unban a player from the database via ID
             elif sar['command'] == '!unban' and self.game.players[sar['player_num']].get_admin_role() >= 80:
                 if line.split(sar['command'])[1]:
-                    arg = line.split(sar['command'])[1].strip()
+                    arg = line.split(sar['command'])[1].strip().lstrip('@')
                     if arg.isdigit():
                         values = (int(arg),)
-                        curs.execute("SELECT COUNT(*) FROM `ban_list` WHERE `id` = ?", values)
-                        if curs.fetchone()[0] > 0:
-                            curs.execute("SELECT `name` FROM `ban_list` WHERE `id` = ?", values)
-                            result = curs.fetchone()
+                        curs.execute("SELECT `name` FROM `ban_list` WHERE `id` = ?", values)
+                        result = curs.fetchone()
+                        if result:
                             name = str(result[0])
                             curs.execute("DELETE FROM `ban_list` WHERE `id` = ?", values)
                             conn.commit()
