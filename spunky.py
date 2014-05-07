@@ -654,10 +654,10 @@ class LogParser(object):
         if player_id.isdigit():
             if int(player_id) > 1:
                 values = (player_id,)
-                curs.execute("SELECT * FROM `player` WHERE `id` = ?", values)
+                curs.execute("SELECT `guid`,`name`,`ip_address` FROM `player` WHERE `id` = ?", values)
                 result = curs.fetchone()
                 if result:
-                    victim = Player(player_num=1023, ip_address=str(result[3]), guid=str(result[1]), name=str(result[2]))
+                    victim = Player(player_num=1023, ip_address=str(result[2]), guid=str(result[0]), name=str(result[1]))
                     victim.define_offline_player(player_id=int(player_id))
                     return True, victim, None
                 else:
