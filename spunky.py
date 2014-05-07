@@ -1712,13 +1712,18 @@ class Player(object):
             self.country = info.country_name
 
         # check ban_list
-        now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-        values = (self.guid, self.address, now)
-        curs.execute("SELECT COUNT(*) FROM `ban_list` WHERE (`guid` = ? OR `ip_address` = ?) AND `expires` > ?", values)
-        if curs.fetchone()[0] > 0:
-            values = (self.guid,)
-            curs.execute("SELECT `id` FROM `ban_list` WHERE `guid` = ?", values)
-            self.ban_id = curs.fetchone()[0]
+        now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(self.time_joined))
+        values = (self.guid, now)
+        curs.execute("SELECT `id` FROM `ban_list` WHERE `guid` = ? AND `expires` > ?", values)
+        result = curs.fetchone()
+        if result:
+            self.ban_id = result[0]
+        else:
+            values = (self.address, now)
+            curs.execute("SELECT `id` FROM `ban_list` WHERE `ip_address` = ? AND `expires` > ?", values)
+            result = curs.fetchone()
+            if result:
+                self.ban_id = result[0]
 
     def ban(self, duration=900, reason='tk', admin=None):
         if admin:
