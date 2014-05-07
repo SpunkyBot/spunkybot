@@ -1434,7 +1434,7 @@ class LogParser(object):
                     limit = 0
                 else:
                     limit = len(result)
-                banlist = ['^7[^2%s^7]%s' % (result[item][0], result[item][2]) for item in xrange(limit)]  # 0=ID,2=Name
+                banlist = ['^7[^2@%s^7] %s' % (result[item][0], result[item][2]) for item in xrange(limit)]  # 0=ID,2=Name
                 msg = 'Currently no one is banned' if not banlist else str(", ".join(banlist))
                 self.game.rcon_tell(sar['player_num'], "^7Banlist: %s" % msg)
 
