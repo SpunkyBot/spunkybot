@@ -1601,11 +1601,13 @@ class LogParser(object):
         most_streak = 0
         most_hs = 0
         most_defused = 0
+        most_planted = 0
         flagrunner = ""
         serialkiller = ""
         streaker = ""
         headshooter = ""
-        defuser = ""
+        defused_by = ""
+        planted_by = ""
         msg = []
         with self.players_lock:
             for player in self.game.players.itervalues():
@@ -1623,7 +1625,10 @@ class LogParser(object):
                     headshooter = player.get_name()
                 if player.get_defused_bomb() > most_defused:
                     most_defused = player.get_defused_bomb()
-                    defuser = player.get_name()
+                    defused_by = player.get_name()
+                if player.get_planted_bomb() > most_planted:
+                    most_planted = player.get_planted_bomb()
+                    planted_by = player.get_name()
                 # display personal stats at the end of the round, stats for players in spec will not be displayed
                 if player.get_team() != 3:
                     self.game.rcon_tell(player.get_player_num(), "^7Stats %s: ^7K ^2%d ^7D ^3%d ^7HS ^1%d ^7TK ^1%d" % (player.get_name(), player.get_kills(), player.get_deaths(), player.get_headshots(), player.get_team_kill_count()))
@@ -1633,8 +1638,10 @@ class LogParser(object):
             # display Awards
             if most_flags > 1:
                 msg.append("^7%s: ^2%d ^4caps" % (flagrunner, most_flags))
+            if most_planted > 1:
+                msg.append("^7%s: ^2%d ^5planted" % (planted_by, most_planted))
             if most_defused > 1:
-                msg.append("^7%s: ^2%d ^4defuses" % (defuser, most_defused))
+                msg.append("^7%s: ^2%d ^4defused" % (defused_by, most_defused))
             if most_kills > 1:
                 msg.append("^7%s: ^2%d ^3kills" % (serialkiller, most_kills))
             if most_streak > 1:
