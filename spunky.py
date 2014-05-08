@@ -1444,19 +1444,25 @@ class LogParser(object):
                     arg = line.split(sar['command'])[1].strip().lstrip('@')
                     if arg.isdigit():
                         values = (int(arg),)
-                        curs.execute("SELECT `name` FROM `ban_list` WHERE `id` = ?", values)
+                        curs.execute("SELECT `guid`,`name`,`ip_address` FROM `ban_list` WHERE `id` = ?", values)
                         result = curs.fetchone()
                         if result:
-                            name = str(result[0])
+                            guid = result[0]
+                            name = str(result[1])
+                            ip_addr = str(result[2])
                             curs.execute("DELETE FROM `ban_list` WHERE `id` = ?", values)
                             conn.commit()
                             self.game.rcon_tell(sar['player_num'], "^7Player ^2%s ^7unbanned" % name)
+                            values = (guid, ip_addr)
+                            curs.execute("DELETE FROM `ban_list` WHERE `guid` = ? OR ip_address = ?", values)
+                            conn.commit()
+                            self.game.rcon_tell(sar['player_num'], "^7Try to remove duplicates of [^1%s^7]" % ip_addr)
                         else:
                             self.game.rcon_tell(sar['player_num'], "^7Invalid ID, no Player found")
                     else:
-                        self.game.rcon_tell(sar['player_num'], "^7Usage: !unban <ID>")
+                        self.game.rcon_tell(sar['player_num'], "^7Usage: !unban <@ID>")
                 else:
-                    self.game.rcon_tell(sar['player_num'], "^7Usage: !unban <ID>")
+                    self.game.rcon_tell(sar['player_num'], "^7Usage: !unban <@ID>")
 
 ## head admin level 100
             # ungroup - remove the admin level from a player
