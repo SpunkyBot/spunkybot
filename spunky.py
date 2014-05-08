@@ -443,7 +443,7 @@ class LogParser(object):
                 # kick banned player
                 if self.game.players[player_num].get_ban_id():
                     self.game.send_rcon("kick %d" % player_num)
-                    self.game.send_rcon("^7%s ^1banned ^7(ID #%d)" % (name, self.game.players[player_num].get_ban_id()))
+                    self.game.send_rcon("^7%s ^1banned ^7(ID @%d)" % (name, self.game.players[player_num].get_ban_id()))
                 else:
                     self.game.rcon_say("^7%s ^7connected from %s" % (name, self.game.players[player_num].get_country()))
             else:
