@@ -179,6 +179,8 @@ class LogParser(object):
                 schedule.every(self.task_frequency).seconds.do(self.taskmanager)
         # schedule the task
         schedule.every(12).hours.do(self.send_heartbeat)
+        # schedule the task
+        schedule.every(2).hours.do(self.remove_expired_db_entries)
 
         self.find_game_start()
 
@@ -204,6 +206,19 @@ class LogParser(object):
             urllib2.urlopen(self.ping_url)
         except urllib2.URLError:
             pass
+
+    def remove_expired_db_entries(self):
+        """
+        delete expired ban points and bans from the database
+        """
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+        values = (timestamp,)
+
+        # remove expired bans
+        curs.execute("DELETE FROM `ban_list` WHERE `expires` < ?", values)
+        # remove expired ban_points
+        curs.execute("DELETE FROM `ban_points` WHERE `expires` < ?", values)
+        conn.commit()
 
     def taskmanager(self):
         """
