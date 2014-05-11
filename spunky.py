@@ -101,6 +101,8 @@ class LogParser(object):
         self.num_kick_specs = config.getint('bot', 'kick_spec_full_server')
         # set task frequency
         self.task_frequency = config.getint('bot', 'task_frequency')
+        # enable/disable message 'Player connected from...'
+        self.show_country_on_connect = config.getboolean('bot', 'show_country_on_connect')
         # set teams autobalancer
         self.teams_autobalancer = config.getboolean('bot', 'autobalancer')
         # support for low gravity server
@@ -460,7 +462,8 @@ class LogParser(object):
                     self.game.send_rcon("kick %d" % player_num)
                     self.game.send_rcon("^7%s ^1banned ^7(ID @%d)" % (name, self.game.players[player_num].get_ban_id()))
                 else:
-                    self.game.rcon_say("^7%s ^7connected from %s" % (name, self.game.players[player_num].get_country()))
+                    if self.show_country_on_connect:
+                        self.game.rcon_say("^7%s ^7connected from %s" % (name, self.game.players[player_num].get_country()))
             else:
                 if 'name' in values and values['name'] != self.game.players[player_num].get_name():
                     self.game.players[player_num].set_name(values['name'])
