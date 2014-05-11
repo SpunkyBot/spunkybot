@@ -1249,7 +1249,7 @@ class LogParser(object):
                             else:
                                 # ban for 7 days
                                 if victim.ban(duration=604800, reason=reason, admin=self.game.players[sar['player_num']].get_name()):
-                                    self.game.rcon_say("^2%s ^1banned for 7 days ^7by %s: ^3%s" % (victim.get_name(), self.game.players[sar['player_num']].get_name(), kick_reason))
+                                    self.game.rcon_say("^2%s ^1banned ^7for ^37 days ^7by %s: ^3%s" % (victim.get_name(), self.game.players[sar['player_num']].get_name(), kick_reason))
                                 else:
                                     self.game.rcon_tell(sar['player_num'], "^7This player has already a longer ban")
                                 self.game.kick_player(player_num=victim.get_player_num(), reason=kick_reason)
