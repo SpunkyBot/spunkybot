@@ -1428,7 +1428,9 @@ class LogParser(object):
 
             # banlist - display the last 10 entries of the banlist
             elif sar['command'] == '!banlist' and self.game.players[sar['player_num']].get_admin_role() >= 80:
-                curs.execute("SELECT * FROM `ban_list` ORDER BY `id` DESC LIMIT 10")
+                timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+                values = (timestamp,)
+                curs.execute("SELECT * FROM `ban_list` WHERE `expires` > ? ORDER BY `id` DESC LIMIT 10", values)
                 result = curs.fetchall()
                 if len(result) > 10:
                     limit = 10
