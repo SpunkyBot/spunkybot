@@ -1122,6 +1122,7 @@ class LogParser(object):
                                 duration = 86400
                                 duration_output = "24 hours"
                             found, victim, msg = self.player_found(user)
+                            kick_reason = reason_dict[reason] if reason in reason_dict else reason
                             if not found:
                                 self.game.rcon_tell(sar['player_num'], msg)
                             else:
@@ -1129,10 +1130,10 @@ class LogParser(object):
                                     self.game.rcon_tell(sar['player_num'], "Insufficient privileges to ban an admin")
                                 else:
                                     if victim.ban(duration=duration, reason=reason, admin=self.game.players[sar['player_num']].get_name()):
-                                        self.game.rcon_say("^2%s ^1banned for %s ^7by %s: ^4%s" % (victim.get_name(), duration_output, self.game.players[sar['player_num']].get_name(), reason))
+                                        self.game.rcon_say("^2%s ^1banned for %s ^7by %s: ^3%s" % (victim.get_name(), duration_output, self.game.players[sar['player_num']].get_name(), kick_reason))
                                     else:
                                         self.game.rcon_tell(sar['player_num'], "^7This player has already a longer ban")
-                                    self.game.kick_player(victim.get_player_num())
+                                    self.game.kick_player(player_num=victim.get_player_num(), reason=kick_reason)
                     else:
                         self.game.rcon_tell(sar['player_num'], "^7You need to enter a reason: ^3!tempban <name> <reason> [<duration in hours>]")
                 else:
@@ -1254,6 +1255,7 @@ class LogParser(object):
                         user = arg[0]
                         reason = ' '.join(arg[1:])[:40].strip()
                         found, victim, msg = self.player_found(user)
+                        kick_reason = reason_dict[reason] if reason in reason_dict else reason
                         if not found:
                             self.game.rcon_tell(sar['player_num'], msg)
                         else:
@@ -1262,10 +1264,10 @@ class LogParser(object):
                             else:
                                 # ban for 7 days
                                 if victim.ban(duration=604800, reason=reason, admin=self.game.players[sar['player_num']].get_name()):
-                                    self.game.rcon_say("^2%s ^1banned for 7 days ^7by %s: ^4%s" % (victim.get_name(), self.game.players[sar['player_num']].get_name(), reason))
+                                    self.game.rcon_say("^2%s ^1banned for 7 days ^7by %s: ^3%s" % (victim.get_name(), self.game.players[sar['player_num']].get_name(), kick_reason))
                                 else:
                                     self.game.rcon_tell(sar['player_num'], "^7This player has already a longer ban")
-                                self.game.kick_player(victim.get_player_num())
+                                self.game.kick_player(player_num=victim.get_player_num(), reason=kick_reason)
                     else:
                         self.game.rcon_tell(sar['player_num'], "^7You need to enter a reason: ^3!ban <name> <reason>")
                 else:
