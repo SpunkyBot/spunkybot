@@ -79,10 +79,9 @@
 - **warnclear** - clear the user warnings
 	- Usage: `!warnclear <name>`
 	- Short: `!wc <name>`
-- **tempban** - ban a player temporary for given period in hours
-	-  Usage: `!tempban <name> <reason> [<duration in hours>]`
-	-  Short: `!tb <name> <reason> [<duration in hours>]`
-	-  Default ban duration: 1 hour
+- **tempban** - ban a player temporary for the given period
+	-  Usage: `!tempban <name> <duration> [<reason>]`
+	-  Short: `!tb <name> <duration> [<reason>]`
 	-  Max ban duration: 24 hours
 
 

@@ -1095,49 +1095,34 @@ class LogParser(object):
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !warnclear <name>")
 
-            # tempban - ban a player temporary for given period in hours (1-24 hrs)
+            # tempban - ban a player temporary for the given period (1 min to 24 hrs)
             elif (sar['command'] == '!tempban' or sar['command'] == '!tb') and self.game.players[sar['player_num']].get_admin_role() >= 40:
                 if line.split(sar['command'])[1]:
                     arg = line.split(sar['command'])[1].strip().split(' ')
                     if len(arg) > 1:
                         user = arg[0]
-                        if len(arg) == 2:
-                            reason = arg[1]
-                            duration_string = '1'
+                        duration, duration_output = self.convert_time(arg[1])
+                        reason = ' '.join(arg[2:])[:40].strip() if len(arg) >= 2 else ''
+                        kick_reason = reason_dict[reason] if reason in reason_dict else reason
+                        found, victim, msg = self.player_found(user)
+                        if not found:
+                            self.game.rcon_tell(sar['player_num'], msg)
                         else:
-                            reason = arg[1]
-                            duration_string = arg[2].rstrip('hm')
-                        if reason.rstrip('hm').isdigit():
-                            self.game.rcon_tell(sar['player_num'], "^7You need to enter a reason: ^3!tempban <name> <reason> [<duration in hours>]")
-                        else:
-                            if duration_string.isdigit():
-                                duration = int(duration_string) * 3600
+                            if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
+                                self.game.rcon_tell(sar['player_num'], "Insufficient privileges to ban an admin")
                             else:
-                                duration = 3600
-                            if duration == 3600:
-                                duration_output = "1 hour"
-                            else:
-                                duration_output = "%s hours" % duration_string
-                            if duration > 86400:
-                                duration = 86400
-                                duration_output = "24 hours"
-                            found, victim, msg = self.player_found(user)
-                            kick_reason = reason_dict[reason] if reason in reason_dict else reason
-                            if not found:
-                                self.game.rcon_tell(sar['player_num'], msg)
-                            else:
-                                if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
-                                    self.game.rcon_tell(sar['player_num'], "Insufficient privileges to ban an admin")
+                                if victim.ban(duration=duration, reason=reason, admin=self.game.players[sar['player_num']].get_name()):
+                                    msg = "^2%s ^1banned ^7for ^3%s ^7by %s" % (victim.get_name(), duration_output, self.game.players[sar['player_num']].get_name())
+                                    if kick_reason:
+                                        msg = "%s: ^3%s" % (msg, kick_reason)
+                                    self.game.rcon_say(msg)
                                 else:
-                                    if victim.ban(duration=duration, reason=reason, admin=self.game.players[sar['player_num']].get_name()):
-                                        self.game.rcon_say("^2%s ^1banned for %s ^7by %s: ^3%s" % (victim.get_name(), duration_output, self.game.players[sar['player_num']].get_name(), kick_reason))
-                                    else:
-                                        self.game.rcon_tell(sar['player_num'], "^7This player has already a longer ban")
-                                    self.game.kick_player(player_num=victim.get_player_num(), reason=kick_reason)
+                                    self.game.rcon_tell(sar['player_num'], "^7This player has already a longer ban")
+                                self.game.kick_player(player_num=victim.get_player_num(), reason=kick_reason)
                     else:
-                        self.game.rcon_tell(sar['player_num'], "^7You need to enter a reason: ^3!tempban <name> <reason> [<duration in hours>]")
+                        self.game.rcon_tell(sar['player_num'], "^7You need to enter a duration: ^3!tempban <name> <duration> [<reason>]")
                 else:
-                    self.game.rcon_tell(sar['player_num'], "^7Usage: !tempban <name> <reason> [<duration in hours>]")
+                    self.game.rcon_tell(sar['player_num'], "^7Usage: !tempban <name> <duration> [<reason>]")
 
 ## full admin level 60
             # scream - scream a message in different colors to all players
@@ -1525,6 +1510,34 @@ class LogParser(object):
             self.game.rcon_say(msg)
         else:
             self.game.rcon_tell(sar['player_num'], msg)
+
+    def convert_time(self, time_string):
+        """
+        convert time string in duration and time unit
+        """
+        if time_string.endswith('h'):
+            duration_string = time_string.rstrip('h')
+            duration = int(duration_string) * 3600 if duration_string.isdigit() else 3600
+            duration_output = "1 hour" if duration == 3600 else "%s hours" % duration_string
+        elif time_string.endswith('m'):
+            duration_string = time_string.rstrip('m')
+            duration = int(duration_string) * 60 if duration_string.isdigit() else 60
+            duration_output = "1 minute" if duration == 60 else "%s minutes" % duration_string
+            if duration > 3600:
+                calc = int(round(duration / 3600))
+                duration_output = "1 hour" if calc == 1 else "%s hours" % calc
+        else:
+            duration = 3600
+            duration_output = "1 hour"
+        # minimum ban duration = 1 hour
+        if duration == 0:
+            duration = 3600
+            duration_output = "1 hour"
+        # limit to max duration = 24 hours
+        elif duration > 86400:
+            duration = 86400
+            duration_output = "24 hours"
+        return duration, duration_output
 
     def handle_flag(self, line):
         """
