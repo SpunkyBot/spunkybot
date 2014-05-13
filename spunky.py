@@ -105,6 +105,7 @@ class LogParser(object):
         self.show_country_on_connect = config.getboolean('bot', 'show_country_on_connect')
         # set teams autobalancer
         self.teams_autobalancer = config.getboolean('bot', 'autobalancer')
+        self.allow_cmd_teams_round_end = config.getboolean('bot', 'allow_teams_round_end')
         # support for low gravity server
         if config.has_section('lowgrav'):
             self.support_lowgravity = config.getboolean('lowgrav', 'support_lowgravity')
@@ -321,7 +322,8 @@ class LogParser(object):
                             for player in self.game.players.itervalues():
                                 player.reset_flag_stats()
                     elif self.ts_gametype or self.bomb_gametype:
-                        self.allow_cmd_teams = False
+                        if self.allow_cmd_teams_round_end:
+                            self.allow_cmd_teams = False
                 elif tmp[0].lstrip() == 'ClientUserinfo':
                     self.handle_userinfo(line)
                 elif tmp[0].lstrip() == 'ClientUserinfoChanged':
@@ -1594,7 +1596,8 @@ class LogParser(object):
         if self.ts_do_team_balance:
             self.allow_cmd_teams = True
             self.handle_team_balance()
-            self.allow_cmd_teams = False
+            if self.allow_cmd_teams_round_end:
+                self.allow_cmd_teams = False
 
     def handle_team_balance(self):
         """
