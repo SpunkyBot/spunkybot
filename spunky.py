@@ -61,7 +61,7 @@ class LogParser(object):
         self.user_cmds = ['bombstats', 'forgiveall, forgiveprev', 'hs', 'register', 'spree', 'stats', 'teams', 'time', 'xlrstats']
         self.mod_cmds = self.user_cmds + ['country', 'leveltest', 'list', 'nextmap', 'mute', 'seen', 'shuffleteams', 'warn']
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'force', 'kick', 'nuke', 'say', 'tempban', 'warnclear']
-        self.fulladmin_cmds = self.admin_cmds + ['ban', 'ci', 'scream', 'slap', 'swap', 'version', 'veto']
+        self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'scream', 'slap', 'swap', 'version', 'veto']
         self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'lookup', 'map', 'maps', 'maprestart', 'moon', 'permban', 'putgroup', 'setnextmap', 'unban', 'ungroup']
         # alphabetic sort of the commands
         self.mod_cmds.sort()
@@ -1262,6 +1262,26 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], "^7You need to enter a reason: ^3!ban <name> <reason>")
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !ban <name> <reason>")
+
+            # baninfo - display active bans of a player
+            elif (sar['command'] == '!baninfo' or sar['command'] == '!bi') and self.game.players[sar['player_num']].get_admin_role() >= 60:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
+                    found, victim, msg = self.player_found(user)
+                    if not found:
+                        self.game.rcon_tell(sar['player_num'], msg)
+                    else:
+                        timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+                        guid = victim.get_guid()
+                        values = (timestamp, guid)
+                        curs.execute("SELECT `expires` FROM `ban_list` WHERE `expires` > ? AND `guid` = ?", values)
+                        result = curs.fetchone()
+                        if result:
+                            self.game.rcon_tell(sar['player_num'], "%s ^7has an active ban until [^1%s^7]" % (victim.get_name(), str(result[0])))
+                        else:
+                            self.game.rcon_tell(sar['player_num'], "%s ^7has no active ban" % victim.get_name())
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7Usage: !baninfo <name>")
 
 ## senior admin level 80
             # kiss - clear all player warnings

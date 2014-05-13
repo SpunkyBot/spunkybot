@@ -104,6 +104,9 @@
 	- Usage: `!ci <name>`
 - **ban** - ban a player for 7 days
 	- Usage: `!ban <name> <reason>`
+- **baninfo** - display active bans of a player
+	- Usage: `!baninfo <name>`
+	- Short: `!bi <name>`
 
 
 ### Senior Admin [80]
