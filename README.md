@@ -4,7 +4,7 @@
 Its purpose is to administrate an [Urban Terror](http://www.urbanterror.info) 4.1 / 4.2 server and to provide real time statistical data for players.
 The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was released under the Beerware License.
 
-[![Build Status](https://travis-ci.org/urthub/spunkybot.png?branch=master)](https://travis-ci.org/urthub/spunkybot)
+[![Build Status](https://travis-ci.org/SpunkyBot/spunkybot.png?branch=master)](https://travis-ci.org/SpunkyBot/spunkybot)
 
 
 ## Features
@@ -26,9 +26,9 @@ The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was 
 
 
 ## Resources
-* [Documentation](https://github.com/urthub/spunkybot/wiki)
-* [Bug Tracker](https://github.com/urthub/spunkybot/issues)
-* [Code](https://github.com/urthub/spunkybot)
+* [Documentation](https://github.com/SpunkyBot/spunkybot/wiki)
+* [Bug Tracker](https://github.com/SpunkyBot/spunkybot/issues)
+* [Code](https://github.com/SpunkyBot/spunkybot)
 * [Homepage](http://www.spunkybot.de)
 
 
