@@ -440,6 +440,14 @@ class LogParser(object):
             if player_num not in self.game.players:
                 player = Player(player_num, ip_address, guid, name)
                 self.game.add_player(player)
+                # kick banned player
+                if self.game.players[player_num].get_ban_id():
+                    self.game.send_rcon("kick %d" % player_num)
+                    self.game.send_rcon("^7%s ^1banned ^7(ID @%d)" % (name, self.game.players[player_num].get_ban_id()))
+                else:
+                    if self.show_country_on_connect:
+                        self.game.rcon_say("^7%s ^7connected from %s" % (name, self.game.players[player_num].get_country()))
+
             if self.game.players[player_num].get_guid() != guid:
                 self.game.players[player_num].set_guid(guid)
             if self.game.players[player_num].get_name() != name:
@@ -459,13 +467,6 @@ class LogParser(object):
                 if port == "1337" or port == "1024":
                     self.game.send_rcon("Cheater Port detected for %s -> Player kicked" % name)
                     self.game.send_rcon("kick %d" % player_num)
-                # kick banned player
-                if self.game.players[player_num].get_ban_id():
-                    self.game.send_rcon("kick %d" % player_num)
-                    self.game.send_rcon("^7%s ^1banned ^7(ID @%d)" % (name, self.game.players[player_num].get_ban_id()))
-                else:
-                    if self.show_country_on_connect:
-                        self.game.rcon_say("^7%s ^7connected from %s" % (name, self.game.players[player_num].get_country()))
             else:
                 if 'name' in values and values['name'] != self.game.players[player_num].get_name():
                     self.game.players[player_num].set_name(values['name'])
