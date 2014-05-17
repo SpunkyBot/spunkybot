@@ -1,0 +1,110 @@
+#!/bin/sh
+#
+#
+# chkconfig: - 64 36
+# Default-Start: 3 5
+# Default-Stop: 0 1 2 3 4 6
+# Required-Start:
+# description: start stop script for the spunkybot
+# processname: python
+# pidfile: spunkybot.pid
+# lockfile: /var/lock/subsys/spunky
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+# Check that networking is up.
+[ "$NETWORKING" = "no" ] && exit 0
+
+# the system use who should run the script as
+USER="urbanterror"
+
+APPNAME="spunkybot"
+
+#path tho the python interpreter
+APPBIN="/usr/bin/python"
+
+# the spunkybot directory
+# CHANGE THAT TO YOUR NEEDS
+APPDIR="/opt/urbanterror/spunkybot/"
+
+# our filename
+FILENAME="spunky.py"
+
+# combine those two to the python script that 
+# is finaly executed
+APPARGS=$APPDIR$FILENAME
+
+# write a log file (whatever the spunkybot logs)
+# and give the user as that the bot is running
+# rights to write into that log file.
+LOGFILE="/var/log/$APPNAME/spunky.log"
+
+# create a lock file
+LOCKFILE="/var/lock/subsys/$APPNAME"
+
+# and a pid file
+# thats because we later do not want to kill all
+# python processes but only those with the right PID
+PIDFILE=$APPDIR"conf/spunkybot.pid"
+
+# do some logging
+# I've no clue what the spunkybot does log
+# but we'll see
+LOGPATH=$(dirname $LOGFILE)
+
+start() {
+        [ -d $LOGPATH ] || mkdir $LOGPATH
+        [ -f $LOGFILE ] || touch $LOGFILE ; chown $USER $LOGFILE
+	if [ ! -f $PIDFILE ]; then
+	        echo -n $"Starting $APPNAME: "
+        	daemon --user=$USER "$APPBIN $APPARGS >>$LOGFILE &"
+        	
+        	# get the PID
+        	PID=`ps ax | grep [s]punky.py | awk '{print $1}'`
+        	
+        	# write it to the pid file
+      		echo $PID > $PIDFILE
+        	RETVAL=$?
+        	echo
+        	[ $RETVAL -eq 0 ] && touch $LOCKFILE
+        	return $RETVAL
+        	
+        	#echo $PID > $PIDFILE
+        fi
+}
+
+stop() {
+        echo -n $"Stopping $APPNAME: "
+        killproc -p $PIDFILE $APPBIN
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && rm -f $LOCKFILE $PIDFILE
+        return $RETVAL
+}
+
+restart() {
+        stop
+        start
+}
+
+case "$1" in
+        start)
+                $1
+        ;;
+        stop)
+                $1
+        ;;
+        restart)
+                $1
+        ;;
+        status)
+        status -p $PIDFILE $prog
+        ;;
+        *)
+                echo $"Usage: $0 {start|stop|status|restart}"
+                exit 2
+esac
