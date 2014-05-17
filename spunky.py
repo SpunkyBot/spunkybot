@@ -1307,8 +1307,9 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !map <ut4_name>")
 
             # maps - display all available maps
-            elif sar['command'] == '!maps' and self.game.players[sar['player_num']].get_admin_role() >= 80:
-                self.game.rcon_tell(sar['player_num'], "^7Available Maps: ^3%s" % ', '.join(self.game.get_all_maps()))
+            elif (sar['command'] == '!maps' or sar['command'] == '@maps') and self.game.players[sar['player_num']].get_admin_role() >= 80:
+                msg = "^7Available Maps: ^3%s" % ', '.join(self.game.get_all_maps())
+                self.tell_say_message(sar, msg)
 
             # maprestart - restart the map
             elif sar['command'] == '!maprestart' and self.game.players[sar['player_num']].get_admin_role() >= 80:
