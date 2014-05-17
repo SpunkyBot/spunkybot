@@ -24,6 +24,7 @@ __version__ = '1.2.0'
 
 ### IMPORTS
 import re
+import os
 import time
 import sqlite3
 import math
@@ -2237,7 +2238,8 @@ class Game(object):
         self.rcon_handle = Rcon(game_cfg.get('server', 'server_ip'), game_cfg.get('server', 'server_port'), game_cfg.get('server', 'rcon_password'))
         if game_cfg.getboolean('rules', 'show_rules'):
             # create instance of Rules to display the rules and rotation messages
-            Rules('./conf/rules.conf', game_cfg.getint('rules', 'rules_frequency'), self.rcon_handle)
+            Rules('%s/conf/rules.conf' % mypath,
+                  game_cfg.getint('rules', 'rules_frequency'), self.rcon_handle)
 
         # add Spunky Bot as player 'World' to the game
         spunky_bot = Player(1022, '127.0.0.1', 'NONE', 'World')
@@ -2446,11 +2448,13 @@ class Game(object):
 ### Main ###
 print "\n\nStarting Spunky Bot:"
 
+mypath = os.path.dirname(os.path.realpath(__file__))
+
 # load the GEO database and store it globally in interpreter memory
-GEOIP = pygeoip.Database('./lib/GeoIP.dat')
+GEOIP = pygeoip.Database('%s/lib/GeoIP.dat' % mypath)
 
 # connect to database
-conn = sqlite3.connect('./data.sqlite')
+conn = sqlite3.connect('%s/data.sqlite' % mypath)
 curs = conn.cursor()
 
 # create tables if not exists
@@ -2461,7 +2465,7 @@ curs.execute('CREATE TABLE IF NOT EXISTS ban_points (id INTEGER PRIMARY KEY NOT 
 print "- Connected to database 'data.sqlite' successful."
 
 # create instance of LogParser
-LogParser('./conf/settings.conf')
+LogParser('%s/conf/settings.conf' % mypath)
 
 # close database connection
 conn.close()
