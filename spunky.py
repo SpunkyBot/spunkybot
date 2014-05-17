@@ -1142,7 +1142,7 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !scream <text>")
 
             # slap - slap a player (a number of times); (1-10 times)
-            elif (sar['command'] == '!slap' or sar['command'] == '!spank') and self.game.players[sar['player_num']].get_admin_role() >= 60:
+            elif sar['command'] == '!slap' and self.game.players[sar['player_num']].get_admin_role() >= 60:
                 if line.split(sar['command'])[1]:
                     arg = line.split(sar['command'])[1].strip().split(' ')
                     if len(arg) > 1:
