@@ -1475,7 +1475,7 @@ class LogParser(object):
             elif sar['command'] == '!banlist' and self.game.players[sar['player_num']].get_admin_role() >= 80:
                 timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
                 values = (timestamp,)
-                curs.execute("SELECT * FROM `ban_list` WHERE `expires` > ? ORDER BY `id` DESC LIMIT 10", values)
+                curs.execute("SELECT * FROM `ban_list` WHERE `expires` > ? ORDER BY `timestamp` DESC LIMIT 10", values)
                 result = curs.fetchall()
                 if len(result) > 10:
                     limit = 10
