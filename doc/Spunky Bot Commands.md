@@ -70,7 +70,7 @@
 - **say** - say a message to all players
 	- Usage: `!say <text>`
 - **force** - force a player to the given team
-	- Usage: `!force <name> <blue/red/spec>`
+	- Usage: `!force <name> <blue/red/spec> [<lock>]`
 - **nuke** - nuke a player
 	- Usage: `!nuke <name>`
 - **kick** - kick a player

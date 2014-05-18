@@ -347,6 +347,9 @@ class LogParser(object):
                     self.debug("Match ended!")
                     self.handle_awards()
                     self.allow_cmd_teams = True
+                    with self.players_lock:
+                        for player in self.game.players.itervalues():
+                            player.set_team_lock(None)
                 elif tmp[0].lstrip() == 'SurvivorWinner':
                     self.handle_teams_ts_mode()
                 elif 'Bomb' in tmp[0]:
@@ -488,11 +491,17 @@ class LogParser(object):
                 team_num = 3
                 player.set_team(team_num)
                 name = self.game.players[player_num].get_name()
-            team_dict = {0: "GREEN", 1: "RED", 2: "BLUE", 3: "SPEC"}
-            team = team_dict[team_num] if team_num in team_dict else "SPEC"
+
+            # set new name, if player changed name
             if not(self.game.players[player_num].get_name() == name):
                 self.game.players[player_num].set_name(name)
-            self.debug("Player %d %s is on the %s team" % (player_num, name, team))
+
+            # move locked player to the defined team, if player tries to change teams
+            team_lock = self.game.players[player_num].get_team_lock()
+            if team_lock and Player.teams[team_num] != team_lock:
+                self.game.rcon_forceteam(player_num, team_lock)
+                self.game.rcon_tell(player_num, "^3You are forced to: ^7%s" % team_lock)
+            self.debug("Player %d %s joined team %s" % (player_num, name, Player.teams[team_num]))
 
     def handle_begin(self, line):
         """
@@ -1018,6 +1027,9 @@ class LogParser(object):
                     if len(arg) > 1:
                         user = arg[0]
                         team = arg[1]
+                        lock = False
+                        if len(arg) > 2:
+                            lock = True if arg[2] == 'lock' else False
                         team_dict = {'red': 'red', 'r': 'red', 're': 'red',
                                      'blue': 'blue', 'b': 'blue', 'bl': 'blue', 'blu': 'blue',
                                      'spec': 'spectator', 'spectator': 'spectator', 's': 'spectator', 'sp': 'spectator', 'spe': 'spectator',
@@ -1030,12 +1042,17 @@ class LogParser(object):
                                 victim_player_num = victim.get_player_num()
                                 self.game.rcon_forceteam(victim_player_num, team_dict[team])
                                 self.game.rcon_tell(victim_player_num, "^3You are forced to: ^7%s" % team_dict[team])
+                                # set team lock if defined
+                                if lock:
+                                    victim.set_team_lock(team_dict[team])
+                                else:
+                                    victim.set_team_lock(None)
                             else:
-                                self.game.rcon_tell(sar['player_num'], "^7Usage: !force <name> <blue/red/spec>")
+                                self.game.rcon_tell(sar['player_num'], "^7Usage: !force <name> <blue/red/spec> [<lock>]")
                     else:
-                        self.game.rcon_tell(sar['player_num'], "^7Usage: !force <name> <blue/red/spec>")
+                        self.game.rcon_tell(sar['player_num'], "^7Usage: !force <name> <blue/red/spec> [<lock>]")
                 else:
-                    self.game.rcon_tell(sar['player_num'], "^7Usage: !force <name> <blue/red/spec>")
+                    self.game.rcon_tell(sar['player_num'], "^7Usage: !force <name> <blue/red/spec> [<lock>]")
 
             # nuke - nuke a player
             elif sar['command'] == '!nuke' and self.game.players[sar['player_num']].get_admin_role() >= 40:
@@ -1188,6 +1205,9 @@ class LogParser(object):
                                     self.game.rcon_tell(sar['player_num'], "^7Cannot swap, both players are in the same team")
                                 else:
                                     game_data = self.game.get_gamestats()
+                                    # remove team lock
+                                    victim1.set_team_lock(None)
+                                    victim2.set_team_lock(None)
                                     if game_data[Player.teams[team1]] < game_data[Player.teams[team2]]:
                                         self.game.rcon_forceteam(victim2.get_player_num(), Player.teams[team1])
                                         self.game.rcon_forceteam(victim1.get_player_num(), Player.teams[team2])
@@ -1769,6 +1789,7 @@ class Player(object):
         self.bomb_defused = 0
         self.address = ip_address
         self.team = 3
+        self.team_lock = None
         self.time_joined = time.time()
         self.welcome_msg = True
         self.country = None
@@ -1863,6 +1884,7 @@ class Player(object):
         self.killed_with_bomb = 0
         self.bomb_planted = 0
         self.bomb_defused = 0
+        self.team_lock = None
 
     def reset_flag_stats(self):
         self.flags_captured = 0
@@ -2005,6 +2027,12 @@ class Player(object):
 
     def get_team(self):
         return self.team
+
+    def get_team_lock(self):
+        return self.team_lock
+
+    def set_team_lock(self, team):
+        self.team_lock = team
 
     def get_num_played(self):
         return self.num_played
@@ -2435,7 +2463,7 @@ class Game(object):
             else:
                 return -1
         for player in self.players.itervalues():
-            if player.get_team() == team1:
+            if player.get_team() == team1 and not player.get_team_lock():
                 p_list.append(player)
         p_list.sort(cmp_ab)
         for player in p_list[:int(num_ptm)]:
