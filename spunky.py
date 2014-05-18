@@ -781,8 +781,9 @@ class LogParser(object):
 
             # bombstats - display bomb statistics
             elif sar['command'] == '!bombstats':
-                self.game.rcon_tell(sar['player_num'], "^7planted: ^2%d ^7- defused: ^2%d" % (self.game.players[sar['player_num']].get_planted_bomb(), self.game.players[sar['player_num']].get_defused_bomb()))
-                self.game.rcon_tell(sar['player_num'], "^7bomb carrier killed: ^2%d ^7- enemies bombed: ^2%d" % (self.game.players[sar['player_num']].get_bomb_carrier_kills(), self.game.players[sar['player_num']].get_kills_with_bomb()))
+                if self.bomb_gametype:
+                    self.game.rcon_tell(sar['player_num'], "^7planted: ^2%d ^7- defused: ^2%d" % (self.game.players[sar['player_num']].get_planted_bomb(), self.game.players[sar['player_num']].get_defused_bomb()))
+                    self.game.rcon_tell(sar['player_num'], "^7bomb carrier killed: ^2%d ^7- enemies bombed: ^2%d" % (self.game.players[sar['player_num']].get_bomb_carrier_kills(), self.game.players[sar['player_num']].get_kills_with_bomb()))
 
             # time - display the servers current time
             elif sar['command'] == '!time' or sar['command'] == '@time':
