@@ -2453,20 +2453,13 @@ class Game(object):
             return
         self.rcon_bigtext("AUTOBALANCING TEAMS...")
         num_ptm = math.floor((game_data[Player.teams[team1]] - game_data[Player.teams[team2]]) / 2)
-        p_list = []
+        player_list = []
 
-        def cmp_ab(p1, p2):
-            if p1.get_time_joined() < p2.get_time_joined():
-                return 1
-            elif p1.get_time_joined() == p2.get_time_joined():
-                return 0
-            else:
-                return -1
         for player in self.players.itervalues():
             if player.get_team() == team1 and not player.get_team_lock():
-                p_list.append(player)
-        p_list.sort(cmp_ab)
-        for player in p_list[:int(num_ptm)]:
+                player_list.append(player)
+        player_list.sort(cmp=lambda player1, player2: cmp(player2.get_time_joined(), player1.get_time_joined()))
+        for player in player_list[:int(num_ptm)]:
             self.rcon_forceteam(player.get_player_num(), Player.teams[team2])
         self.rcon_say("^7Autobalance complete!")
 
