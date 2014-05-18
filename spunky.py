@@ -212,13 +212,10 @@ class LogParser(object):
 
     def remove_expired_db_entries(self):
         """
-        delete expired ban points and bans from the database
+        delete expired ban points
         """
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         values = (timestamp,)
-
-        # remove expired bans
-        curs.execute("DELETE FROM `ban_list` WHERE `expires` < ?", values)
         # remove expired ban_points
         curs.execute("DELETE FROM `ban_points` WHERE `expires` < ?", values)
         conn.commit()
