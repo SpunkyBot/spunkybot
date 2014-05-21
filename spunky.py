@@ -25,6 +25,7 @@ __version__ = '1.2.0'
 ### IMPORTS
 import re
 import os
+import argparse
 import time
 import sqlite3
 import math
@@ -2446,15 +2447,47 @@ class Game(object):
 
 
 ### Main ###
-print "\n\nStarting Spunky Bot:"
 
+# get the path of our installation directory
 mypath = os.path.dirname(os.path.realpath(__file__))
 
+# parse commandline options to get an eventually given config and/ or
+# database file. if nothing is specified we use our default file(s)
+parser = argparse.ArgumentParser()
+
+# our options
+# config file
+parser.add_argument('-c', action='store', dest='configfile',
+                    default='%s/conf/settings.conf' % mypath,
+                    help='custom config file (with full path)')
+
+# database
+parser.add_argument('-d', action='store', dest='database',
+                    default='%s/data.sqlite' % mypath,
+                    help='custom database file (with full path)')
+
+# GeoIP.dat file
+parser.add_argument('-g', action='store', dest='geoip',
+                    default='%s/lib/GeoIP.dat' % mypath,
+                    help='full path to your GeoIP.dat')
+
+# version
+parser.add_argument('-v', action='version', version='I\'m at version: %s '
+                                                    % __version__,
+                    help="show bot version and exit without running it")
+
+commandline = vars(parser.parse_args())
+configfile = commandline['configfile']
+database = commandline['database']
+geoipfile = commandline['geoip']
+
+print "\n\nStarting Spunky Bot:"
+
 # load the GEO database and store it globally in interpreter memory
-GEOIP = pygeoip.Database('%s/lib/GeoIP.dat' % mypath)
+GEOIP = pygeoip.Database(geoipfile)
 
 # connect to database
-conn = sqlite3.connect('%s/data.sqlite' % mypath)
+conn = sqlite3.connect(database)
 curs = conn.cursor()
 
 # create tables if not exists
@@ -2465,7 +2498,8 @@ curs.execute('CREATE TABLE IF NOT EXISTS ban_points (id INTEGER PRIMARY KEY NOT 
 print "- Connected to database 'data.sqlite' successful."
 
 # create instance of LogParser
-LogParser('%s/conf/settings.conf' % mypath)
+#LogParser('%s/conf/settings.conf' % mypath)
+LogParser(configfile)
 
 # close database connection
 conn.close()
