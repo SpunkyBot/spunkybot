@@ -93,9 +93,9 @@ if [ $httpResponse -eq 200 ]
 				echo "No existing file found - I'll proceed further and download one."
 		fi
 		echo 'receiving and extract the new file'
-		# thats the tricky part. I'll stream the download to directly to zcat
+		# thats the tricky part because I stream the download directly to zcat
 		# so we do not need to remove a downloaded file.
-		# this will work in bash only
+		# --> this will work in bash only <--
 		$zcat < <($wget -q -O -  $IPAddress) > $geoIPPath/GeoIP.dat
 		echo -ne '#####                     (33%)\r'
 		sleep 1
@@ -108,7 +108,7 @@ if [ $httpResponse -eq 200 ]
 		sleep 1
 		if [ -z "$update" ];
 			then
-				echo 'Update complete!'
+				echo 'Download complete!'
 			else
 				echo 'Cleaning up'
 				rm -rf $geoIPPath/GeoIP.dat_backup
