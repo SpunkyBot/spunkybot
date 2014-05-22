@@ -58,7 +58,7 @@ LOGPATH=$(dirname $LOGFILE)
 
 start() {
         [ -d $LOGPATH ] || mkdir $LOGPATH
-        [ -f $LOGFILE ] || touch $LOGFILE ; chown $USER $LOGFILE
+        [ -f $LOGFILE ] || touch $LOGFILE ; chown $USER: $LOGFILE
 	if [ ! -f $PIDFILE ]; then
 	        echo -n $"Starting $APPNAME: "
         	daemon --user=$USER "$APPBIN $APPARGS >>$LOGFILE &"
