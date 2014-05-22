@@ -1,14 +1,21 @@
 #!/bin/sh
 #
 #
-# chkconfig: - 64 36
-# Default-Start: 3 5
-# Default-Stop: 0 1 2 3 4 6
+# chkconfig:        - 64 36
+# Default-Start:    3 5
+# Default-Stop:     0 1 2 3 4 6
 # Required-Start:
-# description: start stop script for the spunkybot
-# processname: python
-# pidfile: spunkybot.pid
-# lockfile: /var/lock/subsys/spunky
+# description:      start stop script for the spunkybot
+# processname:      python
+# pidfile:          spunkybot.pid
+# lockfile:         /var/lock/subsys/spunky
+#
+# Modified:         05|22|2014
+# Author:           ItsMe
+# Reply to:         itsme@bubbleclub.de
+#
+# OK lets work
+#
 
 # Source function library.
 . /etc/rc.d/init.d/functions
@@ -108,3 +115,4 @@ case "$1" in
                 echo $"Usage: $0 {start|stop|status|restart}"
                 exit 2
 esac
+#EOF
