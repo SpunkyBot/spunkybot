@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+#
+# Provides:     Get a decent up-to-date GeoIP.dat file
+# Description:  download a GeoIP.dat file or update an
+#               existing one
+#
+# Limitations:  This script uses named pipes in a way
+#               that will work only in a bash environment.
+#               This script will fail will fail will fail will fail *punch to the turntable*
+#				when you run it under 'sh' or something.
+#
+# Options:      -p  give a path where the GeoIP.dat file
+#                   will extracted to
+#                   Note:   you'll need write permissions to this
+#                           directory/ file
+#               -i  a download URL for a different GeoIP provider
+#               -h  brings up a short help
+#
+#               All options are not mandatory. As standard the GeoIP.dat
+#               will be extracted to the current directory.
+#
+# pidfile:      n/a
+# lockfile:     n/a
+#
+# Modified:     05|22|2014
+# Author:       ItsMe
+# Reply to:     itsme@bubbleclub.de
+#
+# Licence:      MIT License
+#
+# OK lets work
+#
+# set some system variables
+geoIPPath='./'
+IPAddress='http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz'
+zcat=/bin/zcat
+wget=/usr/bin/wget
+curl=/bin/curl
+
+# set some file and cosmetic variables
+filename=`basename $0`
+bold=`tput bold`
+normal=`tput sgr0`
+
+# catch the commandline arguments - if some given
+usage=`printf "Usage: %s [-p /path/to/destination/] [-i download URL]" "$filename"`
+while getopts "p:h" opt; do
+  case $opt in
+    p)  if [ -n $OPTARG ]; then
+    		geoIPPath=$OPTARG
+        fi
+        ;;
+    i)  if [ -n $OPTARG ]; then
+    		IPAddress=$OPTARG
+        fi
+        ;;
+    h)  echo $usage
+        exit 0
+        ;;
+
+    \?) echo "Invalid option: -$OPTARG" >&2
+        exit 1
+        ;;
+  esac
+done
+
+# check the if the file exists
+echo -ne 'Checking if the remote File is available\r'
+httpResponse=$($curl --write-out %{http_code} --silent --output /dev/null $IPAddress)
+echo -ne 'Checking if the remote File is available.\r'
+sleep 1
+echo -ne 'Checking if the remote File is available..\r'
+sleep 1
+echo -ne 'Checking if the remote File is available...\r'
+sleep 1
+echo -ne '\n'
+
+if [ $httpResponse -eq 200 ]
+	then
+		# yup it is online
+		echo "We're in luck they still provide the file"
+		sleep 1
+		echo 'Let me take a look if we have an existing GeoIP.dat'
+		sleep 1
+		if [ -e $geoIPPath/GeoIP.dat ] 
+			then
+				update=1
+				echo "Got one - I'll do a backup before proceed further"
+				mv $geoIPPath/GeoIP.dat $geoIPPath/GeoIP.dat_backup
+				sleep 1
+				echo 'Done!'
+			else
+				echo "No existing file found - I'll proceed further and download one."
+		fi
+		echo 'receiving and extract the new file'
+		# thats the tricky part. I'll stream the download to directly to zcat
+		# so we do not need to remove a downloaded file.
+		# this will work in bash only
+		$zcat < <($wget -q -O -  $IPAddress) > $geoIPPath/GeoIP.dat
+		echo -ne '#####                     (33%)\r'
+		sleep 1
+		echo -ne '#############             (66%)\r'
+		sleep 1
+		echo -ne '#######################   (100%)\r'
+		echo -ne '\n'
+		sleep 1
+		echo 'Download complete!'
+		sleep 1
+		if [ -z "$update" ];
+			then
+				echo 'Update complete!'
+			else
+				echo 'Cleaning up'
+				rm -rf $geoIPPath/GeoIP.dat_backup
+				sleep 1
+				echo 'Update complete'
+		fi
+	else
+		printf "\nNope, download failed\nThe requested file (${bold}%s${normal}) does not exist.\n" "$IPAddress"
+fi
+# EOF
