@@ -17,7 +17,7 @@
 #               -h  brings up a short help
 #
 #               All options are not mandatory. As standard the GeoIP.dat
-#               will be extracted to the current directory.
+#               will be extracted to the /lib directory.
 #
 # pidfile:      n/a
 # lockfile:     n/a
@@ -31,7 +31,7 @@
 # OK lets work
 #
 # set some system variables
-geoIPPath='./'
+geoIPPath='lib/'
 IPAddress='http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz'
 zcat=/bin/zcat
 wget=/usr/bin/wget
