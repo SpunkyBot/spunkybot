@@ -24,7 +24,7 @@
 . /etc/sysconfig/network
 
 # Check that networking is up.
-[ "$NETWORKING" = "no" ] && exit 0
+[ "${NETWORKING}" = "no" ] && exit 0
 
 # the system use who should run the script as
 USER="urbanterror"
@@ -43,7 +43,7 @@ FILENAME="spunky.py"
 
 # combine those two to the python script that 
 # is finaly executed
-APPARGS=$APPDIR$FILENAME
+APPARGS=${APPDIR}${FILENAME}
 
 # write a log file (whatever the spunkybot logs)
 # and give the user as that the bot is running
@@ -51,46 +51,44 @@ APPARGS=$APPDIR$FILENAME
 LOGFILE="/var/log/$APPNAME/spunky.log"
 
 # create a lock file
-LOCKFILE="/var/lock/subsys/$APPNAME"
+LOCKFILE="/var/lock/subsys/${APPNAME}"
 
 # and a pid file
 # thats because we later do not want to kill all
 # python processes but only those with the right PID
-PIDFILE=$APPDIR"conf/spunkybot.pid"
+PIDFILE="${APPDIR}conf/spunkybot.pid"
 
 # do some logging
 # I've no clue what the spunkybot does log
 # but we'll see
-LOGPATH=$(dirname $LOGFILE)
+LOGPATH=$(dirname ${LOGFILE})
 
 start() {
-        [ -d $LOGPATH ] || mkdir $LOGPATH
-        [ -f $LOGFILE ] || touch $LOGFILE ; chown $USER: $LOGFILE
-	if [ ! -f $PIDFILE ]; then
-	        echo -n $"Starting $APPNAME: "
-        	daemon --user=$USER "$APPBIN $APPARGS >>$LOGFILE &"
+        [ -d ${LOGPATH} ] || mkdir ${LOGPATH} ; chown -R ${USER}: ${LOGPATH}
+        [ -f ${LOGFILE} ] || touch ${LOGFILE} ; chown ${USER}: ${LOGFILE}
+	if [ ! -f ${PIDFILE} ]; then
+	        echo -n $"Starting ${APPNAME}: "
+        	daemon --user=${USER} "${APPBIN} ${APPARGS} >>${LOGFILE} &"
         	
         	# get the PID
         	PID=`ps ax | grep [s]punky.py | awk '{print $1}'`
         	
         	# write it to the pid file
-      		echo $PID > $PIDFILE
+      		echo ${PID} > ${PIDFILE}
         	RETVAL=$?
         	echo
-        	[ $RETVAL -eq 0 ] && touch $LOCKFILE
-        	return $RETVAL
-        	
-        	#echo $PID > $PIDFILE
+        	[ ${RETVAL} -eq 0 ] && touch ${LOCKFILE}
+        	return ${RETVAL}
         fi
 }
 
 stop() {
-        echo -n $"Stopping $APPNAME: "
-        killproc -p $PIDFILE $APPBIN
+        echo -n $"Stopping ${APPNAME}: "
+        killproc -p ${PIDFILE} ${APPBIN}
         RETVAL=$?
         echo
-        [ $RETVAL -eq 0 ] && rm -f $LOCKFILE $PIDFILE
-        return $RETVAL
+        [ ${RETVAL} -eq 0 ] && rm -f ${LOCKFILE} ${PIDFILE}
+        return ${RETVAL}
 }
 
 restart() {
@@ -109,7 +107,7 @@ case "$1" in
                 $1
         ;;
         status)
-        status -p $PIDFILE $prog
+        status -p ${PIDFILE} ${prog}
         ;;
         *)
                 echo $"Usage: $0 {start|stop|status|restart}"
