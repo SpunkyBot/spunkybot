@@ -25,6 +25,7 @@ __version__ = '1.2.0'
 ### IMPORTS
 import re
 import os
+import sys
 import argparse
 import time
 import sqlite3
@@ -2446,6 +2447,19 @@ class Game(object):
         self.rcon_say("^7Autobalance complete!")
 
 
+class logme(object):
+    """
+    logging to a file and stdout
+    the init script will make sure that we can write to the directory/ file
+    """
+    def __init__(self, logfile):
+        self.terminal = sys.stdout
+        self.log = open(logfile, "a")
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+
 ### Main ###
 
 # get the path of our installation directory
@@ -2471,6 +2485,10 @@ parser.add_argument('-g', action='store', dest='geoip',
                     default='%s/lib/GeoIP.dat' % mypath,
                     help='full path to your GeoIP.dat')
 
+parser.add_argument('-l', action='store', dest='logfile',
+                    default='/var/log/spunkybot/spunky.log',
+                    help='custom config file (with full path)')
+
 # version
 parser.add_argument('-v', action='version', version='I\'m at version: %s '
                                                     % __version__,
@@ -2480,6 +2498,10 @@ commandline = vars(parser.parse_args())
 configfile = commandline['configfile']
 database = commandline['database']
 geoipfile = commandline['geoip']
+logfile = commandline['logfile']
+
+# catch our print statements and send them to the logging class
+sys.stdout = logme()
 
 print "\n\nStarting Spunky Bot:"
 
