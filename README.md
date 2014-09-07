@@ -5,7 +5,8 @@ Its purpose is to administrate an [Urban Terror](http://www.urbanterror.info) 4.
 The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was released under the Beerware License.
 
 [![Build Status](https://travis-ci.org/SpunkyBot/spunkybot.png?branch=master)](https://travis-ci.org/SpunkyBot/spunkybot)
-
+[![Release](http://img.shields.io/github/release/SpunkyBot/spunkyBot.svg)]
+[![License](http://img.shields.io/badge/license-MIT-blue.svg)]
 
 ## Features
 - Lightweight and fast
