@@ -85,6 +85,7 @@ class LogParser(object):
         self.ctf_gametype = False
         self.ts_gametype = False
         self.bomb_gametype = False
+        self.freeze_gametype = False
         self.ts_do_team_balance = False
         self.allow_cmd_teams = True
         self.urt42_modversion = True
@@ -155,6 +156,8 @@ class LogParser(object):
                         self.ts_gametype = True
                     elif 'g_gametype\\8' in line:
                         self.bomb_gametype = True
+                    elif 'g_gametype\\10' in line:
+                        self.freeze_gametype = True
                 if self.log_file.tell() > end_pos:
                     break
                 elif len(line) == 0:
@@ -318,7 +321,7 @@ class LogParser(object):
                         with self.players_lock:
                             for player in self.game.players.itervalues():
                                 player.reset_flag_stats()
-                    elif self.ts_gametype or self.bomb_gametype:
+                    elif self.ts_gametype or self.bomb_gametype or self.freeze_gametype:
                         if self.allow_cmd_teams_round_end:
                             self.allow_cmd_teams = False
                 elif tmp[0].lstrip() == 'ClientUserinfo':
@@ -333,6 +336,10 @@ class LogParser(object):
                     self.handle_kill(line)
                 elif tmp[0].lstrip() == 'Hit':
                     self.handle_hit(line)
+                elif tmp[0].lstrip() == 'Freeze':
+                    self.handle_freeze(line)
+                elif tmp[0].lstrip() == 'ThawOutFinished':
+                    self.handle_thawout(line)
                 elif tmp[0].lstrip() == 'ShutdownGame':
                     self.debug("Shutting down game...")
                     self.game.rcon_clear()
@@ -385,6 +392,7 @@ class LogParser(object):
         self.ctf_gametype = True if 'g_gametype\\7' in line else False
         self.ts_gametype = True if 'g_gametype\\4' in line else False
         self.bomb_gametype = True if 'g_gametype\\8' in line else False
+        self.freeze_gametype = True if 'g_gametype\\10' in line else False
         self.debug("Starting game...")
         self.game.rcon_clear()
 
@@ -797,11 +805,15 @@ class LogParser(object):
 
             # stats - display current map stats
             elif sar['command'] == '!stats':
-                if self.game.players[sar['player_num']].get_deaths() == 0:
-                    ratio = 1.0
+                if not self.freeze_gametype:
+                    if self.game.players[sar['player_num']].get_deaths() == 0:
+                        ratio = 1.0
+                    else:
+                        ratio = round(float(self.game.players[sar['player_num']].get_kills()) / float(self.game.players[sar['player_num']].get_deaths()), 2)
+                    self.game.rcon_tell(sar['player_num'], "^7Map Stats %s: ^7K ^2%d ^7D ^3%d ^7TK ^1%d ^7Ratio ^5%s ^7HS ^2%d" % (self.game.players[sar['player_num']].get_name(), self.game.players[sar['player_num']].get_kills(), self.game.players[sar['player_num']].get_deaths(), self.game.players[sar['player_num']].get_team_kill_count(), ratio, self.game.players[sar['player_num']].get_headshots()))
                 else:
-                    ratio = round(float(self.game.players[sar['player_num']].get_kills()) / float(self.game.players[sar['player_num']].get_deaths()), 2)
-                self.game.rcon_tell(sar['player_num'], "^7Map Stats %s: ^7K ^2%d ^7D ^3%d ^7TK ^1%d ^7Ratio ^5%s ^7HS ^2%d" % (self.game.players[sar['player_num']].get_name(), self.game.players[sar['player_num']].get_kills(), self.game.players[sar['player_num']].get_deaths(), self.game.players[sar['player_num']].get_team_kill_count(), ratio, self.game.players[sar['player_num']].get_headshots()))
+                    # Freeze Tag
+                    self.game.rcon_tell(sar['player_num'], "^7Freeze Stats %s: ^7F ^2%d ^7T ^3%d ^7TK ^1%d ^7HS ^2%d" % (self.game.players[sar['player_num']].get_name(), self.game.players[sar['player_num']].get_freeze(), self.game.players[sar['player_num']].get_thawout(), self.game.players[sar['player_num']].get_team_kill_count(), self.game.players[sar['player_num']].get_headshots()))
 
             # xlrstats - display full player stats
             elif sar['command'] == '!xlrstats':
@@ -1651,7 +1663,7 @@ class LogParser(object):
                     self.ts_do_team_balance = False
                     self.debug("Balance teams by user request")
                 else:
-                    if self.ts_gametype or self.bomb_gametype:
+                    if self.ts_gametype or self.bomb_gametype or self.freeze_gametype:
                         self.ts_do_team_balance = True
                         self.game.rcon_say("^7Teams will be balanced at the end of the round!")
             else:
@@ -1670,6 +1682,26 @@ class LogParser(object):
                     self.debug("Autobalancer performed team balance")
                 self.ts_do_team_balance = False
 
+    def handle_freeze(self, line):
+        """
+        handle freeze
+        """
+        info = line.split(":", 1)[0].split(" ")
+        player_num = int(info[0])
+        with self.players_lock:
+            player = self.game.players[player_num]
+            player.freeze()
+
+    def handle_thawout(self, line):
+        """
+        handle thaw out
+        """
+        info = line.split(":", 1)[0].split(" ")
+        player_num = int(info[0])
+        with self.players_lock:
+            player = self.game.players[player_num]
+            player.thawout()
+
     def handle_awards(self):
         """
         display awards and personal stats at the end of the round
@@ -1678,11 +1710,15 @@ class LogParser(object):
         most_flags = 0
         most_streak = 0
         most_hs = 0
+        most_frozen = 0
+        most_thawouts = 0
         most_defused = 0
         most_planted = 0
         flagrunner = ""
         serialkiller = ""
         streaker = ""
+        freezer = ""
+        thawouter = ""
         headshooter = ""
         defused_by = ""
         planted_by = ""
@@ -1701,6 +1737,12 @@ class LogParser(object):
                 if player.get_headshots() > most_hs:
                     most_hs = player.get_headshots()
                     headshooter = player.get_name()
+                if player.get_freeze() > most_frozen:
+                    most_frozen = player.get_freeze()
+                    freezer = player.get_name()
+                if player.get_thawout() > most_thawouts:
+                    most_thawouts = player.get_thawout()
+                    thawouter = player.get_name()
                 if player.get_defused_bomb() > most_defused:
                     most_defused = player.get_defused_bomb()
                     defused_by = player.get_name()
@@ -1709,7 +1751,10 @@ class LogParser(object):
                     planted_by = player.get_name()
                 # display personal stats at the end of the round, stats for players in spec will not be displayed
                 if player.get_team() != 3:
-                    self.game.rcon_tell(player.get_player_num(), "^7Stats %s: ^7K ^2%d ^7D ^3%d ^7HS ^1%d ^7TK ^1%d" % (player.get_name(), player.get_kills(), player.get_deaths(), player.get_headshots(), player.get_team_kill_count()))
+                    if self.freeze_gametype:
+                        self.game.rcon_tell(player.get_player_num(), "^7Stats %s: ^7F ^2%d ^7T ^3%d ^7HS ^1%d ^7TK ^1%d" % (player.get_name(), player.get_freeze(), player.get_thawout(), player.get_headshots(), player.get_team_kill_count()))
+                    else:
+                        self.game.rcon_tell(player.get_player_num(), "^7Stats %s: ^7K ^2%d ^7D ^3%d ^7HS ^1%d ^7TK ^1%d" % (player.get_name(), player.get_kills(), player.get_deaths(), player.get_headshots(), player.get_team_kill_count()))
                 # store score in database
                 player.save_info()
 
@@ -1720,6 +1765,10 @@ class LogParser(object):
                 msg.append("^7%s: ^2%d ^5planted" % (planted_by, most_planted))
             if most_defused > 1:
                 msg.append("^7%s: ^2%d ^4defused" % (defused_by, most_defused))
+            if most_frozen > 1:
+                msg.append("^7%s: ^2%d ^3freezes" % (freezer, most_frozen))
+            if most_thawouts > 1:
+                msg.append("^7%s: ^2%d ^4thaws" % (thawouter, most_thawouts))
             if most_kills > 1:
                 msg.append("^7%s: ^2%d ^3kills" % (serialkiller, most_kills))
             if most_streak > 1:
@@ -1759,6 +1808,8 @@ class Player(object):
         self.last_visit = 0
         self.admin_role = 0
         self.kills = 0
+        self.froze = 0
+        self.thawouts = 0
         self.db_kills = 0
         self.killing_streak = 0
         self.max_kill_streak = 0
@@ -1866,6 +1917,8 @@ class Player(object):
 
     def reset(self):
         self.kills = 0
+        self.froze = 0
+        self.thawouts = 0
         self.killing_streak = 0
         self.max_kill_streak = 0
         self.deaths = 0
@@ -2044,6 +2097,12 @@ class Player(object):
     def get_kills(self):
         return self.kills
 
+    def get_freeze(self):
+        return self.froze
+
+    def get_thawout(self):
+        return self.thawouts
+
     def get_db_deaths(self):
         return self.db_deaths
 
@@ -2087,6 +2146,12 @@ class Player(object):
         self.killing_streak += 1
         self.kills += 1
         self.db_kills += 1
+
+    def freeze(self):
+        self.froze += 1
+
+    def thawout(self):
+        self.thawouts += 1
 
     def die(self):
         if self.killing_streak > self.max_kill_streak:
