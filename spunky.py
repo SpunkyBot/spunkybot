@@ -663,6 +663,7 @@ class LogParser(object):
         """
         victim = None
         name_list = []
+        append = name_list.append
         for player in self.game.players.itervalues():
             player_name = player.get_name()
             player_num = player.get_player_num()
@@ -673,7 +674,7 @@ class LogParser(object):
                 break
             elif user.upper() in player_name.upper() and player_num != 1022:
                 victim = player
-                name_list.append("^3%s [^2%d^3]" % (player_name, player_num))
+                append("^3%s [^2%d^3]" % (player_name, player_num))
         if len(name_list) == 0:
             if user.startswith('@'):
                 return self.offline_player(user)
@@ -707,12 +708,13 @@ class LogParser(object):
         return True and map name or False and message text
         """
         map_list = []
+        append = map_list.append
         for maps in self.game.get_all_maps():
             if map_name.lower() == maps or ('ut4_%s' % map_name.lower()) == maps:
-                map_list.append(maps)
+                append(maps)
                 break
             elif map_name.lower() in maps:
-                map_list.append(maps)
+                append(maps)
         if len(map_list) == 0:
             return False, None, "Map not found"
         elif len(map_list) > 1:
@@ -855,6 +857,7 @@ class LogParser(object):
             elif sar['command'] == '!forgiveall' or sar['command'] == '!fa':
                 victim = self.game.players[sar['player_num']]
                 msg = []
+                append = msg.append
                 if victim.get_killed_me():
                     all_forgive_player_num_list = victim.get_killed_me()
                     forgive_player_num_list = list(set(all_forgive_player_num_list))
@@ -862,7 +865,7 @@ class LogParser(object):
                     for forgive_player_num in forgive_player_num_list:
                         forgive_player = self.game.players[forgive_player_num]
                         forgive_player.clear_killed_me(victim.get_player_num())
-                        msg.append(forgive_player.get_name())
+                        append(forgive_player.get_name())
                 if msg:
                     self.game.rcon_say("^7%s has forgiven: %s" % (victim.get_name(), ", ".join(msg)))
                 else:
@@ -1723,6 +1726,7 @@ class LogParser(object):
         defused_by = ""
         planted_by = ""
         msg = []
+        append = msg.append
         with self.players_lock:
             for player in self.game.players.itervalues():
                 if player.get_flags_captured() > most_flags:
@@ -1760,21 +1764,21 @@ class LogParser(object):
 
             # display Awards
             if most_flags > 1:
-                msg.append("^7%s: ^2%d ^4caps" % (flagrunner, most_flags))
+                append("^7%s: ^2%d ^4caps" % (flagrunner, most_flags))
             if most_planted > 1:
-                msg.append("^7%s: ^2%d ^5planted" % (planted_by, most_planted))
+                append("^7%s: ^2%d ^5planted" % (planted_by, most_planted))
             if most_defused > 1:
-                msg.append("^7%s: ^2%d ^4defused" % (defused_by, most_defused))
+                append("^7%s: ^2%d ^4defused" % (defused_by, most_defused))
             if most_frozen > 1:
-                msg.append("^7%s: ^2%d ^3freezes" % (freezer, most_frozen))
+                append("^7%s: ^2%d ^3freezes" % (freezer, most_frozen))
             if most_thawouts > 1:
-                msg.append("^7%s: ^2%d ^4thaws" % (thawouter, most_thawouts))
+                append("^7%s: ^2%d ^4thaws" % (thawouter, most_thawouts))
             if most_kills > 1:
-                msg.append("^7%s: ^2%d ^3kills" % (serialkiller, most_kills))
+                append("^7%s: ^2%d ^3kills" % (serialkiller, most_kills))
             if most_streak > 1:
-                msg.append("^7%s: ^2%d ^6streaks" % (streaker, most_streak))
+                append("^7%s: ^2%d ^6streaks" % (streaker, most_streak))
             if most_hs > 1:
-                msg.append("^7%s: ^2%d ^1heads" % (headshooter, most_hs))
+                append("^7%s: ^2%d ^1heads" % (headshooter, most_hs))
             if msg:
                 self.game.rcon_say("^1AWARDS: %s" % " ^7- ".join(msg))
 
@@ -2517,10 +2521,11 @@ class Game(object):
         self.rcon_bigtext("AUTOBALANCING TEAMS...")
         num_ptm = math.floor((game_data[Player.teams[team1]] - game_data[Player.teams[team2]]) / 2)
         player_list = []
+        append = player_list.append
 
         for player in self.players.itervalues():
             if player.get_team() == team1 and not player.get_team_lock():
-                player_list.append(player)
+                append(player)
         player_list.sort(cmp=lambda player1, player2: cmp(player2.get_time_joined(), player1.get_time_joined()))
         for player in player_list[:int(num_ptm)]:
             self.rcon_forceteam(player.get_player_num(), Player.teams[team2])
