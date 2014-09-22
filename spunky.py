@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
 Spunky Bot - An automated game server bot
 http://www.spunkybot.de
