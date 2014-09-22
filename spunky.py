@@ -965,8 +965,11 @@ class LogParser(object):
                         if not found:
                             self.game.rcon_tell(sar['player_num'], msg)
                         else:
+                            warn_delay = 15
                             if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
                                 self.game.rcon_tell(sar['player_num'], "You cannot warn an admin")
+                            elif victim.get_last_warn_time() + warn_delay > time.time():
+                                self.game.rcon_tell(sar['player_num'], "Only one warning per %d seconds can be issued" % warn_delay)
                             else:
                                 show_alert = False
                                 ban_duration = 0
@@ -1836,6 +1839,7 @@ class Player(object):
         self.high_ping_count = 0
         self.spec_warn_count = 0
         self.warn_counter = 0
+        self.last_warn_time = 0
         self.flags_captured = 0
         self.flags_returned = 0
         self.bombholder = False
@@ -1935,6 +1939,7 @@ class Player(object):
         self.tk_victim_names = []
         self.tk_killer_names = []
         self.warn_counter = 0
+        self.last_warn_time = 0
         self.flags_captured = 0
         self.flags_returned = 0
         self.bombholder = False
@@ -2238,9 +2243,13 @@ class Player(object):
 
     def add_warning(self):
         self.warn_counter += 1
+        self.last_warn_time = time.time()
 
     def get_warning(self):
         return self.warn_counter
+
+    def get_last_warn_time(self):
+        return self.last_warn_time
 
     def clear_warning(self):
         self.warn_counter = 0
