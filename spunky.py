@@ -943,7 +943,10 @@ class LogParser(object):
                     if not found:
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
-                        self.game.rcon_tell(sar['player_num'], "%s ^7was last seen on %s" % (victim.get_name(), victim.get_last_visit()))
+                        if victim.get_registered_user():
+                            self.game.rcon_tell(sar['player_num'], "%s ^7was last seen on %s" % (victim.get_name(), victim.get_last_visit()))
+                        else:
+                            self.game.rcon_tell(sar['player_num'], "%s ^7is not a registered user" % victim.get_name())
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !seen <name>")
 
