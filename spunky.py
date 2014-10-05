@@ -356,6 +356,9 @@ class LogParser(object):
                     self.allow_cmd_teams = True
                     with self.players_lock:
                         for player in self.game.players.itervalues():
+                            # store score in database
+                            player.save_info()
+                            # reset team lock
                             player.set_team_lock(None)
                 elif tmp[0].lstrip() == 'SurvivorWinner':
                     self.handle_teams_ts_mode()
@@ -1768,8 +1771,6 @@ class LogParser(object):
                         self.game.rcon_tell(player.get_player_num(), "^7Stats %s: ^7F ^2%d ^7T ^3%d ^7HS ^1%d ^7TK ^1%d" % (player.get_name(), player.get_freeze(), player.get_thawout(), player.get_headshots(), player.get_team_kill_count()))
                     else:
                         self.game.rcon_tell(player.get_player_num(), "^7Stats %s: ^7K ^2%d ^7D ^3%d ^7HS ^1%d ^7TK ^1%d" % (player.get_name(), player.get_kills(), player.get_deaths(), player.get_headshots(), player.get_team_kill_count()))
-                # store score in database
-                player.save_info()
 
             # display Awards
             if most_flags > 1:
@@ -2112,12 +2113,6 @@ class Player(object):
     def get_kills(self):
         return self.kills
 
-    def get_freeze(self):
-        return self.froze
-
-    def get_thawout(self):
-        return self.thawouts
-
     def get_db_deaths(self):
         return self.db_deaths
 
@@ -2161,12 +2156,6 @@ class Player(object):
         self.killing_streak += 1
         self.kills += 1
         self.db_kills += 1
-
-    def freeze(self):
-        self.froze += 1
-
-    def thawout(self):
-        self.thawouts += 1
 
     def die(self):
         if self.killing_streak > self.max_kill_streak:
@@ -2321,6 +2310,19 @@ class Player(object):
 
     def get_defused_bomb(self):
         return self.bomb_defused
+
+# Freeze Tag
+    def freeze(self):
+        self.froze += 1
+
+    def get_freeze(self):
+        return self.froze
+
+    def thawout(self):
+        self.thawouts += 1
+
+    def get_thawout(self):
+        return self.thawouts
 
 
 ### CLASS Game ###
@@ -2535,12 +2537,7 @@ class Game(object):
             return
         self.rcon_bigtext("AUTOBALANCING TEAMS...")
         num_ptm = math.floor((game_data[Player.teams[team1]] - game_data[Player.teams[team2]]) / 2)
-        player_list = []
-        append = player_list.append
-
-        for player in self.players.itervalues():
-            if player.get_team() == team1 and not player.get_team_lock():
-                append(player)
+        player_list = [player for player in self.players.itervalues() if player.get_team() == team1 and not player.get_team_lock()]
         player_list.sort(cmp=lambda player1, player2: cmp(player2.get_time_joined(), player1.get_time_joined()))
         for player in player_list[:int(num_ptm)]:
             self.rcon_forceteam(player.get_player_num(), Player.teams[team2])
