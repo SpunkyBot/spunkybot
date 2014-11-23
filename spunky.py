@@ -313,20 +313,9 @@ class LogParser(object):
                 if tmp[0].lstrip() == 'InitGame':
                     self.new_game(line)
                 elif tmp[0].lstrip() == 'Warmup':
-                    with self.players_lock:
-                        for player in self.game.players.itervalues():
-                            player.reset()
-                    self.allow_cmd_teams = True
-                    self.autobalancer()
+                    self.handle_warmup()
                 elif tmp[0].lstrip() == 'InitRound':
-                    self.debug("Round started...")
-                    if self.ctf_gametype:
-                        with self.players_lock:
-                            for player in self.game.players.itervalues():
-                                player.reset_flag_stats()
-                    elif self.ts_gametype or self.bomb_gametype or self.freeze_gametype:
-                        if self.allow_cmd_teams_round_end:
-                            self.allow_cmd_teams = False
+                    self.handle_initround()
                 elif tmp[0].lstrip() == 'ClientUserinfo':
                     self.handle_userinfo(line)
                 elif tmp[0].lstrip() == 'ClientUserinfoChanged':
@@ -351,15 +340,7 @@ class LogParser(object):
                 elif tmp[0].lstrip() == 'Flag':
                     self.handle_flag(line)
                 elif tmp[0].lstrip() == 'Exit':
-                    self.debug("Match ended!")
-                    self.handle_awards()
-                    self.allow_cmd_teams = True
-                    with self.players_lock:
-                        for player in self.game.players.itervalues():
-                            # store score in database
-                            player.save_info()
-                            # reset team lock
-                            player.set_team_lock(None)
+                    self.handle_exit()
                 elif tmp[0].lstrip() == 'SurvivorWinner':
                     self.handle_teams_ts_mode()
                 elif 'Bomb' in tmp[0]:
@@ -413,6 +394,43 @@ class LogParser(object):
         # support for low gravity server
         if self.support_lowgravity:
             self.game.send_rcon("set g_gravity %d" % self.gravity)
+
+    def handle_warmup(self):
+        """
+        handle warmup
+        """
+        with self.players_lock:
+            for player in self.game.players.itervalues():
+                player.reset()
+        self.allow_cmd_teams = True
+        self.autobalancer()
+
+    def handle_initround(self):
+        """
+        handle Init Round
+        """
+        self.debug("Round started...")
+        if self.ctf_gametype:
+            with self.players_lock:
+                for player in self.game.players.itervalues():
+                    player.reset_flag_stats()
+        elif self.ts_gametype or self.bomb_gametype or self.freeze_gametype:
+            if self.allow_cmd_teams_round_end:
+                self.allow_cmd_teams = False
+
+    def handle_exit(self):
+        """
+        handle Exit of a match, show Awards, store user score in database
+        """
+        self.debug("Match ended!")
+        self.handle_awards()
+        self.allow_cmd_teams = True
+        with self.players_lock:
+            for player in self.game.players.itervalues():
+                # store score in database
+                player.save_info()
+                # reset team lock
+                player.set_team_lock(None)
 
     def handle_userinfo(self, line):
         """
