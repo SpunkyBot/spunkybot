@@ -23,6 +23,8 @@
 	- Usage: `!stats`
 - **bombstats** - display bomb stats
 	- Usage: `!bombstats`
+- **freezestats** - display freeze/thawout stats
+	- Usage: `!freezestats`
 - **teams** - balance teams
 	- Usage: `!teams`
 - **time** - display the current server time

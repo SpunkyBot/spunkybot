@@ -801,6 +801,11 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7planted: ^2%d ^7- defused: ^2%d" % (self.game.players[sar['player_num']].get_planted_bomb(), self.game.players[sar['player_num']].get_defused_bomb()))
                     self.game.rcon_tell(sar['player_num'], "^7bomb carrier killed: ^2%d ^7- enemies bombed: ^2%d" % (self.game.players[sar['player_num']].get_bomb_carrier_kills(), self.game.players[sar['player_num']].get_kills_with_bomb()))
 
+            # freezestats - display freeze tag statistics
+            elif sar['command'] == '!freezestats':
+                if self.freeze_gametype:
+                    self.game.rcon_tell(sar['player_num'], "^froze: ^2%d ^7- thaw out: ^2%d" % (self.game.players[sar['player_num']].get_freeze(), self.game.players[sar['player_num']].get_thawout()))
+
             # time - display the servers current time
             elif sar['command'] == '!time' or sar['command'] == '@time':
                 msg = "^7%s" % time.strftime("%H:%M", time.localtime(time.time()))
