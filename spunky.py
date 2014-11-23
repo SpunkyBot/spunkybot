@@ -94,6 +94,8 @@ class LogParser(object):
         self.urt42_modversion = True
         self.game = None
         self.players_lock = RLock()
+        self.firstblood = False
+        self.firstnadekill = False
 
         # enable/disable debug output
         self.verbose = config.getboolean('bot', 'verbose')
@@ -107,6 +109,8 @@ class LogParser(object):
         self.task_frequency = config.getint('bot', 'task_frequency')
         # enable/disable message 'Player connected from...'
         self.show_country_on_connect = config.getboolean('bot', 'show_country_on_connect')
+        # enable/disable message 'Firstblood / first nade kill...'
+        self.show_first_kill_msg = config.getboolean('bot', 'show_first_kill') if config.has_option('bot', 'show_first_kill') else True
         # set teams autobalancer
         self.teams_autobalancer = config.getboolean('bot', 'autobalancer')
         self.allow_cmd_teams_round_end = config.getboolean('bot', 'allow_teams_round_end')
@@ -382,6 +386,7 @@ class LogParser(object):
         self.freeze_gametype = True if 'g_gametype\\10' in line else False
         self.debug("Starting game...")
         self.game.rcon_clear()
+        self.set_first_kill_trigger()
 
         # wait for server loading the new map
         time.sleep(4)
@@ -425,12 +430,21 @@ class LogParser(object):
         self.debug("Match ended!")
         self.handle_awards()
         self.allow_cmd_teams = True
+        self.set_first_kill_trigger()
         with self.players_lock:
             for player in self.game.players.itervalues():
                 # store score in database
                 player.save_info()
                 # reset team lock
                 player.set_team_lock(None)
+
+    def set_first_kill_trigger(self):
+        """
+        set first kill trigger
+        """
+        if self.show_first_kill_msg and not self.ffa_lms_gametype:
+            self.firstblood = True
+            self.firstnadekill = True
 
     def handle_userinfo(self, line):
         """
@@ -653,6 +667,18 @@ class LogParser(object):
             # kill counter
             elif not tk_event and int(info[2]) != 10:  # 10: MOD_CHANGE_TEAM
                 killer.kill()
+
+                # first kill message
+                if self.firstblood:
+                    self.game.rcon_bigtext("^1FIRSTBLOOD: ^7%s killed by ^3%s" % (victim_name, killer_name))
+                    self.firstblood = False
+                    if death_cause == 'UT_MOD_HEGRENADE':
+                        self.firstnadekill = False
+                elif self.firstnadekill and death_cause == 'UT_MOD_HEGRENADE':
+                    self.game.rcon_bigtext("^3%s: ^7first HE grenade kill" % killer_name)
+                    self.firstnadekill = False
+
+                # bomb mode
                 if self.bomb_gametype:
                     # bomb carrier killed
                     if victim.get_bombholder():
@@ -660,6 +686,8 @@ class LogParser(object):
                     # killed with bomb
                     if death_cause == 'UT_MOD_BOMBED':
                         killer.kills_with_bomb()
+
+                # killing spree counter
                 killer_color = "^1" if (killer.get_team() == 1) else "^4"
                 killer_killing_streak = killer.get_killing_streak()
                 kill_streak_msg = {5: "is on a killing spree (^15 ^7kills in a row)",
@@ -678,6 +706,7 @@ class LogParser(object):
                     self.game.rcon_say("%s%s's ^7rampage was ended by %s%s!" % (victim_color, victim_name, killer_color, killer_name))
                 elif victim.get_killing_streak() >= 5 and killer_name != victim_name and killer_id != 1022:
                     self.game.rcon_say("%s%s's ^7killing spree was ended by %s%s!" % (victim_color, victim_name, killer_color, killer_name))
+
                 # death counter
                 victim.die()
                 self.debug("Player %d %s killed %d %s with %s" % (killer_id, killer_name, victim_id, victim_name, death_cause))
