@@ -749,6 +749,11 @@ class LogParser(object):
                 self.game.rcon_tell(sar['player_num'], "^2%d ^7total hits - ^2%d ^7headshots" % (self.game.players[sar['player_num']].get_all_hits(), self.game.players[sar['player_num']].get_headshots()))
                 if self.ctf_gametype:
                     self.game.rcon_tell(sar['player_num'], "^2%d ^7flags captured - ^2%d ^7flags returned" % (self.game.players[sar['player_num']].get_flags_captured(), self.game.players[sar['player_num']].get_flags_returned()))
+                elif self.bomb_gametype:
+                    self.game.rcon_tell(sar['player_num'], "^7planted: ^2%d ^7- defused: ^2%d" % (self.game.players[sar['player_num']].get_planted_bomb(), self.game.players[sar['player_num']].get_defused_bomb()))
+                    self.game.rcon_tell(sar['player_num'], "^7bomb carrier killed: ^2%d ^7- enemies bombed: ^2%d" % (self.game.players[sar['player_num']].get_bomb_carrier_kills(), self.game.players[sar['player_num']].get_kills_with_bomb()))
+                elif self.freeze_gametype:
+                    self.game.rcon_tell(sar['player_num'], "^freeze: ^2%d ^7- thaw out: ^2%d" % (self.game.players[sar['player_num']].get_freeze(), self.game.players[sar['player_num']].get_thawout()))
 
             elif sar['command'] == '!help' or sar['command'] == '!h':
                 ## TO DO - specific help for each command
@@ -804,7 +809,7 @@ class LogParser(object):
             # freezestats - display freeze tag statistics
             elif sar['command'] == '!freezestats':
                 if self.freeze_gametype:
-                    self.game.rcon_tell(sar['player_num'], "^froze: ^2%d ^7- thaw out: ^2%d" % (self.game.players[sar['player_num']].get_freeze(), self.game.players[sar['player_num']].get_thawout()))
+                    self.game.rcon_tell(sar['player_num'], "^freeze: ^2%d ^7- thaw out: ^2%d" % (self.game.players[sar['player_num']].get_freeze(), self.game.players[sar['player_num']].get_thawout()))
 
             # time - display the servers current time
             elif sar['command'] == '!time' or sar['command'] == '@time':
