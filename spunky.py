@@ -473,9 +473,10 @@ class LogParser(object):
                 player = Player(player_num, ip_address, guid, name)
                 self.game.add_player(player)
                 # kick banned player
-                if self.game.players[player_num].get_ban_id():
+                player_ban_id = self.game.players[player_num].get_ban_id()
+                if player_ban_id:
                     self.game.send_rcon("kick %d" % player_num)
-                    self.game.send_rcon("^7%s ^1banned ^7(ID @%d)" % (name, self.game.players[player_num].get_ban_id()))
+                    self.game.send_rcon("^7%s ^1banned ^7(ID @%d)" % (name, player_ban_id))
                 else:
                     if self.show_country_on_connect:
                         self.game.rcon_say("^7%s ^7connected from %s" % (name, self.game.players[player_num].get_country()))
@@ -583,9 +584,8 @@ class LogParser(object):
                     hitter_hs_count = hitter.get_headshots()
                     player_color = "^1" if (hitter.get_team() == 1) else "^4"
                     hs_plural = "headshots" if hitter_hs_count > 1 else "headshot"
-                    if self.game.live:
-                        percentage = int(round(float(hitter_hs_count) / float(hitter.get_all_hits()), 2) * 100)
-                        self.game.send_rcon("%s%s ^7has %d %s (%d percent)" % (player_color, hitter_name, hitter_hs_count, hs_plural, percentage))
+                    percentage = int(round(float(hitter_hs_count) / float(hitter.get_all_hits()), 2) * 100)
+                    self.game.send_rcon("%s%s ^7has %d %s (%d percent)" % (player_color, hitter_name, hitter_hs_count, hs_plural, percentage))
                 self.debug("Player %d %s hit %d %s in the %s with %s" % (hitter_id, hitter_name, victim_id, victim_name, self.hit_points[hitpoint], self.hit_item[hit_item]))
 
     def handle_kill(self, line):
@@ -644,8 +644,9 @@ class LogParser(object):
                             self.game.rcon_tell(killer_id, "^1WARNING ^7[^33^7]: ^7For team killing you will get kicked")
 
             suicide_reason = ['UT_MOD_SUICIDE', 'MOD_FALLING', 'MOD_WATER', 'MOD_LAVA', 'MOD_TRIGGER_HURT', 'UT_MOD_SPLODED', 'UT_MOD_SLAPPED', 'UT_MOD_SMITED']
+            suicide_weapon = ['UT_MOD_HEGRENADE', 'UT_MOD_HK69', 'UT_MOD_NUKED', 'UT_MOD_BOMBED']
             # suicide counter
-            if death_cause in suicide_reason or (killer_id == victim_id and (death_cause == 'UT_MOD_HEGRENADE' or death_cause == 'UT_MOD_HK69' or death_cause == 'UT_MOD_NUKED' or death_cause == 'UT_MOD_BOMBED')):
+            if death_cause in suicide_reason or (killer_id == victim_id and death_cause in suicide_weapon):
                 victim.suicide()
                 victim.die()
                 self.debug("Player %d %s committed suicide with %s" % (victim_id, victim_name, death_cause))
@@ -660,14 +661,13 @@ class LogParser(object):
                     if death_cause == 'UT_MOD_BOMBED':
                         killer.kills_with_bomb()
                 killer_color = "^1" if (killer.get_team() == 1) else "^4"
-                if killer.get_killing_streak() == 5 and killer_id != 1022:
-                    self.game.rcon_say("%s%s ^7is on a killing spree!" % (killer_color, killer_name))
-                elif killer.get_killing_streak() == 10 and killer_id != 1022:
-                    self.game.rcon_say("%s%s ^7is on a rampage!" % (killer_color, killer_name))
-                elif killer.get_killing_streak() == 15 and killer_id != 1022:
-                    self.game.rcon_say("%s%s ^7is unstoppable!" % (killer_color, killer_name))
-                elif killer.get_killing_streak() == 20 and killer_id != 1022:
-                    self.game.rcon_say("%s%s ^7is godlike!" % (killer_color, killer_name))
+                killer_killing_streak = killer.get_killing_streak()
+                kill_streak_msg = {5: "is on a killing spree (^15 ^7kills in a row)",
+                                   10: "is on a rampage (^110 ^7kills in a row)",
+                                   15: "is unstoppable (^115 ^7kills in a row)",
+                                   20: "is godlike (^120 ^7kills in a row)"}
+                if killer_killing_streak in kill_streak_msg and killer_id != 1022:
+                    self.game.rcon_say("%s%s ^7%s" % (killer_color, killer_name, kill_streak_msg[killer_killing_streak]))
 
                 victim_color = "^1" if (victim.get_team() == 1) else "^4"
                 if victim.get_killing_streak() >= 20 and killer_name != victim_name and killer_id != 1022:
@@ -678,6 +678,7 @@ class LogParser(object):
                     self.game.rcon_say("%s%s's ^7rampage was ended by %s%s!" % (victim_color, victim_name, killer_color, killer_name))
                 elif victim.get_killing_streak() >= 5 and killer_name != victim_name and killer_id != 1022:
                     self.game.rcon_say("%s%s's ^7killing spree was ended by %s%s!" % (victim_color, victim_name, killer_color, killer_name))
+                # death counter
                 victim.die()
                 self.debug("Player %d %s killed %d %s with %s" % (killer_id, killer_name, victim_id, victim_name, death_cause))
 
@@ -1732,8 +1733,7 @@ class LogParser(object):
         info = line.split(":", 1)[0].split(" ")
         player_num = int(info[0])
         with self.players_lock:
-            player = self.game.players[player_num]
-            player.freeze()
+            self.game.players[player_num].freeze()
 
     def handle_thawout(self, line):
         """
@@ -1742,8 +1742,7 @@ class LogParser(object):
         info = line.split(":", 1)[0].split(" ")
         player_num = int(info[0])
         with self.players_lock:
-            player = self.game.players[player_num]
-            player.thawout()
+            self.game.players[player_num].thawout()
 
     def handle_awards(self):
         """
@@ -2536,14 +2535,15 @@ class Game(object):
         """
         game_data = {Player.teams[1]: 0, Player.teams[2]: 0, Player.teams[3]: 0}
         for player in self.players.itervalues():
+            player_team = player.get_team()
             # red team
-            if player.get_team() == 1:
+            if player_team == 1:
                 game_data[Player.teams[1]] += 1
             # blue team
-            elif player.get_team() == 2:
+            elif player_team == 2:
                 game_data[Player.teams[2]] += 1
             # spectators
-            elif player.get_team() == 3:
+            elif player_team == 3:
                 game_data[Player.teams[3]] += 1
         return game_data
 
