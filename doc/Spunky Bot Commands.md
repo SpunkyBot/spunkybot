@@ -23,6 +23,8 @@
 	- Usage: `!stats`
 - **bombstats** - display bomb stats
 	- Usage: `!bombstats`
+- **ctfstats** - display Capture the Flag stats
+	- Usage: `!ctfstats`
 - **freezestats** - display freeze/thawout stats
 	- Usage: `!freezestats`
 - **teams** - balance teams
