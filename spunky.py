@@ -646,16 +646,16 @@ class LogParser(object):
                             # add TK ban points - 15 minutes
                             duration = killer.add_ban_point('tk, auto-kick', 900)
                             if duration > 0:
-                                self.game.rcon_say("%s ^7banned for ^1%d minutes ^7for team killing" % (killer_name, duration))
+                                self.game.rcon_say("^3%s ^7banned for ^1%d minutes ^7for team killing" % (killer_name, duration))
                             else:
                                 self.game.rcon_say("^7Player ^2%s ^7kicked for team killing" % killer_name)
                             self.game.kick_player(killer_id, reason='stop team killing')
                         elif len(killer.get_tk_victim_names()) == 2:
-                            self.game.rcon_tell(killer_id, "^1WARNING ^7[^31^7]: ^7For team killing you will get kicked")
+                            self.game.rcon_tell(killer_id, "^1WARNING ^7[^31^7]: ^7For team killing you will get kicked", False)
                         elif len(killer.get_tk_victim_names()) == 3:
-                            self.game.rcon_tell(killer_id, "^1WARNING ^7[^32^7]: ^7For team killing you will get kicked")
+                            self.game.rcon_tell(killer_id, "^1WARNING ^7[^32^7]: ^7For team killing you will get kicked", False)
                         elif len(killer.get_tk_victim_names()) == 4:
-                            self.game.rcon_tell(killer_id, "^1WARNING ^7[^33^7]: ^7For team killing you will get kicked")
+                            self.game.rcon_tell(killer_id, "^1WARNING ^7[^33^7]: ^7For team killing you will get kicked", False)
 
             suicide_reason = ['UT_MOD_SUICIDE', 'MOD_FALLING', 'MOD_WATER', 'MOD_LAVA', 'MOD_TRIGGER_HURT', 'UT_MOD_SPLODED', 'UT_MOD_SLAPPED', 'UT_MOD_SMITED']
             suicide_weapon = ['UT_MOD_HEGRENADE', 'UT_MOD_HK69', 'UT_MOD_NUKED', 'UT_MOD_BOMBED']
@@ -733,7 +733,7 @@ class LogParser(object):
             if user.startswith('@'):
                 return self.offline_player(user)
             else:
-                return False, None, "No Player found"
+                return False, None, "^3No Player found"
         elif len(name_list) > 1:
             return False, None, "^7Players matching %s: ^3%s" % (user, ', '.join(name_list))
         else:
@@ -770,7 +770,7 @@ class LogParser(object):
             elif map_name.lower() in maps:
                 append(maps)
         if len(map_list) == 0:
-            return False, None, "Map not found"
+            return False, None, "^3Map not found"
         elif len(map_list) > 1:
             return False, None, "^7Maps matching %s: ^3%s" % (map_name, ', '.join(map_list))
         else:
@@ -801,36 +801,31 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7planted: ^2%d ^7- defused: ^2%d" % (self.game.players[sar['player_num']].get_planted_bomb(), self.game.players[sar['player_num']].get_defused_bomb()))
                     self.game.rcon_tell(sar['player_num'], "^7bomb carrier killed: ^2%d ^7- enemies bombed: ^2%d" % (self.game.players[sar['player_num']].get_bomb_carrier_kills(), self.game.players[sar['player_num']].get_kills_with_bomb()))
                 elif self.freeze_gametype:
-                    self.game.rcon_tell(sar['player_num'], "^freeze: ^2%d ^7- thaw out: ^2%d" % (self.game.players[sar['player_num']].get_freeze(), self.game.players[sar['player_num']].get_thawout()))
+                    self.game.rcon_tell(sar['player_num'], "^7freeze: ^2%d ^7- thaw out: ^2%d" % (self.game.players[sar['player_num']].get_freeze(), self.game.players[sar['player_num']].get_thawout()))
 
             elif sar['command'] == '!help' or sar['command'] == '!h':
                 ## TO DO - specific help for each command
                 if self.game.players[sar['player_num']].get_admin_role() < 20:
-                    self.game.rcon_tell(sar['player_num'], "^7Available commands:")
-                    self.game.rcon_tell(sar['player_num'], ", ".join(self.user_cmds), False)
+                    self.game.rcon_tell(sar['player_num'], "^7Available commands: ^3%s" % ', '.join(self.user_cmds))
                 # help for mods - additional commands
                 elif self.game.players[sar['player_num']].get_admin_role() == 20:
-                    self.game.rcon_tell(sar['player_num'], "^7Moderator commands:")
-                    self.game.rcon_tell(sar['player_num'], ", ".join(self.mod_cmds), False)
+                    self.game.rcon_tell(sar['player_num'], "^7Moderator commands: ^3%s" % ', '.join(self.mod_cmds))
                 # help for admins - additional commands
                 elif self.game.players[sar['player_num']].get_admin_role() == 40:
-                    self.game.rcon_tell(sar['player_num'], "^7Admin commands:")
-                    self.game.rcon_tell(sar['player_num'], ", ".join(self.admin_cmds), False)
+                    self.game.rcon_tell(sar['player_num'], "^7Admin commands: ^3%s" % ', '.join(self.admin_cmds))
                 elif self.game.players[sar['player_num']].get_admin_role() == 60:
-                    self.game.rcon_tell(sar['player_num'], "^7Full Admin commands:")
-                    self.game.rcon_tell(sar['player_num'], ", ".join(self.fulladmin_cmds), False)
+                    self.game.rcon_tell(sar['player_num'], "^7Full Admin commands: ^3%s" % ', '.join(self.fulladmin_cmds))
                 elif self.game.players[sar['player_num']].get_admin_role() >= 80:
-                    self.game.rcon_tell(sar['player_num'], "^7Senior Admin commands:")
-                    self.game.rcon_tell(sar['player_num'], ", ".join(self.senioradmin_cmds), False)
+                    self.game.rcon_tell(sar['player_num'], "^7Senior Admin commands: ^3%s" % ', '.join(self.senioradmin_cmds))
 
 ## player commands
             # register - register yourself as a basic user
             elif sar['command'] == '!register':
                 if not self.game.players[sar['player_num']].get_registered_user():
                     self.game.players[sar['player_num']].register_user_db(role=1)
-                    self.game.rcon_tell(sar['player_num'], "%s ^7put in group User" % self.game.players[sar['player_num']].get_name())
+                    self.game.rcon_tell(sar['player_num'], "^3%s ^7put in group User" % self.game.players[sar['player_num']].get_name())
                 else:
-                    self.game.rcon_tell(sar['player_num'], "%s ^7is already in a higher level group" % self.game.players[sar['player_num']].get_name())
+                    self.game.rcon_tell(sar['player_num'], "^3%s ^7is already in a higher level group" % self.game.players[sar['player_num']].get_name())
 
             # hs - display headshot counter
             elif sar['command'] == '!hs':
@@ -857,7 +852,7 @@ class LogParser(object):
             # freezestats - display freeze tag statistics
             elif sar['command'] == '!freezestats':
                 if self.freeze_gametype:
-                    self.game.rcon_tell(sar['player_num'], "^freeze: ^2%d ^7- thaw out: ^2%d" % (self.game.players[sar['player_num']].get_freeze(), self.game.players[sar['player_num']].get_thawout()))
+                    self.game.rcon_tell(sar['player_num'], "^7freeze: ^2%d ^7- thaw out: ^2%d" % (self.game.players[sar['player_num']].get_freeze(), self.game.players[sar['player_num']].get_thawout()))
 
             # time - display the servers current time
             elif sar['command'] == '!time' or sar['command'] == '@time':
@@ -915,7 +910,7 @@ class LogParser(object):
                     forgive_player.clear_killed_me(victim.get_player_num())
                     self.game.rcon_say("^7%s has forgiven %s's attack" % (victim.get_name(), forgive_player.get_name()))
                 else:
-                    self.game.rcon_tell(sar['player_num'], "No one to forgive")
+                    self.game.rcon_tell(sar['player_num'], "^3No one to forgive")
 
             # forgive all team kills
             elif sar['command'] == '!forgiveall' or sar['command'] == '!fa':
@@ -933,7 +928,7 @@ class LogParser(object):
                 if msg:
                     self.game.rcon_say("^7%s has forgiven: %s" % (victim.get_name(), ", ".join(msg)))
                 else:
-                    self.game.rcon_tell(sar['player_num'], "No one to forgive")
+                    self.game.rcon_tell(sar['player_num'], "^3No one to forgive")
 
 ## mod level 20
             # country
@@ -944,7 +939,7 @@ class LogParser(object):
                     if not found:
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
-                        msg = "Country ^3%s: ^7%s" % (victim.get_name(), victim.get_country())
+                        msg = "^3Country %s: ^7%s" % (victim.get_name(), victim.get_country())
                         self.tell_say_message(sar, msg)
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !country <name>")
@@ -957,9 +952,9 @@ class LogParser(object):
                     if not found:
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
-                        self.game.rcon_tell(sar['player_num'], "Level ^3%s [^2%d^3]: ^7%s" % (victim.get_name(), victim.get_admin_role(), victim.roles[victim.get_admin_role()]))
+                        self.game.rcon_tell(sar['player_num'], "^3Level %s [^2%d^3]: ^7%s" % (victim.get_name(), victim.get_admin_role(), victim.roles[victim.get_admin_role()]))
                 else:
-                    self.game.rcon_tell(sar['player_num'], "Level ^3%s [^2%d^3]: ^7%s" % (self.game.players[sar['player_num']].get_name(), self.game.players[sar['player_num']].get_admin_role(), self.game.players[sar['player_num']].roles[self.game.players[sar['player_num']].get_admin_role()]))
+                    self.game.rcon_tell(sar['player_num'], "^3Level %s [^2%d^3]: ^7%s" % (self.game.players[sar['player_num']].get_name(), self.game.players[sar['player_num']].get_admin_role(), self.game.players[sar['player_num']].roles[self.game.players[sar['player_num']].get_admin_role()]))
 
             # list - list all connected players
             elif sar['command'] == '!list' and self.game.players[sar['player_num']].get_admin_role() >= 20:
@@ -1005,9 +1000,9 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
                         if victim.get_registered_user():
-                            self.game.rcon_tell(sar['player_num'], "%s ^7was last seen on %s" % (victim.get_name(), victim.get_last_visit()))
+                            self.game.rcon_tell(sar['player_num'], "^3%s ^7was last seen on %s" % (victim.get_name(), victim.get_last_visit()))
                         else:
-                            self.game.rcon_tell(sar['player_num'], "%s ^7is not a registered user" % victim.get_name())
+                            self.game.rcon_tell(sar['player_num'], "^3%s ^7is not a registered user" % victim.get_name())
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !seen <name>")
 
@@ -1031,9 +1026,9 @@ class LogParser(object):
                         else:
                             warn_delay = 15
                             if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
-                                self.game.rcon_tell(sar['player_num'], "You cannot warn an admin")
+                                self.game.rcon_tell(sar['player_num'], "^3You cannot warn an admin")
                             elif victim.get_last_warn_time() + warn_delay > time.time():
-                                self.game.rcon_tell(sar['player_num'], "Only one warning per %d seconds can be issued" % warn_delay)
+                                self.game.rcon_tell(sar['player_num'], "^3Only one warning per %d seconds can be issued" % warn_delay)
                             else:
                                 show_alert = False
                                 ban_duration = 0
@@ -1146,7 +1141,7 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
                         if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
-                            self.game.rcon_tell(sar['player_num'], "Insufficient privileges to nuke an admin")
+                            self.game.rcon_tell(sar['player_num'], "^3Insufficient privileges to nuke an admin")
                         else:
                             self.game.send_rcon("nuke %d" % victim.get_player_num())
                 else:
@@ -1170,7 +1165,7 @@ class LogParser(object):
                             self.game.rcon_tell(sar['player_num'], msg)
                         else:
                             if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
-                                self.game.rcon_tell(sar['player_num'], "Insufficient privileges to kick an admin")
+                                self.game.rcon_tell(sar['player_num'], "^3Insufficient privileges to kick an admin")
                             else:
                                 msg = "^2%s ^7was kicked by %s" % (victim.get_name(), self.game.players[sar['player_num']].get_name())
                                 if reason in reason_dict:
@@ -1215,7 +1210,7 @@ class LogParser(object):
                             self.game.rcon_tell(sar['player_num'], msg)
                         else:
                             if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
-                                self.game.rcon_tell(sar['player_num'], "Insufficient privileges to ban an admin")
+                                self.game.rcon_tell(sar['player_num'], "^3Insufficient privileges to ban an admin")
                             else:
                                 if victim.ban(duration=duration, reason=reason, admin=self.game.players[sar['player_num']].get_name()):
                                     msg = "^2%s ^1banned ^7for ^3%s ^7by %s" % (victim.get_name(), duration_output, self.game.players[sar['player_num']].get_name())
@@ -1262,7 +1257,7 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
                         if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
-                            self.game.rcon_tell(sar['player_num'], "Insufficient privileges to slap an admin")
+                            self.game.rcon_tell(sar['player_num'], "^3Insufficient privileges to slap an admin")
                         else:
                             for _ in xrange(0, number):
                                 self.game.send_rcon("slap %d" % victim.get_player_num())
@@ -1280,7 +1275,7 @@ class LogParser(object):
                             found1, victim1, _ = self.player_found(player1)
                             found2, victim2, _ = self.player_found(player2)
                             if not found1 or not found2:
-                                self.game.rcon_tell(sar['player_num'], 'Player not found')
+                                self.game.rcon_tell(sar['player_num'], '^3Player not found')
                             else:
                                 team1 = victim1.get_team()
                                 team2 = victim2.get_team()
@@ -1337,7 +1332,7 @@ class LogParser(object):
                             self.game.kick_player(victim.get_player_num(), reason='connection interrupted, try to reconnect')
                             self.game.rcon_say("^2%s ^7was kicked by %s: ^4connection interrupted" % (victim.get_name(), self.game.players[sar['player_num']].get_name()))
                         else:
-                            self.game.rcon_tell(sar['player_num'], "%s has no connection interrupted" % victim.get_name())
+                            self.game.rcon_tell(sar['player_num'], "^3%s has no connection interrupted" % victim.get_name())
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !ci <name>")
 
@@ -1354,7 +1349,7 @@ class LogParser(object):
                             self.game.rcon_tell(sar['player_num'], msg)
                         else:
                             if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
-                                self.game.rcon_tell(sar['player_num'], "Insufficient privileges to ban an admin")
+                                self.game.rcon_tell(sar['player_num'], "^3Insufficient privileges to ban an admin")
                             else:
                                 # ban for 7 days
                                 if victim.ban(duration=604800, reason=reason, admin=self.game.players[sar['player_num']].get_name()):
@@ -1381,9 +1376,9 @@ class LogParser(object):
                         curs.execute("SELECT `expires` FROM `ban_list` WHERE `expires` > ? AND `guid` = ?", values)
                         result = curs.fetchone()
                         if result:
-                            self.game.rcon_tell(sar['player_num'], "%s ^7has an active ban until [^1%s^7]" % (victim.get_name(), str(result[0])))
+                            self.game.rcon_tell(sar['player_num'], "^3%s ^7has an active ban until [^1%s^7]" % (victim.get_name(), str(result[0])))
                         else:
-                            self.game.rcon_tell(sar['player_num'], "%s ^7has no active ban" % victim.get_name())
+                            self.game.rcon_tell(sar['player_num'], "^3%s ^7has no active ban" % victim.get_name())
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !baninfo <name>")
 
@@ -1463,7 +1458,7 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
                         if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
-                            self.game.rcon_tell(sar['player_num'], "Insufficient privileges to kill an admin")
+                            self.game.rcon_tell(sar['player_num'], "^3Insufficient privileges to kill an admin")
                         else:
                             self.game.send_rcon("smite %d" % victim.get_player_num())
                 else:
@@ -1480,7 +1475,7 @@ class LogParser(object):
                     for row in result:
                         self.game.rcon_tell(sar['player_num'], "^7[^2@%s^7] %s ^7[^1%s^7]" % (str(row[0]), str(row[2]), str(row[4])), False)  # 0=ID, 1=GUID, 2=Name, 3=IP, 4=Date
                     if not result:
-                        self.game.rcon_tell(sar['player_num'], "No Player found matching %s" % arg)
+                        self.game.rcon_tell(sar['player_num'], "^3No Player found matching %s" % arg)
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !lookup <name>")
 
@@ -1496,7 +1491,7 @@ class LogParser(object):
                             self.game.rcon_tell(sar['player_num'], msg)
                         else:
                             if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
-                                self.game.rcon_tell(sar['player_num'], "Insufficient privileges to ban an admin")
+                                self.game.rcon_tell(sar['player_num'], "^3Insufficient privileges to ban an admin")
                             else:
                                 # ban for 20 years
                                 victim.ban(duration=630720000, reason=reason, admin=self.game.players[sar['player_num']].get_name())
@@ -1530,26 +1525,26 @@ class LogParser(object):
                                 new_role = 1
 
                             if right == "user" and victim.get_admin_role() < 80:
-                                self.game.rcon_tell(sar['player_num'], "%s put in group User" % victim.get_name())
+                                self.game.rcon_tell(sar['player_num'], "^3%s put in group ^7User" % victim.get_name())
                                 new_role = 1
                             elif right == "regular" and victim.get_admin_role() < 80:
-                                self.game.rcon_tell(sar['player_num'], "%s put in group Regular" % victim.get_name())
+                                self.game.rcon_tell(sar['player_num'], "^3%s put in group ^7Regular" % victim.get_name())
                                 new_role = 2
                             elif (right == "mod" or right == "moderator") and victim.get_admin_role() < 80:
-                                self.game.rcon_tell(sar['player_num'], "%s added as Moderator" % victim.get_name())
+                                self.game.rcon_tell(sar['player_num'], "^3%s added as ^7Moderator" % victim.get_name())
                                 new_role = 20
                             elif right == "admin" and victim.get_admin_role() < 80:
-                                self.game.rcon_tell(sar['player_num'], "%s added as Admin" % victim.get_name())
+                                self.game.rcon_tell(sar['player_num'], "^3%s added as ^7Admin" % victim.get_name())
                                 new_role = 40
                             elif right == "fulladmin" and victim.get_admin_role() < 80:
-                                self.game.rcon_tell(sar['player_num'], "%s added as Full Admin" % victim.get_name())
+                                self.game.rcon_tell(sar['player_num'], "^3%s added as ^7Full Admin" % victim.get_name())
                                 new_role = 60
                             # Note: senioradmin level can only be set by head admin
                             elif right == "senioradmin" and self.game.players[sar['player_num']].get_admin_role() == 100 and victim.get_player_num() != sar['player_num']:
-                                self.game.rcon_tell(sar['player_num'], "%s added as ^6Senior Admin" % victim.get_name())
+                                self.game.rcon_tell(sar['player_num'], "^3%s added as ^6Senior Admin" % victim.get_name())
                                 new_role = 80
                             else:
-                                self.game.rcon_tell(sar['player_num'], "Sorry, you cannot put %s in group <%s>" % (victim.get_name(), right))
+                                self.game.rcon_tell(sar['player_num'], "^3Sorry, you cannot put %s in group <%s>" % (victim.get_name(), right))
                             victim.update_db_admin_role(role=new_role)
                     else:
                         self.game.rcon_tell(sar['player_num'], "^7Usage: !putgroup <name> <group>")
@@ -1608,10 +1603,10 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
                         if 1 < victim.get_admin_role() < 100:
-                            self.game.rcon_tell(sar['player_num'], "%s put in group User" % victim.get_name())
+                            self.game.rcon_tell(sar['player_num'], "^3%s put in group User" % victim.get_name())
                             victim.update_db_admin_role(role=1)
                         else:
-                            self.game.rcon_tell(sar['player_num'], "Sorry, you cannot put %s in group User" % victim.get_name())
+                            self.game.rcon_tell(sar['player_num'], "^3Sorry, you cannot put %s in group User" % victim.get_name())
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !ungroup <name>")
 
@@ -2434,7 +2429,7 @@ class Game(object):
         # wrap long messages into shorter list elements
         lines = textwrap.wrap(msg, 145)
         for line in lines:
-            self.send_rcon('say ^3%s' % line)
+            self.send_rcon('say %s' % line)
 
     def rcon_tell(self, player_num, msg, pm_tag=True):
         """
@@ -2448,13 +2443,13 @@ class Game(object):
         @type  pm_tag: bool
         """
         lines = textwrap.wrap(msg, 135)
-        prefix = "^4[pm]"
+        prefix = "^4[pm] "
         for line in lines:
             if pm_tag:
-                self.send_rcon('tell %d %s ^3%s' % (player_num, prefix, line))
-                prefix = ""
+                self.send_rcon('tell %d %s%s' % (player_num, prefix, line))
+                prefix = "^3"
             else:
-                self.send_rcon('tell %d ^3%s' % (player_num, line))
+                self.send_rcon('tell %d %s' % (player_num, line))
 
     def rcon_bigtext(self, msg):
         """
