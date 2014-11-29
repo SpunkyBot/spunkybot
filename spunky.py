@@ -308,10 +308,7 @@ class LogParser(object):
         """
         line = string[7:]
         tmp = line.split(":", 1)
-        if len(tmp) > 1:
-            line = tmp[1].strip()
-        else:
-            line = tmp[0].strip()
+        line = tmp[1].strip() if len(tmp) > 1 else tmp[0].strip()
         try:
             if tmp is not None:
                 if tmp[0].lstrip() == 'InitGame':
@@ -480,10 +477,7 @@ class LogParser(object):
                     name = "UnnamedPlayer"
                     self.game.send_rcon("Player with invalid name kicked")
                     self.game.send_rcon("kick %d" % player_num)
-                if 'ip' in values:
-                    ip_port = values['ip']
-                else:
-                    ip_port = "0.0.0.0:0"
+                ip_port = values['ip'] if 'ip' in values else "0.0.0.0:0"
 
             ip_address = ip_port.split(":")[0].strip()
             port = ip_port.split(":")[1].strip()
@@ -877,10 +871,7 @@ class LogParser(object):
             # stats - display current map stats
             elif sar['command'] == '!stats':
                 if not self.freeze_gametype:
-                    if self.game.players[sar['player_num']].get_deaths() == 0:
-                        ratio = 1.0
-                    else:
-                        ratio = round(float(self.game.players[sar['player_num']].get_kills()) / float(self.game.players[sar['player_num']].get_deaths()), 2)
+                    ratio = round(float(self.game.players[sar['player_num']].get_kills()) / float(self.game.players[sar['player_num']].get_deaths()), 2) if self.game.players[sar['player_num']].get_deaths() > 0 else 1.0
                     self.game.rcon_tell(sar['player_num'], "^7Map Stats %s: ^7K ^2%d ^7D ^3%d ^7TK ^1%d ^7Ratio ^5%s ^7HS ^2%d" % (self.game.players[sar['player_num']].get_name(), self.game.players[sar['player_num']].get_kills(), self.game.players[sar['player_num']].get_deaths(), self.game.players[sar['player_num']].get_team_kill_count(), ratio, self.game.players[sar['player_num']].get_headshots()))
                 else:
                     # Freeze Tag
@@ -893,19 +884,13 @@ class LogParser(object):
                     for player in self.game.players.itervalues():
                         if (arg.upper() in (player.get_name()).upper()) or arg == str(player.get_player_num()):
                             if player.get_registered_user():
-                                if player.get_db_deaths() == 0:
-                                    ratio = 1.0
-                                else:
-                                    ratio = round(float(player.get_db_kills()) / float(player.get_db_deaths()), 2)
+                                ratio = round(float(player.get_db_kills()) / float(player.get_db_deaths()), 2) if player.get_db_deaths() > 0 else 1.0
                                 self.game.rcon_tell(sar['player_num'], "^7Stats %s: ^7K ^2%d ^7D ^3%d ^7TK ^1%d ^7Ratio ^5%s ^7HS ^2%d" % (player.get_name(), player.get_db_kills(), player.get_db_deaths(), player.get_db_tks(), ratio, player.get_db_headshots()))
                             else:
                                 self.game.rcon_tell(sar['player_num'], "^7Sorry, this player is not registered")
                 else:
                     if self.game.players[sar['player_num']].get_registered_user():
-                        if self.game.players[sar['player_num']].get_db_deaths() == 0:
-                            ratio = 1.0
-                        else:
-                            ratio = round(float(self.game.players[sar['player_num']].get_db_kills()) / float(self.game.players[sar['player_num']].get_db_deaths()), 2)
+                        ratio = round(float(self.game.players[sar['player_num']].get_db_kills()) / float(self.game.players[sar['player_num']].get_db_deaths()), 2) if self.game.players[sar['player_num']].get_db_deaths() > 0 else 1.0
                         self.game.rcon_tell(sar['player_num'], "^7Stats %s: ^7K ^2%d ^7D ^3%d ^7TK ^1%d ^7Ratio ^5%s ^7HS ^2%d" % (self.game.players[sar['player_num']].get_name(), self.game.players[sar['player_num']].get_db_kills(), self.game.players[sar['player_num']].get_db_deaths(), self.game.players[sar['player_num']].get_db_tks(), ratio, self.game.players[sar['player_num']].get_db_headshots()))
                     else:
                         self.game.rcon_tell(sar['player_num'], "^7You need to ^2!register ^7first")
@@ -1696,10 +1681,7 @@ class LogParser(object):
         """
         handle bomb
         """
-        if "Bombholder" in line:
-            tmp = line.split("is")
-        else:
-            tmp = line.split("by")
+        tmp = line.split("is") if "Bombholder" in line else line.split("by")
         action = tmp[0].strip()
         player_num = int(tmp[1].rstrip('!').strip())
         with self.players_lock:
@@ -2020,10 +2002,7 @@ class Player(object):
 
     def save_info(self):
         if self.registered_user:
-            if self.db_deaths == 0:
-                ratio = 1.0
-            else:
-                ratio = round(float(self.db_kills) / float(self.db_deaths), 2)
+            ratio = round(float(self.db_kills) / float(self.db_deaths), 2) if self.db_deaths > 0 else 1.0
             values = (self.db_kills, self.db_deaths, self.db_head_shots, self.db_tk_count, self.db_team_death, self.db_killing_streak, self.db_suicide, ratio, self.guid)
             curs.execute("UPDATE `xlrstats` SET `kills` = ?,`deaths` = ?,`headshots` = ?,`team_kills` = ?,`team_death` = ?,`max_kill_streak` = ?,`suicides` = ?,`rounds` = `rounds` + 1,`ratio` = ? WHERE `guid` = ?", values)
             conn.commit()
@@ -2569,16 +2548,7 @@ class Game(object):
         """
         game_data = {Player.teams[1]: 0, Player.teams[2]: 0, Player.teams[3]: 0}
         for player in self.players.itervalues():
-            player_team = player.get_team()
-            # red team
-            if player_team == 1:
-                game_data[Player.teams[1]] += 1
-            # blue team
-            elif player_team == 2:
-                game_data[Player.teams[2]] += 1
-            # spectators
-            elif player_team == 3:
-                game_data[Player.teams[3]] += 1
+            game_data[Player.teams[player.get_team()]] += 1
         return game_data
 
     def balance_teams(self, game_data):
