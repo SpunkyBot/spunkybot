@@ -337,8 +337,7 @@ class LogParser(object):
                 elif tmp[0].lstrip() == 'ThawOutFinished':
                     self.handle_thawout(line)
                 elif tmp[0].lstrip() == 'ShutdownGame':
-                    self.debug("Shutting down game...")
-                    self.game.rcon_clear()
+                    self.handle_shutdown()
                 elif tmp[0].lstrip() == 'say':
                     self.handle_say(line)
                 elif tmp[0].lstrip() == 'Flag':
@@ -422,6 +421,13 @@ class LogParser(object):
         elif self.ts_gametype or self.bomb_gametype or self.freeze_gametype:
             if self.allow_cmd_teams_round_end:
                 self.allow_cmd_teams = False
+
+    def handle_shutdown(self):
+        """
+        handle shutdown of game
+        """
+        self.debug("Shutting down game...")
+        self.game.rcon_clear()
 
     def handle_exit(self):
         """
