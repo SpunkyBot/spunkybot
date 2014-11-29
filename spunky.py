@@ -447,6 +447,9 @@ class LogParser(object):
         if self.show_first_kill_msg and not self.ffa_lms_gametype:
             self.firstblood = True
             self.firstnadekill = True
+        else:
+            self.firstblood = False
+            self.firstnadekill = False
 
     def handle_userinfo(self, line):
         """
