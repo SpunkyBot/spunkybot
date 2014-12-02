@@ -646,12 +646,10 @@ class LogParser(object):
             death_cause = self.death_cause[int(info[2])]
             victim = self.game.players[victim_id]
 
-            if k_name != "<non-client>":
-                killer = self.game.players[killer_id]
-            else:
+            if k_name == "<non-client>":
                 # killed by World
-                killer = self.game.players[1022]
                 killer_id = 1022
+            killer = self.game.players[killer_id]
 
             killer_name = killer.get_name()
             victim_name = victim.get_name()
@@ -1965,18 +1963,17 @@ class Player(object):
                 values = (self.address, expire_date, self.guid)
                 curs.execute("UPDATE `ban_list` SET `ip_address` = ?,`expires` = ? WHERE `guid` = ?", values)
                 conn.commit()
-                ban_status = True
+                return True
             else:
                 values = (self.address, self.guid)
                 curs.execute("UPDATE `ban_list` SET `ip_address` = ? WHERE `guid` = ?", values)
                 conn.commit()
-                ban_status = False
+                return False
         else:
             values = (self.player_id, self.guid, self.prettyname, self.address, expire_date, timestamp, reason)
             curs.execute("INSERT INTO `ban_list` (`id`,`guid`,`name`,`ip_address`,`expires`,`timestamp`,`reason`) VALUES (?,?,?,?,?,?,?)", values)
             conn.commit()
-            ban_status = True
-        return ban_status
+            return True
 
     def add_ban_point(self, point_type, duration):
         unix_expiration = duration + time.time()
@@ -1993,10 +1990,9 @@ class Player(object):
             # ban duration multiplied by 3
             ban_duration = duration * 3
             self.ban(duration=ban_duration, reason=point_type)
-            ban_period = ban_duration / 60
+            return ban_duration / 60
         else:
-            ban_period = 0
-        return ban_period
+            return 0
 
     def reset(self):
         self.kills = 0
