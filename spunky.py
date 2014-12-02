@@ -127,24 +127,23 @@ class LogParser(object):
         self.firstnadekill = False
 
         # enable/disable autokick for team killing
-        self.tk_autokick = config.getboolean('bot', 'teamkill_autokick')
+        self.tk_autokick = config.getboolean('bot', 'teamkill_autokick') if config.has_option('bot', 'teamkill_autokick') else True
         # set the maximum allowed ping
-        self.max_ping = config.getint('bot', 'max_ping')
+        self.max_ping = config.getint('bot', 'max_ping') if config.has_option('bot', 'max_ping') else 200
         # kick spectator on full server
-        self.num_kick_specs = config.getint('bot', 'kick_spec_full_server')
+        self.num_kick_specs = config.getint('bot', 'kick_spec_full_server') if config.has_option('bot', 'kick_spec_full_server') else 10
         # set task frequency
-        self.task_frequency = config.getint('bot', 'task_frequency')
+        self.task_frequency = config.getint('bot', 'task_frequency') if config.has_option('bot', 'task_frequency') else 60
         # enable/disable message 'Player connected from...'
-        self.show_country_on_connect = config.getboolean('bot', 'show_country_on_connect')
+        self.show_country_on_connect = config.getboolean('bot', 'show_country_on_connect') if config.has_option('bot', 'show_country_on_connect') else True
         # enable/disable message 'Firstblood / first nade kill...'
         self.show_first_kill_msg = config.getboolean('bot', 'show_first_kill') if config.has_option('bot', 'show_first_kill') else True
         # set teams autobalancer
-        self.teams_autobalancer = config.getboolean('bot', 'autobalancer')
-        self.allow_cmd_teams_round_end = config.getboolean('bot', 'allow_teams_round_end')
+        self.teams_autobalancer = config.getboolean('bot', 'autobalancer') if config.has_option('bot', 'autobalancer') else False
+        self.allow_cmd_teams_round_end = config.getboolean('bot', 'allow_teams_round_end') if config.has_option('bot', 'allow_teams_round_end') else False
         # support for low gravity server
-        if config.has_section('lowgrav'):
-            self.support_lowgravity = config.getboolean('lowgrav', 'support_lowgravity')
-            self.gravity = config.getint('lowgrav', 'gravity')
+        self.support_lowgravity = config.getboolean('lowgrav', 'support_lowgravity') if config.has_option('lowgrav', 'support_lowgravity') else False
+        self.gravity = config.getint('lowgrav', 'gravity') if config.has_option('lowgrav', 'gravity') else 800
         logger.info("Configuration loaded  : OK")
         # enable/disable option to get Head Admin by checking existence of head admin in database
         curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `admin_role` = 100")
@@ -152,8 +151,9 @@ class LogParser(object):
         logger.info("Connecting to Database: OK")
         # Master Server
         self.base_url = 'http://master.spunkybot.de'
+        server_port = config.get('server', 'server_port') if config.has_option('server', 'server_port') else "27960"
         # Heartbeat packet
-        data = {'v': __version__, 'p': config.get('server', 'server_port'), 'o': platform.platform()}
+        data = {'v': __version__, 'p': server_port, 'o': platform.platform()}
         values = urllib.urlencode(data)
         self.ping_url = '%s/ping.php?%s' % (self.base_url, values)
 
