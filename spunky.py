@@ -35,12 +35,19 @@ import urllib
 import urllib2
 import platform
 import ConfigParser
+import logging.handlers
 import lib.pygeoip as pygeoip
 import lib.schedule as schedule
 
 from lib.rcon import Rcon
 from lib.rules import Rules
 from threading import RLock
+
+
+# Get an instance of a logger
+logger = logging.getLogger('spunkybot')
+logger.setLevel(logging.DEBUG)
+logger.propagate = False
 
 
 ### CLASS Log Parser ###
@@ -75,14 +82,36 @@ class LogParser(object):
         self.config_file = config_file
         config = ConfigParser.ConfigParser()
         config.read(config_file)
-        print "- Imported config file '%s' successful." % config_file
+
+        # enable/disable debug output
+        verbose = config.getboolean('bot', 'verbose') if config.has_option('bot', 'verbose') else False
+        # logging format
+        formatter = logging.Formatter('[%(asctime)s] %(levelname)-8s %(message)s', datefmt='%d.%m.%Y %H:%M:%S')
+        # console logging
+        console = logging.StreamHandler()
+        if not verbose:
+            console.setLevel(logging.INFO)
+        console.setFormatter(formatter)
+
+        # devel.log file
+        devel_log = logging.handlers.RotatingFileHandler(filename='devel.log', maxBytes=2097152, backupCount=1, encoding='utf8')
+        devel_log.setLevel(logging.INFO)
+        devel_log.setFormatter(formatter)
+
+        # add logging handler
+        logger.addHandler(console)
+        logger.addHandler(devel_log)
+
+        logger.info("*** Spunky Bot v%s : www.spunkybot.de ***", __version__)
+        logger.info("Starting logging      : OK")
+        logger.info("Loading config file   : %s", config_file)
 
         games_log = config.get('server', 'log_file')
         # open game log file
         self.log_file = open(games_log, 'r')
         # go to the end of the file
         self.log_file.seek(0, 2)
-        print "- Parsing games log file '%s' successful." % games_log
+        logger.info("Parsing Gamelog file  : %s", games_log)
 
         self.ffa_lms_gametype = False
         self.ctf_gametype = False
@@ -97,8 +126,6 @@ class LogParser(object):
         self.firstblood = False
         self.firstnadekill = False
 
-        # enable/disable debug output
-        self.verbose = config.getboolean('bot', 'verbose')
         # enable/disable autokick for team killing
         self.tk_autokick = config.getboolean('bot', 'teamkill_autokick')
         # set the maximum allowed ping
@@ -118,9 +145,11 @@ class LogParser(object):
         if config.has_section('lowgrav'):
             self.support_lowgravity = config.getboolean('lowgrav', 'support_lowgravity')
             self.gravity = config.getint('lowgrav', 'gravity')
+        logger.info("Configuration loaded  : OK")
         # enable/disable option to get Head Admin by checking existence of head admin in database
         curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `admin_role` = 100")
         self.iamgod = True if curs.fetchone()[0] < 1 else False
+        logger.info("Connecting to Database: OK")
         # Master Server
         self.base_url = 'http://master.spunkybot.de'
         # Heartbeat packet
@@ -153,7 +182,7 @@ class LogParser(object):
                         self.hit_item = {1: "UT_MOD_KNIFE", 2: "UT_MOD_BERETTA", 3: "UT_MOD_DEAGLE", 4: "UT_MOD_SPAS", 5: "UT_MOD_MP5K", 6: "UT_MOD_UMP45", 8: "UT_MOD_LR300", 9: "UT_MOD_G36", 10: "UT_MOD_PSG1", 14: "UT_MOD_SR8", 15: "UT_MOD_AK103", 17: "UT_MOD_NEGEV", 19: "UT_MOD_M4", 21: "UT_MOD_KICKED", 22: "UT_MOD_KNIFE_THROWN"}
                         self.death_cause = {1: "MOD_WATER", 3: "MOD_LAVA", 5: "UT_MOD_TELEFRAG", 6: "MOD_FALLING", 7: "UT_MOD_SUICIDE", 9: "MOD_TRIGGER_HURT", 10: "MOD_CHANGE_TEAM", 12: "UT_MOD_KNIFE", 13: "UT_MOD_KNIFE_THROWN", 14: "UT_MOD_BERETTA", 15: "UT_MOD_DEAGLE", 16: "UT_MOD_SPAS", 17: "UT_MOD_UMP45", 18: "UT_MOD_MP5K", 19: "UT_MOD_LR300", 20: "UT_MOD_G36", 21: "UT_MOD_PSG1", 22: "UT_MOD_HK69", 23: "UT_MOD_BLED", 24: "UT_MOD_KICKED", 25: "UT_MOD_HEGRENADE", 28: "UT_MOD_SR8", 30: "UT_MOD_AK103", 31: "UT_MOD_SPLODED", 32: "UT_MOD_SLAPPED", 33: "UT_MOD_BOMBED", 34: "UT_MOD_NUKED", 35: "UT_MOD_NEGEV", 37: "UT_MOD_HK69_HIT", 38: "UT_MOD_M4", 39: "UT_MOD_FLAG", 40: "UT_MOD_GOOMBA"}
                         self.urt42_modversion = False
-                        self.debug("Game modversion 4.1 detected")
+                        logger.info("Game modversion 4.1 detected")
                     if 'g_gametype\\0' in line or 'g_gametype\\1' in line or 'g_gametype\\9' in line:
                         # disable teamkill event and some commands for FFA (0), LMS (1) and Jump (9) mode
                         self.ffa_lms_gametype = True
@@ -299,8 +328,8 @@ class LogParser(object):
                                 self.game.rcon_tell(player.num, "^1WARNING ^7[^3%d^7]: ^7Your ping is too high [^4%d^7]. ^3The maximum allowed ping is %d." % (gameplayer.get_high_ping(), ping_value, self.max_ping), False)
                             else:
                                 gameplayer.clear_high_ping()
-        except Exception, err:
-            print "%s: %s" % (err.__class__.__name__, err)
+        except Exception as err:
+            logger.error(err, exc_info=True)
 
     def parse_line(self, string):
         """
@@ -346,12 +375,12 @@ class LogParser(object):
                 elif 'Bomb' in tmp[0]:
                     self.handle_bomb(line)
                 elif 'Pop' in tmp[0]:
-                    self.debug("Bomb exploded!")
+                    logger.debug("Bomb exploded!")
                     self.handle_teams_ts_mode()
         except (IndexError, KeyError):
             pass
-        except Exception, err:
-            print "%s: %s" % (err.__class__.__name__, err)
+        except Exception as err:
+            logger.error(err, exc_info=True)
 
     def explode_line(self, line):
         """
@@ -380,7 +409,7 @@ class LogParser(object):
         self.ts_gametype = True if 'g_gametype\\4' in line else False
         self.bomb_gametype = True if 'g_gametype\\8' in line else False
         self.freeze_gametype = True if 'g_gametype\\10' in line else False
-        self.debug("Starting game...")
+        logger.debug("Starting game...")
         self.game.rcon_clear()
         self.set_first_kill_trigger()
 
@@ -407,7 +436,7 @@ class LogParser(object):
         """
         handle Init Round
         """
-        self.debug("Round started...")
+        logger.debug("Round started...")
         if self.ctf_gametype:
             with self.players_lock:
                 for player in self.game.players.itervalues():
@@ -420,14 +449,14 @@ class LogParser(object):
         """
         handle shutdown of game
         """
-        self.debug("Shutting down game...")
+        logger.debug("Shutting down game...")
         self.game.rcon_clear()
 
     def handle_exit(self):
         """
         handle Exit of a match, show Awards, store user score in database
         """
-        self.debug("Match ended!")
+        logger.debug("Match ended!")
         self.handle_awards()
         self.allow_cmd_teams = True
         self.set_first_kill_trigger()
@@ -511,7 +540,7 @@ class LogParser(object):
                 self.game.send_rcon("kick %d" % player_num)
 
             if challenge:
-                self.debug("Player %d %s is challenging the server and has the guid %s" % (player_num, name, guid))
+                logger.debug("Player %d %s is challenging the server and has the guid %s", player_num, name, guid)
                 # kick player with hax port 1337 or 1024
                 if port == "1337" or port == "1024":
                     self.game.send_rcon("Cheater Port detected for %s -> Player kicked" % name)
@@ -547,7 +576,7 @@ class LogParser(object):
             if team_lock and Player.teams[team_num] != team_lock:
                 self.game.rcon_forceteam(player_num, team_lock)
                 self.game.rcon_tell(player_num, "^3You are forced to: ^7%s" % team_lock)
-            self.debug("Player %d %s joined team %s" % (player_num, name, Player.teams[team_num]))
+            logger.debug("Player %d %s joined team %s", player_num, name, Player.teams[team_num])
 
     def handle_begin(self, line):
         """
@@ -562,7 +591,7 @@ class LogParser(object):
                 self.game.rcon_tell(player_num, "^7[^2Authed^7] Welcome back %s, you are ^2%s^7, last visit %s, you played %s times" % (player_name, player.roles[player.get_admin_role()], player.get_last_visit(), player.get_num_played()), False)
                 # disable welcome message for next rounds
                 player.disable_welcome_msg()
-            self.debug("Player %d %s has entered the game" % (player_num, player_name))
+            logger.debug("Player %d %s has entered the game", player_num, player_name)
 
     def handle_disconnect(self, line):
         """
@@ -574,7 +603,7 @@ class LogParser(object):
             player.save_info()
             player.reset()
             del self.game.players[player_num]
-            self.debug("Player %d %s has left the game" % (player_num, player.get_name()))
+            logger.debug("Player %d %s has left the game", player_num, player.get_name())
 
     def handle_hit(self, line):
         """
@@ -602,7 +631,7 @@ class LogParser(object):
                     hs_plural = "headshots" if hitter_hs_count > 1 else "headshot"
                     percentage = int(round(float(hitter_hs_count) / float(hitter.get_all_hits()), 2) * 100)
                     self.game.send_rcon("%s%s ^7has %d %s (%d percent)" % (player_color, hitter_name, hitter_hs_count, hs_plural, percentage))
-                self.debug("Player %d %s hit %d %s in the %s with %s" % (hitter_id, hitter_name, victim_id, victim_name, self.hit_points[hitpoint], self.hit_item[hit_item]))
+                logger.debug("Player %d %s hit %d %s in the %s with %s", hitter_id, hitter_name, victim_id, victim_name, self.hit_points[hitpoint], self.hit_item[hit_item])
 
     def handle_kill(self, line):
         """
@@ -665,7 +694,7 @@ class LogParser(object):
             if death_cause in suicide_reason or (killer_id == victim_id and death_cause in suicide_weapon):
                 victim.suicide()
                 victim.die()
-                self.debug("Player %d %s committed suicide with %s" % (victim_id, victim_name, death_cause))
+                logger.debug("Player %d %s committed suicide with %s", victim_id, victim_name, death_cause)
             # kill counter
             elif not tk_event and int(info[2]) != 10:  # 10: MOD_CHANGE_TEAM
                 killer.kill()
@@ -711,7 +740,7 @@ class LogParser(object):
 
                 # death counter
                 victim.die()
-                self.debug("Player %d %s killed %d %s with %s" % (killer_id, killer_name, victim_id, victim_name, death_cause))
+                logger.debug("Player %d %s killed %d %s with %s", killer_id, killer_name, victim_id, victim_name, death_cause)
 
     def player_found(self, user):
         """
@@ -1675,10 +1704,10 @@ class LogParser(object):
             player = self.game.players[player_num]
             if action == '1:':
                 player.return_flag()
-                self.debug("Player %d returned the flag" % player_num)
+                logger.debug("Player %d returned the flag", player_num)
             elif action == '2:':
                 player.capture_flag()
-                self.debug("Player %d captured the flag" % player_num)
+                logger.debug("Player %d captured the flag", player_num)
 
     def handle_bomb(self, line):
         """
@@ -1691,11 +1720,11 @@ class LogParser(object):
             player = self.game.players[player_num]
             if action == 'Bomb was defused':
                 player.defused_bomb()
-                self.debug("Player %d defused the bomb" % player_num)
+                logger.debug("Player %d defused the bomb", player_num)
                 self.handle_teams_ts_mode()
             elif action == 'Bomb was planted':
                 player.planted_bomb()
-                self.debug("Player %d planted the bomb" % player_num)
+                logger.debug("Player %d planted the bomb", player_num)
             elif action == 'Bomb was tossed':
                 player.bomb_tossed()
             elif action == 'Bomb has been collected':
@@ -1724,7 +1753,7 @@ class LogParser(object):
                 if self.allow_cmd_teams:
                     self.game.balance_teams(game_data)
                     self.ts_do_team_balance = False
-                    self.debug("Balance teams by user request")
+                    logger.debug("Balance teams by user request")
                 else:
                     if self.ts_gametype or self.bomb_gametype or self.freeze_gametype:
                         self.ts_do_team_balance = True
@@ -1742,7 +1771,7 @@ class LogParser(object):
                 game_data = self.game.get_gamestats()
                 if (abs(game_data[Player.teams[1]] - game_data[Player.teams[2]])) > 1:
                     self.game.balance_teams(game_data)
-                    self.debug("Autobalancer performed team balance")
+                    logger.debug("Autobalancer performed team balance")
                 self.ts_do_team_balance = False
 
     def handle_freeze(self, line):
@@ -1837,13 +1866,6 @@ class LogParser(object):
                 append("^7%s: ^2%d ^1heads" % (headshooter, most_hs))
             if msg:
                 self.game.rcon_say("^1AWARDS: %s" % " ^7- ".join(msg))
-
-    def debug(self, msg):
-        """
-        print debug messages
-        """
-        if self.verbose:
-            print msg
 
 
 ### CLASS Player ###
@@ -2390,16 +2412,19 @@ class Game(object):
         game_cfg = ConfigParser.ConfigParser()
         game_cfg.read(config_file)
         self.rcon_handle = Rcon(game_cfg.get('server', 'server_ip'), game_cfg.get('server', 'server_port'), game_cfg.get('server', 'rcon_password'))
+        logger.info("Opening RCON socket   : OK")
         if game_cfg.getboolean('rules', 'show_rules'):
             # create instance of Rules to display the rules and rotation messages
             Rules('./conf/rules.conf', game_cfg.getint('rules', 'rules_frequency'), self.rcon_handle)
+            logger.info("Load rotating messages: OK")
 
         # add Spunky Bot as player 'World' to the game
         spunky_bot = Player(1022, '127.0.0.1', 'NONE', 'World')
         self.add_player(spunky_bot)
-        print "- Added Spunky Bot successful to the game.\n"
-        print "Spunky Bot is running until you are closing this session or pressing CTRL + C to abort this process."
-        print "Note: Use the provided initscript to run Spunky Bot as daemon.\n"
+        logger.info("Activating the Bot    : OK")
+        logger.info("Startup completed     : Let's get ready to rumble!")
+        logger.info("Spunky Bot is running until you are closing this session or pressing CTRL + C to abort this process.")
+        logger.info("Note: Use the provided initscript to run Spunky Bot as daemon.")
 
     def send_rcon(self, command):
         """
@@ -2580,7 +2605,6 @@ class Game(object):
 
 
 ### Main ###
-print "\n\nStarting Spunky Bot:"
 
 # load the GEO database and store it globally in interpreter memory
 GEOIP = pygeoip.Database('./lib/GeoIP.dat')
@@ -2594,7 +2618,6 @@ curs.execute('CREATE TABLE IF NOT EXISTS xlrstats (id INTEGER PRIMARY KEY NOT NU
 curs.execute('CREATE TABLE IF NOT EXISTS player (id INTEGER PRIMARY KEY NOT NULL, guid TEXT NOT NULL, name TEXT NOT NULL, ip_address TEXT NOT NULL, time_joined DATETIME, aliases TEXT)')
 curs.execute('CREATE TABLE IF NOT EXISTS ban_list (id INTEGER PRIMARY KEY NOT NULL, guid TEXT NOT NULL, name TEXT, ip_address TEXT, expires DATETIME DEFAULT 259200, timestamp DATETIME, reason TEXT)')
 curs.execute('CREATE TABLE IF NOT EXISTS ban_points (id INTEGER PRIMARY KEY NOT NULL, guid TEXT NOT NULL, point_type TEXT, expires DATETIME)')
-print "- Connected to database 'data.sqlite' successful."
 
 # create instance of LogParser
 LogParser('./conf/settings.conf')
