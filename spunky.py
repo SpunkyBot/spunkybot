@@ -1051,9 +1051,9 @@ class LogParser(object):
             elif (sar['command'] == '!warn' or sar['command'] == '!w') and self.game.players[sar['player_num']].get_admin_role() >= 20:
                 if line.split(sar['command'])[1]:
                     arg = line.split(sar['command'])[1].strip().split(' ')
-                    if len(arg) > 1:
+                    if len(arg) > 0:
                         user = arg[0]
-                        reason = ' '.join(arg[1:])[:40].strip()
+                        reason = ' '.join(arg[1:])[:40].strip() if len(arg) > 1 else 'behave yourself'
                         found, victim, msg = self.player_found(user)
                         if not found:
                             self.game.rcon_tell(sar['player_num'], msg)
@@ -1095,9 +1095,9 @@ class LogParser(object):
                                 if show_alert:
                                     self.game.rcon_say("^1ALERT: ^2%s ^7auto-kick from warnings if not cleared" % victim.get_name())
                     else:
-                        self.game.rcon_tell(sar['player_num'], "^7You need to enter a reason: ^3!warn <name> <reason>")
+                        self.game.rcon_tell(sar['player_num'], "^7Usage: !warn <name> [<reason>]")
                 else:
-                    self.game.rcon_tell(sar['player_num'], "^7Usage: !warn <name> <reason>")
+                    self.game.rcon_tell(sar['player_num'], "^7Usage: !warn <name> [<reason>]")
 
 ## admin level 40
             # admins - list all the online admins
