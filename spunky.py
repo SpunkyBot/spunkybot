@@ -376,8 +376,7 @@ class LogParser(object):
                 elif 'Bomb' in tmp[0]:
                     self.handle_bomb(line)
                 elif 'Pop' in tmp[0]:
-                    logger.debug("Bomb exploded!")
-                    self.handle_teams_ts_mode()
+                    self.handle_bomb_exploded()
         except (IndexError, KeyError):
             pass
         except Exception as err:
@@ -1747,6 +1746,13 @@ class LogParser(object):
                 player.is_bombholder()
             elif action == 'Bombholder':
                 player.is_bombholder()
+
+    def handle_bomb_exploded(self):
+        """
+        handle bomb exploded
+        """
+        logger.debug("Bomb exploded!")
+        self.handle_teams_ts_mode()
 
     def handle_teams_ts_mode(self):
         """
