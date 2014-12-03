@@ -1417,11 +1417,20 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !baninfo <name>")
 
 ## senior admin level 80
-            # kiss - clear all player warnings
+            # kiss - clear all player warnings - !clear [<player>]
             elif (sar['command'] == '!kiss' or sar['command'] == '!clear') and self.game.players[sar['player_num']].get_admin_role() >= 80:
-                for player in self.game.players.itervalues():
-                    player.clear_warning()
-                self.game.rcon_say("^1All player warnings cleared")
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
+                    found, victim, msg = self.player_found(user)
+                    if not found:
+                        self.game.rcon_tell(sar['player_num'], msg)
+                    else:
+                        victim.clear_warning()
+                        self.game.rcon_say("^1All warnings cleared for ^3%s" % victim.get_name())
+                else:
+                    for player in self.game.players.itervalues():
+                        player.clear_warning()
+                    self.game.rcon_say("^1All player warnings cleared")
 
             # map - load given map
             elif sar['command'] == '!map' and self.game.players[sar['player_num']].get_admin_role() >= 80:
