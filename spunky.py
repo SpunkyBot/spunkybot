@@ -409,7 +409,7 @@ class LogParser(object):
         self.ts_gametype = True if 'g_gametype\\4' in line else False
         self.bomb_gametype = True if 'g_gametype\\8' in line else False
         self.freeze_gametype = True if 'g_gametype\\10' in line else False
-        logger.debug("Starting game...")
+        logger.debug("InitGame: Starting game...")
         self.game.rcon_clear()
         self.set_first_kill_trigger()
 
@@ -436,7 +436,7 @@ class LogParser(object):
         """
         handle Init Round
         """
-        logger.debug("Round started...")
+        logger.debug("InitRound: Round started...")
         if self.ctf_gametype:
             with self.players_lock:
                 for player in self.game.players.itervalues():
@@ -449,14 +449,14 @@ class LogParser(object):
         """
         handle shutdown of game
         """
-        logger.debug("Shutting down game...")
+        logger.debug("Shutdown: Shutting down game...")
         self.game.rcon_clear()
 
     def handle_exit(self):
         """
         handle Exit of a match, show Awards, store user score in database
         """
-        logger.debug("Match ended!")
+        logger.debug("Exit: Match ended!")
         self.handle_awards()
         self.allow_cmd_teams = True
         self.set_first_kill_trigger()
@@ -576,7 +576,7 @@ class LogParser(object):
             if team_lock and Player.teams[team_num] != team_lock:
                 self.game.rcon_forceteam(player_num, team_lock)
                 self.game.rcon_tell(player_num, "^3You are forced to: ^7%s" % team_lock)
-            logger.debug("Player %d %s joined team %s", player_num, name, Player.teams[team_num])
+            logger.debug("ClientUserinfoChanged: Player %d %s joined team %s", player_num, name, Player.teams[team_num])
 
     def handle_begin(self, line):
         """
@@ -591,7 +591,7 @@ class LogParser(object):
                 self.game.rcon_tell(player_num, "^7[^2Authed^7] Welcome back %s, you are ^2%s^7, last visit %s, you played %s times" % (player_name, player.roles[player.get_admin_role()], player.get_last_visit(), player.get_num_played()), False)
                 # disable welcome message for next rounds
                 player.disable_welcome_msg()
-            logger.debug("Player %d %s has entered the game", player_num, player_name)
+            logger.debug("ClientBegin: Player %d %s has entered the game", player_num, player_name)
 
     def handle_disconnect(self, line):
         """
@@ -603,7 +603,7 @@ class LogParser(object):
             player.save_info()
             player.reset()
             del self.game.players[player_num]
-            logger.debug("Player %d %s has left the game", player_num, player.get_name())
+            logger.debug("ClientDisconnect: Player %d %s has left the game", player_num, player.get_name())
 
     def handle_hit(self, line):
         """
@@ -2452,7 +2452,7 @@ class Game(object):
         logger.info("Activating the Bot    : OK")
         logger.info("Startup completed     : Let's get ready to rumble!")
         logger.info("Spunky Bot is running until you are closing this session or pressing CTRL + C to abort this process.")
-        logger.info("Note: Use the provided initscript to run Spunky Bot as daemon.")
+        logger.info("*** Note: Use the provided initscript to run Spunky Bot as daemon ***")
 
     def send_rcon(self, command):
         """
