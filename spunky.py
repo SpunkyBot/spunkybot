@@ -138,6 +138,7 @@ class LogParser(object):
         self.show_country_on_connect = config.getboolean('bot', 'show_country_on_connect') if config.has_option('bot', 'show_country_on_connect') else True
         # enable/disable message 'Firstblood / first nade kill...'
         self.show_first_kill_msg = config.getboolean('bot', 'show_first_kill') if config.has_option('bot', 'show_first_kill') else True
+        self.show_hit_stats_msg = config.getboolean('bot', 'show_hit_stats_respawn') if config.has_option('bot', 'show_hit_stats_respawn') else True
         # set teams autobalancer
         self.teams_autobalancer = config.getboolean('bot', 'autobalancer') if config.has_option('bot', 'autobalancer') else False
         self.allow_cmd_teams_round_end = config.getboolean('bot', 'allow_teams_round_end') if config.has_option('bot', 'allow_teams_round_end') else False
@@ -623,6 +624,10 @@ class LogParser(object):
             # increase summary of all hits
             hitter.set_all_hits()
 
+            zones = {'TORSO': 'body', 'VEST': 'body', 'KEVLAR': 'body', 'BUTT': 'body', 'GROIN': 'body',
+                     'LEGS': 'legs', 'LEFT_UPPER_LEG': 'legs', 'RIGHT_UPPER_LEG': 'legs', 'LEFT_LOWER_LEG': 'legs', 'RIGHT_LOWER_LEG': 'legs', 'LEFT_FOOT': 'legs', 'RIGHT_FOOT': 'legs',
+                     'ARMS': 'arms', 'LEFT_ARM': 'arms', 'RIGHT_ARM': 'arms'}
+
             if hitpoint in self.hit_points:
                 if self.hit_points[hitpoint] == 'HEAD' or self.hit_points[hitpoint] == 'HELMET':
                     hitter.headshot()
@@ -631,6 +636,8 @@ class LogParser(object):
                     hs_plural = "headshots" if hitter_hs_count > 1 else "headshot"
                     percentage = int(round(float(hitter_hs_count) / float(hitter.get_all_hits()), 2) * 100)
                     self.game.send_rcon("%s%s ^7has %d %s (%d percent)" % (player_color, hitter_name, hitter_hs_count, hs_plural, percentage))
+                elif self.hit_points[hitpoint] in zones:
+                    hitter.set_hitzones(zones[self.hit_points[hitpoint]])
                 logger.debug("Player %d %s hit %d %s in the %s with %s", hitter_id, hitter_name, victim_id, victim_name, self.hit_points[hitpoint], self.hit_item[hit_item])
 
     def handle_kill(self, line):
@@ -738,6 +745,8 @@ class LogParser(object):
 
                 # death counter
                 victim.die()
+                if self.show_hit_stats_msg:
+                    self.game.rcon_tell(victim_id, "^1HIT Stats: ^7HS: ^2%s ^7BODY: ^2%s ^7ARMS: ^2%s ^7LEGS: ^2%s ^7TOTAL: ^2%s" % (victim.get_headshots(), victim.get_hitzones('body'), victim.get_hitzones('arms'), victim.get_hitzones('legs'), victim.get_all_hits()))
                 logger.debug("Player %d %s killed %d %s with %s", killer_id, killer_name, victim_id, victim_name, death_cause)
 
     def player_found(self, user):
@@ -1899,6 +1908,7 @@ class Player(object):
         self.db_suicide = 0
         self.head_shots = 0
         self.db_head_shots = 0
+        self.hitzone = {'body': 0, 'arms': 0, 'legs': 0}
         self.all_hits = 0
         self.tk_count = 0
         self.db_tk_count = 0
@@ -2002,6 +2012,7 @@ class Player(object):
         self.max_kill_streak = 0
         self.deaths = 0
         self.head_shots = 0
+        self.hitzone = {'body': 0, 'arms': 0, 'legs': 0}
         self.all_hits = 0
         self.tk_count = 0
         self.tk_victim_names = []
@@ -2233,6 +2244,12 @@ class Player(object):
     def headshot(self):
         self.head_shots += 1
         self.db_head_shots += 1
+
+    def set_hitzones(self, part):
+        self.hitzone[part] += 1
+
+    def get_hitzones(self, part):
+        return self.hitzone[part]
 
     def set_all_hits(self):
         self.all_hits += 1
