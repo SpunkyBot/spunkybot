@@ -22,17 +22,40 @@ USER=q3ut4
 GROUP=q3ut4
 
 # Don't modify the code below
-DAEMON="/usr/bin/python $DIR/spunky.py"
+DAEMON=$DIR/spunky.py
 NAME=spunkybot
+RUNDIR=/var/run/$NAME
+PIDFILE=$RUNDIR/$NAME.pid
 
 # Get LSB functions
 . /lib/lsb/init-functions
 
+# See if the daemon is present
+if [ -e "$DAEMON" ]
+    then
+        chmod +x "$DAEMON"
+        chown -R "$USER:$GROUP" "$DIR"
+    fi
+
+# Make sure /var/run/spunkybot exists
+test -d "$RUNDIR" || {
+    mkdir -p "$RUNDIR"
+    chown -R "$USER:$GROUP" "$RUNDIR"
+}
+
 case "$1" in
     start)
+        if [ -e "$PIDFILE" ]
+        then
+            echo "$0:"
+            echo "  Another instance of \`${DAEMON##*/}' seems to be running."
+            echo "  If this is not the case, please remove \"$PIDFILE\"."
+            exit 1
+        fi
+
         log_begin_msg "Starting service $NAME..."
         umask 002
-        if start-stop-daemon --start --quiet --background --chdir $DIR --chuid $USER:$GROUP --exec $DAEMON; then
+        if start-stop-daemon --start --quiet --background --chdir $DIR --chuid $USER:$GROUP --pidfile "$PIDFILE" --make-pidfile --exec $DAEMON; then
             log_end_msg 0
         else
             log_end_msg $?
@@ -41,23 +64,21 @@ case "$1" in
 
     stop)
         log_begin_msg "Stopping service $NAME..."
-        if start-stop-daemon --stop --quiet --oknodo --exec $DAEMON; then
-                log_end_msg 0
+        if start-stop-daemon --stop --quiet --pidfile "$PIDFILE" && rm -f "$PIDFILE"; then
+            log_end_msg 0
         else
-                log_end_msg $?
+            log_end_msg $?
         fi
         ;;
 
     restart)
-        log_begin_msg "Restarting service $NAME..."
-        start-stop-daemon --stop --quiet --oknodo --exec $DAEMON
+        $0 stop
         sleep 3
-        start-stop-daemon --start --quiet --background --chdir $DIR --chuid $USER:$GROUP --exec $DAEMON
-        log_end_msg $?
+        $0 start
         ;;
 
     *)
-        echo "Usage: /etc/init.d/$NAME {start|stop|restart}"
+        echo "Usage: $0 {start|stop|restart}" >&2
         exit 1
         ;;
 esac
