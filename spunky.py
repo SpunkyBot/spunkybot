@@ -69,7 +69,7 @@ class LogParser(object):
 
         # RCON commands for the different admin roles
         self.user_cmds = ['bombstats', 'ctfstats', 'freezestats', 'forgiveall, forgiveprev', 'hs', 'register', 'spree', 'stats', 'teams', 'time', 'xlrstats']
-        self.mod_cmds = self.user_cmds + ['country', 'leveltest', 'list', 'nextmap', 'mute', 'seen', 'shuffleteams', 'warn']
+        self.mod_cmds = self.user_cmds + ['country', 'leveltest', 'list', 'nextmap', 'mute', 'seen', 'shuffleteams', 'warn', 'warninfo']
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'force', 'kick', 'nuke', 'say', 'tempban', 'warnclear']
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'scream', 'slap', 'swap', 'version', 'veto']
         self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'lookup', 'map', 'maps', 'maprestart', 'moon', 'permban', 'putgroup', 'setnextmap', 'unban', 'ungroup']
@@ -1046,7 +1046,19 @@ class LogParser(object):
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Command is disabled for this game mode")
 
-            # warn - warn user
+            # warninfo - display how many warnings the player has
+            elif (sar['command'] == '!warninfo' or sar['command'] == '!wi') and self.game.players[sar['player_num']].get_admin_role() >= 20:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
+                    found, victim, msg = self.player_found(user)
+                    if not found:
+                        self.game.rcon_tell(sar['player_num'], msg)
+                    else:
+                        self.game.rcon_tell(sar['player_num'], "^7%s has ^2%s ^7active warning(s)" % (victim.get_name(), victim.get_warning()))
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7Usage: !warninfo <name>")
+
+            # warn - warn user - !warn <name> [<reason>]
             elif (sar['command'] == '!warn' or sar['command'] == '!w') and self.game.players[sar['player_num']].get_admin_role() >= 20:
                 if line.split(sar['command'])[1]:
                     arg = line.split(sar['command'])[1].strip().split(' ')
