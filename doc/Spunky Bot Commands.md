@@ -57,8 +57,8 @@
 	- Usage: `!shuffleteams`
 	- Short: `!shuffle`
 - **warn** - warn user
-	- Usage: `!warn <name> <reason>`
-	- Short: `!w <name> <reason>`
+	- Usage: `!warn <name> [<reason>]`
+	- Short: `!w <name> [<reason>]`
 	- Available short form reasons: _tk_, _obj_, _spec_, _ping_, _spam_, _camp_, _lang_,  _racism_
 
 
