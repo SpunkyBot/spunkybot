@@ -95,7 +95,7 @@ class Rcon(object):
 
     def get_mapcycle_path(self):
         """
-        get the full path of mapcycle.txe file
+        get the full path of mapcycle.txt file
         """
         maplist = []
         self.quake.rcon_update()
