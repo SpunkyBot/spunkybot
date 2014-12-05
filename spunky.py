@@ -538,7 +538,7 @@ class LogParser(object):
                 self.game.send_rcon("kick %d" % player_num)
 
             if challenge:
-                logger.debug("Player %d %s is challenging the server and has the guid %s", player_num, name, guid)
+                logger.debug("ClientUserinfo: Player %d %s is challenging the server and has the guid %s", player_num, name, guid)
                 # kick player with hax port 1337 or 1024
                 if port == "1337" or port == "1024":
                     self.game.send_rcon("Cheater Port detected for %s -> Player kicked" % name)
