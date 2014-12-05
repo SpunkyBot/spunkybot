@@ -823,10 +823,13 @@ class LogParser(object):
         with self.players_lock:
             line = line.strip()
             try:
-                tmp = line.split(" ")
-                sar = {'player_num': int(tmp[0]), 'name': tmp[1], 'command': tmp[2]}
+                divider = line.split(": ", 1)
+                number = divider[0].split(" ", 1)[0]
+                cmd = divider[1].split()[0]
+
+                sar = {'player_num': int(number), 'command': cmd}
             except IndexError:
-                sar = {'player_num': None, 'name': None, 'command': None}
+                sar = {'player_num': None, 'command': None}
 
             if sar['command'] == '!mapstats':
                 self.game.rcon_tell(sar['player_num'], "^2%d ^7kills - ^2%d ^7deaths" % (self.game.players[sar['player_num']].get_kills(), self.game.players[sar['player_num']].get_deaths()))
