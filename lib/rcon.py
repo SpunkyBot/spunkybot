@@ -6,7 +6,7 @@ Author: Alexander Kress
 This program is released under the MIT License.
 """
 
-__version__ = '1.0.6'
+__version__ = '1.0.7'
 
 
 ### IMPORTS
@@ -145,7 +145,7 @@ class Rcon(object):
                                 self.quake.rcon_update()
                         except Exception:
                             pass
-            time.sleep(.8)
+            time.sleep(.33)
 
     def clear(self):
         """
