@@ -464,8 +464,6 @@ class LogParser(object):
             for player in self.game.players.itervalues():
                 # store score in database
                 player.save_info()
-                # reset player statistics
-                player.reset()
                 # reset team lock
                 player.set_team_lock(None)
 
@@ -586,6 +584,8 @@ class LogParser(object):
             player_num = int(line[:2].strip())
             player = self.game.players[player_num]
             player_name = player.get_name()
+            # reset player statistics
+            player.reset()
             # Welcome message for registered players
             if player.get_registered_user() and player.get_welcome_msg():
                 self.game.rcon_tell(player_num, "^7[^2Authed^7] Welcome back %s, you are ^2%s^7, last visit %s, you played %s times" % (player_name, player.roles[player.get_admin_role()], player.get_last_visit(), player.get_num_played()), False)
