@@ -175,7 +175,7 @@ class LogParser(object):
             while self.log_file:
                 line = self.log_file.readline()
                 msg = re.search(r"(\d+:\d+)\s([A-Za-z]+:)", line)
-                if msg is not None and msg.group(2) == 'InitGame:':
+                if msg and msg.group(2) == 'InitGame:':
                     game_start = True
                     if 'g_modversion\\4.1' in line:
                         # hit zone support for UrT 4.1
@@ -339,43 +339,19 @@ class LogParser(object):
         line = string[7:]
         tmp = line.split(":", 1)
         line = tmp[1].strip() if len(tmp) > 1 else tmp[0].strip()
+
+        option = {'InitGame': self.new_game, 'Warmup': self.handle_warmup, 'InitRound': self.handle_initround, 'Exit': self.handle_exit, 'say': self.handle_say,
+                  'ClientUserinfo': self.handle_userinfo, 'ClientUserinfoChanged': self.handle_userinfo_changed, 'ClientBegin': self.handle_begin, 'ClientDisconnect': self.handle_disconnect,
+                  'SurvivorWinner': self.handle_teams_ts_mode, 'Kill': self.handle_kill, 'Hit': self.handle_hit, 'Freeze': self.handle_freeze, 'ThawOutFinished': self.handle_thawout, 'Flag': self.handle_flag}
+
         try:
-            if tmp is not None:
-                if tmp[0].lstrip() == 'InitGame':
-                    self.new_game(line)
-                elif tmp[0].lstrip() == 'Warmup':
-                    self.handle_warmup()
-                elif tmp[0].lstrip() == 'InitRound':
-                    self.handle_initround()
-                elif tmp[0].lstrip() == 'ClientUserinfo':
-                    self.handle_userinfo(line)
-                elif tmp[0].lstrip() == 'ClientUserinfoChanged':
-                    self.handle_userinfo_changed(line)
-                elif tmp[0].lstrip() == 'ClientBegin':
-                    self.handle_begin(line)
-                elif tmp[0].lstrip() == 'ClientDisconnect':
-                    self.handle_disconnect(line)
-                elif tmp[0].lstrip() == 'Kill':
-                    self.handle_kill(line)
-                elif tmp[0].lstrip() == 'Hit':
-                    self.handle_hit(line)
-                elif tmp[0].lstrip() == 'Freeze':
-                    self.handle_freeze(line)
-                elif tmp[0].lstrip() == 'ThawOutFinished':
-                    self.handle_thawout(line)
-                elif tmp[0].lstrip() == 'ShutdownGame':
-                    self.handle_shutdown()
-                elif tmp[0].lstrip() == 'say':
-                    self.handle_say(line)
-                elif tmp[0].lstrip() == 'Flag':
-                    self.handle_flag(line)
-                elif tmp[0].lstrip() == 'Exit':
-                    self.handle_exit()
-                elif tmp[0].lstrip() == 'SurvivorWinner':
-                    self.handle_teams_ts_mode()
-                elif 'Bomb' in tmp[0]:
+            if tmp:
+                action = tmp[0].strip()
+                if action in option:
+                    option[action](line)
+                elif 'Bomb' in action:
                     self.handle_bomb(line)
-                elif 'Pop' in tmp[0]:
+                elif 'Pop' in action:
                     self.handle_bomb_exploded()
         except (IndexError, KeyError):
             pass
@@ -413,9 +389,6 @@ class LogParser(object):
         self.game.rcon_clear()
         self.set_first_kill_trigger()
 
-        # wait for server loading the new map
-        time.sleep(4)
-
         # set the current map
         self.game.set_current_map()
         # load all available maps
@@ -425,14 +398,15 @@ class LogParser(object):
         if self.support_lowgravity:
             self.game.send_rcon("set g_gravity %d" % self.gravity)
 
-    def handle_warmup(self):
+    def handle_warmup(self, line):
         """
         handle warmup
         """
+        logger.debug("Warmup... %s", line)
         self.allow_cmd_teams = True
         self.autobalancer()
 
-    def handle_initround(self):
+    def handle_initround(self, _):
         """
         handle Init Round
         """
@@ -445,18 +419,11 @@ class LogParser(object):
             if self.allow_cmd_teams_round_end:
                 self.allow_cmd_teams = False
 
-    def handle_shutdown(self):
-        """
-        handle shutdown of game
-        """
-        logger.debug("Shutdown: Shutting down game...")
-        self.game.rcon_clear()
-
-    def handle_exit(self):
+    def handle_exit(self, line):
         """
         handle Exit of a match, show Awards, store user score in database
         """
-        logger.debug("Exit: Match ended!")
+        logger.debug("Exit: %s", line)
         self.handle_awards()
         self.allow_cmd_teams = True
         self.set_first_kill_trigger()
@@ -581,7 +548,7 @@ class LogParser(object):
         handle player entering game
         """
         with self.players_lock:
-            player_num = int(line[:2].strip())
+            player_num = int(line)
             player = self.game.players[player_num]
             player_name = player.get_name()
             # reset player statistics
@@ -598,7 +565,7 @@ class LogParser(object):
         handle player disconnect
         """
         with self.players_lock:
-            player_num = int(line[:2].strip())
+            player_num = int(line)
             player = self.game.players[player_num]
             player.save_info()
             player.reset()
@@ -1751,7 +1718,7 @@ class LogParser(object):
             if action == 'Bomb was defused':
                 player.defused_bomb()
                 logger.debug("Player %d defused the bomb", player_num)
-                self.handle_teams_ts_mode()
+                self.handle_teams_ts_mode('Blue')
             elif action == 'Bomb was planted':
                 player.planted_bomb()
                 logger.debug("Player %d planted the bomb", player_num)
@@ -1767,12 +1734,13 @@ class LogParser(object):
         handle bomb exploded
         """
         logger.debug("Bomb exploded!")
-        self.handle_teams_ts_mode()
+        self.handle_teams_ts_mode('Red')
 
-    def handle_teams_ts_mode(self):
+    def handle_teams_ts_mode(self, line):
         """
         handle team balance in Team Survivor mode
         """
+        logger.debug("SurvivorWinner: %s team", line)
         self.autobalancer()
         if self.ts_do_team_balance:
             self.allow_cmd_teams = True
