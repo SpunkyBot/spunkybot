@@ -1474,19 +1474,20 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !setnextmap <ut4_name>")
 
             # kill - kill a player
-            elif sar['command'] == '!kill' and self.urt42_modversion and self.game.players[sar['player_num']].get_admin_role() >= 80:
-                if line.split(sar['command'])[1]:
-                    user = line.split(sar['command'])[1].strip()
-                    found, victim, msg = self.player_found(user)
-                    if not found:
-                        self.game.rcon_tell(sar['player_num'], msg)
-                    else:
-                        if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
-                            self.game.rcon_tell(sar['player_num'], "^3Insufficient privileges to kill an admin")
+            elif sar['command'] == '!kill' and self.game.players[sar['player_num']].get_admin_role() >= 80:
+                if self.urt42_modversion:
+                    if line.split(sar['command'])[1]:
+                        user = line.split(sar['command'])[1].strip()
+                        found, victim, msg = self.player_found(user)
+                        if not found:
+                            self.game.rcon_tell(sar['player_num'], msg)
                         else:
-                            self.game.send_rcon("smite %d" % victim.get_player_num())
-                else:
-                    self.game.rcon_tell(sar['player_num'], "^7Usage: !kill <name>")
+                            if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
+                                self.game.rcon_tell(sar['player_num'], "^3Insufficient privileges to kill an admin")
+                            else:
+                                self.game.send_rcon("smite %d" % victim.get_player_num())
+                    else:
+                        self.game.rcon_tell(sar['player_num'], "^7Usage: !kill <name>")
 
             # lookup - search for player in database
             elif (sar['command'] == '!lookup' or sar['command'] == '!l') and self.game.players[sar['player_num']].get_admin_role() >= 80:
