@@ -578,7 +578,7 @@ class LogParser(object):
         """
         with self.players_lock:
             parts = line.split(":", 1)
-            info = parts[0].split(" ")
+            info = parts[0].split()
             hitter_id = int(info[1])
             victim_id = int(info[0])
             hitter = self.game.players[hitter_id]
@@ -612,8 +612,8 @@ class LogParser(object):
         """
         with self.players_lock:
             parts = line.split(":", 1)
-            info = parts[0].split(" ")
-            k_name = parts[1].strip().split(" ")[0]
+            info = parts[0].split()
+            k_name = parts[1].split()[0]
             killer_id = int(info[0])
             victim_id = int(info[1])
             death_cause = self.death_cause[int(info[2])]
@@ -977,7 +977,7 @@ class LogParser(object):
             # mute - mute or unmute a player
             elif sar['command'] == '!mute' and self.game.players[sar['player_num']].get_admin_role() >= 20:
                 if line.split(sar['command'])[1]:
-                    arg = line.split(sar['command'])[1].strip().split(' ')
+                    arg = line.split(sar['command'])[1].split()
                     if len(arg) > 1:
                         user = arg[0]
                         duration = arg[1]
@@ -1031,7 +1031,7 @@ class LogParser(object):
             # warn - warn user - !warn <name> [<reason>]
             elif (sar['command'] == '!warn' or sar['command'] == '!w') and self.game.players[sar['player_num']].get_admin_role() >= 20:
                 if line.split(sar['command'])[1]:
-                    arg = line.split(sar['command'])[1].strip().split(' ')
+                    arg = line.split(sar['command'])[1].split()
                     if len(arg) > 0:
                         user = arg[0]
                         reason = ' '.join(arg[1:])[:40].strip() if len(arg) > 1 else 'behave yourself'
@@ -1116,7 +1116,7 @@ class LogParser(object):
             # force - force a player to the given team
             elif sar['command'] == '!force' and self.game.players[sar['player_num']].get_admin_role() >= 40:
                 if line.split(sar['command'])[1]:
-                    arg = line.split(sar['command'])[1].strip().split(' ')
+                    arg = line.split(sar['command'])[1].split()
                     if len(arg) > 1:
                         user = arg[0]
                         team = arg[1]
@@ -1150,7 +1150,7 @@ class LogParser(object):
             # nuke - nuke a player
             elif sar['command'] == '!nuke' and self.game.players[sar['player_num']].get_admin_role() >= 40:
                 if line.split(sar['command'])[1]:
-                    user = line.split(sar['command'])[1].strip()
+                    user = line.split(sar['command'])[1].split()[0]
                     found, victim, msg = self.player_found(user)
                     if not found:
                         self.game.rcon_tell(sar['player_num'], msg)
@@ -1165,7 +1165,7 @@ class LogParser(object):
             # kick - kick a player
             elif (sar['command'] == '!kick' or sar['command'] == '!k') and self.game.players[sar['player_num']].get_admin_role() >= 40:
                 if line.split(sar['command'])[1]:
-                    arg = line.split(sar['command'])[1].strip().split(' ')
+                    arg = line.split(sar['command'])[1].split()
                     if self.game.players[sar['player_num']].get_admin_role() >= 80 and len(arg) == 1:
                         user = arg[0]
                         reason = '.'
@@ -1214,7 +1214,7 @@ class LogParser(object):
             # tempban - ban a player temporary for the given period (1 min to 24 hrs)
             elif (sar['command'] == '!tempban' or sar['command'] == '!tb') and self.game.players[sar['player_num']].get_admin_role() >= 40:
                 if line.split(sar['command'])[1]:
-                    arg = line.split(sar['command'])[1].strip().split(' ')
+                    arg = line.split(sar['command'])[1].split()
                     if len(arg) > 1:
                         user = arg[0]
                         duration, duration_output = self.convert_time(arg[1])
@@ -1254,7 +1254,7 @@ class LogParser(object):
             # slap - slap a player (a number of times); (1-15 times)
             elif sar['command'] == '!slap' and self.game.players[sar['player_num']].get_admin_role() >= 60:
                 if line.split(sar['command'])[1]:
-                    arg = line.split(sar['command'])[1].strip().split(' ')
+                    arg = line.split(sar['command'])[1].split()
                     if len(arg) > 1:
                         user = arg[0]
                         number = arg[1]
@@ -1283,7 +1283,7 @@ class LogParser(object):
             elif sar['command'] == '!swap' and self.game.players[sar['player_num']].get_admin_role() >= 60:
                 if not self.ffa_lms_gametype:
                     if line.split(sar['command'])[1]:
-                        arg = line.split(sar['command'])[1].strip().split(' ')
+                        arg = line.split(sar['command'])[1].split()
                         if len(arg) > 1:
                             player1 = arg[0]
                             player2 = arg[1]
@@ -1354,7 +1354,7 @@ class LogParser(object):
             # ban - ban a player for 7 days
             elif (sar['command'] == '!ban' or sar['command'] == '!b') and self.game.players[sar['player_num']].get_admin_role() >= 60:
                 if line.split(sar['command'])[1]:
-                    arg = line.split(sar['command'])[1].strip().split(' ')
+                    arg = line.split(sar['command'])[1].split()
                     if len(arg) > 1:
                         user = arg[0]
                         reason = ' '.join(arg[1:])[:40].strip()
@@ -1507,7 +1507,7 @@ class LogParser(object):
             # permban - ban a player permanent
             elif (sar['command'] == '!permban' or sar['command'] == '!pb') and self.game.players[sar['player_num']].get_admin_role() >= 80:
                 if line.split(sar['command'])[1]:
-                    arg = line.split(sar['command'])[1].strip().split(' ')
+                    arg = line.split(sar['command'])[1].split()
                     if len(arg) > 1:
                         user = arg[0]
                         reason = ' '.join(arg[1:])[:40].strip()
@@ -1534,7 +1534,7 @@ class LogParser(object):
             # putgroup - add a client to a group
             elif sar['command'] == '!putgroup' and self.game.players[sar['player_num']].get_admin_role() >= 80:
                 if line.split(sar['command'])[1]:
-                    arg = line.split(sar['command'])[1].strip().split(' ')
+                    arg = line.split(sar['command'])[1].split()
                     if len(arg) > 1:
                         user = arg[0]
                         right = arg[1]
@@ -1695,9 +1695,9 @@ class LogParser(object):
         """
         handle flag
         """
-        tmp = line.split(" ")
-        player_num = int(tmp[0].strip())
-        action = tmp[1].strip()
+        tmp = line.split()
+        player_num = int(tmp[0])
+        action = tmp[1]
         with self.players_lock:
             player = self.game.players[player_num]
             if action == '1:':
@@ -1784,7 +1784,7 @@ class LogParser(object):
         """
         handle freeze
         """
-        info = line.split(":", 1)[0].split(" ")
+        info = line.split(":", 1)[0].split()
         player_num = int(info[0])
         with self.players_lock:
             self.game.players[player_num].freeze()
@@ -1793,7 +1793,7 @@ class LogParser(object):
         """
         handle thaw out
         """
-        info = line.split(":", 1)[0].split(" ")
+        info = line.split(":", 1)[0].split()
         player_num = int(info[0])
         with self.players_lock:
             self.game.players[player_num].thawout()
