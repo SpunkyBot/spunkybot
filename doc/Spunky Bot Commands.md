@@ -99,7 +99,7 @@
 - **slap** - slap a player (a number of times)
 	- Usage: `!slap <name> [<amount>]`
 	- Default amount: 1
-	- Max amount: 10
+	- Max amount: 15
 - **swap** - swap teams for player A and B (if in different teams)
 	- Usage: `!swap <playerA> <playerB>`
 - **version** - display the version of the bot
