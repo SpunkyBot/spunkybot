@@ -813,17 +813,17 @@ class LogParser(object):
             elif sar['command'] == '!help' or sar['command'] == '!h':
                 ## TO DO - specific help for each command
                 if self.game.players[sar['player_num']].get_admin_role() < 20:
-                    self.game.rcon_tell(sar['player_num'], "^7Available commands: ^3%s" % ', '.join(self.user_cmds))
+                    self.game.rcon_tell(sar['player_num'], "^7Available commands: ^3%s" % ', ^3'.join(self.user_cmds))
                 # help for mods - additional commands
                 elif self.game.players[sar['player_num']].get_admin_role() == 20:
-                    self.game.rcon_tell(sar['player_num'], "^7Moderator commands: ^3%s" % ', '.join(self.mod_cmds))
+                    self.game.rcon_tell(sar['player_num'], "^7Moderator commands: ^3%s" % ', ^3'.join(self.mod_cmds))
                 # help for admins - additional commands
                 elif self.game.players[sar['player_num']].get_admin_role() == 40:
-                    self.game.rcon_tell(sar['player_num'], "^7Admin commands: ^3%s" % ', '.join(self.admin_cmds))
+                    self.game.rcon_tell(sar['player_num'], "^7Admin commands: ^3%s" % ', ^3'.join(self.admin_cmds))
                 elif self.game.players[sar['player_num']].get_admin_role() == 60:
-                    self.game.rcon_tell(sar['player_num'], "^7Full Admin commands: ^3%s" % ', '.join(self.fulladmin_cmds))
+                    self.game.rcon_tell(sar['player_num'], "^7Full Admin commands: ^3%s" % ', ^3'.join(self.fulladmin_cmds))
                 elif self.game.players[sar['player_num']].get_admin_role() >= 80:
-                    self.game.rcon_tell(sar['player_num'], "^7Senior Admin commands: ^3%s" % ', '.join(self.senioradmin_cmds))
+                    self.game.rcon_tell(sar['player_num'], "^7Senior Admin commands: ^3%s" % ', ^3'.join(self.senioradmin_cmds))
 
 ## player commands
             # register - register yourself as a basic user
@@ -1024,7 +1024,7 @@ class LogParser(object):
                     if not found:
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
-                        self.game.rcon_tell(sar['player_num'], "^7%s has ^2%s ^7active warning(s)" % (victim.get_name(), victim.get_warning()))
+                        self.game.rcon_tell(sar['player_num'], "^3%s ^7has ^2%s ^7active warning(s)" % (victim.get_name(), victim.get_warning()))
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !warninfo <name>")
 
@@ -1430,7 +1430,7 @@ class LogParser(object):
 
             # maps - display all available maps
             elif (sar['command'] == '!maps' or sar['command'] == '@maps') and self.game.players[sar['player_num']].get_admin_role() >= 80:
-                msg = "^7Available Maps: ^3%s" % ', '.join(self.game.get_all_maps())
+                msg = "^7Available Maps: ^3%s" % ', ^3'.join(self.game.get_all_maps())
                 self.tell_say_message(sar, msg)
 
             # maprestart - restart the map
@@ -2146,7 +2146,7 @@ class Player(object):
     def get_aliases(self):
         if len(self.aliases) == 15:
             self.aliases.append("and more...")
-        return str(", ".join(self.aliases))
+        return str(", ^3".join(self.aliases))
 
     def set_guid(self, guid):
         self.guid = guid
@@ -2476,7 +2476,7 @@ class Game(object):
         for line in lines:
             if pm_tag:
                 self.send_rcon('tell %d %s%s' % (player_num, prefix, line))
-                prefix = "^3"
+                prefix = ""
             else:
                 self.send_rcon('tell %d %s' % (player_num, line))
 
