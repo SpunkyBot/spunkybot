@@ -796,7 +796,7 @@ class LogParser(object):
 
                 sar = {'player_num': int(number), 'command': cmd}
             except IndexError:
-                sar = {'player_num': None, 'command': None}
+                sar = {'player_num': 1022, 'command': ''}
 
             if sar['command'] == '!mapstats':
                 self.game.rcon_tell(sar['player_num'], "^2%d ^7kills - ^2%d ^7deaths" % (self.game.players[sar['player_num']].get_kills(), self.game.players[sar['player_num']].get_deaths()))
