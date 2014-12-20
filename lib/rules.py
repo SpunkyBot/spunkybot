@@ -6,7 +6,7 @@ Author: Alexander Kress
 This program is released under the MIT License.
 """
 
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 
 
 ### IMPORTS
@@ -56,7 +56,7 @@ class Rules(object):
             for line in filehandle.readlines():
                 # display rule
                 with self.rcon_lock:
-                    self.rcon_handle.push("say ^2%s" % line)
+                    self.rcon_handle.push("say ^2%s" % line.strip())
                 # wait for given delay in the config file
                 time.sleep(self.rules_frequency)
             filehandle.close()
