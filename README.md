@@ -18,10 +18,10 @@ The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was 
 - Runs 'out of the box', no other software requirements
 
 ## Environment
-- Urban Terror 4.1.1 and 4.2.021
+- Urban Terror 4.1.1 and 4.2.022
 - Python 2.6.x / 2.7.x
 - SQLite 3 database
-- Linux platform (tested on Debian 6 & 7 and CentOS 6)
+- Linux platform (tested on Debian 6 & 7, Ubuntu 12 & 14, CentOS 6.5 and Mac OS X 10.10)
 - Supporting Linux 32-bit and 64-bit operating system
 
 
