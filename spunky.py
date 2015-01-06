@@ -389,6 +389,11 @@ class LogParser(object):
         self.game.rcon_clear()
         self.set_first_kill_trigger()
 
+        # reset player statistics
+        with self.players_lock:
+            for player in self.game.players.itervalues():
+                player.reset()
+
         # set the current map
         self.game.set_current_map()
         # load all available maps
@@ -551,8 +556,6 @@ class LogParser(object):
             player_num = int(line)
             player = self.game.players[player_num]
             player_name = player.get_name()
-            # reset player statistics
-            player.reset()
             # Welcome message for registered players
             if player.get_registered_user() and player.get_welcome_msg():
                 self.game.rcon_tell(player_num, "^7[^2Authed^7] Welcome back %s, you are ^2%s^7, last visit %s, you played %s times" % (player_name, player.roles[player.get_admin_role()], player.get_last_visit(), player.get_num_played()), False)
