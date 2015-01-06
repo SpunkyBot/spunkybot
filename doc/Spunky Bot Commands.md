@@ -63,6 +63,9 @@
 - **warninfo** - display how many warnings the player has
 	- Usage: `!warninfo <name>`
 	- Short: `!wi <name>`
+- **warnremove** - remove a users last warning
+	- Usage: `!warnremove <name>`
+	- Short: `!wr <name>`
 
 
 ### Admin [40]

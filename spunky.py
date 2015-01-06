@@ -69,7 +69,7 @@ class LogParser(object):
 
         # RCON commands for the different admin roles
         self.user_cmds = ['bombstats', 'ctfstats', 'freezestats', 'forgiveall, forgiveprev', 'hs', 'register', 'spree', 'stats', 'teams', 'time', 'xlrstats']
-        self.mod_cmds = self.user_cmds + ['country', 'leveltest', 'list', 'nextmap', 'mute', 'seen', 'shuffleteams', 'warn', 'warninfo']
+        self.mod_cmds = self.user_cmds + ['country', 'leveltest', 'list', 'nextmap', 'mute', 'seen', 'shuffleteams', 'warn', 'warninfo', 'warnremove']
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'force', 'kick', 'nuke', 'say', 'tempban', 'warnclear']
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'scream', 'slap', 'swap', 'version', 'veto']
         self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'lookup', 'map', 'maps', 'maprestart', 'moon', 'permban', 'putgroup', 'setnextmap', 'unban', 'ungroup']
@@ -1051,10 +1051,8 @@ class LogParser(object):
                                     self.game.kick_player(victim.get_player_num(), reason='too many warnings')
                                     msg = "^2%s ^7was kicked, too many warnings" % victim.get_name()
                                 else:
-                                    victim.add_warning()
-                                    msg = "^1WARNING ^7[^3%d^7]: ^2%s^7:" % (victim.get_warning(), victim.get_name())
                                     if reason in reason_dict:
-                                        msg = "%s %s" % (msg, reason_dict[reason])
+                                        warning = reason_dict[reason]
                                         if reason == 'tk' and victim.get_warning() > 1:
                                             ban_duration = victim.add_ban_point('tk, ban by %s' % self.game.players[sar['player_num']].get_name(), 600)
                                         elif reason == 'lang' and victim.get_warning() > 1:
@@ -1064,7 +1062,9 @@ class LogParser(object):
                                         elif reason == 'racism' and victim.get_warning() > 1:
                                             ban_duration = victim.add_ban_point('racism', 300)
                                     else:
-                                        msg = "%s %s" % (msg, reason)
+                                        warning = reason
+                                    victim.add_warning(warning)
+                                    msg = "^1WARNING ^7[^3%d^7]: ^2%s^7: %s" % (victim.get_warning(), victim.get_name(), warning)
                                     # ban player if needed
                                     if ban_duration > 0:
                                         msg = "^2%s ^7banned for ^1%d minutes ^7for too many warnings" % (victim.get_name(), ban_duration)
@@ -1079,6 +1079,22 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], "^7Usage: !warn <name> [<reason>]")
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !warn <name> [<reason>]")
+
+            # warnremove - remove a users last warning
+            elif (sar['command'] == '!warnremove' or sar['command'] == '!wr') and self.game.players[sar['player_num']].get_admin_role() >= 20:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
+                    found, victim, msg = self.player_found(user)
+                    if not found:
+                        self.game.rcon_tell(sar['player_num'], msg)
+                    else:
+                        last_warning = victim.clear_last_warning()
+                        if last_warning:
+                            self.game.rcon_say("^7Last warning removed for %s: ^3%s" % (victim.get_name(), last_warning))
+                        else:
+                            self.game.rcon_tell(sar['player_num'], "^3%s ^7has no active warning" % victim.get_name())
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7Usage: !warnremove <name>")
 
 ## admin level 40
             # admins - list all the online admins
@@ -1199,7 +1215,7 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !kick <name> <reason>")
 
             # warnclear - clear the user warnings
-            elif (sar['command'] == '!warnclear' or sar['command'] == '!wc' or sar['command'] == '!wr') and self.game.players[sar['player_num']].get_admin_role() >= 40:
+            elif (sar['command'] == '!warnclear' or sar['command'] == '!wc') and self.game.players[sar['player_num']].get_admin_role() >= 40:
                 if line.split(sar['command'])[1]:
                     user = line.split(sar['command'])[1].strip()
                     found, victim, msg = self.player_found(user)
@@ -1917,7 +1933,7 @@ class Player(object):
         self.ping_value = 0
         self.high_ping_count = 0
         self.spec_warn_count = 0
-        self.warn_counter = 0
+        self.warn_list = []
         self.last_warn_time = 0
         self.flags_captured = 0
         self.flags_returned = 0
@@ -2016,7 +2032,7 @@ class Player(object):
         self.tk_count = 0
         self.tk_victim_names = []
         self.tk_killer_names = []
-        self.warn_counter = 0
+        self.warn_list = []
         self.last_warn_time = 0
         self.flags_captured = 0
         self.flags_returned = 0
@@ -2310,18 +2326,24 @@ class Player(object):
     def get_spec_warning(self):
         return self.spec_warn_count
 
-    def add_warning(self):
-        self.warn_counter += 1
+    def add_warning(self, warning):
+        self.warn_list.append(warning)
         self.last_warn_time = time.time()
 
     def get_warning(self):
-        return self.warn_counter
+        return len(self.warn_list)
 
     def get_last_warn_time(self):
         return self.last_warn_time
 
+    def clear_last_warning(self):
+        if len(self.warn_list) > 0:
+            last_warning = self.warn_list[-1]
+            self.warn_list.pop()
+            return last_warning
+
     def clear_warning(self):
-        self.warn_counter = 0
+        self.warn_list = []
         self.spec_warn_count = 0
         self.tk_victim_names = []
         self.tk_killer_names = []
