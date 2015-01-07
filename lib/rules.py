@@ -6,7 +6,7 @@ Author: Alexander Kress
 This program is released under the MIT License.
 """
 
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 
 
 ### IMPORTS
@@ -53,7 +53,11 @@ class Rules(object):
         time.sleep(30)
         while 1:
             filehandle = open(self.rules_file, 'r+')
-            for line in filehandle.readlines():
+            rotation_msg = filehandle.readlines()
+            if not rotation_msg:
+                filehandle.close()
+                break
+            for line in rotation_msg:
                 # display rule
                 with self.rcon_lock:
                     self.rcon_handle.push("say ^2%s" % line.strip())
