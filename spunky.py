@@ -389,11 +389,6 @@ class LogParser(object):
         self.game.rcon_clear()
         self.set_first_kill_trigger()
 
-        # reset player statistics
-        with self.players_lock:
-            for player in self.game.players.itervalues():
-                player.reset()
-
         # set the current map
         self.game.set_current_map()
         # load all available maps
@@ -436,6 +431,8 @@ class LogParser(object):
             for player in self.game.players.itervalues():
                 # store score in database
                 player.save_info()
+                # reset player statistics
+                player.reset()
                 # reset team lock
                 player.set_team_lock(None)
 
