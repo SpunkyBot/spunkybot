@@ -36,6 +36,9 @@
 ### User [1]
 - **xlrstats** - display full player statistics
 	- Usage: `!xlrstats [<name>]`
+- **xlrtopstats** - display the top players
+	- Usage: `!xlrtopstats`
+	- Short: `!topstats`
 
 
 ### Moderator [20]
