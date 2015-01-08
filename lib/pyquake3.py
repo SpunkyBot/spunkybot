@@ -104,7 +104,7 @@ class PyQuake3(object):
         except socket.error, err:
             raise Exception('Error receiving the packet: %s' % err[1])
 
-    def command(self, cmd, timeout=1, retries=3):
+    def command(self, cmd, timeout=1, retries=5):
         """
         send command and receive response
         """

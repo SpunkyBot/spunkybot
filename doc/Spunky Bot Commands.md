@@ -36,6 +36,9 @@
 ### User [1]
 - **xlrstats** - display full player statistics
 	- Usage: `!xlrstats [<name>]`
+- **xlrtopstats** - display the top players
+	- Usage: `!xlrtopstats`
+	- Short: `!topstats`
 
 
 ### Moderator [20]
@@ -63,6 +66,9 @@
 - **warninfo** - display how many warnings the player has
 	- Usage: `!warninfo <name>`
 	- Short: `!wi <name>`
+- **warnremove** - remove a users last warning
+	- Usage: `!warnremove <name>`
+	- Short: `!wr <name>`
 
 
 ### Admin [40]
