@@ -27,6 +27,8 @@
 	- Usage: `!ctfstats`
 - **freezestats** - display freeze/thawout stats
 	- Usage: `!freezestats`
+- **hestats** - display HE grenade kill stats
+	- Usage: `!hestats`
 - **teams** - balance teams
 	- Usage: `!teams`
 - **time** - display the current server time

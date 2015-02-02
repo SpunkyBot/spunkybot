@@ -69,7 +69,7 @@ class LogParser(object):
         self.death_cause = {1: "MOD_WATER", 3: "MOD_LAVA", 5: "UT_MOD_TELEFRAG", 6: "MOD_FALLING", 7: "UT_MOD_SUICIDE", 9: "MOD_TRIGGER_HURT", 10: "MOD_CHANGE_TEAM", 12: "UT_MOD_KNIFE", 13: "UT_MOD_KNIFE_THROWN", 14: "UT_MOD_BERETTA", 15: "UT_MOD_DEAGLE", 16: "UT_MOD_SPAS", 17: "UT_MOD_UMP45", 18: "UT_MOD_MP5K", 19: "UT_MOD_LR300", 20: "UT_MOD_G36", 21: "UT_MOD_PSG1", 22: "UT_MOD_HK69", 23: "UT_MOD_BLED", 24: "UT_MOD_KICKED", 25: "UT_MOD_HEGRENADE", 28: "UT_MOD_SR8", 30: "UT_MOD_AK103", 31: "UT_MOD_SPLODED", 32: "UT_MOD_SLAPPED", 33: "UT_MOD_SMITED", 34: "UT_MOD_BOMBED", 35: "UT_MOD_NUKED", 36: "UT_MOD_NEGEV", 37: "UT_MOD_HK69_HIT", 38: "UT_MOD_M4", 39: "UT_MOD_GLOCK", 40: "UT_MOD_COLT1911", 41: "UT_MOD_MAC11", 42: "UT_MOD_FLAG", 43: "UT_MOD_GOOMBA"}
 
         # RCON commands for the different admin roles
-        self.user_cmds = ['bombstats', 'ctfstats', 'freezestats', 'forgiveall, forgiveprev', 'hs', 'register', 'spree', 'stats', 'teams', 'time', 'xlrstats', 'xlrtopstats']
+        self.user_cmds = ['bombstats', 'ctfstats', 'freezestats', 'forgiveall, forgiveprev', 'hestats', 'hs', 'register', 'spree', 'stats', 'teams', 'time', 'xlrstats', 'xlrtopstats']
         self.mod_cmds = self.user_cmds + ['country', 'leveltest', 'list', 'nextmap', 'mute', 'seen', 'shuffleteams', 'warn', 'warninfo', 'warnremove']
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'force', 'kick', 'nuke', 'say', 'tempban', 'warnclear']
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'scream', 'slap', 'swap', 'version', 'veto']
@@ -690,6 +690,10 @@ class LogParser(object):
                     if death_cause == 'UT_MOD_BOMBED':
                         killer.kills_with_bomb()
 
+                # HE grenade kill
+                if death_cause == 'UT_MOD_HEGRENADE':
+                    killer.set_he_kill()
+
                 # killing spree counter
                 killer_color = "^1" if (killer.get_team() == 1) else "^4"
                 killer_killing_streak = killer.get_killing_streak()
@@ -803,6 +807,7 @@ class LogParser(object):
                 self.game.rcon_tell(sar['player_num'], "^2%d ^7kills - ^2%d ^7deaths" % (self.game.players[sar['player_num']].get_kills(), self.game.players[sar['player_num']].get_deaths()))
                 self.game.rcon_tell(sar['player_num'], "^2%d ^7kills in a row - ^2%d ^7teamkills" % (self.game.players[sar['player_num']].get_killing_streak(), self.game.players[sar['player_num']].get_team_kill_count()))
                 self.game.rcon_tell(sar['player_num'], "^2%d ^7total hits - ^2%d ^7headshots" % (self.game.players[sar['player_num']].get_all_hits(), self.game.players[sar['player_num']].get_headshots()))
+                self.game.rcon_tell(sar['player_num'], "^2%d ^7HE grenade kills" % self.game.players[sar['player_num']].get_he_kills())
                 if self.ctf_gametype:
                     self.game.rcon_tell(sar['player_num'], "^7flags captured: ^2%d ^7- flags returned: ^2%d" % (self.game.players[sar['player_num']].get_flags_captured(), self.game.players[sar['player_num']].get_flags_returned()))
                 elif self.bomb_gametype:
@@ -850,6 +855,14 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7You have ^2%d ^7kill%s in a row" % (spree_count, 's' if spree_count > 1 else ''))
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7You are currently not having a killing spree")
+
+            # hestats - display HE grenade kill counter
+            elif sar['command'] == '!hestats':
+                he_kill_count = self.game.players[sar['player_num']].get_he_kills()
+                if he_kill_count > 0:
+                    self.game.rcon_tell(sar['player_num'], "^7You made ^2%d ^7HE grenade kill%s" % (he_kill_count, 's' if he_kill_count > 1 else ''))
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7You made no HE grenade kill")
 
             # bombstats - display bomb statistics
             elif sar['command'] == '!bombstats':
@@ -1937,6 +1950,7 @@ class Player(object):
         self.db_head_shots = 0
         self.hitzone = {'body': 0, 'arms': 0, 'legs': 0}
         self.all_hits = 0
+        self.he_kills = 0
         self.tk_count = 0
         self.db_tk_count = 0
         self.db_team_death = 0
@@ -2041,6 +2055,7 @@ class Player(object):
         self.head_shots = 0
         self.hitzone = {'body': 0, 'arms': 0, 'legs': 0}
         self.all_hits = 0
+        self.he_kills = 0
         self.tk_count = 0
         self.tk_victim_names = []
         self.tk_killer_names = []
@@ -2283,6 +2298,12 @@ class Player(object):
 
     def get_all_hits(self):
         return self.all_hits
+
+    def set_he_kill(self):
+        self.he_kills += 1
+
+    def get_he_kills(self):
+        return self.he_kills
 
     def get_killing_streak(self):
         return self.killing_streak
