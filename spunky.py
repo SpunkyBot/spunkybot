@@ -792,7 +792,7 @@ class LogParser(object):
         """
         reason_dict = {'obj': 'go for objective', 'camp': 'stop camping', 'spam': 'do not spam, shut-up!', 'lang': 'bad language', 'racism': 'racism is not tolerated',
                        'ping': 'fix your ping', 'afk': 'away from keyboard', 'tk': 'stop team killing', 'spec': 'spectator too long on full server', 'ci': 'connection interrupted',
-                       'whiner': 'stop complaining about camp, lag or block'}
+                       'whiner': 'stop complaining about camp, lag or block', 'name': 'do not use offensive names'}
 
         with self.players_lock:
             line = line.strip()
