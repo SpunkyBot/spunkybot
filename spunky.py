@@ -143,6 +143,7 @@ class LogParser(object):
         # set teams autobalancer
         self.teams_autobalancer = config.getboolean('bot', 'autobalancer') if config.has_option('bot', 'autobalancer') else False
         self.allow_cmd_teams_round_end = config.getboolean('bot', 'allow_teams_round_end') if config.has_option('bot', 'allow_teams_round_end') else False
+        self.spam_bomb_planted_msg = config.getboolean('bot', 'spam_bomb_planted') if config.has_option('bot', 'spam_bomb_planted') else True
         # support for low gravity server
         self.support_lowgravity = config.getboolean('lowgrav', 'support_lowgravity') if config.has_option('lowgrav', 'support_lowgravity') else False
         self.gravity = config.getint('lowgrav', 'gravity') if config.has_option('lowgrav', 'gravity') else 800
@@ -1764,6 +1765,9 @@ class LogParser(object):
             elif action == 'Bomb was planted':
                 player.planted_bomb()
                 logger.debug("Player %d planted the bomb", player_num)
+                if self.spam_bomb_planted_msg:
+                    self.game.rcon_say("^1Bomb has been planted!")
+                    self.game.rcon_say("^1Bomb has been planted!")
             elif action == 'Bomb was tossed':
                 player.bomb_tossed()
             elif action == 'Bomb has been collected':
