@@ -743,11 +743,11 @@ class LogParser(object):
             if user.startswith('@'):
                 return self.offline_player(user)
             else:
-                return False, None, "^3No Player found"
+                return False, None, "^3No players found matching %s" % user
         elif len(name_list) > 1:
             return False, None, "^7Players matching %s: ^3%s" % (user, ', '.join(name_list))
         else:
-            return True, victim, None
+            return True, victim, "^7Found player matching %s: ^3%s" % (user, name_list[-1])
 
     def offline_player(self, user_id):
         player_id = user_id.lstrip('@')
