@@ -1851,6 +1851,7 @@ class LogParser(object):
         most_thawouts = 0
         most_defused = 0
         most_planted = 0
+        most_he_kills = 0
         flagrunner = ""
         serialkiller = ""
         streaker = ""
@@ -1859,6 +1860,7 @@ class LogParser(object):
         headshooter = ""
         defused_by = ""
         planted_by = ""
+        nader = ""
         msg = []
         append = msg.append
         with self.players_lock:
@@ -1887,6 +1889,10 @@ class LogParser(object):
                 if player.get_planted_bomb() > most_planted:
                     most_planted = player.get_planted_bomb()
                     planted_by = player.get_name()
+                if player.get_he_kills() > most_he_kills:
+                    most_he_kills = player.get_he_kills()
+                    nader = player.get_name()
+
                 # display personal stats at the end of the round, stats for players in spec will not be displayed
                 if player.get_team() != 3:
                     if self.freeze_gametype:
@@ -1911,6 +1917,8 @@ class LogParser(object):
                 append("^7%s: ^2%d ^6streaks" % (streaker, most_streak))
             if most_hs > 1:
                 append("^7%s: ^2%d ^1heads" % (headshooter, most_hs))
+            if most_he_kills > 1:
+                append("^7%s: ^2%d ^5HE kills" % (nader, most_he_kills))
             if msg:
                 self.game.rcon_say("^1AWARDS: %s" % " ^7- ".join(msg))
 
