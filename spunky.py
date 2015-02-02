@@ -791,7 +791,8 @@ class LogParser(object):
         handle say commands
         """
         reason_dict = {'obj': 'go for objective', 'camp': 'stop camping', 'spam': 'do not spam, shut-up!', 'lang': 'bad language', 'racism': 'racism is not tolerated',
-                       'ping': 'fix your ping', 'afk': 'away from keyboard', 'tk': 'stop team killing', 'spec': 'spectator too long on full server', 'ci': 'connection interrupted'}
+                       'ping': 'fix your ping', 'afk': 'away from keyboard', 'tk': 'stop team killing', 'spec': 'spectator too long on full server', 'ci': 'connection interrupted',
+                       'whiner': 'stop complaining about camp, lag or block'}
 
         with self.players_lock:
             line = line.strip()
