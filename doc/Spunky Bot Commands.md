@@ -76,6 +76,8 @@
 - **warnremove** - remove a users last warning
 	- Usage: `!warnremove <name>`
 	- Short: `!wr <name>`
+- **warntest** -  test a warning
+	- Usage: `!warntest <warning>`
 
 
 ### Admin [40]
