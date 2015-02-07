@@ -48,6 +48,8 @@
 
 ### Moderator [20]
 
+- **admintest** - display current admin status
+	- Usage: `!admintest`
 - **country** - get the country of the player
 	- Usage: `!country <name>`
 - **leveltest** - get the admin level for a given player or myself
