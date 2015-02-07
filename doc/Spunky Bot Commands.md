@@ -91,8 +91,9 @@
 	- Short: `!alias <name>`
 - **bigtext** - display big message on screen
 	- Usage: `!bigtext <text>`
-- **say** - say a message to all players
+- **say** - say a message to all players (allow spectator to say a message to players in-game)
 	- Usage: `!say <text>`
+	- Short: `!!<text>`
 - **force** - force a player to the given team
 	- Usage: `!force <name> <blue/red/spec> [<lock>]`
 - **nuke** - nuke a player
