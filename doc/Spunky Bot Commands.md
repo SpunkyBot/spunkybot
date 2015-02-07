@@ -36,6 +36,9 @@
 
 
 ### User [1]
+
+- **regtest** - regtest - display current user status
+	- Usage: `!regtest`
 - **xlrstats** - display full player statistics
 	- Usage: `!xlrstats [<name>]`
 - **xlrtopstats** - display the top players
