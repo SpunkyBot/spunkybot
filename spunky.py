@@ -341,8 +341,7 @@ class LogParser(object):
         line = string[7:]
         tmp = line.split(":", 1)
         line = tmp[1].strip() if len(tmp) > 1 else tmp[0].strip()
-
-        option = {'InitGame': self.new_game, 'Warmup': self.handle_warmup, 'InitRound': self.handle_initround, 'Exit': self.handle_exit, 'say': self.handle_say,
+        option = {'InitGame': self.new_game, 'Warmup': self.handle_warmup, 'InitRound': self.handle_initround, 'Exit': self.handle_exit, 'say': self.handle_say, 'saytell': self.handle_saytell,
                   'ClientUserinfo': self.handle_userinfo, 'ClientUserinfoChanged': self.handle_userinfo_changed, 'ClientBegin': self.handle_begin, 'ClientDisconnect': self.handle_disconnect,
                   'SurvivorWinner': self.handle_teams_ts_mode, 'Kill': self.handle_kill, 'Hit': self.handle_hit, 'Freeze': self.handle_freeze, 'ThawOutFinished': self.handle_thawout, 'Flag': self.handle_flag}
 
@@ -784,6 +783,17 @@ class LogParser(object):
             return False, None, "^7Maps matching %s: ^3%s" % (map_name, ', '.join(map_list))
         else:
             return True, map_list[0], None
+
+    def handle_saytell(self, line):
+        """
+        handle saytell commands
+        """
+        tmp = line.strip()
+        try:
+            new = tmp[0] + ''.join(tmp[3:])
+            self.handle_say(new)
+        except IndexError:
+            pass
 
     def handle_say(self, line):
         """
