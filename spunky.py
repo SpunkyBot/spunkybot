@@ -71,7 +71,7 @@ class LogParser(object):
         # RCON commands for the different admin roles
         self.user_cmds = ['bombstats', 'ctfstats', 'freezestats', 'forgiveall, forgiveprev', 'hestats', 'hs', 'register', 'regtest', 'spree', 'stats', 'teams', 'time', 'xlrstats', 'xlrtopstats']
         self.mod_cmds = self.user_cmds + ['admintest', 'country', 'leveltest', 'list', 'nextmap', 'mute', 'seen', 'shuffleteams', 'warn', 'warninfo', 'warnremove', 'warns', 'warntest']
-        self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'force', 'kick', 'nuke', 'say', 'tempban', 'warnclear']
+        self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'find', 'force', 'kick', 'nuke', 'say', 'tempban', 'warnclear']
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'scream', 'slap', 'swap', 'version', 'veto']
         self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'lookup', 'map', 'maps', 'maprestart', 'moon', 'permban', 'putgroup', 'setnextmap', 'unban', 'ungroup']
         # alphabetic sort of the commands
@@ -1188,6 +1188,15 @@ class LogParser(object):
             elif sar['command'].startswith('!!') and self.game.players[sar['player_num']].get_admin_role() >= 40:
                 if line.split('!!')[1]:
                     self.game.rcon_say("^4%s: ^7%s" % (self.game.players[sar['player_num']].get_name(), line.split('!!')[1].strip()))
+
+            # find - display the slot number of the player
+            elif sar['command'] == '!find' and self.game.players[sar['player_num']].get_admin_role() >= 40:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
+                    found, victim, msg = self.player_found(user)
+                    self.game.rcon_tell(sar['player_num'], msg)
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7Usage: !find <name>")
 
             # force - force a player to the given team
             elif sar['command'] == '!force' and self.game.players[sar['player_num']].get_admin_role() >= 40:

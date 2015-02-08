@@ -94,6 +94,8 @@
 - **say** - say a message to all players (allow spectator to say a message to players in-game)
 	- Usage: `!say <text>`
 	- Short: `!!<text>`
+- **find** - display the slot number of the player
+	- Usage: `!find <name>`
 - **force** - force a player to the given team
 	- Usage: `!force <name> <blue/red/spec> [<lock>]`
 - **nuke** - nuke a player
