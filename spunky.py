@@ -1012,11 +1012,8 @@ class LogParser(object):
 
             # nextmap - display the next map in rotation
             elif (sar['command'] == '!nextmap' or sar['command'] == '@nextmap') and self.game.players[sar['player_num']].get_admin_role() >= 20:
-                try:
-                    g_nextmap = self.game.get_rcon_handle().get_cvar('g_nextmap').split(" ")[0].strip()
-                except IndexError:
-                    g_nextmap = self.game.next_mapname
-                if g_nextmap in self.game.get_all_maps():
+                g_nextmap = self.game.get_rcon_handle().get_cvar('g_nextmap')
+                if g_nextmap and g_nextmap.split(" ")[0].strip() in self.game.get_all_maps():
                     msg = "^7Next Map: ^3%s" % g_nextmap
                     self.game.next_mapname = g_nextmap
                 else:
