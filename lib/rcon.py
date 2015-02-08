@@ -6,7 +6,7 @@ Author: Alexander Kress
 This program is released under the MIT License.
 """
 
-__version__ = '1.0.7'
+__version__ = '1.0.8'
 
 
 ### IMPORTS
@@ -91,7 +91,12 @@ class Rcon(object):
         """
         if self.live:
             with self.rcon_lock:
-                return self.quake.rcon(value)[1].split(':')[1].split('^7')[0].lstrip('"')
+                try:
+                    ret_val = self.quake.rcon(value)[1].split(':')[1].split('^7')[0].lstrip('"')
+                except IndexError:
+                    ret_val = None
+                time.sleep(.33)
+                return ret_val
 
     def get_mapcycle_path(self):
         """
@@ -105,9 +110,12 @@ class Rcon(object):
         fs_game = self.get_cvar('fs_game')
         # get file name of mapcycle.txt
         mapcycle_file = self.get_cvar('g_mapcycle')
-        # set full path of mapcycle.txt
-        mc_home_path = os.path.join(fs_homepath, fs_game, mapcycle_file)
-        mc_base_path = os.path.join(fs_basepath, fs_game, mapcycle_file)
+        try:
+            # set full path of mapcycle.txt
+            mc_home_path = os.path.join(fs_homepath, fs_game, mapcycle_file)
+            mc_base_path = os.path.join(fs_basepath, fs_game, mapcycle_file)
+        except TypeError:
+            raise Exception('Server did not respond to mapcycle path request, please restart the Bot')
         if os.path.isfile(mc_home_path):
             mapcycle_path = mc_home_path
         elif os.path.isfile(mc_base_path):
