@@ -406,7 +406,6 @@ class LogParser(object):
         """
         logger.debug("Warmup... %s", line)
         self.allow_cmd_teams = True
-        self.autobalancer()
 
     def handle_initround(self, _):
         """
