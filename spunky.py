@@ -1193,7 +1193,7 @@ class LogParser(object):
             # !!<text> - allow spectator to say a message to players in-game
             elif sar['command'].startswith('!!') and self.game.players[sar['player_num']].get_admin_role() >= 40:
                 if line.split('!!')[1]:
-                    self.game.rcon_say("^4%s: ^7%s" % (self.game.players[sar['player_num']].get_name(), line.split('!!')[1].strip()))
+                    self.game.rcon_say("^4%s: ^7%s" % (self.game.players[sar['player_num']].get_name(), line.split('!!', 1)[1].strip()))
 
             # find - display the slot number of the player
             elif sar['command'] == '!find' and self.game.players[sar['player_num']].get_admin_role() >= 40:
