@@ -8,4 +8,4 @@ branches:
 install:
   - pip install flake8 --use-mirrors
 script:
-  - flake8 --ignore=E501,E265 .
+  - flake8 --ignore=E501,E265,E266,E402 .
