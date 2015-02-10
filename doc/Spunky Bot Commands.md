@@ -27,6 +27,8 @@
 	- Usage: `!ctfstats`
 - **freezestats** - display freeze/thawout stats
 	- Usage: `!freezestats`
+- **hestats** - display HE grenade kill stats
+	- Usage: `!hestats`
 - **teams** - balance teams
 	- Usage: `!teams`
 - **time** - display the current server time
@@ -34,6 +36,9 @@
 
 
 ### User [1]
+
+- **regtest** - regtest - display current user status
+	- Usage: `!regtest`
 - **xlrstats** - display full player statistics
 	- Usage: `!xlrstats [<name>]`
 - **xlrtopstats** - display the top players
@@ -43,6 +48,8 @@
 
 ### Moderator [20]
 
+- **admintest** - display current admin status
+	- Usage: `!admintest`
 - **country** - get the country of the player
 	- Usage: `!country <name>`
 - **leveltest** - get the admin level for a given player or myself
@@ -69,6 +76,10 @@
 - **warnremove** - remove a users last warning
 	- Usage: `!warnremove <name>`
 	- Short: `!wr <name>`
+- **warns** - list the warnings
+	- Usage: `!warns`
+- **warntest** -  test a warning
+	- Usage: `!warntest <warning>`
 
 
 ### Admin [40]
@@ -80,8 +91,11 @@
 	- Short: `!alias <name>`
 - **bigtext** - display big message on screen
 	- Usage: `!bigtext <text>`
-- **say** - say a message to all players
+- **say** - say a message to all players (allow spectator to say a message to players in-game)
 	- Usage: `!say <text>`
+	- Short: `!!<text>`
+- **find** - display the slot number of the player
+	- Usage: `!find <name>`
 - **force** - force a player to the given team
 	- Usage: `!force <name> <blue/red/spec> [<lock>]`
 - **nuke** - nuke a player
