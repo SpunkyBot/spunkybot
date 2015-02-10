@@ -2651,6 +2651,9 @@ class Game(object):
         self.set_all_maps()
         self.maplist = self.rcon_handle.get_mapcycle_path()
         self.set_current_map()
+        self.rcon_say("^7Powered by ^8[Spunky Bot %s] ^1[www.spunkybot.de]" % __version__)
+        logger.info("*** Live tracking: current map: %s ***", self.mapname)
+        logger.info("Mapcycle: %s", ', '.join(self.maplist))
 
     def set_current_map(self):
         """
