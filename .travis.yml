@@ -5,6 +5,7 @@ python:
 branches:
   only:
     - master
+	- develop
 install:
   - pip install flake8 --use-mirrors
 script:
