@@ -2572,7 +2572,7 @@ class Game(object):
         @type  msg: String
         """
         # wrap long messages into shorter list elements
-        lines = textwrap.wrap(msg, 145)
+        lines = textwrap.wrap(msg, 140)
         for line in lines:
             self.send_rcon('say %s' % line)
 
@@ -2587,7 +2587,7 @@ class Game(object):
         @param pm_tag: Display '[pm]' (private message) in front of the message
         @type  pm_tag: bool
         """
-        lines = textwrap.wrap(msg, 135)
+        lines = textwrap.wrap(msg, 128)
         prefix = "^4[pm] "
         for line in lines:
             if pm_tag:
