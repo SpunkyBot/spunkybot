@@ -21,9 +21,11 @@ DIR=/opt/spunkybot
 USER=q3ut4
 GROUP=q3ut4
 
+# Change the name, if you want to run multiple instances of Spunky Bot
+NAME=spunkybot
+
 # Don't modify the code below
 DAEMON=$DIR/spunky.py
-NAME=spunkybot
 RUNDIR=/var/run/$NAME
 PIDFILE=$RUNDIR/$NAME.pid
 
