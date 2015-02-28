@@ -2185,7 +2185,7 @@ class Player(object):
             self.registered_user = True
             # get DB DATA for XLRSTATS
             values = (self.guid,)
-            curs.execute("SELECT `last_played`,`num_played`,`kills`,`deaths`,`headshots`,`team_kills`,`team_death`,`max_kill_streak`,`suicides`,`admin_role` FROM `xlrstats` WHERE `guid` = ?", values)
+            curs.execute("SELECT `last_played`,`num_played`,`kills`,`deaths`,`headshots`,`team_kills`,`team_death`,`max_kill_streak`,`suicides`,`admin_role`,`first_seen` FROM `xlrstats` WHERE `guid` = ?", values)
             result = curs.fetchone()
             self.last_visit = result[0]
             self.num_played = result[1]
@@ -2197,6 +2197,7 @@ class Player(object):
             self.db_killing_streak = result[7]
             self.db_suicide = result[8]
             self.admin_role = result[9]
+            self.first_seen = result[10]
             # update name, last_played and increase num_played counter
             values = (self.prettyname, now, self.guid)
             curs.execute("UPDATE `xlrstats` SET `name` = ?,`last_played` = ?,`num_played` = `num_played` + 1 WHERE `guid` = ?", values)
@@ -2281,6 +2282,9 @@ class Player(object):
 
     def get_last_visit(self):
         return str(self.last_visit)
+
+    def get_first_seen_date(self):
+        return str(self.first_seen)
 
     def get_db_kills(self):
         return self.db_kills
