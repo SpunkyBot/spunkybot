@@ -388,7 +388,8 @@ class LogParser(object):
         self.freeze_gametype = True if 'g_gametype\\10\\' in line else False
         logger.debug("InitGame: Starting game...")
         self.game.rcon_clear()
-        self.set_first_kill_trigger()
+        # reset the player stats
+        self.stats_reset()
 
         # set the current map
         self.game.set_current_map()
@@ -421,25 +422,28 @@ class LogParser(object):
 
     def handle_exit(self, line):
         """
-        handle Exit of a match, show Awards, store user score in database
+        handle Exit of a match, show Awards, store user score in database and reset statistics
         """
         logger.debug("Exit: %s", line)
         self.handle_awards()
         self.allow_cmd_teams = True
-        self.set_first_kill_trigger()
+        self.stats_reset(store_score=True)
+
+    def stats_reset(self, store_score=False):
+        """
+        store user score in database if needed and reset the player statistics
+        """
         with self.players_lock:
             for player in self.game.players.itervalues():
-                # store score in database
-                player.save_info()
+                if store_score:
+                    # store score in database
+                    player.save_info()
                 # reset player statistics
                 player.reset()
                 # reset team lock
                 player.set_team_lock(None)
 
-    def set_first_kill_trigger(self):
-        """
-        set first kill trigger
-        """
+        # set first kill trigger
         if self.show_first_kill_msg and not self.ffa_lms_gametype:
             self.firstblood = True
             self.firstnadekill = True
@@ -1527,9 +1531,7 @@ class LogParser(object):
             # maprestart - restart the map
             elif sar['command'] == '!maprestart' and self.game.players[sar['player_num']].get_admin_role() >= 80:
                 self.game.send_rcon('restart')
-                for player in self.game.players.itervalues():
-                    # reset player statistics
-                    player.reset()
+                self.stats_reset()
 
             # moon - activate Moon mode (low gravity)
             elif sar['command'] == '!moon' and self.game.players[sar['player_num']].get_admin_role() >= 80:
