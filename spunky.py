@@ -1515,7 +1515,7 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
                         victim.clear_warning()
-                        self.game.rcon_say("^1All warnings cleared for ^3%s" % victim.get_name())
+                        self.game.rcon_say("^1All warnings cleared for ^2%s" % victim.get_name())
                 else:
                     for player in self.game.players.itervalues():
                         player.clear_warning()
