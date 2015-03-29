@@ -2578,6 +2578,13 @@ class Game(object):
             Rules(os.path.join(HOME, 'conf', 'rules.conf'), game_cfg.getint('rules', 'rules_frequency'), self.rcon_handle)
             logger.info("Load rotating messages: OK")
 
+        # dynamic mapcycle
+        self.dynamic_mapcycle = game_cfg.getboolean('mapcycle', 'dynamic_mapcycle') if game_cfg.has_option('mapcycle', 'dynamic_mapcycle') else False
+        if self.dynamic_mapcycle:
+            self.switch_count = game_cfg.getint('mapcycle', 'switch_count') if game_cfg.has_option('mapcycle', 'switch_count') else 4
+            self.big_cycle = filter(None, game_cfg.get('mapcycle', 'big_cycle').replace(' ', '').split(',')) if game_cfg.has_option('mapcycle', 'big_cycle') else []
+            self.small_cycle = filter(None, game_cfg.get('mapcycle', 'small_cycle').replace(' ', '').split(',')) if game_cfg.has_option('mapcycle', 'small_cycle') else []
+
         # add Spunky Bot as player 'World' to the game
         spunky_bot = Player(1022, '127.0.0.1', 'NONE', 'World')
         self.add_player(spunky_bot)
@@ -2696,6 +2703,9 @@ class Game(object):
         except KeyError:
             self.mapname = self.next_mapname
 
+        if self.dynamic_mapcycle:
+            self.maplist = filter(None, (self.small_cycle if len(self.players) < (self.switch_count + 1) else self.big_cycle))
+
         if self.maplist:
             if self.mapname in self.maplist:
                 if self.maplist.index(self.mapname) < (len(self.maplist) - 1):
@@ -2706,6 +2716,9 @@ class Game(object):
                 self.next_mapname = self.maplist[0]
         else:
             self.next_mapname = self.mapname
+
+        if self.dynamic_mapcycle:
+            self.send_rcon('g_nextmap %s' % self.next_mapname)
 
     def set_all_maps(self):
         """
