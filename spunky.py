@@ -343,7 +343,7 @@ class LogParser(object):
         line = tmp[1].strip() if len(tmp) > 1 else tmp[0].strip()
         option = {'InitGame': self.new_game, 'Warmup': self.handle_warmup, 'InitRound': self.handle_initround, 'Exit': self.handle_exit, 'say': self.handle_say, 'saytell': self.handle_saytell,
                   'ClientUserinfo': self.handle_userinfo, 'ClientUserinfoChanged': self.handle_userinfo_changed, 'ClientBegin': self.handle_begin, 'ClientDisconnect': self.handle_disconnect,
-                  'SurvivorWinner': self.handle_teams_ts_mode, 'Kill': self.handle_kill, 'Hit': self.handle_hit, 'Freeze': self.handle_freeze, 'ThawOutFinished': self.handle_thawout, 'Flag': self.handle_flag}
+                  'SurvivorWinner': self.handle_teams_ts_mode, 'Kill': self.handle_kill, 'Hit': self.handle_hit, 'Freeze': self.handle_freeze, 'ThawOutFinished': self.handle_thawout, 'Flag': self.handle_flag, 'FlagCaptureTime': self.handle_flagcapturetime}
 
         try:
             if tmp:
@@ -399,6 +399,19 @@ class LogParser(object):
         # support for low gravity server
         if self.support_lowgravity:
             self.game.send_rcon("set g_gravity %d" % self.gravity)
+
+    def handle_flagcapturetime(self, line):
+        """
+        handle flag capture time
+        """
+        tmp = line.split(": ", 1)
+        player_num = int(tmp[0])
+        action = tmp[1]
+        if action.isdigit():
+            cap_time = round(float(action) / 1000, 2)
+            logger.debug("Player %d captured the flag in %s seconds", player_num, cap_time)
+            with self.players_lock:
+                self.game.players[player_num].set_flag_capture_time(cap_time)
 
     def handle_warmup(self, line):
         """
@@ -2027,6 +2040,7 @@ class Player(object):
         self.last_warn_time = 0
         self.flags_captured = 0
         self.flags_returned = 0
+        self.flag_capture_time = 999
         self.bombholder = False
         self.bomb_carrier_killed = 0
         self.killed_with_bomb = 0
@@ -2127,6 +2141,7 @@ class Player(object):
         self.last_warn_time = 0
         self.flags_captured = 0
         self.flags_returned = 0
+        self.flag_capture_time = 999
         self.bombholder = False
         self.bomb_carrier_killed = 0
         self.killed_with_bomb = 0
@@ -2137,6 +2152,7 @@ class Player(object):
     def reset_flag_stats(self):
         self.flags_captured = 0
         self.flags_returned = 0
+        self.flag_capture_time = 999
 
     def save_info(self):
         if self.registered_user:
@@ -2475,6 +2491,15 @@ class Player(object):
 
     def get_flags_returned(self):
         return self.flags_returned
+
+    def set_flag_capture_time(self, cap_time):
+        if cap_time < self.flag_capture_time:
+            self.flag_capture_time = cap_time
+
+    def get_flag_capture_time(self):
+        if self.flag_capture_time == 999:
+            return 0
+        return self.flag_capture_time
 
 # Bomb Mode
     def is_bombholder(self):
