@@ -2716,7 +2716,7 @@ class Game(object):
         self.maplist = filter(None, self.rcon_handle.get_mapcycle_path())
         self.set_current_map()
         self.rcon_say("^7Powered by ^8[Spunky Bot %s] ^1[www.spunkybot.de]" % __version__)
-        logger.info("*** Live tracking: current map: %s ***", self.mapname)
+        logger.info("*** Live tracking: Current map: %s / Next map: %s ***", self.mapname, self.next_mapname)
         logger.info("Mapcycle: %s", ', '.join(self.maplist))
 
     def set_current_map(self):
@@ -2730,6 +2730,7 @@ class Game(object):
 
         if self.dynamic_mapcycle:
             self.maplist = filter(None, (self.small_cycle if len(self.players) < (self.switch_count + 1) else self.big_cycle))
+            logger.debug("Players online: %s / Mapcycle: %s", (len(self.players) - 1), self.maplist)
 
         if self.maplist:
             if self.mapname in self.maplist:
@@ -2741,6 +2742,8 @@ class Game(object):
                 self.next_mapname = self.maplist[0]
         else:
             self.next_mapname = self.mapname
+
+        logger.debug("Current map: %s / Next map: %s", self.mapname, self.next_mapname)
 
         if self.dynamic_mapcycle:
             self.send_rcon('g_nextmap %s' % self.next_mapname)
