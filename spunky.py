@@ -2713,7 +2713,7 @@ class Game(object):
         self.live = True
         self.rcon_handle.go_live()
         self.set_all_maps()
-        self.maplist = self.rcon_handle.get_mapcycle_path()
+        self.maplist = filter(None, self.rcon_handle.get_mapcycle_path())
         self.set_current_map()
         self.rcon_say("^7Powered by ^8[Spunky Bot %s] ^1[www.spunkybot.de]" % __version__)
         logger.info("*** Live tracking: current map: %s ***", self.mapname)
