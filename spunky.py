@@ -1637,6 +1637,7 @@ class LogParser(object):
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !permban <name> <reason>")
 
+            # makereg - make a player a regular (Level 2) user
             elif (sar['command'] == '!makereg' or sar['command'] == '!mr') and self.game.players[sar['player_num']].get_admin_role() >= 80:
                 if line.split(sar['command'])[1]:
                     user = line.split(sar['command'])[1].strip()

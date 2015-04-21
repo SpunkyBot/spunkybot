@@ -146,6 +146,7 @@
 - **lookup** - search for player in database
 	- Usage: `!lookup <name>`
 	- Short: `!l <name>`
+- **makereg** - make a player a regular (Level 2) user
 	- Usage: `!makereg <name>`
 	- Short: `!mr <name>`
 - **map** - load given map
