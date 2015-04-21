@@ -1989,7 +1989,7 @@ class LogParser(object):
                     else:
                         self.game.rcon_tell(player.get_player_num(), "^7Stats %s: ^7K ^2%d ^7D ^3%d ^7HS ^1%d ^7TK ^1%d" % (player.get_name(), player.get_kills(), player.get_deaths(), player.get_headshots(), player.get_team_kill_count()))
 
-            # display Awards
+            # get Awards
             if most_flags > 1:
                 append("^7%s: ^2%d ^4caps" % (flagrunner, most_flags))
             if most_planted > 1:
@@ -2006,8 +2006,12 @@ class LogParser(object):
                 append("^7%s: ^2%d ^6streaks" % (streaker, most_streak))
             if most_hs > 1:
                 append("^7%s: ^2%d ^1heads" % (headshooter, most_hs))
+
+            # HE grenade kills
             if most_he_kills > 1:
-                append("^7%s: ^2%d ^5HE kills" % (nader, most_he_kills))
+                self.game.rcon_say("^2Most HE grenade kills: ^7%s (^1%d ^7HE kills)" % (nader, most_he_kills))
+
+            # display Awards
             if msg:
                 self.game.rcon_say("^1AWARDS: %s" % " ^7- ".join(msg))
 
