@@ -73,7 +73,7 @@ class LogParser(object):
         self.mod_cmds = self.user_cmds + ['admintest', 'country', 'leveltest', 'list', 'nextmap', 'mute', 'seen', 'shuffleteams', 'warn', 'warninfo', 'warnremove', 'warns', 'warntest']
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'find', 'force', 'kick', 'nuke', 'say', 'tempban', 'warnclear']
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'scream', 'slap', 'swap', 'version', 'veto']
-        self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'lookup', 'map', 'maps', 'maprestart', 'moon', 'permban', 'putgroup', 'setnextmap', 'unban', 'ungroup']
+        self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'lookup', 'makereg', 'map', 'maps', 'maprestart', 'moon', 'permban', 'putgroup', 'setnextmap', 'unban', 'ungroup']
         # alphabetic sort of the commands
         self.mod_cmds.sort()
         self.admin_cmds.sort()
@@ -1636,6 +1636,26 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], "^7You need to enter a reason: ^3!permban <name> <reason>")
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !permban <name> <reason>")
+
+            elif (sar['command'] == '!makereg' or sar['command'] == '!mr') and self.game.players[sar['player_num']].get_admin_role() >= 80:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
+                    found, victim, msg = self.player_found(user)
+                    if not found:
+                        self.game.rcon_tell(sar['player_num'], msg)
+                    else:
+                        if victim.get_registered_user():
+                            if victim.get_admin_role() < 2:
+                                victim.update_db_admin_role(role=2)
+                                self.game.rcon_tell(sar['player_num'], "^3%s put in group ^7Regular" % victim.get_name())
+                            else:
+                                self.game.rcon_tell(sar['player_num'], "^3%s is already in a higher level group" % victim.get_name())
+                        else:
+                            # register new user in DB and set role to 2
+                            victim.register_user_db(role=2)
+                            self.game.rcon_tell(sar['player_num'], "^3%s put in group ^7Regular" % victim.get_name())
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7Usage: !makereg <name>")
 
             # putgroup - add a client to a group
             elif sar['command'] == '!putgroup' and self.game.players[sar['player_num']].get_admin_role() >= 80:

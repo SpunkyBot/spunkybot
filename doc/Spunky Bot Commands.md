@@ -146,6 +146,8 @@
 - **lookup** - search for player in database
 	- Usage: `!lookup <name>`
 	- Short: `!l <name>`
+	- Usage: `!makereg <name>`
+	- Short: `!mr <name>`
 - **map** - load given map
 	- Usage: `!map <ut4_name>`
 - **maps** - display all available maps
