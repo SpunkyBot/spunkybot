@@ -2275,6 +2275,8 @@ class Player(object):
             self.registered_user = True
             self.admin_role = role
             self.welcome_msg = False
+            self.first_seen = now
+            self.last_visit = now
 
     def update_db_admin_role(self, role):
         values = (role, self.guid)
