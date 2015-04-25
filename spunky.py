@@ -1950,6 +1950,8 @@ class LogParser(object):
         most_defused = 0
         most_planted = 0
         most_he_kills = 0
+        fastest_cap = 999
+        most_flag_returns = 0
         flagrunner = ""
         serialkiller = ""
         streaker = ""
@@ -1959,6 +1961,8 @@ class LogParser(object):
         defused_by = ""
         planted_by = ""
         nader = ""
+        fastrunner = ""
+        defender = ""
         msg = []
         append = msg.append
         with self.players_lock:
@@ -1990,6 +1994,12 @@ class LogParser(object):
                 if player.get_he_kills() > most_he_kills:
                     most_he_kills = player.get_he_kills()
                     nader = player.get_name()
+                if 0 < player.get_flag_capture_time() < fastest_cap:
+                    fastest_cap = player.get_flag_capture_time()
+                    fastrunner = player.get_name()
+                if player.get_flags_returned() > most_flag_returns:
+                    most_flag_returns = player.get_flags_returned()
+                    defender = player.get_name()
 
                 # display personal stats at the end of the round, stats for players in spec will not be displayed
                 if player.get_team() != 3:
@@ -2019,6 +2029,12 @@ class LogParser(object):
             # HE grenade kills
             if most_he_kills > 1:
                 self.game.rcon_say("^2Most HE grenade kills: ^7%s (^1%d ^7HE kills)" % (nader, most_he_kills))
+
+            # CTF statistics
+            if fastest_cap < 999:
+                self.game.rcon_say("^2Fastest cap: ^7%s (^1%s ^7sec)" % (fastrunner, fastest_cap))
+            if most_flag_returns > 1:
+                self.game.rcon_say("^2Best defender: ^7%s (^1%d ^7flag returns)" % (defender, most_flag_returns))
 
             # display Awards
             if msg:
