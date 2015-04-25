@@ -2780,10 +2780,14 @@ class Game(object):
         set a list of all available maps
         """
         all_maps = self.rcon_handle.get_rcon_output("dir map bsp")[1].split()
-        all_maps.sort()
         all_maps_list = [maps.replace("/", "").replace(".bsp", "") for maps in all_maps if maps.startswith("/")]
-        if all_maps_list:
-            self.all_maps_list = all_maps_list
+        pk3_list = self.rcon_handle.get_rcon_output("fdir *.pk3")[1].split()
+        all_pk3_list = [maps.replace("/", "").replace(".pk3", "").replace(".bsp", "") for maps in pk3_list if maps.startswith("/ut4_")]
+
+        all_together = list(set(all_maps_list + all_pk3_list))
+        all_together.sort()
+        if all_together:
+            self.all_maps_list = all_together
 
     def get_all_maps(self):
         """
