@@ -282,13 +282,15 @@ class LogParser(object):
                     player_name = player.get_name()
                     player_num = player.get_player_num()
                     player_admin_role = player.get_admin_role()
+                    if player_num == 1022:
+                        continue
                     # kick player with 3 or more warnings, Admins will never get kicked
                     if player.get_warning() > 2 and player_admin_role < 40:
                         self.game.rcon_say("^2%s ^7was kicked, too many warnings" % player_name)
                         self.game.kick_player(player_num, reason='too many warnings')
                         continue
                     # kick player with high ping after 3 warnings, Admins will never get kicked
-                    elif player.get_high_ping() > 2 and player_admin_role < 40:
+                    if self.max_ping > 0 and player.get_high_ping() > 2 and player_admin_role < 40:
                         self.game.rcon_say("^2%s ^7was kicked, ping too high for this server ^7[^4%s^7]" % (player_name, player.get_ping_value()))
                         self.game.kick_player(player_num, reason='fix your ping')
                         continue
@@ -305,8 +307,9 @@ class LogParser(object):
                             continue
                         # if player is spectator on full server, inform player and increase warn counter
                         # GTV or Moderator or higher levels will not get the warning
-                        elif counter > self.num_kick_specs and player.get_team() == 3 and player_admin_role < 20 and player.get_time_joined() < (time.time() - 30) and player_num != 1022:
+                        elif counter > self.num_kick_specs and player.get_team() == 3 and player.get_time_joined() < (time.time() - 30):
                             player.add_spec_warning()
+                            logger.debug("%s is spectator too long on full server", player_name)
                             self.game.rcon_tell(player_num, "^1WARNING ^7[^3%d^7]: ^7You are spectator too long on full server" % player.get_spec_warning(), False)
                         # reset spec warning
                         else:
