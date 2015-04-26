@@ -271,6 +271,7 @@ class LogParser(object):
         """
         - check warnings and kick players with too many warnings
         - check for spectators and set warning
+        - check for players with low score and set warning
         - check ping of all players and set warning for high ping user
         """
         try:
