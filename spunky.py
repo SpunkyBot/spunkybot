@@ -294,14 +294,14 @@ class LogParser(object):
                         self.game.rcon_say("^2%s ^7was kicked, ping too high for this server ^7[^4%s^7]" % (player_name, player.get_ping_value()))
                         self.game.kick_player(player_num, reason='fix your ping')
                         continue
-                    # kick spectator after 3 warnings, Moderator or higher levels will not get kicked
-                    elif player.get_spec_warning() > 2 and player_admin_role < 20:
-                        self.game.rcon_say("^2%s ^7was kicked, spectator too long on full server" % player_name)
-                        self.game.kick_player(player_num, reason='spectator too long on full server')
-                        continue
 
                     # check for spectators and set warning
-                    if self.num_kick_specs > 0:
+                    if self.num_kick_specs > 0 and player_admin_role < 20:
+                        # kick spectator after 3 warnings, Moderator or higher levels will not get kicked
+                        if player.get_spec_warning() > 2 and player.get_team() == 3:
+                            self.game.rcon_say("^2%s ^7was kicked, spectator too long on full server" % player_name)
+                            self.game.kick_player(player_num, reason='spectator too long on full server')
+                            continue
                         # ignore player with name prefix GTV-
                         if 'GTV-' in player_name:
                             continue
