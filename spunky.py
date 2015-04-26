@@ -283,11 +283,11 @@ class LogParser(object):
 
                 # check amount of warnings and kick player if needed
                 for player in self.game.players.itervalues():
-                    player_name = player.get_name()
                     player_num = player.get_player_num()
-                    player_admin_role = player.get_admin_role()
                     if player_num == BOT_PLAYER_NUM:
                         continue
+                    player_name = player.get_name()
+                    player_admin_role = player.get_admin_role()
                     # kick player with 3 or more warnings, Admins will never get kicked
                     if player.get_warning() > 2 and player_admin_role < 40:
                         self.game.rcon_say("^2%s ^7was kicked, too many warnings" % player_name)
@@ -772,14 +772,16 @@ class LogParser(object):
         name_list = []
         append = name_list.append
         for player in self.game.players.itervalues():
-            player_name = player.get_name()
             player_num = player.get_player_num()
+            if player_num == BOT_PLAYER_NUM:
+                continue
+            player_name = player.get_name()
             player_id = "@%d" % player.get_player_id()
-            if (user.upper() == player_name.upper() or user == str(player_num) or user == player_id) and player_num != 1022:
+            if user.upper() == player_name.upper() or user == str(player_num) or user == player_id:
                 victim = player
                 name_list = ["^3%s [^2%d^3]" % (player_name, player_num)]
                 break
-            elif user.upper() in player_name.upper() and player_num != 1022:
+            elif user.upper() in player_name.upper():
                 victim = player
                 append("^3%s [^2%d^3]" % (player_name, player_num))
         if len(name_list) == 0:
@@ -1995,46 +1997,52 @@ class LogParser(object):
         append = msg.append
         with self.players_lock:
             for player in self.game.players.itervalues():
+                player_num = player.get_player_num()
+                if player_num == BOT_PLAYER_NUM:
+                    continue
+                player_name = player.get_name()
+                player_kills = player.get_kills()
+                player_headshots = player.get_headshots()
                 if player.get_flags_captured() > most_flags:
                     most_flags = player.get_flags_captured()
-                    flagrunner = player.get_name()
-                if player.get_kills() > most_kills and player.get_player_num() != 1022:
-                    most_kills = player.get_kills()
-                    serialkiller = player.get_name()
-                if player.get_max_kill_streak() > most_streak and player.get_player_num() != 1022:
+                    flagrunner = player_name
+                if player_kills > most_kills:
+                    most_kills = player_kills
+                    serialkiller = player_name
+                if player.get_max_kill_streak() > most_streak:
                     most_streak = player.get_max_kill_streak()
-                    streaker = player.get_name()
-                if player.get_headshots() > most_hs:
-                    most_hs = player.get_headshots()
-                    headshooter = player.get_name()
+                    streaker = player_name
+                if player_headshots > most_hs:
+                    most_hs = player_headshots
+                    headshooter = player_name
                 if player.get_freeze() > most_frozen:
                     most_frozen = player.get_freeze()
-                    freezer = player.get_name()
+                    freezer = player_name
                 if player.get_thawout() > most_thawouts:
                     most_thawouts = player.get_thawout()
-                    thawouter = player.get_name()
+                    thawouter = player_name
                 if player.get_defused_bomb() > most_defused:
                     most_defused = player.get_defused_bomb()
-                    defused_by = player.get_name()
+                    defused_by = player_name
                 if player.get_planted_bomb() > most_planted:
                     most_planted = player.get_planted_bomb()
-                    planted_by = player.get_name()
+                    planted_by = player_name
                 if player.get_he_kills() > most_he_kills:
                     most_he_kills = player.get_he_kills()
-                    nader = player.get_name()
+                    nader = player_name
                 if 0 < player.get_flag_capture_time() < fastest_cap:
                     fastest_cap = player.get_flag_capture_time()
-                    fastrunner = player.get_name()
+                    fastrunner = player_name
                 if player.get_flags_returned() > most_flag_returns:
                     most_flag_returns = player.get_flags_returned()
-                    defender = player.get_name()
+                    defender = player_name
 
                 # display personal stats at the end of the round, stats for players in spec will not be displayed
                 if player.get_team() != 3:
                     if self.freeze_gametype:
-                        self.game.rcon_tell(player.get_player_num(), "^7Stats %s: ^7F ^2%d ^7T ^3%d ^7HS ^1%d ^7TK ^1%d" % (player.get_name(), player.get_freeze(), player.get_thawout(), player.get_headshots(), player.get_team_kill_count()))
+                        self.game.rcon_tell(player_num, "^7Stats %s: ^7F ^2%d ^7T ^3%d ^7HS ^1%d ^7TK ^1%d" % (player_name, player.get_freeze(), player.get_thawout(), player.get_headshots(), player.get_team_kill_count()))
                     else:
-                        self.game.rcon_tell(player.get_player_num(), "^7Stats %s: ^7K ^2%d ^7D ^3%d ^7HS ^1%d ^7TK ^1%d" % (player.get_name(), player.get_kills(), player.get_deaths(), player.get_headshots(), player.get_team_kill_count()))
+                        self.game.rcon_tell(player_num, "^7Stats %s: ^7K ^2%d ^7D ^3%d ^7HS ^1%d ^7TK ^1%d" % (player_name, player_kills, player.get_deaths(), player_headshots, player.get_team_kill_count()))
 
             # get Awards
             if most_flags > 1:
