@@ -129,6 +129,8 @@ class LogParser(object):
 
         # enable/disable autokick for team killing
         self.tk_autokick = config.getboolean('bot', 'teamkill_autokick') if config.has_option('bot', 'teamkill_autokick') else True
+        # enable/disable autokick of players with low score
+        self.noob_autokick = config.getboolean('bot', 'noob_autokick') if config.has_option('bot', 'noob_autokick') else False
         # set the maximum allowed ping
         self.max_ping = config.getint('bot', 'max_ping') if config.has_option('bot', 'max_ping') else 200
         # kick spectator on full server
@@ -310,8 +312,27 @@ class LogParser(object):
                         else:
                             player.clear_spec_warning()
 
+                    # check for players with low score and set warning
+                    if self.noob_autokick and player_admin_role < 2:
+                        kills = player.get_kills()
+                        deaths = player.get_deaths()
+                        ratio = round(float(kills) / float(deaths), 2) if deaths > 0 else 1.0
+                        # if player ratio is too low, inform player and increase warn counter
+                        # Regulars or higher levels will not get the warning
+                        if kills > 0 and ratio < 0.33:
+                            # kick player with low score after 3 or more warnings
+                            if player.get_score_warning() > 2:
+                                self.game.rcon_say("^2%s ^7was kicked, score too low for this server" % player_name)
+                                self.game.kick_player(player_num, reason='score too low')
+                                continue
+                            player.add_score_warning()
+                            logger.debug("Score of %s is too low, ratio: %s", player_name, ratio)
+                            self.game.rcon_tell(player_num, "^1WARNING ^7[^3%d^7]: ^7Your score is too low for this server" % player.get_score_warning(), False)
+                        else:
+                            player.clear_score_warning()
+
                     # warn player with 3 warnings, Admins will never get the alert warning
-                    if (player.get_warning() == 3 or player.get_spec_warning() == 3) and player_admin_role < 40:
+                    if (player.get_warning() == 3 or player.get_spec_warning() == 3 or player.get_score_warning() == 3) and player_admin_role < 40:
                         self.game.rcon_say("^1ALERT: ^2%s ^7auto-kick from warnings if not cleared" % player_name)
 
                 # check for player with high ping
@@ -2086,6 +2107,7 @@ class Player(object):
         self.ping_value = 0
         self.high_ping_count = 0
         self.spec_warn_count = 0
+        self.score_warn_count = 0
         self.warn_list = []
         self.last_warn_time = 0
         self.flags_captured = 0
@@ -2187,6 +2209,7 @@ class Player(object):
         self.tk_count = 0
         self.tk_victim_names = []
         self.tk_killer_names = []
+        self.score_warn_count = 0
         self.warn_list = []
         self.last_warn_time = 0
         self.flags_captured = 0
@@ -2495,6 +2518,15 @@ class Player(object):
     def get_spec_warning(self):
         return self.spec_warn_count
 
+    def add_score_warning(self):
+        self.score_warn_count += 1
+
+    def clear_score_warning(self):
+        self.score_warn_count = 0
+
+    def get_score_warning(self):
+        return self.score_warn_count
+
     def add_warning(self, warning):
         self.warn_list.append(warning)
         self.last_warn_time = time.time()
@@ -2514,6 +2546,7 @@ class Player(object):
     def clear_warning(self):
         self.warn_list = []
         self.spec_warn_count = 0
+        self.score_warn_count = 0
         self.tk_victim_names = []
         self.tk_killer_names = []
         # clear ban_points
