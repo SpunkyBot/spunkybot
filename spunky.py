@@ -50,6 +50,9 @@ logger = logging.getLogger('spunkybot')
 logger.setLevel(logging.DEBUG)
 logger.propagate = False
 
+# Bot player number
+BOT_PLAYER_NUM = 1022
+
 
 ### CLASS Log Parser ###
 class LogParser(object):
@@ -282,7 +285,7 @@ class LogParser(object):
                     player_name = player.get_name()
                     player_num = player.get_player_num()
                     player_admin_role = player.get_admin_role()
-                    if player_num == 1022:
+                    if player_num == BOT_PLAYER_NUM:
                         continue
                     # kick player with 3 or more warnings, Admins will never get kicked
                     if player.get_warning() > 2 and player_admin_role < 40:
@@ -662,7 +665,7 @@ class LogParser(object):
 
             if k_name == "<non-client>":
                 # killed by World
-                killer_id = 1022
+                killer_id = BOT_PLAYER_NUM
             killer = self.game.players[killer_id]
 
             killer_name = killer.get_name()
@@ -741,17 +744,17 @@ class LogParser(object):
                                    10: "is on a rampage (^110 ^7kills in a row)",
                                    15: "is unstoppable (^115 ^7kills in a row)",
                                    20: "is godlike (^120 ^7kills in a row)"}
-                if killer_killing_streak in kill_streak_msg and killer_id != 1022:
+                if killer_killing_streak in kill_streak_msg and killer_id != BOT_PLAYER_NUM:
                     self.game.rcon_say("%s%s ^7%s" % (killer_color, killer_name, kill_streak_msg[killer_killing_streak]))
 
                 victim_color = "^1" if (victim.get_team() == 1) else "^4"
-                if victim.get_killing_streak() >= 20 and killer_name != victim_name and killer_id != 1022:
+                if victim.get_killing_streak() >= 20 and killer_name != victim_name and killer_id != BOT_PLAYER_NUM:
                     self.game.rcon_say("%s%s's ^7godlike was ended by %s%s!" % (victim_color, victim_name, killer_color, killer_name))
-                elif victim.get_killing_streak() >= 15 and killer_name != victim_name and killer_id != 1022:
+                elif victim.get_killing_streak() >= 15 and killer_name != victim_name and killer_id != BOT_PLAYER_NUM:
                     self.game.rcon_say("%s%s's ^7unstoppable was ended by %s%s!" % (victim_color, victim_name, killer_color, killer_name))
-                elif victim.get_killing_streak() >= 10 and killer_name != victim_name and killer_id != 1022:
+                elif victim.get_killing_streak() >= 10 and killer_name != victim_name and killer_id != BOT_PLAYER_NUM:
                     self.game.rcon_say("%s%s's ^7rampage was ended by %s%s!" % (victim_color, victim_name, killer_color, killer_name))
-                elif victim.get_killing_streak() >= 5 and killer_name != victim_name and killer_id != 1022:
+                elif victim.get_killing_streak() >= 5 and killer_name != victim_name and killer_id != BOT_PLAYER_NUM:
                     self.game.rcon_say("%s%s's ^7killing spree was ended by %s%s!" % (victim_color, victim_name, killer_color, killer_name))
 
                 # death counter
@@ -853,7 +856,7 @@ class LogParser(object):
 
                 sar = {'player_num': int(number), 'command': cmd}
             except IndexError:
-                sar = {'player_num': 1022, 'command': ''}
+                sar = {'player_num': BOT_PLAYER_NUM, 'command': ''}
 
             if sar['command'] == '!mapstats':
                 self.game.rcon_tell(sar['player_num'], "^2%d ^7kills - ^2%d ^7deaths" % (self.game.players[sar['player_num']].get_kills(), self.game.players[sar['player_num']].get_deaths()))
@@ -1057,7 +1060,7 @@ class LogParser(object):
 
             # list - list all connected players
             elif sar['command'] == '!list' and self.game.players[sar['player_num']].get_admin_role() >= 20:
-                msg = "^7Players online: %s" % ", ".join(["^3%s [^2%d^3]" % (player.get_name(), player.get_player_num()) for player in self.game.players.itervalues() if player.get_player_num() != 1022])
+                msg = "^7Players online: %s" % ", ".join(["^3%s [^2%d^3]" % (player.get_name(), player.get_player_num()) for player in self.game.players.itervalues() if player.get_player_num() != BOT_PLAYER_NUM])
                 self.game.rcon_tell(sar['player_num'], msg)
 
             # nextmap - display the next map in rotation
@@ -2674,7 +2677,7 @@ class Game(object):
             self.small_cycle = filter(None, game_cfg.get('mapcycle', 'small_cycle').replace(' ', '').split(',')) if game_cfg.has_option('mapcycle', 'small_cycle') else []
 
         # add Spunky Bot as player 'World' to the game
-        spunky_bot = Player(1022, '127.0.0.1', 'NONE', 'World')
+        spunky_bot = Player(BOT_PLAYER_NUM, '127.0.0.1', 'NONE', 'World')
         self.add_player(spunky_bot)
         logger.info("Activating the Bot    : OK")
         logger.info("Startup completed     : Let's get ready to rumble!")
