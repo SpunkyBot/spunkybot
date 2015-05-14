@@ -2663,8 +2663,8 @@ class Game(object):
         @type  config_file: String
         """
         self.all_maps_list = []
-        self.next_mapname = None
-        self.mapname = None
+        self.next_mapname = ''
+        self.mapname = ''
         self.maplist = []
         self.players = {}
         self.live = False
