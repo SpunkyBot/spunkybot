@@ -29,6 +29,8 @@
 	- Usage: `!freezestats`
 - **hestats** - display HE grenade kill stats
 	- Usage: `!hestats`
+- **hits** - display hit stats
+	- Usage: `!hits`
 - **teams** - balance teams
 	- Usage: `!teams`
 - **time** - display the current server time
