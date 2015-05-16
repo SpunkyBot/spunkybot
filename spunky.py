@@ -1040,7 +1040,7 @@ class LogParser(object):
                     if not found:
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
-                        msg = "^3Country %s: ^7%s" % (victim.get_name(), victim.get_country())
+                        msg = "^3%s ^7is connecting from ^3%s" % (victim.get_name(), victim.get_country())
                         self.tell_say_message(sar, msg)
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !country <name>")
