@@ -2149,7 +2149,7 @@ class Player(object):
         # GeoIP lookup
         info = GEOIP.lookup(ip_address)
         if info.country:
-            self.country = info.country_name
+            self.country = "%s (%s)" % (info.country_name, info.country)
 
         # check ban_list
         now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(self.time_joined))
