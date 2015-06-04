@@ -846,6 +846,31 @@ class LogParser(object):
         except IndexError:
             pass
 
+    def clean_cmd_list(self, cmd_list):
+        """
+        remove commands which are not available in current game type or modversion
+        """
+        disabled_cmds = []
+        clean_list = list(cmd_list)
+        if self.ffa_lms_gametype or self.ts_gametype or self.tdm_gametype:
+            disabled_cmds = ['bombstats', 'ctfstats', 'freezestats']
+        elif self.bomb_gametype:
+            disabled_cmds = ['ctfstats', 'freezestats']
+        elif self.ctf_gametype:
+            disabled_cmds = ['bombstats', 'freezestats']
+        elif self.freeze_gametype:
+            disabled_cmds = ['bombstats', 'ctfstats']
+
+        if not self.urt42_modversion:
+            disabled_cmds += ['kill']
+
+        for item in disabled_cmds:
+            try:
+                clean_list.remove(item)
+            except ValueError:
+                pass
+        return clean_list
+
     def handle_say(self, line):
         """
         handle say commands
@@ -884,17 +909,17 @@ class LogParser(object):
             elif sar['command'] == '!help' or sar['command'] == '!h':
                 ## TO DO - specific help for each command
                 if self.game.players[sar['player_num']].get_admin_role() < 20:
-                    self.game.rcon_tell(sar['player_num'], "^7Available commands: ^3%s" % ', ^3'.join(self.user_cmds))
+                    self.game.rcon_tell(sar['player_num'], "^7Available commands: ^3%s" % ', ^3'.join(self.clean_cmd_list(self.user_cmds)))
                 # help for mods - additional commands
                 elif self.game.players[sar['player_num']].get_admin_role() == 20:
-                    self.game.rcon_tell(sar['player_num'], "^7Moderator commands: ^3%s" % ', ^3'.join(self.mod_cmds))
+                    self.game.rcon_tell(sar['player_num'], "^7Moderator commands: ^3%s" % ', ^3'.join(self.clean_cmd_list(self.mod_cmds)))
                 # help for admins - additional commands
                 elif self.game.players[sar['player_num']].get_admin_role() == 40:
-                    self.game.rcon_tell(sar['player_num'], "^7Admin commands: ^3%s" % ', ^3'.join(self.admin_cmds))
+                    self.game.rcon_tell(sar['player_num'], "^7Admin commands: ^3%s" % ', ^3'.join(self.clean_cmd_list(self.admin_cmds)))
                 elif self.game.players[sar['player_num']].get_admin_role() == 60:
-                    self.game.rcon_tell(sar['player_num'], "^7Full Admin commands: ^3%s" % ', ^3'.join(self.fulladmin_cmds))
+                    self.game.rcon_tell(sar['player_num'], "^7Full Admin commands: ^3%s" % ', ^3'.join(self.clean_cmd_list(self.fulladmin_cmds)))
                 elif self.game.players[sar['player_num']].get_admin_role() >= 80:
-                    self.game.rcon_tell(sar['player_num'], "^7Senior Admin commands: ^3%s" % ', ^3'.join(self.senioradmin_cmds))
+                    self.game.rcon_tell(sar['player_num'], "^7Senior Admin commands: ^3%s" % ', ^3'.join(self.clean_cmd_list(self.senioradmin_cmds)))
 
 ## player commands
             # register - register yourself as a basic user
