@@ -197,7 +197,7 @@ class LogParser(object):
                         self.ffa_lms_gametype = True
                     elif 'g_gametype\\7\\' in line:
                         self.ctf_gametype = True
-                    elif 'g_gametype\\4\\' in line:
+                    elif 'g_gametype\\4\\' in line or 'g_gametype\\5\\' in line:
                         self.ts_gametype = True
                     elif 'g_gametype\\3\\' in line:
                         self.tdm_gametype = True
@@ -414,7 +414,7 @@ class LogParser(object):
         """
         self.ffa_lms_gametype = True if ('g_gametype\\0\\' in line or 'g_gametype\\1\\' in line or 'g_gametype\\9\\' in line) else False
         self.ctf_gametype = True if 'g_gametype\\7\\' in line else False
-        self.ts_gametype = True if 'g_gametype\\4\\' in line else False
+        self.ts_gametype = True if ('g_gametype\\4\\' in line or 'g_gametype\\5\\' in line) else False
         self.tdm_gametype = True if 'g_gametype\\3\\' in line else False
         self.bomb_gametype = True if 'g_gametype\\8\\' in line else False
         self.freeze_gametype = True if 'g_gametype\\10\\' in line else False
