@@ -1643,6 +1643,8 @@ class LogParser(object):
                                 self.game.send_rcon("smite %d" % victim.get_player_num())
                     else:
                         self.game.rcon_tell(sar['player_num'], "^7Usage: !kill <name>")
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7The command ^3!kill ^7is not supported")
 
             # lookup - search for player in database
             elif (sar['command'] == '!lookup' or sar['command'] == '!l') and self.game.players[sar['player_num']].get_admin_role() >= 80:
