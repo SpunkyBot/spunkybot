@@ -84,11 +84,16 @@ class LogParser(object):
                             39: "UT_MOD_GLOCK", 40: "UT_MOD_COLT1911", 41: "UT_MOD_MAC11", 42: "UT_MOD_FLAG", 43: "UT_MOD_GOOMBA"}
 
         # RCON commands for the different admin roles
-        self.user_cmds = ['bombstats', 'ctfstats', 'freezestats', 'forgiveall, forgiveprev', 'hestats', 'hs', 'hits', 'register', 'regtest', 'spree', 'stats', 'teams', 'time', 'xlrstats', 'xlrtopstats']
-        self.mod_cmds = self.user_cmds + ['admintest', 'country', 'leveltest', 'list', 'nextmap', 'mute', 'seen', 'shuffleteams', 'warn', 'warninfo', 'warnremove', 'warns', 'warntest']
-        self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'find', 'force', 'kick', 'nuke', 'say', 'tempban', 'warnclear']
+        self.user_cmds = ['bombstats', 'ctfstats', 'freezestats', 'forgiveall, forgiveprev', 'hestats', 'hs', 'hits',
+                          'register', 'regtest', 'spree', 'stats', 'teams', 'time', 'xlrstats', 'xlrtopstats']
+        self.mod_cmds = self.user_cmds + ['admintest', 'country', 'leveltest', 'list', 'nextmap', 'mute',
+                                          'seen', 'shuffleteams', 'warn', 'warninfo', 'warnremove', 'warns', 'warntest']
+        self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'find', 'force', 'kick', 'nuke', 'say',
+                                           'tempban', 'warnclear']
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'scream', 'slap', 'swap', 'version', 'veto']
-        self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'lookup', 'makereg', 'map', 'maps', 'maprestart', 'moon', 'permban', 'putgroup', 'setnextmap', 'unban', 'ungroup']
+        self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'lookup',
+                                                       'makereg', 'map', 'maps', 'maprestart', 'moon',
+                                                       'permban', 'putgroup', 'setnextmap', 'unban', 'ungroup']
         # alphabetic sort of the commands
         self.mod_cmds.sort()
         self.admin_cmds.sort()
@@ -298,7 +303,6 @@ class LogParser(object):
         - check warnings and kick players with too many warnings
         - check for spectators and set warning
         - check for players with low score and set warning
-        - check ping of all players and set warning for high ping user
         """
         try:
             # get rcon status
@@ -369,24 +373,31 @@ class LogParser(object):
                         self.game.rcon_say("^1ALERT: ^2%s ^7auto-kick from warnings if not cleared" % player_name)
 
                 # check for player with high ping
-                if self.max_ping > 0:
-                    # rcon update status
-                    self.game.get_rcon_handle().quake.rcon_update()
-                    for player in self.game.get_rcon_handle().quake.players:
-                        # if ping is too high, increase warn counter, Admins or higher levels will not get the warning
-                        try:
-                            ping_value = player.ping
-                            gameplayer = self.game.players[player.num]
-                        except KeyError:
-                            continue
-                        else:
-                            if self.max_ping < ping_value < 999 and gameplayer.get_admin_role() < 40:
-                                gameplayer.add_high_ping(ping_value)
-                                self.game.rcon_tell(player.num, "^1WARNING ^7[^3%d^7]: ^7Your ping is too high [^4%d^7]. ^3The maximum allowed ping is %d." % (gameplayer.get_high_ping(), ping_value, self.max_ping), False)
-                            else:
-                                gameplayer.clear_high_ping()
+                self.check_player_ping()
+
         except Exception as err:
             logger.error(err, exc_info=True)
+
+    def check_player_ping(self):
+        """
+        check ping of all players and set warning for high ping user
+        """
+        if self.max_ping > 0:
+            # rcon update status
+            self.game.get_rcon_handle().quake.rcon_update()
+            for player in self.game.get_rcon_handle().quake.players:
+                # if ping is too high, increase warn counter, Admins or higher levels will not get the warning
+                try:
+                    ping_value = player.ping
+                    gameplayer = self.game.players[player.num]
+                except KeyError:
+                    continue
+                else:
+                    if self.max_ping < ping_value < 999 and gameplayer.get_admin_role() < 40:
+                        gameplayer.add_high_ping(ping_value)
+                        self.game.rcon_tell(player.num, "^1WARNING ^7[^3%d^7]: ^7Your ping is too high [^4%d^7]. ^3The maximum allowed ping is %d." % (gameplayer.get_high_ping(), ping_value, self.max_ping), False)
+                    else:
+                        gameplayer.clear_high_ping()
 
     def parse_line(self, string):
         """
@@ -544,14 +555,12 @@ class LogParser(object):
                     guid = "BOT%d" % player_num
                 else:
                     guid = "None"
-                    self.game.send_rcon("Player with invalid GUID kicked")
-                    self.game.send_rcon("kick %d" % player_num)
+                    self.kick_player_reason(reason="Player with invalid GUID kicked", player_num=player_num)
                 if 'name' in values:
                     name = re.sub(r"\s+", "", values['name'])
                 else:
                     name = "UnnamedPlayer"
-                    self.game.send_rcon("Player with invalid name kicked")
-                    self.game.send_rcon("kick %d" % player_num)
+                    self.kick_player_reason(reason="Player with invalid name kicked", player_num=player_num)
                 ip_port = values['ip'] if 'ip' in values else "0.0.0.0:0"
 
             ip_address = ip_port.split(":")[0].strip()
@@ -563,8 +572,7 @@ class LogParser(object):
                 # kick banned player
                 player_ban_id = self.game.players[player_num].get_ban_id()
                 if player_ban_id:
-                    self.game.send_rcon("kick %d" % player_num)
-                    self.game.send_rcon("^7%s ^1banned ^7(ID @%d)" % (name, player_ban_id))
+                    self.kick_player_reason("^7%s ^1banned ^7(ID @%d)" % (name, player_ban_id), player_num)
                 else:
                     if self.show_country_on_connect:
                         self.game.rcon_say("^7%s ^7connected from %s" % (name, self.game.players[player_num].get_country()))
@@ -576,21 +584,25 @@ class LogParser(object):
 
             # kick player with hax guid 'kemfew'
             if "KEMFEW" in guid.upper():
-                self.game.send_rcon("Cheater GUID detected for %s -> Player kicked" % name)
-                self.game.send_rcon("kick %d" % player_num)
+                self.kick_player_reason("Cheater GUID detected for %s -> Player kicked" % name, player_num)
             if "WORLD" in guid.upper() or "UNKNOWN" in guid.upper():
-                self.game.send_rcon("Invalid GUID detected for %s -> Player kicked" % name)
-                self.game.send_rcon("kick %d" % player_num)
+                self.kick_player_reason("Invalid GUID detected for %s -> Player kicked" % name, player_num)
 
             if challenge:
                 logger.debug("ClientUserinfo: Player %d %s is challenging the server and has the guid %s", player_num, name, guid)
                 # kick player with hax port 1337 or 1024
                 if port == "1337" or port == "1024":
-                    self.game.send_rcon("Cheater Port detected for %s -> Player kicked" % name)
-                    self.game.send_rcon("kick %d" % player_num)
+                    self.kick_player_reason("Cheater Port detected for %s -> Player kicked" % name, player_num)
             else:
                 if 'name' in values and values['name'] != self.game.players[player_num].get_name():
                     self.game.players[player_num].set_name(values['name'])
+
+    def kick_player_reason(self, reason, player_num):
+        """
+        kick player for specific reason
+        """
+        self.game.send_rcon("kick %d" % player_num)
+        self.game.send_rcon(reason)
 
     def handle_userinfo_changed(self, line):
         """
@@ -653,14 +665,11 @@ class LogParser(object):
         handle all kind of hits
         """
         with self.players_lock:
-            parts = line.split(":", 1)
-            info = parts[0].split()
+            info = line.split(":", 1)[0].split()
             hitter_id = int(info[1])
             victim_id = int(info[0])
             hitter = self.game.players[hitter_id]
-            victim = self.game.players[victim_id]
             hitter_name = hitter.get_name()
-            victim_name = victim.get_name()
             hitpoint = int(info[2])
             hit_item = int(info[3])
             # increase summary of all hits
@@ -681,7 +690,7 @@ class LogParser(object):
                     self.game.send_rcon("%s%s ^7has %d %s (%d percent)" % (player_color, hitter_name, hitter_hs_count, hs_plural, percentage))
                 elif self.hit_points[hitpoint] in zones:
                     hitter.set_hitzones(zones[self.hit_points[hitpoint]])
-                logger.debug("Player %d %s hit %d %s in the %s with %s", hitter_id, hitter_name, victim_id, victim_name, self.hit_points[hitpoint], self.hit_item[hit_item])
+                logger.debug("Player %d %s hit %d %s in the %s with %s", hitter_id, hitter_name, victim_id, self.game.players[victim_id].get_name(), self.hit_points[hitpoint], self.hit_item[hit_item])
 
     def handle_kill(self, line):
         """
@@ -736,7 +745,8 @@ class LogParser(object):
                         elif len(killer.get_tk_victim_names()) == 4:
                             self.game.rcon_tell(killer_id, "^1WARNING ^7[^33^7]: ^7For team killing you will get kicked", False)
 
-            suicide_reason = ['UT_MOD_SUICIDE', 'MOD_FALLING', 'MOD_WATER', 'MOD_LAVA', 'MOD_TRIGGER_HURT', 'UT_MOD_SPLODED', 'UT_MOD_SLAPPED', 'UT_MOD_SMITED']
+            suicide_reason = ['UT_MOD_SUICIDE', 'MOD_FALLING', 'MOD_WATER', 'MOD_LAVA', 'MOD_TRIGGER_HURT',
+                              'UT_MOD_SPLODED', 'UT_MOD_SLAPPED', 'UT_MOD_SMITED']
             suicide_weapon = ['UT_MOD_HEGRENADE', 'UT_MOD_HK69', 'UT_MOD_NUKED', 'UT_MOD_BOMBED']
             # suicide counter
             if death_cause in suicide_reason or (killer_id == victim_id and death_cause in suicide_weapon):
