@@ -1805,7 +1805,7 @@ class LogParser(object):
                             if right == "user" and victim.get_admin_role() < 80:
                                 self.game.rcon_tell(sar['player_num'], "^3%s put in group ^7User" % victim.get_name())
                                 new_role = 1
-                            elif right == "regular" and victim.get_admin_role() < 80:
+                            elif (right == "reg" or right == "regular") and victim.get_admin_role() < 80:
                                 self.game.rcon_tell(sar['player_num'], "^3%s put in group ^7Regular" % victim.get_name())
                                 new_role = 2
                             elif (right == "mod" or right == "moderator") and victim.get_admin_role() < 80:
