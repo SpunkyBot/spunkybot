@@ -165,6 +165,8 @@
 	- Usage: `!cyclemap`
 - **setnextmap** - set the given map as nextmap
 	- Usage: `!setnextmap <ut4_name>`
+- **swapteams** - swap the current teams
+	- Usage: `!swapteams`
 - **permban** - ban a player permanent
 	- Usage: `!permban <name> <reason>`
 	- Short: `!pb <name> <reason>`
