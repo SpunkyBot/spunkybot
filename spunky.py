@@ -35,6 +35,7 @@ import textwrap
 import urllib
 import urllib2
 import platform
+import random
 import ConfigParser
 import logging.handlers
 import lib.pygeoip as pygeoip
@@ -86,7 +87,7 @@ class LogParser(object):
         # RCON commands for the different admin roles
         self.user_cmds = ['bombstats', 'ctfstats', 'freezestats', 'forgiveall, forgiveprev', 'hestats', 'hs', 'hits',
                           'register', 'regtest', 'spree', 'stats', 'teams', 'time', 'xlrstats', 'xlrtopstats']
-        self.mod_cmds = self.user_cmds + ['admintest', 'country', 'leveltest', 'list', 'nextmap', 'mute',
+        self.mod_cmds = self.user_cmds + ['admintest', 'country', 'leveltest', 'list', 'nextmap', 'mute', 'poke',
                                           'seen', 'shuffleteams', 'warn', 'warninfo', 'warnremove', 'warns', 'warntest']
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'find', 'force', 'kick', 'nuke', 'say',
                                            'tempban', 'warnclear']
@@ -926,6 +927,8 @@ class LogParser(object):
                        'whiner': 'stop complaining about camp, lag or block',
                        'name': 'do not use offensive names'}
 
+        poke_options = ['Go', 'Wake up', '*poke*', 'Attention', 'Get up', 'Move out']
+
         with self.players_lock:
             line = line.strip()
             try:
@@ -1130,6 +1133,18 @@ class LogParser(object):
                         self.tell_say_message(sar, msg)
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !country <name>")
+
+            # poke - notify a player that he needs to move
+            elif sar['command'] == '!poke' and self.game.players[sar['player_num']].get_admin_role() >= 20:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
+                    found, victim, msg = self.player_found(user)
+                    if not found:
+                        self.game.rcon_tell(sar['player_num'], msg)
+                    else:
+                        self.game.rcon_tell(sar['player_num'], "^7%s %s!" % (random.choice(poke_options), victim.get_name()))
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7Usage: !poke <name>")
 
             # leveltest
             elif (sar['command'] == '!leveltest' or sar['command'] == '!lt') and self.game.players[sar['player_num']].get_admin_role() >= 20:

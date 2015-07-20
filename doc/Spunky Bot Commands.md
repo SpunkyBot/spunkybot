@@ -63,6 +63,8 @@
 	- Usage: `!nextmap`
 - **mute** - mute or unmute a player
 	- Usage: `!mute <name> [<seconds>]`
+- **poke** - notify a player that he needs to move
+	- Usage: `!poke <name>`
 - **seen** - display when the player was last seen
 	- Usage: `!seen <name>`
 - **shuffleteams** - shuffle the teams
