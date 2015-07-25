@@ -1602,9 +1602,15 @@ class LogParser(object):
             elif (sar['command'] == '!ban' or sar['command'] == '!b') and self.game.players[sar['player_num']].get_admin_role() >= 60:
                 if line.split(sar['command'])[1]:
                     arg = line.split(sar['command'])[1].split()
-                    if len(arg) > 1:
+                    if len(arg) == 1 and self.game.players[sar['player_num']].get_admin_role() >= 80:
+                        user = arg[0]
+                        reason = "banned"
+                    elif len(arg) > 1:
                         user = arg[0]
                         reason = ' '.join(arg[1:])[:40].strip()
+                    else:
+                        user = reason = None
+                    if user and reason:
                         found, victim, msg = self.player_found(user)
                         kick_reason = reason_dict[reason] if reason in reason_dict else reason
                         if not found:
