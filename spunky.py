@@ -838,6 +838,9 @@ class LogParser(object):
             return True, victim, "^7Found player matching %s: ^3%s" % (user, name_list[-1])
 
     def offline_player(self, user_id):
+        """
+        return True and instance of player or False and message text
+        """
         player_id = user_id.lstrip('@')
         if player_id.isdigit():
             if int(player_id) > 1:
