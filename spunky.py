@@ -345,7 +345,8 @@ class LogParser(object):
                         elif counter > self.num_kick_specs and player.get_team() == 3 and player.get_time_joined() < (time.time() - 30):
                             player.add_spec_warning()
                             logger.debug("%s is spectator too long on full server", player_name)
-                            self.game.rcon_tell(player_num, "^1WARNING ^7[^3%d^7]: ^7You are spectator too long on full server" % player.get_spec_warning(), False)
+                            warnmsg = "^1WARNING ^7[^3%d^7]: ^7You are spectator too long on full server" % player.get_spec_warning()
+                            self.game.rcon_tell(player_num, warnmsg, False)
                         # reset spec warning
                         else:
                             player.clear_spec_warning()
@@ -365,7 +366,8 @@ class LogParser(object):
                                 continue
                             player.add_score_warning()
                             logger.debug("Score of %s is too low, ratio: %s", player_name, ratio)
-                            self.game.rcon_tell(player_num, "^1WARNING ^7[^3%d^7]: ^7Your score is too low for this server" % player.get_score_warning(), False)
+                            warnmsg = "^1WARNING ^7[^3%d^7]: ^7Your score is too low for this server" % player.get_score_warning()
+                            self.game.rcon_tell(player_num, warnmsg, False)
                         else:
                             player.clear_score_warning()
 
