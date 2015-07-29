@@ -546,25 +546,16 @@ class LogParser(object):
             line = line[2:].lstrip("\\").lstrip()
             values = self.explode_line(line)
             challenge = True if 'challenge' in values else False
-            try:
-                guid = values['cl_guid'].rstrip('\n')
-                name = re.sub(r"\s+", "", values['name'])
-                ip_port = values['ip']
-            except KeyError:
-                if 'cl_guid' in values:
-                    guid = values['cl_guid']
-                elif 'skill' in values:
-                    # bot connecting
-                    guid = "BOT%d" % player_num
-                else:
-                    guid = "None"
-                    self.kick_player_reason(reason="Player with invalid GUID kicked", player_num=player_num)
-                if 'name' in values:
-                    name = re.sub(r"\s+", "", values['name'])
-                else:
-                    name = "UnnamedPlayer"
-                    self.kick_player_reason(reason="Player with invalid name kicked", player_num=player_num)
-                ip_port = values['ip'] if 'ip' in values else "0.0.0.0:0"
+            name = re.sub(r"\s+", "", values['name']) if 'name' in values else "UnnamedPlayer"
+            ip_port = values['ip'] if 'ip' in values else "0.0.0.0:0"
+            if 'cl_guid' in values:
+                guid = values['cl_guid']
+            elif 'skill' in values:
+                # bot connecting
+                guid = "BOT%d" % player_num
+            else:
+                guid = "None"
+                self.kick_player_reason(reason="Player with invalid GUID kicked", player_num=player_num)
 
             ip_address = ip_port.split(":")[0].strip()
             port = ip_port.split(":")[1].strip()
@@ -596,9 +587,6 @@ class LogParser(object):
                 # kick player with hax port 1337 or 1024
                 if port == "1337" or port == "1024":
                     self.kick_player_reason("Cheater Port detected for %s -> Player kicked" % name, player_num)
-            else:
-                if 'name' in values and values['name'] != self.game.players[player_num].get_name():
-                    self.game.players[player_num].set_name(values['name'])
 
     def kick_player_reason(self, reason, player_num):
         """
