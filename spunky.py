@@ -92,7 +92,7 @@ class LogParser(object):
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'find', 'force', 'kick', 'nuke', 'say',
                                            'tempban', 'warnclear']
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'scream', 'slap', 'swap', 'version', 'veto']
-        self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'lookup',
+        self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'lastbans', 'lookup',
                                                        'makereg', 'map', 'maps', 'maprestart', 'moon',
                                                        'permban', 'putgroup', 'setnextmap', 'swapteams', 'unban', 'ungroup']
         # alphabetic sort of the commands
@@ -1846,7 +1846,7 @@ class LogParser(object):
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !putgroup <name> <group>")
 
-            # banlist - display the last 10 entries of the banlist
+            # banlist - display the last active 10 bans
             elif sar['command'] == '!banlist' and self.game.players[sar['player_num']].get_admin_role() >= 80:
                 timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
                 values = (timestamp,)
@@ -1854,6 +1854,13 @@ class LogParser(object):
                 banlist = ['^7[^2@%s^7] %s' % (result[item][0], result[item][2]) for item in xrange(len(result))]  # 0=ID,2=Name
                 msg = 'Currently no one is banned' if not banlist else str(", ".join(banlist))
                 self.game.rcon_tell(sar['player_num'], "^7Banlist: %s" % msg)
+
+            # lastbans - list the last 4 bans
+            elif (sar['command'] == '!lastbans' or sar['command'] == '!bans') and self.game.players[sar['player_num']].get_admin_role() >= 80:
+                result = curs.execute("SELECT * FROM `ban_list` ORDER BY `timestamp` DESC LIMIT 4").fetchall()
+                lastbanlist = ['^3[^2@%s^3] ^7%s ^3(^1%s^3)' % (result[item][0], result[item][2], result[item][4]) for item in xrange(len(result))]
+                for item in lastbanlist:
+                    self.game.rcon_tell(sar['player_num'], str(item))
 
             # unban - unban a player from the database via ID
             elif sar['command'] == '!unban' and self.game.players[sar['player_num']].get_admin_role() >= 80:

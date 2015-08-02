@@ -141,12 +141,15 @@
 
 ### Senior Admin [80]
 
-- **banlist** - display the last entries of the banlist
+- **banlist** - display the last active 10 bans
 	- Usage: `!banlist`
 - **kiss** - clear all player warnings
 	- Usage: `!kiss`
 - **kill** - kill a player
 	- Usage: `!kill <name>`
+- **lastbans** - list the last 4 bans
+	- Usage: `!lastbans`
+	- Short: `!bans`
 - **lookup** - search for player in database
 	- Usage: `!lookup <name>`
 	- Short: `!l <name>`
