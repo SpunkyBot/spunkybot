@@ -29,6 +29,8 @@
 	- Usage: `!freezestats`
 - **hestats** - display HE grenade kill stats
 	- Usage: `!hestats`
+- **hits** - display hit stats
+	- Usage: `!hits`
 - **teams** - balance teams
 	- Usage: `!teams`
 - **time** - display the current server time
@@ -61,6 +63,8 @@
 	- Usage: `!nextmap`
 - **mute** - mute or unmute a player
 	- Usage: `!mute <name> [<seconds>]`
+- **poke** - notify a player that he needs to move
+	- Usage: `!poke <name>`
 - **seen** - display when the player was last seen
 	- Usage: `!seen <name>`
 - **shuffleteams** - shuffle the teams
@@ -137,15 +141,21 @@
 
 ### Senior Admin [80]
 
-- **banlist** - display the last entries of the banlist
+- **banlist** - display the last active 10 bans
 	- Usage: `!banlist`
 - **kiss** - clear all player warnings
 	- Usage: `!kiss`
 - **kill** - kill a player
 	- Usage: `!kill <name>`
+- **lastbans** - list the last 4 bans
+	- Usage: `!lastbans`
+	- Short: `!bans`
 - **lookup** - search for player in database
 	- Usage: `!lookup <name>`
 	- Short: `!l <name>`
+- **makereg** - make a player a regular (Level 2) user
+	- Usage: `!makereg <name>`
+	- Short: `!mr <name>`
 - **map** - load given map
 	- Usage: `!map <ut4_name>`
 - **maps** - display all available maps
@@ -158,6 +168,8 @@
 	- Usage: `!cyclemap`
 - **setnextmap** - set the given map as nextmap
 	- Usage: `!setnextmap <ut4_name>`
+- **swapteams** - swap the current teams
+	- Usage: `!swapteams`
 - **permban** - ban a player permanent
 	- Usage: `!permban <name> <reason>`
 	- Short: `!pb <name> <reason>`

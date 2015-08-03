@@ -6,7 +6,7 @@ Author: Alexander Kress
 This program is released under the MIT License.
 """
 
-__version__ = '1.0.8'
+__version__ = '1.0.9'
 
 
 ### IMPORTS
@@ -123,8 +123,8 @@ class Rcon(object):
         else:
             mapcycle_path = None
         if mapcycle_path:
-            file_handle = open(mapcycle_path, 'r')
-            lines = file_handle.readlines()
+            with open(mapcycle_path, 'r') as file_handle:
+                lines = [line for line in file_handle if line != '\n']
             try:
                 while 1:
                     tmp = lines.pop(0).strip()

@@ -6,7 +6,7 @@ Author: Alexander Kress
 This program is released under the MIT License.
 """
 
-__version__ = '1.0.3'
+__version__ = '1.0.4'
 
 
 ### IMPORTS
@@ -52,10 +52,9 @@ class Rules(object):
         # initial wait
         time.sleep(30)
         while 1:
-            filehandle = open(self.rules_file, 'r+')
-            rotation_msg = filehandle.readlines()
+            with open(self.rules_file, 'r') as filehandle:
+                rotation_msg = filehandle.readlines()
             if not rotation_msg:
-                filehandle.close()
                 break
             for line in rotation_msg:
                 # display rule
@@ -63,4 +62,3 @@ class Rules(object):
                     self.rcon_handle.push("say ^2%s" % line.strip())
                 # wait for given delay in the config file
                 time.sleep(self.rules_frequency)
-            filehandle.close()
