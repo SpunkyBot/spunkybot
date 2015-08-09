@@ -319,37 +319,37 @@ class LogParser(object):
                         continue
                     player_name = player.get_name()
                     player_admin_role = player.get_admin_role()
+
                     # kick player with 3 or more warnings, Admins will never get kicked
                     if player.get_warning() > 2 and player_admin_role < 40:
-                        self.game.rcon_say("^2%s ^7was kicked, too many warnings" % player_name)
-                        self.game.kick_player(player_num, reason='too many warnings')
-                        continue
-                    # kick player with high ping after 3 warnings, Admins will never get kicked
-                    if self.max_ping > 0 and player.get_high_ping() > 2 and player_admin_role < 40:
-                        self.game.rcon_say("^2%s ^7was kicked, ping too high for this server ^7[^4%s^7]" % (player_name, player.get_ping_value()))
-                        self.game.kick_player(player_num, reason='fix your ping')
+                        if 'spectator' in player.get_last_warn_msg():
+                            kick_msg = reason = "spectator too long on full server"
+                        elif 'ping' in player.get_last_warn_msg():
+                            kick_msg = "ping too high for this server ^7[^4%s^7]" % player.get_ping_value()
+                            reason = "fix your ping"
+                        elif 'score' in player.get_last_warn_msg():
+                            kick_msg = reason = "score too low for this server"
+                        else:
+                            kick_msg = reason = "too many warnings"
+                        self.game.rcon_say("^2%s ^7was kicked, %s" % (player_name, kick_msg))
+                        self.game.kick_player(player_num, reason=reason)
                         continue
 
                     # check for spectators and set warning
                     if self.num_kick_specs > 0 and player_admin_role < 20:
-                        # kick spectator after 3 warnings, Moderator or higher levels will not get kicked
-                        if player.get_spec_warning() > 2 and player.get_team() == 3:
-                            self.game.rcon_say("^2%s ^7was kicked, spectator too long on full server" % player_name)
-                            self.game.kick_player(player_num, reason='spectator too long on full server')
-                            continue
                         # ignore player with name prefix GTV-
                         if 'GTV-' in player_name:
                             continue
                         # if player is spectator on full server, inform player and increase warn counter
                         # GTV or Moderator or higher levels will not get the warning
                         elif counter > self.num_kick_specs and player.get_team() == 3 and player.get_time_joined() < (time.time() - 30):
-                            player.add_spec_warning()
+                            player.add_warning(warning='spectator too long on full server', timer=False)
                             logger.debug("%s is spectator too long on full server", player_name)
-                            warnmsg = "^1WARNING ^7[^3%d^7]: ^7You are spectator too long on full server" % player.get_spec_warning()
+                            warnmsg = "^1WARNING ^7[^3%d^7]: ^7You are spectator too long on full server" % player.get_warning()
                             self.game.rcon_tell(player_num, warnmsg, False)
                         # reset spec warning
                         else:
-                            player.clear_spec_warning()
+                            player.clear_specific_warning('spectator too long on full server')
 
                     # check for players with low score and set warning
                     if self.noob_autokick and player_admin_role < 2:
@@ -359,20 +359,15 @@ class LogParser(object):
                         # if player ratio is too low, inform player and increase warn counter
                         # Regulars or higher levels will not get the warning
                         if kills > 0 and ratio < 0.33:
-                            # kick player with low score after 3 or more warnings
-                            if player.get_score_warning() > 2:
-                                self.game.rcon_say("^2%s ^7was kicked, score too low for this server" % player_name)
-                                self.game.kick_player(player_num, reason='score too low')
-                                continue
-                            player.add_score_warning()
+                            player.add_warning(warning='score too low for this server', timer=False)
                             logger.debug("Score of %s is too low, ratio: %s", player_name, ratio)
-                            warnmsg = "^1WARNING ^7[^3%d^7]: ^7Your score is too low for this server" % player.get_score_warning()
+                            warnmsg = "^1WARNING ^7[^3%d^7]: ^7Your score is too low for this server" % player.get_warning()
                             self.game.rcon_tell(player_num, warnmsg, False)
                         else:
-                            player.clear_score_warning()
+                            player.clear_specific_warning('score too low for this server')
 
                     # warn player with 3 warnings, Admins will never get the alert warning
-                    if (player.get_warning() == 3 or player.get_spec_warning() == 3 or player.get_score_warning() == 3) and player_admin_role < 40:
+                    if player.get_warning() == 3 and player_admin_role < 40:
                         self.game.rcon_say("^1ALERT: ^2%s ^7auto-kick from warnings if not cleared" % player_name)
 
                 # check for player with high ping
@@ -398,9 +393,9 @@ class LogParser(object):
                 else:
                     if self.max_ping < ping_value < 999 and gameplayer.get_admin_role() < 40:
                         gameplayer.add_high_ping(ping_value)
-                        self.game.rcon_tell(player.num, "^1WARNING ^7[^3%d^7]: ^7Your ping is too high [^4%d^7]. ^3The maximum allowed ping is %d." % (gameplayer.get_high_ping(), ping_value, self.max_ping), False)
+                        self.game.rcon_tell(player.num, "^1WARNING ^7[^3%d^7]: ^7Your ping is too high [^4%d^7]. ^3The maximum allowed ping is %d." % (gameplayer.get_warning(), ping_value, self.max_ping), False)
                     else:
-                        gameplayer.clear_high_ping()
+                        gameplayer.clear_specific_warning('fix your ping')
 
     def parse_line(self, string):
         """
@@ -2224,9 +2219,6 @@ class Player(object):
         self.tk_victim_names = []
         self.tk_killer_names = []
         self.ping_value = 0
-        self.high_ping_count = 0
-        self.spec_warn_count = 0
-        self.score_warn_count = 0
         self.warn_list = []
         self.last_warn_time = 0
         self.flags_captured = 0
@@ -2328,7 +2320,6 @@ class Player(object):
         self.tk_count = 0
         self.tk_victim_names = []
         self.tk_killer_names = []
-        self.score_warn_count = 0
         self.warn_list = []
         self.last_warn_time = 0
         self.flags_captured = 0
@@ -2616,42 +2607,27 @@ class Player(object):
         self.tk_killer_names = []
 
     def add_high_ping(self, value):
-        self.high_ping_count += 1
+        self.warn_list.append('fix your ping')
         self.ping_value = value
-
-    def clear_high_ping(self):
-        self.high_ping_count = 0
-
-    def get_high_ping(self):
-        return self.high_ping_count
 
     def get_ping_value(self):
         return self.ping_value
 
-    def add_spec_warning(self):
-        self.spec_warn_count += 1
+    def clear_specific_warning(self, warning):
+        while self.warn_list.count(warning) > 0:
+            self.warn_list.remove(warning)
 
-    def clear_spec_warning(self):
-        self.spec_warn_count = 0
-
-    def get_spec_warning(self):
-        return self.spec_warn_count
-
-    def add_score_warning(self):
-        self.score_warn_count += 1
-
-    def clear_score_warning(self):
-        self.score_warn_count = 0
-
-    def get_score_warning(self):
-        return self.score_warn_count
-
-    def add_warning(self, warning):
+    def add_warning(self, warning, timer=True):
         self.warn_list.append(warning)
-        self.last_warn_time = time.time()
+        if timer:
+            self.last_warn_time = time.time()
 
     def get_warning(self):
         return len(self.warn_list)
+
+    def get_last_warn_msg(self):
+        if len(self.warn_list) > 0:
+            return self.warn_list[-1]
 
     def get_last_warn_time(self):
         return self.last_warn_time
@@ -2664,8 +2640,6 @@ class Player(object):
 
     def clear_warning(self):
         self.warn_list = []
-        self.spec_warn_count = 0
-        self.score_warn_count = 0
         self.tk_victim_names = []
         self.tk_killer_names = []
         # clear ban_points
