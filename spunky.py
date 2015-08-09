@@ -609,7 +609,7 @@ class LogParser(object):
                 name = self.game.players[player_num].get_name()
 
             # set new name, if player changed name
-            if not(self.game.players[player_num].get_name() == name):
+            if not self.game.players[player_num].get_name() == name:
                 self.game.players[player_num].set_name(name)
 
             # move locked player to the defined team, if player tries to change teams
