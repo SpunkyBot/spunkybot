@@ -88,6 +88,8 @@ For additional information, visit the Spunky Bot website at [https://www.spunkyb
 
 If you have any questions about Spunky Bot or need help, please use the [mailing list](https://groups.google.com/group/spunkybot) or post the question on our [forum](http://forum.spunkybot.de). If you need help right now, you can also find us on [Twitter](https://twitter.com/spunkybot).
 
+In our [Google+ community](https://plus.google.com/communities/116728939500870368885) we talk about anything our community is interested in.
+
 If you have bug reports or feature suggestions, please use the [issue tracker](https://github.com/SpunkyBot/spunkybot/issues?state=open).
 
 
