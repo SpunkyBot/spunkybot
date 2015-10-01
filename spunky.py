@@ -1913,7 +1913,7 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7You are registered as ^6Head Admin")
 
 ## unknown command
-            elif sar['command'].startswith('!') and self.game.players[sar['player_num']].get_admin_role() > 20:
+            elif sar['command'].startswith('!') and len(sar['command']) > 1 and self.game.players[sar['player_num']].get_admin_role() > 20:
                 if sar['command'].lstrip('!') in self.senioradmin_cmds:
                     self.game.rcon_tell(sar['player_num'], "^7Insufficient privileges to use command ^3%s" % sar['command'])
                 else:
