@@ -868,7 +868,7 @@ class LogParser(object):
         """
         tmp = line.strip()
         try:
-            new = tmp[0] + ''.join(tmp[3:])
+            new = "%s %s" % (tmp[0], ' '.join(tmp[2:]))
             self.handle_say(new)
         except IndexError:
             pass
