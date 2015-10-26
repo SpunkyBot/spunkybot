@@ -837,11 +837,11 @@ class LogParser(object):
                     victim.define_offline_player(player_id=int(player_id))
                     return True, victim, None
                 else:
-                    return False, None, "No Player found"
+                    return False, None, "^3No Player found"
             else:
-                return False, None, "No Player found"
+                return False, None, "^3No Player found"
         else:
-            return False, None, "No Player found"
+            return False, None, "^3No Player found"
 
     def map_found(self, map_name):
         """
