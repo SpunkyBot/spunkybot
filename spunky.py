@@ -27,7 +27,6 @@ __version__ = '1.5.0'
 
 ### IMPORTS
 import os
-import re
 import time
 import sqlite3
 import math
@@ -200,8 +199,8 @@ class LogParser(object):
         while not game_start:
             while self.log_file:
                 line = self.log_file.readline()
-                msg = re.search(r"(\d+:\d+)\s([A-Za-z]+:)", line)
-                if msg and msg.group(2) == 'InitGame:':
+                tmp = line.split()
+                if len(tmp) > 1 and tmp[1] == "InitGame:":
                     game_start = True
                     if 'g_modversion\\4.1' in line:
                         # hit zone support for UrT 4.1
@@ -236,7 +235,7 @@ class LogParser(object):
                         self.freeze_gametype = True
                 if self.log_file.tell() > end_pos:
                     break
-                elif len(line) == 0:
+                elif not line:
                     break
             if self.log_file.tell() < seek_amount:
                 self.log_file.seek(0, 0)
@@ -273,7 +272,7 @@ class LogParser(object):
         while self.log_file:
             schedule.run_pending()
             line = self.log_file.readline()
-            if len(line) != 0:
+            if line:
                 self.parse_line(line)
             else:
                 if not self.game.live:
@@ -413,14 +412,13 @@ class LogParser(object):
                   'Flag': self.handle_flag, 'FlagCaptureTime': self.handle_flagcapturetime}
 
         try:
-            if tmp:
-                action = tmp[0].strip()
-                if action in option:
-                    option[action](line)
-                elif 'Bomb' in action:
-                    self.handle_bomb(line)
-                elif 'Pop' in action:
-                    self.handle_bomb_exploded()
+            action = tmp[0].strip()
+            if action in option:
+                option[action](line)
+            elif 'Bomb' in action:
+                self.handle_bomb(line)
+            elif 'Pop' in action:
+                self.handle_bomb_exploded()
         except (IndexError, KeyError):
             pass
         except Exception as err:
@@ -541,7 +539,7 @@ class LogParser(object):
             line = line[2:].lstrip("\\").lstrip()
             values = self.explode_line(line)
             challenge = True if 'challenge' in values else False
-            name = re.sub(r"\s+", "", values['name']) if 'name' in values else "UnnamedPlayer"
+            name = values['n'].replace(' ', '') if 'name' in values else "UnnamedPlayer"
             ip_port = values['ip'] if 'ip' in values else "0.0.0.0:0"
             if 'cl_guid' in values:
                 guid = values['cl_guid']
@@ -602,7 +600,7 @@ class LogParser(object):
                 values = self.explode_line(line)
                 team_num = int(values['t'])
                 player.set_team(team_num)
-                name = re.sub(r"\s+", "", values['n'])
+                name = values['n'].replace(' ', '')
             except KeyError:
                 team_num = 3
                 player.set_team(team_num)
@@ -812,7 +810,7 @@ class LogParser(object):
             elif user.upper() in player_name.upper():
                 victim = player
                 append("^3%s [^2%d^3]" % (player_name, player_num))
-        if len(name_list) == 0:
+        if not name_list:
             if user.startswith('@'):
                 return self.offline_player(user)
             else:
@@ -855,7 +853,7 @@ class LogParser(object):
                 break
             elif map_name.lower() in maps:
                 append(maps)
-        if len(map_list) == 0:
+        if not map_list:
             return False, None, "^3Map not found"
         elif len(map_list) > 1:
             return False, None, "^7Maps matching %s: ^3%s" % (map_name, ', '.join(map_list))
@@ -2190,7 +2188,7 @@ class Player(object):
         """
         self.player_num = player_num
         self.guid = guid
-        self.name = "".join(name.split())
+        self.name = name.replace(' ', '')
         self.player_id = 0
         self.aliases = []
         self.registered_user = False
@@ -2447,7 +2445,7 @@ class Player(object):
         return self.ban_id
 
     def set_name(self, name):
-        self.name = "".join(name.split())
+        self.name = name.replace(' ', '')
 
     def get_name(self):
         return self.name
