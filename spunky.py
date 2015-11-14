@@ -1820,16 +1820,20 @@ class LogParser(object):
                                 new_role = 2
                             elif (right == "mod" or right == "moderator") and victim.get_admin_role() < 80:
                                 self.game.rcon_tell(sar['player_num'], "^3%s added as ^7Moderator" % victim.get_name())
+                                self.game.rcon_tell(victim.get_player_num(), "^3You are added as ^7Moderator")
                                 new_role = 20
                             elif right == "admin" and victim.get_admin_role() < 80:
                                 self.game.rcon_tell(sar['player_num'], "^3%s added as ^7Admin" % victim.get_name())
+                                self.game.rcon_tell(victim.get_player_num(), "^3You are added as ^7Admin")
                                 new_role = 40
                             elif right == "fulladmin" and victim.get_admin_role() < 80:
                                 self.game.rcon_tell(sar['player_num'], "^3%s added as ^7Full Admin" % victim.get_name())
+                                self.game.rcon_tell(victim.get_player_num(), "^3You are added as ^7Full Admin")
                                 new_role = 60
                             # Note: senioradmin level can only be set by head admin
                             elif right == "senioradmin" and self.game.players[sar['player_num']].get_admin_role() == 100 and victim.get_player_num() != sar['player_num']:
                                 self.game.rcon_tell(sar['player_num'], "^3%s added as ^6Senior Admin" % victim.get_name())
+                                self.game.rcon_tell(victim.get_player_num(), "^3You are added as ^6Senior Admin")
                                 new_role = 80
                             else:
                                 self.game.rcon_tell(sar['player_num'], "^3Sorry, you cannot put %s in group <%s>" % (victim.get_name(), right))
