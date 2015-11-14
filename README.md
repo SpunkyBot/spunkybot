@@ -88,7 +88,16 @@ For additional information, visit the Spunky Bot website at [https://www.spunkyb
 
 If you have any questions about Spunky Bot or need help, please use the [mailing list](https://groups.google.com/group/spunkybot) or post the question on our [forum](http://forum.spunkybot.de). If you need help right now, you can also find us on [Twitter](https://twitter.com/spunkybot).
 
-In our [Google+ community](https://plus.google.com/communities/116728939500870368885) we talk about anything our community is interested in.
+* Joining the mailing list:
+	* Send an email to <spunkybot+subscribe@googlegroups.com>
+	* or subscribe via web: [https://groups.google.com/forum/#!forum/spunkybot/join](https://groups.google.com/forum/#!forum/spunkybot/join)
+* Leaving the mailing list:
+	* Send an email to <spunkybot+unsubscribe@googlegroups.com>
+	* or unsubscribe via web: [https://groups.google.com/forum/#!forum/spunkybot/unsubscribe](https://groups.google.com/forum/#!forum/spunkybot/unsubscribe)
+* If you joined the group, you can post to this group:
+	* Send an email to <spunkybot@googlegroups.com>
+
+In our [Google+ Community](https://plus.google.com/communities/116728939500870368885) we talk about anything our community is interested in. You can also follow us on [Google+](https://plus.google.com/106857192050943115434).
 
 If you have bug reports or feature suggestions, please use the [issue tracker](https://github.com/SpunkyBot/spunkybot/issues?state=open).
 
@@ -97,7 +106,12 @@ If you have bug reports or feature suggestions, please use the [issue tracker](h
 You can help us in different ways:
 
 * Open an [issue](https://github.com/SpunkyBot/spunkybot/issues) with suggestions for improvements
-* Fork this repository and submit a pull request
+* Fork this repository and submit a pull request:
+	* Click the Fork button to create your personal fork 
+	* Create your feature branch (`git checkout -b new-feature`)
+	* Commit your changes (`git commit -am 'Add some feature'`)
+	* Push to the branch (`git push origin new-feature`)
+	* Create a new pull request
 * Improve the [documentation](https://github.com/SpunkyBot/spunkybot-docs) (separate repository)
 
 By contributing code to this project in any form, including sending a pull request via GitHub, a code fragment or patch via mail or public discussion groups, you agree to release your code under the terms of the MIT license that you can find in the [LICENSE](https://github.com/SpunkyBot/spunkybot/blob/master/LICENSE) file included in this source distribution.
@@ -116,3 +130,7 @@ The code of Spunky Bot is released under the MIT License. See the [LICENSE](http
 	- This file is released under the MIT License. 
 
 Urban Terror™ and FrozenSand™ are trademarks of 0870760 B.C. Ltd.
+
+
+## Thank you!
+We really appreciate all kinds of feedback and contributions. Thanks for using and supporting Spunky Bot!
