@@ -539,7 +539,7 @@ class LogParser(object):
             line = line[2:].lstrip("\\").lstrip()
             values = self.explode_line(line)
             challenge = True if 'challenge' in values else False
-            name = values['n'].replace(' ', '') if 'name' in values else "UnnamedPlayer"
+            name = values['name'].replace(' ', '') if 'name' in values else "UnnamedPlayer"
             ip_port = values['ip'] if 'ip' in values else "0.0.0.0:0"
             if 'cl_guid' in values:
                 guid = values['cl_guid']
