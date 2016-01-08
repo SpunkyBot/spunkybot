@@ -1,4 +1,4 @@
-This README is just a quick start document. You can find more detailed documentation at [https://spunkybot.de](https://spunkybot.de).
+This README is just a quick start document. You can find more detailed documentation of Spunky Bot at [https://spunkybot.de](https://spunkybot.de).
 
 # What is Spunky Bot?
 
@@ -8,7 +8,7 @@ Spunky Bot offers in-game commands without authentication and automated administ
 The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was released under the Beerware License.
 
 [![Build Status](https://travis-ci.org/SpunkyBot/spunkybot.png?branch=master)](https://travis-ci.org/SpunkyBot/spunkybot)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/SpunkyBot/spunkybot/blob/master/LICENSE)
 ![Version](https://img.shields.io/badge/version-1.5.0-orange.svg)
 
 If you want to know more, this is a list of selected starting points:
