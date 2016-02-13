@@ -18,8 +18,15 @@ __pycache__
 # Backup files
 *.*~
 
+# Swap files
+*.sw[po]
+
 # Test files
 test*.*
 
 # Log files
 *.log
+
+# Vagrant
+Vagrantfile
+.vagrant/
