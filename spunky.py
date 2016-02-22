@@ -128,11 +128,6 @@ class LogParser(object):
         logger.info("Loading config file   : %s", config_file)
 
         games_log = config.get('server', 'log_file')
-        # open game log file
-        self.log_file = open(games_log, 'r')
-        # go to the end of the file
-        self.log_file.seek(0, 2)
-        logger.info("Parsing Gamelog file  : %s", games_log)
 
         self.ffa_lms_gametype = False
         self.ctf_gametype = False
@@ -183,8 +178,18 @@ class LogParser(object):
         values = urllib.urlencode(data)
         self.ping_url = '%s/ping.php?%s' % (self.base_url, values)
 
-        # start parsing the games logfile
-        self.read_log()
+        try:
+            # open game log file
+            self.log_file = open(games_log, 'r')
+        except IOError:
+            logger.error("ERROR: The Gamelog file '%s' has not been found" % games_log)
+            logger.error("*** Aborting Spunky Bot ***")
+        else:
+            # go to the end of the file
+            self.log_file.seek(0, 2)
+            # start parsing the games logfile
+            self.read_log()
+            logger.info("Parsing Gamelog file  : %s", games_log)
 
     def find_game_start(self):
         """
