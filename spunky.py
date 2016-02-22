@@ -1457,8 +1457,8 @@ class LogParser(object):
                     if len(arg) > 1:
                         user = arg[0]
                         duration, duration_output = self.convert_time(arg[1])
-                        reason = ' '.join(arg[2:])[:40].strip() if len(arg) >= 2 else ''
-                        kick_reason = reason_dict[reason] if reason in reason_dict else reason
+                        reason = ' '.join(arg[2:])[:40].strip() if len(arg) > 2 else 'tempban'
+                        kick_reason = reason_dict[reason] if reason in reason_dict else '' if reason == 'tempban' else reason
                         found, victim, msg = self.player_found(user)
                         if not found:
                             self.game.rcon_tell(sar['player_num'], msg)
