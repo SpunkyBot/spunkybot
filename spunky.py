@@ -1989,6 +1989,8 @@ class LogParser(object):
                 logger.debug("Player %d returned the flag", player_num)
             elif action == '2:':
                 player.capture_flag()
+                cap_count = player.get_flags_captured()
+                self.game.send_rcon("^7%s has captured ^2%s ^7flag%s" % (player.get_name(), cap_count, 's' if cap_count > 1 else ''))
                 logger.debug("Player %d captured the flag", player_num)
 
     def handle_bomb(self, line):
