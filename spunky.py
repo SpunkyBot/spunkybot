@@ -85,7 +85,7 @@ class LogParser(object):
 
         # RCON commands for the different admin roles
         self.user_cmds = ['bombstats', 'ctfstats', 'freezestats', 'forgiveall, forgiveprev', 'hestats', 'hs', 'hits',
-                          'register', 'regtest', 'spree', 'stats', 'teams', 'time', 'xlrstats', 'xlrtopstats']
+                          'knife', 'register', 'regtest', 'spree', 'stats', 'teams', 'time', 'xlrstats', 'xlrtopstats']
         self.mod_cmds = self.user_cmds + ['admintest', 'country', 'leveltest', 'list', 'nextmap', 'mute', 'poke',
                                           'seen', 'shuffleteams', 'warn', 'warninfo', 'warnremove', 'warns', 'warntest']
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'find', 'force', 'kick', 'nuke', 'say',
@@ -769,6 +769,10 @@ class LogParser(object):
                 if death_cause == 'UT_MOD_HEGRENADE':
                     killer.set_he_kill()
 
+                # Knife kill
+                if "UT_MOD_KNIFE" in death_cause or "UT_MOD_KNIFE_THROWN" in death_cause:
+                    killer.set_knife_kill()
+
                 # killing spree counter
                 killer_color = "^1" if (killer.get_team() == 1) else "^4"
                 killer_killing_streak = killer.get_killing_streak()
@@ -1001,6 +1005,14 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7You made ^2%d ^7HE grenade kill%s" % (he_kill_count, 's' if he_kill_count > 1 else ''))
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7You made no HE grenade kill")
+
+            # knife - display knife kill counter
+            elif sar['command'] == '!knife':
+                knife_kill_count = self.game.players[sar['player_num']].get_knife_kills()
+                if knife_kill_count > 0:
+                    self.game.rcon_tell(sar['player_num'], "^7You made ^2%d ^7knife kill%s" % (knife_kill_count, 's' if knife_kill_count > 1 else ''))
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7You made no knife kill")
 
             # hits - display hit stats
             elif sar['command'] == '!hits':
@@ -2220,6 +2232,7 @@ class Player(object):
         self.hitzone = {'body': 0, 'arms': 0, 'legs': 0}
         self.all_hits = 0
         self.he_kills = 0
+        self.knife_kills = 0
         self.tk_count = 0
         self.db_tk_count = 0
         self.db_team_death = 0
@@ -2324,6 +2337,7 @@ class Player(object):
         self.hitzone = {'body': 0, 'arms': 0, 'legs': 0}
         self.all_hits = 0
         self.he_kills = 0
+        self.knife_kills = 0
         self.tk_count = 0
         self.tk_victim_names = []
         self.tk_killer_names = []
@@ -2580,6 +2594,12 @@ class Player(object):
 
     def get_he_kills(self):
         return self.he_kills
+
+    def set_knife_kill(self):
+        self.knife_kills += 1
+
+    def get_knife_kills(self):
+        return self.knife_kills
 
     def get_killing_streak(self):
         return self.killing_streak
