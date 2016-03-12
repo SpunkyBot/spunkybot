@@ -182,7 +182,7 @@ class LogParser(object):
             # open game log file
             self.log_file = open(games_log, 'r')
         except IOError:
-            logger.error("ERROR: The Gamelog file '%s' has not been found" % games_log)
+            logger.error("ERROR: The Gamelog file '%s' has not been found", games_log)
             logger.error("*** Aborting Spunky Bot ***")
         else:
             # go to the end of the file
