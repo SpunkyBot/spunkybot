@@ -2100,6 +2100,7 @@ class LogParser(object):
         most_defused = 0
         most_planted = 0
         most_he_kills = 0
+        most_knife_kills = 0
         fastest_cap = 999
         most_flag_returns = 0
         flagrunner = ""
@@ -2111,6 +2112,7 @@ class LogParser(object):
         defused_by = ""
         planted_by = ""
         nader = ""
+        knifer = ""
         fastrunner = ""
         defender = ""
         msg = []
@@ -2150,6 +2152,9 @@ class LogParser(object):
                 if player.get_he_kills() > most_he_kills:
                     most_he_kills = player.get_he_kills()
                     nader = player_name
+                if player.get_knife_kills() > most_knife_kills:
+                    most_knife_kills = player.get_knife_kills()
+                    knifer = player_name
                 if 0 < player.get_flag_capture_time() < fastest_cap:
                     fastest_cap = player.get_flag_capture_time()
                     fastrunner = player_name
@@ -2185,6 +2190,9 @@ class LogParser(object):
             # HE grenade kills
             if most_he_kills > 1:
                 self.game.rcon_say("^2Most HE grenade kills: ^7%s (^1%d ^7HE kills)" % (nader, most_he_kills))
+
+            if most_knife_kills > 1:
+                self.game.rcon_say("^2Most knife kills: ^7%s (^1%d ^7kills)" % (knifer, most_knife_kills))
 
             # CTF statistics
             if fastest_cap < 999:
