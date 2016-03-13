@@ -1608,7 +1608,7 @@ class LogParser(object):
                     arg = line.split(sar['command'])[1].split()
                     if len(arg) == 1 and self.game.players[sar['player_num']].get_admin_role() >= 80:
                         user = arg[0]
-                        reason = "banned"
+                        reason = "tempban"
                     elif len(arg) > 1:
                         user = arg[0]
                         reason = ' '.join(arg[1:])[:40].strip()
@@ -1616,7 +1616,7 @@ class LogParser(object):
                         user = reason = None
                     if user and reason:
                         found, victim, msg = self.player_found(user)
-                        kick_reason = reason_dict[reason] if reason in reason_dict else reason
+                        kick_reason = reason_dict[reason] if reason in reason_dict else '' if reason == 'tempban' else reason
                         if not found:
                             self.game.rcon_tell(sar['player_num'], msg)
                         else:
@@ -1625,7 +1625,10 @@ class LogParser(object):
                             else:
                                 # ban for 7 days
                                 if victim.ban(duration=604800, reason=reason, admin=self.game.players[sar['player_num']].get_name()):
-                                    self.game.rcon_say("^2%s ^1banned ^7for ^37 days ^7by %s: ^3%s" % (victim.get_name(), self.game.players[sar['player_num']].get_name(), kick_reason))
+                                    msg = "^2%s ^1banned ^7for ^37 days ^7by %s" % (victim.get_name(), self.game.players[sar['player_num']].get_name())
+                                    if kick_reason:
+                                        msg = "%s: ^3%s" % (msg, kick_reason)
+                                    self.game.rcon_say(msg)
                                 else:
                                     self.game.rcon_tell(sar['player_num'], "^7This player has already a longer ban")
                                 self.game.kick_player(player_num=victim.get_player_num(), reason=kick_reason)
