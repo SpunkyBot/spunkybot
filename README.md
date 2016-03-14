@@ -3,13 +3,15 @@ This README is just a quick start document. You can find more detailed documenta
 # What is Spunky Bot?
 
 **Spunky Bot** is a lightweight game server administration bot and RCON tool.
-Its purpose is to administrate an [Urban Terror](http://www.urbanterror.info) 4.1 / 4.2 server and to provide real time statistical data for players.
-Spunky Bot offers in-game commands without authentication and automated administration even when no admin is online.
+Its purpose is to administer, manage and maintain an [Urban Terror](http://www.urbanterror.info) 4.1 / 4.2 server and to provide real time statistical data for players.
+Spunky Bot is a cross-platform package and offers in-game commands without authentication and automated administration even when no admin is online.
 The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was released under the Beerware License.
 
 [![Build Status](https://travis-ci.org/SpunkyBot/spunkybot.png?branch=master)](https://travis-ci.org/SpunkyBot/spunkybot)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/SpunkyBot/spunkybot/blob/master/LICENSE)
 ![Version](https://img.shields.io/badge/version-1.5.0-orange.svg)
+[![PyPI version](https://img.shields.io/pypi/v/spunkybot.svg)](https://pypi.python.org/pypi/spunkybot)
+[![Code Health](https://landscape.io/github/SpunkyBot/spunkybot/master/landscape.svg)](https://landscape.io/github/SpunkyBot/spunkybot/master)
 
 If you want to know more, this is a list of selected starting points:
 
