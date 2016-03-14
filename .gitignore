@@ -2,6 +2,11 @@
 *.py[co]
 __pycache__
 
+# build products
+build
+dist
+spunkybot.egg-info
+
 # SVN
 .svn/
 
