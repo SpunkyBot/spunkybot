@@ -91,10 +91,10 @@ For additional information, visit the Spunky Bot website at [https://www.spunkyb
 If you have any questions about Spunky Bot or need help, please use the [mailing list](https://groups.google.com/group/spunkybot) or post the question on our [forum](http://forum.spunkybot.de). If you need help right now, you can also find us on [Twitter](https://twitter.com/spunkybot).
 
 * Joining the mailing list:
-	* Send an email to <spunkybot+subscribe@googlegroups.com>
+	* Send an email to <mailto:spunkybot+subscribe@googlegroups.com>
 	* or subscribe via web: [https://groups.google.com/forum/#!forum/spunkybot/join](https://groups.google.com/forum/#!forum/spunkybot/join)
 * Leaving the mailing list:
-	* Send an email to <spunkybot+unsubscribe@googlegroups.com>
+	* Send an email to <mailto:spunkybot+unsubscribe@googlegroups.com>
 	* or unsubscribe via web: [https://groups.google.com/forum/#!forum/spunkybot/unsubscribe](https://groups.google.com/forum/#!forum/spunkybot/unsubscribe)
 * If you joined the group, you can post to this group:
 	* Send an email to <spunkybot@googlegroups.com>
