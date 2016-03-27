@@ -199,8 +199,15 @@ class LogParser(object):
         # search within the specified range for the InitGame message
         start_pos = self.log_file.tell() - seek_amount
         end_pos = start_pos + seek_amount
-        self.log_file.seek(start_pos)
-        game_start = False
+        try:
+            self.log_file.seek(start_pos)
+        except IOError:
+            logger.error("ERROR: The games.log file is empty, ignoring game type and start")
+            # go to the end of the file
+            self.log_file.seek(0, 2)
+            game_start = True
+        else:
+            game_start = False
         while not game_start:
             while self.log_file:
                 line = self.log_file.readline()
