@@ -162,6 +162,8 @@ class LogParser(object):
         self.teams_autobalancer = config.getboolean('bot', 'autobalancer') if config.has_option('bot', 'autobalancer') else False
         self.allow_cmd_teams_round_end = config.getboolean('bot', 'allow_teams_round_end') if config.has_option('bot', 'allow_teams_round_end') else False
         self.spam_bomb_planted_msg = config.getboolean('bot', 'spam_bomb_planted') if config.has_option('bot', 'spam_bomb_planted') else True
+        self.spam_knife_kills_msg = config.getboolean('bot', 'spam_knife_kills') if config.has_option('bot', 'spam_knife_kills') else False
+        self.spam_nade_kills_msg = config.getboolean('bot', 'spam_nade_kills') if config.has_option('bot', 'spam_nade_kills') else False
         # support for low gravity server
         self.support_lowgravity = config.getboolean('lowgrav', 'support_lowgravity') if config.has_option('lowgrav', 'support_lowgravity') else False
         self.gravity = config.getint('lowgrav', 'gravity') if config.has_option('lowgrav', 'gravity') else 800
@@ -772,13 +774,24 @@ class LogParser(object):
                     if death_cause == 'UT_MOD_BOMBED':
                         killer.kills_with_bomb()
 
+                event_series_msg = {5: 'go on!',
+                                    10: 'beware!',
+                                    15: 'eat that!',
+                                    20: 'got pwned!'}
+
                 # HE grenade kill
                 if death_cause == 'UT_MOD_HEGRENADE':
                     killer.set_he_kill()
+                    he_kill_count = killer.get_he_kills()
+                    if self.spam_nade_kills_msg and he_kill_count in event_series_msg:
+                        self.game.rcon_bigtext("^3%s: ^2%d ^7HE grenade kills, %s" % (killer_name, he_kill_count, event_series_msg[he_kill_count]))
 
                 # Knife kill
                 if "UT_MOD_KNIFE" in death_cause or "UT_MOD_KNIFE_THROWN" in death_cause:
                     killer.set_knife_kill()
+                    knife_kill_count = killer.get_knife_kills()
+                    if self.spam_knife_kills_msg and knife_kill_count in event_series_msg:
+                        self.game.rcon_bigtext("^3%s: ^2%d ^7knife kills, %s" % (killer_name, knife_kill_count, event_series_msg[knife_kill_count]))
 
                 # killing spree counter
                 killer_color = "^1" if (killer.get_team() == 1) else "^4"
