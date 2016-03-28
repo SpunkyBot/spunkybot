@@ -164,6 +164,7 @@ class LogParser(object):
         self.spam_bomb_planted_msg = config.getboolean('bot', 'spam_bomb_planted') if config.has_option('bot', 'spam_bomb_planted') else True
         self.spam_knife_kills_msg = config.getboolean('bot', 'spam_knife_kills') if config.has_option('bot', 'spam_knife_kills') else False
         self.spam_nade_kills_msg = config.getboolean('bot', 'spam_nade_kills') if config.has_option('bot', 'spam_nade_kills') else False
+        self.spam_headshot_hits_msg = config.getboolean('bot', 'spam_headshot_hits') if config.has_option('bot', 'spam_headshot_hits') else False
         # support for low gravity server
         self.support_lowgravity = config.getboolean('lowgrav', 'support_lowgravity') if config.has_option('lowgrav', 'support_lowgravity') else False
         self.gravity = config.getint('lowgrav', 'gravity') if config.has_option('lowgrav', 'gravity') else 800
@@ -682,6 +683,13 @@ class LogParser(object):
                 if self.hit_points[hitpoint] == 'HEAD' or self.hit_points[hitpoint] == 'HELMET':
                     hitter.headshot()
                     hitter_hs_count = hitter.get_headshots()
+                    hs_msg = {5: 'watch out!',
+                              10: 'awesome!',
+                              15: 'unbelievable!',
+                              20: '^1MANIAC!',
+                              25: '^2AIMBOT?'}
+                    if self.spam_headshot_hits_msg and hitter_hs_count in hs_msg:
+                        self.game.rcon_bigtext("^3%s: ^2%d ^7HeadShots, %s" % (hitter_name, hitter_hs_count, hs_msg[hitter_hs_count]))
                     player_color = "^1" if (hitter.get_team() == 1) else "^4"
                     hs_plural = "headshots" if hitter_hs_count > 1 else "headshot"
                     percentage = int(round(float(hitter_hs_count) / float(hitter.get_all_hits()), 2) * 100)
