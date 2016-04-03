@@ -9,7 +9,7 @@ The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was 
 
 [![Build Status](https://travis-ci.org/SpunkyBot/spunkybot.png?branch=master)](https://travis-ci.org/SpunkyBot/spunkybot)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/SpunkyBot/spunkybot/blob/master/LICENSE)
-![Version](https://img.shields.io/badge/version-1.5.0-orange.svg)
+![Version](https://img.shields.io/badge/version-1.6.0-orange.svg)
 [![PyPI version](https://img.shields.io/pypi/v/spunkybot.svg)](https://pypi.python.org/pypi/spunkybot)
 [![Code Health](https://landscape.io/github/SpunkyBot/spunkybot/master/landscape.svg)](https://landscape.io/github/SpunkyBot/spunkybot/master)
 
