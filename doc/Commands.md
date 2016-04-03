@@ -29,6 +29,8 @@
 	- Usage: `!freezestats`
 - **hestats** - display HE grenade kill stats
 	- Usage: `!hestats`
+- **knife** - display knife kill stats
+	- Usage: `!knife`
 - **hits** - display hit stats
 	- Usage: `!hits`
 - **teams** - balance teams
@@ -110,7 +112,7 @@
 - **warnclear** - clear the user warnings
 	- Usage: `!warnclear <name>`
 	- Short: `!wc <name>`
-- **tempban** - ban a player temporary for the given period
+- **tempban** - ban a player temporary for the given period (1 min to 24 hrs)
 	-  Usage: `!tempban <name> <duration> [<reason>]`
 	-  Short: `!tb <name> <duration> [<reason>]`
 	-  Max ban duration: 24 hours

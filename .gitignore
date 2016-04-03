@@ -2,6 +2,11 @@
 *.py[co]
 __pycache__
 
+# build products
+build
+dist
+spunkybot.egg-info
+
 # SVN
 .svn/
 
@@ -18,8 +23,15 @@ __pycache__
 # Backup files
 *.*~
 
+# Swap files
+*.sw[po]
+
 # Test files
 test*.*
 
 # Log files
 *.log
+
+# Vagrant
+Vagrantfile
+.vagrant/
