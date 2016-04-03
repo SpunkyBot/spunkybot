@@ -690,10 +690,9 @@ class LogParser(object):
                               25: '^2AIMBOT?'}
                     if self.spam_headshot_hits_msg and hitter_hs_count in hs_msg:
                         self.game.rcon_bigtext("^3%s: ^2%d ^7HeadShots, %s" % (hitter_name, hitter_hs_count, hs_msg[hitter_hs_count]))
-                    player_color = "^1" if (hitter.get_team() == 1) else "^4"
                     hs_plural = "headshots" if hitter_hs_count > 1 else "headshot"
                     percentage = int(round(float(hitter_hs_count) / float(hitter.get_all_hits()), 2) * 100)
-                    self.game.send_rcon("%s%s ^7has %d %s (%d percent)" % (player_color, hitter_name, hitter_hs_count, hs_plural, percentage))
+                    self.game.send_rcon("^7%s has ^2%d ^7%s (%d percent)" % (hitter_name, hitter_hs_count, hs_plural, percentage))
                 elif self.hit_points[hitpoint] in zones:
                     hitter.set_hitzones(zones[self.hit_points[hitpoint]])
                 logger.debug("Player %d %s hit %d %s in the %s with %s", hitter_id, hitter_name, victim_id, self.game.players[victim_id].get_name(), self.hit_points[hitpoint], self.hit_item[hit_item])
