@@ -22,7 +22,7 @@ Modify the files '/conf/settings.conf' and '/conf/rules.conf'
 Run the bot: python spunky.py
 """
 
-__version__ = '1.6.0'
+__version__ = '1.6.1'
 
 
 ### IMPORTS
@@ -902,7 +902,7 @@ class LogParser(object):
         """
         tmp = line.strip()
         try:
-            new = "%s %s" % (tmp[0], ' '.join(tmp[2:]))
+            new = "%s%s" % (tmp[0], ''.join(tmp[1:]))
             self.handle_say(new)
         except IndexError:
             pass
