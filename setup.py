@@ -18,7 +18,7 @@ metadata = dict(re.findall("__([a-z]+)__ = '([^']+)'", open('spunky.py').read())
 
 long_description = """Overview
 ========
-Spunky Bot is a lightweight game server administration bot and RCON tool.
+`Spunky Bot`_ is a lightweight game server administration bot and RCON tool.
 Its purpose is to administer, manage and maintain an `Urban Terror`_ server and
 to provide real time statistical data for players.
 
@@ -56,6 +56,7 @@ Installation
 See the Homepage_ for usage and documentation or visit the Git Repository_
 for the source code.
 
+.. _Spunky Bot: http://spunkybot.de/
 .. _Urban Terror: http://www.urbanterror.info/
 .. _MIT: http://opensource.org/licenses/MIT
 .. _Homepage: http://spunkybot.de/
