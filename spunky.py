@@ -86,7 +86,7 @@ class LogParser(object):
         # RCON commands for the different admin roles
         self.user_cmds = ['bombstats', 'ctfstats', 'freezestats', 'forgiveall, forgiveprev', 'hestats', 'hs', 'hits',
                           'knife', 'register', 'regtest', 'spree', 'stats', 'teams', 'time', 'xlrstats', 'xlrtopstats']
-        self.mod_cmds = self.user_cmds + ['admintest', 'country', 'leveltest', 'list', 'nextmap', 'mute', 'poke',
+        self.mod_cmds = self.user_cmds + ['admintest', 'country', 'leveltest', 'list', 'locate', 'nextmap', 'mute', 'poke',
                                           'seen', 'shuffleteams', 'warn', 'warninfo', 'warnremove', 'warns', 'warntest']
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'find', 'force', 'kick', 'nuke', 'say',
                                            'tempban', 'warnclear']
@@ -1151,8 +1151,8 @@ class LogParser(object):
                 player_admin_role = self.game.players[sar['player_num']].get_admin_role()
                 self.game.rcon_tell(sar['player_num'], "^7%s [^3@%s^7] is ^3%s ^7[^2%d^7]" % (self.game.players[sar['player_num']].get_name(), self.game.players[sar['player_num']].get_player_id(), self.game.players[sar['player_num']].roles[player_admin_role], player_admin_role))
 
-            # country
-            elif (sar['command'] == '!country' or sar['command'] == '@country') and self.game.players[sar['player_num']].get_admin_role() >= 20:
+            # country / locate
+            elif (sar['command'] == '!country' or sar['command'] == '@country' or sar['command'] == '!locate') and self.game.players[sar['player_num']].get_admin_role() >= 20:
                 if line.split(sar['command'])[1]:
                     user = line.split(sar['command'])[1].strip()
                     found, victim, msg = self.player_found(user)
