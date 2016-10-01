@@ -947,6 +947,7 @@ class LogParser(object):
                        'spec': 'spectator too long on full server',
                        'ci': 'connection interrupted',
                        'whiner': 'stop complaining about camp, lag or block',
+                       'skill': 'skill too low for this server',
                        'name': 'do not use offensive names'}
 
         poke_options = ['Go', 'Wake up', '*poke*', 'Attention', 'Get up', 'Move out']
