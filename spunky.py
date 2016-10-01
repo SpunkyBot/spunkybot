@@ -142,6 +142,7 @@ class LogParser(object):
         self.players_lock = RLock()
         self.firstblood = False
         self.firstnadekill = False
+        self.firstknifekill = False
 
         # enable/disable autokick for team killing
         self.tk_autokick = config.getboolean('bot', 'teamkill_autokick') if config.has_option('bot', 'teamkill_autokick') else True
@@ -541,9 +542,11 @@ class LogParser(object):
         if self.show_first_kill_msg and not self.ffa_lms_gametype:
             self.firstblood = True
             self.firstnadekill = True
+            self.firstknifekill = True
         else:
             self.firstblood = False
             self.firstnadekill = False
+            self.firstknifekill = False
 
     def handle_userinfo(self, line):
         """
@@ -769,9 +772,14 @@ class LogParser(object):
                     self.firstblood = False
                     if death_cause == 'UT_MOD_HEGRENADE':
                         self.firstnadekill = False
+                    if death_cause == 'UT_MOD_KNIFE' or death_cause == 'UT_MOD_KNIFE_THROWN':
+                        self.firstknifekill = False
                 elif self.firstnadekill and death_cause == 'UT_MOD_HEGRENADE':
                     self.game.rcon_bigtext("^3%s: ^7first HE grenade kill" % killer_name)
                     self.firstnadekill = False
+                elif self.firstknifekill and (death_cause == 'UT_MOD_KNIFE' or death_cause == 'UT_MOD_KNIFE_THROWN'):
+                    self.game.rcon_bigtext("^3%s: ^7first knife kill" % killer_name)
+                    self.firstknifekill = False
 
                 # bomb mode
                 if self.bomb_gametype:
