@@ -2083,7 +2083,7 @@ class LogParser(object):
                 else:
                     if self.ts_gametype or self.bomb_gametype or self.freeze_gametype:
                         self.ts_do_team_balance = True
-                        self.game.rcon_say("^7Teams will be balanced at the end of the round!")
+                        self.game.rcon_say("^7Teams will be balanced at the end of this round!")
             else:
                 self.game.rcon_say("^7Teams are already balanced")
                 self.ts_do_team_balance = False
