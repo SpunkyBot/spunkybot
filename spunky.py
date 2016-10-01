@@ -687,7 +687,8 @@ class LogParser(object):
                               10: 'awesome!',
                               15: 'unbelievable!',
                               20: '^1MANIAC!',
-                              25: '^2AIMBOT?'}
+                              25: '^2AIMBOT?',
+                              30: 'stop that'}
                     if self.spam_headshot_hits_msg and hitter_hs_count in hs_msg:
                         self.game.rcon_bigtext("^3%s: ^2%d ^7HeadShots, %s" % (hitter_name, hitter_hs_count, hs_msg[hitter_hs_count]))
                     hs_plural = "headshots" if hitter_hs_count > 1 else "headshot"
