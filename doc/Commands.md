@@ -61,6 +61,8 @@
 	- Short: `!lt [<name>]`
 - **list** - list all connected players
 	- Usage: `!list`
+- **locate** - display geolocation info of the player
+	- Usage: `!locate <name>`
 - **nextmap** - display the next map in rotation
 	- Usage: `!nextmap`
 - **mute** - mute or unmute a player
@@ -75,7 +77,7 @@
 - **warn** - warn user
 	- Usage: `!warn <name> [<reason>]`
 	- Short: `!w <name> [<reason>]`
-	- Available short form reasons: _tk_, _obj_, _spec_, _ping_, _spam_, _camp_, _lang_,  _racism_
+	- Available short form reasons: _tk_, _obj_, _spec_, _ping_, _spam_, _camp_, _lang_,  _racism_, _name_, _skill_, _whiner_
 - **warninfo** - display how many warnings the player has
 	- Usage: `!warninfo <name>`
 	- Short: `!wi <name>`
