@@ -11,8 +11,8 @@ This program is released under the MIT License. See LICENSE for more details.
 ## About ##
 Spunky Bot is a lightweight game server administration bot and RCON tool,
 inspired by the eb2k9 bot by Shawn Haggard.
-The purpose of Spunky Bot is to administrate an Urban Terror 4.1 / 4.2 server
-and provide statistical data for players.
+The purpose of Spunky Bot is to administrate an Urban Terror 4.1 / 4.2 / 4.3
+server and provide statistical data for players.
 
 ## Configuration ##
 Modify the UrT server config as follows:
@@ -73,7 +73,7 @@ class LogParser(object):
         self.hit_item = {1: "UT_MOD_KNIFE", 2: "UT_MOD_BERETTA", 3: "UT_MOD_DEAGLE", 4: "UT_MOD_SPAS", 5: "UT_MOD_MP5K",
                          6: "UT_MOD_UMP45", 8: "UT_MOD_LR300", 9: "UT_MOD_G36", 10: "UT_MOD_PSG1", 14: "UT_MOD_SR8",
                          15: "UT_MOD_AK103", 17: "UT_MOD_NEGEV", 19: "UT_MOD_M4", 20: "UT_MOD_GLOCK", 21: "UT_MOD_COLT1911",
-                         22: "UT_MOD_MAC11", 23: "UT_MOD_BLED", 24: "UT_MOD_KICKED", 25: "UT_MOD_KNIFE_THROWN"}
+                         22: "UT_MOD_MAC11", 23: "UT_MOD_BLED"}
         self.death_cause = {1: "MOD_WATER", 3: "MOD_LAVA", 5: "UT_MOD_TELEFRAG", 6: "MOD_FALLING", 7: "UT_MOD_SUICIDE",
                             9: "MOD_TRIGGER_HURT", 10: "MOD_CHANGE_TEAM", 12: "UT_MOD_KNIFE", 13: "UT_MOD_KNIFE_THROWN",
                             14: "UT_MOD_BERETTA", 15: "UT_MOD_DEAGLE", 16: "UT_MOD_SPAS", 17: "UT_MOD_UMP45", 18: "UT_MOD_MP5K",
@@ -81,7 +81,7 @@ class LogParser(object):
                             24: "UT_MOD_KICKED", 25: "UT_MOD_HEGRENADE", 28: "UT_MOD_SR8", 30: "UT_MOD_AK103",
                             31: "UT_MOD_SPLODED", 32: "UT_MOD_SLAPPED", 33: "UT_MOD_SMITED", 34: "UT_MOD_BOMBED",
                             35: "UT_MOD_NUKED", 36: "UT_MOD_NEGEV", 37: "UT_MOD_HK69_HIT", 38: "UT_MOD_M4",
-                            39: "UT_MOD_GLOCK", 40: "UT_MOD_COLT1911", 41: "UT_MOD_MAC11", 42: "UT_MOD_FLAG", 43: "UT_MOD_GOOMBA"}
+                            39: "UT_MOD_GLOCK", 40: "UT_MOD_COLT1911", 41: "UT_MOD_MAC11"}
 
         # RCON commands for the different admin roles
         self.user_cmds = ['bombstats', 'ctfstats', 'freezestats', 'forgiveall, forgiveprev', 'hestats', 'hs', 'hits',
@@ -137,7 +137,7 @@ class LogParser(object):
         self.freeze_gametype = False
         self.ts_do_team_balance = False
         self.allow_cmd_teams = True
-        self.urt42_modversion = True
+        self.urt_modversion = None
         self.game = None
         self.players_lock = RLock()
         self.firstblood = False
@@ -218,24 +218,27 @@ class LogParser(object):
                 tmp = line.split()
                 if len(tmp) > 1 and tmp[1] == "InitGame:":
                     game_start = True
-                    if 'g_modversion\\4.1' in line:
+                    if 'g_modversion\\4.3' in line:
+                        self.hit_item.update({23: "UT_MOD_FRF1", 24: "UT_MOD_BENELLI", 25: "UT_MOD_P90",
+                                              26: "UT_MOD_MAGNUM", 29: "UT_MOD_KICKED", 30: "UT_MOD_KNIFE_THROWN"})
+                        self.death_cause.update({42: "UT_MOD_FRF1", 43: "UT_MOD_BENELLI", 44: "UT_MOD_P90", 45: "UT_MOD_MAGNUM",
+                                                 46: "UT_MOD_TOD50", 47: "UT_MOD_FLAG", 48: "UT_MOD_GOOMBA"})
+                        self.urt_modversion = 43
+                        logger.info("Game modversion       : 4.3")
+                    elif 'g_modversion\\4.2' in line:
+                        self.hit_item.update({23: "UT_MOD_BLED", 24: "UT_MOD_KICKED", 25: "UT_MOD_KNIFE_THROWN"})
+                        self.death_cause.update({42: "UT_MOD_FLAG", 43: "UT_MOD_GOOMBA"})
+                        self.urt_modversion = 42
+                        logger.info("Game modversion       : 4.2")
+                    elif 'g_modversion\\4.1' in line:
                         # hit zone support for UrT 4.1
                         self.hit_points = {0: "HEAD", 1: "HELMET", 2: "TORSO", 3: "KEVLAR", 4: "ARMS", 5: "LEGS", 6: "BODY"}
-                        self.hit_item = {1: "UT_MOD_KNIFE", 2: "UT_MOD_BERETTA", 3: "UT_MOD_DEAGLE", 4: "UT_MOD_SPAS",
-                                         5: "UT_MOD_MP5K", 6: "UT_MOD_UMP45", 8: "UT_MOD_LR300", 9: "UT_MOD_G36",
-                                         10: "UT_MOD_PSG1", 14: "UT_MOD_SR8", 15: "UT_MOD_AK103", 17: "UT_MOD_NEGEV",
-                                         19: "UT_MOD_M4", 21: "UT_MOD_KICKED", 22: "UT_MOD_KNIFE_THROWN"}
-                        self.death_cause = {1: "MOD_WATER", 3: "MOD_LAVA", 5: "UT_MOD_TELEFRAG", 6: "MOD_FALLING",
-                                            7: "UT_MOD_SUICIDE", 9: "MOD_TRIGGER_HURT", 10: "MOD_CHANGE_TEAM",
-                                            12: "UT_MOD_KNIFE", 13: "UT_MOD_KNIFE_THROWN", 14: "UT_MOD_BERETTA",
-                                            15: "UT_MOD_DEAGLE", 16: "UT_MOD_SPAS", 17: "UT_MOD_UMP45", 18: "UT_MOD_MP5K",
-                                            19: "UT_MOD_LR300", 20: "UT_MOD_G36", 21: "UT_MOD_PSG1", 22: "UT_MOD_HK69",
-                                            23: "UT_MOD_BLED", 24: "UT_MOD_KICKED", 25: "UT_MOD_HEGRENADE",
-                                            28: "UT_MOD_SR8", 30: "UT_MOD_AK103", 31: "UT_MOD_SPLODED", 32: "UT_MOD_SLAPPED",
-                                            33: "UT_MOD_BOMBED", 34: "UT_MOD_NUKED", 35: "UT_MOD_NEGEV", 37: "UT_MOD_HK69_HIT",
-                                            38: "UT_MOD_M4", 39: "UT_MOD_FLAG", 40: "UT_MOD_GOOMBA"}
-                        self.urt42_modversion = False
-                        logger.info("Game modversion 4.1 detected")
+                        self.hit_item.update({21: "UT_MOD_KICKED", 22: "UT_MOD_KNIFE_THROWN"})
+                        self.death_cause.update({33: "UT_MOD_BOMBED", 34: "UT_MOD_NUKED", 35: "UT_MOD_NEGEV",
+                                                 39: "UT_MOD_FLAG", 40: "UT_MOD_GOOMBA"})
+                        self.urt_modversion = 41
+                        logger.info("Game modversion       : 4.1")
+
                     if 'g_gametype\\0\\' in line or 'g_gametype\\1\\' in line or 'g_gametype\\9\\' in line or 'g_gametype\\11\\' in line:
                         # disable teamkill event and some commands for FFA (0), LMS (1), Jump (9), Gun (11)
                         self.ffa_lms_gametype = True
@@ -282,7 +285,7 @@ class LogParser(object):
         self.find_game_start()
 
         # create instance of Game
-        self.game = Game(self.config_file, self.urt42_modversion)
+        self.game = Game(self.config_file, self.urt_modversion)
 
         self.log_file.seek(0, 2)
         while self.log_file:
@@ -931,7 +934,7 @@ class LogParser(object):
         elif self.freeze_gametype:
             disabled_cmds = ['bombstats', 'ctfstats']
 
-        if not self.urt42_modversion:
+        if self.urt_modversion == 41:
             disabled_cmds += ['kill']
 
         for item in disabled_cmds:
@@ -978,7 +981,7 @@ class LogParser(object):
                 self.game.rcon_tell(sar['player_num'], "^2%d ^7total hits - ^2%d ^7headshots" % (self.game.players[sar['player_num']].get_all_hits(), self.game.players[sar['player_num']].get_headshots()))
                 self.game.rcon_tell(sar['player_num'], "^2%d ^7HE grenade kills" % self.game.players[sar['player_num']].get_he_kills())
                 if self.ctf_gametype:
-                    if self.urt42_modversion:
+                    if self.urt_modversion > 41:
                         self.game.rcon_tell(sar['player_num'], "^7flags captured: ^2%d ^7- flags returned: ^2%d ^7- fastest cap: ^2%s ^7sec" % (self.game.players[sar['player_num']].get_flags_captured(), self.game.players[sar['player_num']].get_flags_returned(), self.game.players[sar['player_num']].get_flag_capture_time()))
                     else:
                         self.game.rcon_tell(sar['player_num'], "^7flags captured: ^2%d ^7- flags returned: ^2%d" % (self.game.players[sar['player_num']].get_flags_captured(), self.game.players[sar['player_num']].get_flags_returned()))
@@ -1066,7 +1069,7 @@ class LogParser(object):
             # ctfstats - display ctf statistics
             elif sar['command'] == '!ctfstats':
                 if self.ctf_gametype:
-                    if self.urt42_modversion:
+                    if self.urt_modversion > 41:
                         self.game.rcon_tell(sar['player_num'], "^7flags captured: ^2%d ^7- flags returned: ^2%d ^7- fastest cap: ^2%s ^7sec" % (self.game.players[sar['player_num']].get_flags_captured(), self.game.players[sar['player_num']].get_flags_returned(), self.game.players[sar['player_num']].get_flag_capture_time()))
                     else:
                         self.game.rcon_tell(sar['player_num'], "^7flags captured: ^2%d ^7- flags returned: ^2%d" % (self.game.players[sar['player_num']].get_flags_captured(), self.game.players[sar['player_num']].get_flags_returned()))
@@ -1776,7 +1779,7 @@ class LogParser(object):
 
             # kill - kill a player
             elif sar['command'] == '!kill' and self.game.players[sar['player_num']].get_admin_role() >= 80:
-                if self.urt42_modversion:
+                if self.urt_modversion > 41:
                     if line.split(sar['command'])[1]:
                         user = line.split(sar['command'])[1].strip()
                         found, victim, msg = self.player_found(user)
@@ -2812,7 +2815,7 @@ class Game(object):
     """
     Game class
     """
-    def __init__(self, config_file, urt42_modversion):
+    def __init__(self, config_file, urt_modversion):
         """
         create a new instance of Game
 
@@ -2825,7 +2828,7 @@ class Game(object):
         self.maplist = []
         self.players = {}
         self.live = False
-        self.urt42_modversion = urt42_modversion
+        self.urt_modversion = urt_modversion
         game_cfg = ConfigParser.ConfigParser()
         game_cfg.read(config_file)
         self.rcon_handle = Rcon(game_cfg.get('server', 'server_ip'), game_cfg.get('server', 'server_port'), game_cfg.get('server', 'rcon_password'))
@@ -2933,7 +2936,7 @@ class Game(object):
         @param reason: Reason for kick
         @type  reason: String
         """
-        if reason and self.urt42_modversion:
+        if reason and self.urt_modversion > 41:
             self.send_rcon('kick %d "%s"' % (player_num, reason))
         else:
             self.send_rcon('kick %d' % player_num)
