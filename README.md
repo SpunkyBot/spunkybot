@@ -3,7 +3,7 @@ This README is just a quick start document. You can find more detailed documenta
 # What is Spunky Bot?
 
 **Spunky Bot** is a lightweight game server administration bot and RCON tool.
-Its purpose is to administer, manage and maintain an [Urban Terror](http://www.urbanterror.info) 4.1 / 4.2 server and to provide real time statistical data for players.
+Its purpose is to administer, manage and maintain an [Urban Terror](http://www.urbanterror.info) 4.1 / 4.2 / 4.3 server and to provide real time statistical data for players.
 Spunky Bot is a cross-platform package and offers in-game commands without authentication and automated administration even when no admin is online.
 The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was released under the Beerware License.
 
@@ -32,10 +32,10 @@ If you want to know more, this is a list of selected starting points:
 
 
 ## Environment
-- Urban Terror 4.1.1 and 4.2.023
-- Python 2.6.x / 2.7.x
+- Urban Terror 4.1.1 / 4.2.023 / 4.3.0
+- Python 2.6 / 2.7
 - SQLite 3 database
-- Cross-platform (tested on Debian 6 / 7 / 8, Ubuntu 12 / 14, CentOS 6.5 / 7.1, Mac OS X 10.11, Windows 7 / 10)
+- Cross-platform (tested on Debian 6 / 7 / 8, Ubuntu 12 / 14 / 16, CentOS 6 / 7, Mac OS X 10.12, Windows 7 / 10)
 - Supporting 32-bit and 64-bit operating systems
 
 
@@ -131,7 +131,7 @@ The code of Spunky Bot is released under the MIT License. See the [LICENSE](http
  - Schedule: [schedule.py](https://github.com/dbader/schedule)
 	- This file is released under the MIT License. 
 
-Urban Terror™ and FrozenSand™ are trademarks of 0870760 B.C. Ltd.
+Urban Terror™ and FrozenSand™ are trademarks of Frozensand Games Limited.
 
 
 ## Thank you!
