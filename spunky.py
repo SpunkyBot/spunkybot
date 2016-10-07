@@ -1777,6 +1777,14 @@ class LogParser(object):
             elif sar['command'] == '!swapteams' and self.game.players[sar['player_num']].get_admin_role() >= 80:
                 self.game.send_rcon('swapteams')
 
+            # exec - execute given config file
+            elif sar['command'] == '!exec' and self.game.players[sar['player_num']].get_admin_role() >= 40:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip()
+                    self.game.send_rcon('exec %s' % arg)
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7Usage: !exec <filename>")
+
             # kill - kill a player
             elif sar['command'] == '!kill' and self.game.players[sar['player_num']].get_admin_role() >= 80:
                 if self.urt_modversion > 41:

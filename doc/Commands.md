@@ -147,6 +147,10 @@
 
 - **banlist** - display the last active 10 bans
 	- Usage: `!banlist`
+- **cyclemap** - start next map in rotation
+	- Usage: `!cyclemap`
+- **exec** - execute given config file
+	- Usage: `!exec <filename>`
 - **kiss** - clear all player warnings
 	- Usage: `!kiss`
 - **kill** - kill a player
@@ -168,18 +172,16 @@
 	- Usage: `!maprestart`
 - **moon** - activate Moon mode (low gravity)
 	- Usage: `!moon <on/off>`
-- **cyclemap** - start next map in rotation
-	- Usage: `!cyclemap`
-- **setnextmap** - set the given map as nextmap
-	- Usage: `!setnextmap <ut4_name>`
-- **swapteams** - swap the current teams
-	- Usage: `!swapteams`
 - **permban** - ban a player permanent
 	- Usage: `!permban <name> <reason>`
 	- Short: `!pb <name> <reason>`
 - **putgroup** - add a client to a group
 	- Usage: `!putgroup <name> <group>`
 	- Available Groups: _user_, _regular_, _mod_, _admin_, _fulladmin_
+- **setnextmap** - set the given map as nextmap
+	- Usage: `!setnextmap <ut4_name>`
+- **swapteams** - swap the current teams
+	- Usage: `!swapteams`
 - **unban** - unban a player from the database
 	- Usage: `!unban <ID>`
 
