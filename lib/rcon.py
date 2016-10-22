@@ -6,7 +6,7 @@ Author: Alexander Kress
 This program is released under the MIT License.
 """
 
-__version__ = '1.0.9'
+__version__ = '1.0.10'
 
 
 ### IMPORTS
@@ -112,8 +112,8 @@ class Rcon(object):
         mapcycle_file = self.get_cvar('g_mapcycle')
         try:
             # set full path of mapcycle.txt
-            mc_home_path = os.path.join(fs_homepath, fs_game, mapcycle_file)
-            mc_base_path = os.path.join(fs_basepath, fs_game, mapcycle_file)
+            mc_home_path = os.path.join(fs_homepath, fs_game, mapcycle_file) if fs_homepath else ""
+            mc_base_path = os.path.join(fs_basepath, fs_game, mapcycle_file) if fs_basepath else ""
         except TypeError:
             raise Exception('Server did not respond to mapcycle path request, please restart the Bot')
         if os.path.isfile(mc_home_path):
