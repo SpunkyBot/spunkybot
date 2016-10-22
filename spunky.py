@@ -192,8 +192,8 @@ class LogParser(object):
             # go to the end of the file
             self.log_file.seek(0, 2)
             # start parsing the games logfile
-            self.read_log()
             logger.info("Parsing Gamelog file  : %s", games_log)
+            self.read_log()
 
     def find_game_start(self):
         """
