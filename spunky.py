@@ -91,7 +91,7 @@ class LogParser(object):
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'find', 'force', 'kick', 'nuke', 'say',
                                            'tempban', 'warnclear']
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'scream', 'slap', 'swap', 'version', 'veto']
-        self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'lastbans', 'lookup',
+        self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'exec', 'kill', 'kiss', 'lastbans', 'lookup',
                                                        'makereg', 'map', 'maps', 'maprestart', 'moon',
                                                        'permban', 'putgroup', 'setnextmap', 'swapteams', 'unban', 'ungroup']
         # alphabetic sort of the commands
@@ -1778,7 +1778,7 @@ class LogParser(object):
                 self.game.send_rcon('swapteams')
 
             # exec - execute given config file
-            elif sar['command'] == '!exec' and self.game.players[sar['player_num']].get_admin_role() >= 40:
+            elif sar['command'] == '!exec' and self.game.players[sar['player_num']].get_admin_role() >= 80:
                 if line.split(sar['command'])[1]:
                     arg = line.split(sar['command'])[1].strip()
                     self.game.send_rcon('exec %s' % arg)
