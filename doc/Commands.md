@@ -122,6 +122,15 @@
 
 ### Full Admin [60]
 
+- **ban** - ban a player for 7 days
+	- Usage: `!ban <name> <reason>`
+- **baninfo** - display active bans of a player
+	- Usage: `!baninfo <name>`
+	- Short: `!bi <name>`
+- **ci** - kick player with connection interrupt
+	- Usage: `!ci <name>`
+- **rain** - enables or disables rain
+	- Usage: `!rain <on/off>`
 - **scream** - scream a message in different colors to all players
 	- Usage: `!scream <text>`
 - **slap** - slap a player (a number of times)
@@ -134,13 +143,6 @@
 	- Usage: `!version`
 - **veto** - stop voting process
 	- Usage: `!veto`
-- **ci** - kick player with connection interrupt
-	- Usage: `!ci <name>`
-- **ban** - ban a player for 7 days
-	- Usage: `!ban <name> <reason>`
-- **baninfo** - display active bans of a player
-	- Usage: `!baninfo <name>`
-	- Short: `!bi <name>`
 
 
 ### Senior Admin [80]

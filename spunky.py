@@ -90,7 +90,7 @@ class LogParser(object):
                                           'seen', 'shuffleteams', 'warn', 'warninfo', 'warnremove', 'warns', 'warntest']
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'find', 'force', 'kick', 'nuke', 'say',
                                            'tempban', 'warnclear']
-        self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'scream', 'slap', 'swap', 'version', 'veto']
+        self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'rain', 'scream', 'slap', 'swap', 'version', 'veto']
         self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'exec', 'kill', 'kiss', 'lastbans', 'lookup',
                                                        'makereg', 'map', 'maps', 'maprestart', 'moon',
                                                        'permban', 'putgroup', 'setnextmap', 'swapteams', 'unban', 'ungroup']
@@ -1698,6 +1698,21 @@ class LogParser(object):
                             self.game.rcon_tell(sar['player_num'], "^3%s ^7has no active ban" % victim.get_name())
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !baninfo <name>")
+
+            # rain - enables or disables rain - !rain <on/off>
+            elif sar['command'] == '!rain' and self.game.players[sar['player_num']].get_admin_role() >= 60:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip()
+                    if arg == "off":
+                        self.game.send_rcon('g_enableprecip 0')
+                        self.game.rcon_tell(sar['player_num'], "^7Rain: ^1Off")
+                    elif arg == "on":
+                        self.game.send_rcon('g_enableprecip 1')
+                        self.game.rcon_tell(sar['player_num'], "^7Rain: ^2On")
+                    else:
+                        self.game.rcon_tell(sar['player_num'], "^7Usage: !rain <on/off>")
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7Usage: !rain <on/off>")
 
 ## senior admin level 80
             # kiss - clear all player warnings - !clear [<player>]
