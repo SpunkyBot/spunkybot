@@ -92,8 +92,8 @@ class LogParser(object):
                                            'tempban', 'warnclear']
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'rain', 'scream', 'slap', 'swap', 'version', 'veto']
         self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'exec', 'kill', 'kiss', 'lastbans', 'lookup',
-                                                       'makereg', 'map', 'maps', 'maprestart', 'moon',
-                                                       'permban', 'putgroup', 'reload', 'setnextmap', 'swapteams', 'unban', 'ungroup']
+                                                       'makereg', 'map', 'maps', 'maprestart', 'moon', 'password', 'permban',
+                                                       'putgroup', 'reload', 'setnextmap', 'swapteams', 'unban', 'ungroup']
         # alphabetic sort of the commands
         self.mod_cmds.sort()
         self.admin_cmds.sort()
@@ -2008,6 +2008,15 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !unban <@ID>")
 
 ## head admin level 100
+            # password - set private server password
+            elif sar['command'] == '!password' and self.game.players[sar['player_num']].get_admin_role() == 100:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip()
+                    self.game.send_rcon('g_password %s' % arg)
+                    self.game.rcon_tell(sar['player_num'], "^7Password set to '%s' - Server is private" % arg)
+                else:
+                    self.game.send_rcon('g_password ""')
+                    self.game.rcon_tell(sar['player_num'], "^7Password removed - Server is public")
 
             # reload
             elif sar['command'] == '!reload' and self.game.players[sar['player_num']].get_admin_role() == 100:

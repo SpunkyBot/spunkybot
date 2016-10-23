@@ -190,6 +190,9 @@
 
 ### Head Admin [100]
 
+- **password** - set private server password
+	- Usage: `!password [<password>]`
+	- Set an empty string to remove a password
 - **putgroup** - add a client to a group
 	- Usage: `!putgroup <name> <group>`
 	- Available Groups: _user_, _regular_, _mod_, _admin_, _fulladmin_, _senioradmin_
