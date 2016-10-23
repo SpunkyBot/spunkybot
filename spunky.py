@@ -40,7 +40,8 @@ import logging.handlers
 import lib.pygeoip as pygeoip
 import lib.schedule as schedule
 
-from lib.rcon import Rcon
+from lib.pyquake3 import PyQuake3
+from Queue import Queue
 from threading import Thread
 from threading import RLock
 
@@ -366,7 +367,7 @@ class LogParser(object):
         """
         try:
             # get rcon status
-            self.game.get_rcon_handle().get_status()
+            self.game.send_rcon('status')
             with self.players_lock:
                 # get number of connected players
                 counter = len(self.game.players) - 1  # bot is counted as player
@@ -441,8 +442,8 @@ class LogParser(object):
         """
         if self.max_ping > 0:
             # rcon update status
-            self.game.get_rcon_handle().quake.rcon_update()
-            for player in self.game.get_rcon_handle().quake.players:
+            self.game.quake.rcon_update()
+            for player in self.game.quake.players:
                 # if ping is too high, increase warn counter, Admins or higher levels will not get the warning
                 try:
                     ping_value = player.ping
@@ -1673,8 +1674,8 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
                         # update rcon status
-                        self.game.get_rcon_handle().quake.rcon_update()
-                        for player in self.game.get_rcon_handle().quake.players:
+                        self.game.quake.rcon_update()
+                        for player in self.game.quake.players:
                             if victim.get_player_num() == player.num:
                                 player_ping = player.ping
                         if player_ping == 999:
@@ -2076,7 +2077,7 @@ class LogParser(object):
         """
         return the next map in the mapcycle
         """
-        g_nextmap = self.game.get_rcon_handle().get_cvar('g_nextmap')
+        g_nextmap = self.game.get_cvar('g_nextmap')
         if g_nextmap and g_nextmap.split(" ")[0].strip() in self.game.get_all_maps():
             msg = "^7Next Map: ^3%s" % g_nextmap
             self.game.next_mapname = g_nextmap
@@ -2936,7 +2937,10 @@ class Game(object):
         self.urt_modversion = urt_modversion
         game_cfg = ConfigParser.ConfigParser()
         game_cfg.read(config_file)
-        self.rcon_handle = Rcon(game_cfg.get('server', 'server_ip'), game_cfg.get('server', 'server_port'), game_cfg.get('server', 'rcon_password'))
+        self.quake = PyQuake3("%s:%s" % (game_cfg.get('server', 'server_ip'), game_cfg.get('server', 'server_port')), game_cfg.get('server', 'rcon_password'))
+        self.queue = Queue()
+        self.rcon_lock = RLock()
+        self.thread_rcon()
         logger.info("Opening RCON socket   : OK")
 
         # dynamic mapcycle
@@ -2954,6 +2958,106 @@ class Game(object):
         logger.info("Spunky Bot is running until you are closing this session or pressing CTRL + C to abort this process.")
         logger.info("*** Note: Use the provided initscript to run Spunky Bot as daemon ***")
 
+    def thread_rcon(self):
+        """
+        Thread process for starting method rcon_process
+        """
+        # start Thread
+        processor = Thread(target=self.rcon_process)
+        processor.setDaemon(True)
+        processor.start()
+
+    def rcon_process(self):
+        """
+        Thread process
+        """
+        while 1:
+            if not self.queue.empty():
+                if self.live:
+                    with self.rcon_lock:
+                        try:
+                            command = self.queue.get()
+                            if command != 'status':
+                                self.quake.rcon(command)
+                            else:
+                                self.quake.rcon_update()
+                        except Exception as err:
+                            logger.error(err, exc_info=True)
+                            #pass
+            time.sleep(.33)
+
+    def get_quake_value(self, value):
+        """
+        get Quake3 value
+        """
+        if self.live:
+            with self.rcon_lock:
+                self.quake.update()
+                return self.quake.values[value]
+
+    def get_rcon_output(self, value):
+        """
+        get RCON output for value
+        """
+        if self.live:
+            with self.rcon_lock:
+                return self.quake.rcon(value)
+
+    def get_cvar(self, value):
+        """
+        get CVAR value
+        """
+        if self.live:
+            with self.rcon_lock:
+                try:
+                    ret_val = self.quake.rcon(value)[1].split(':')[1].split('^7')[0].lstrip('"')
+                except IndexError:
+                    ret_val = None
+                time.sleep(.33)
+                return ret_val
+
+    def get_mapcycle_path(self):
+        """
+        get the full path of mapcycle.txt file
+        """
+        maplist = []
+        self.quake.rcon_update()
+        # get path of fs_homepath and fs_basepath
+        fs_homepath = self.get_cvar('fs_homepath')
+        logger.debug("fs_homepath           : %s", fs_homepath)
+        fs_basepath = self.get_cvar('fs_basepath')
+        logger.debug("fs_basepath           : %s", fs_basepath)
+        fs_game = self.get_cvar('fs_game')
+        # get file name of mapcycle.txt
+        mapcycle_file = self.get_cvar('g_mapcycle')
+        try:
+            # set full path of mapcycle.txt
+            mc_home_path = os.path.join(fs_homepath, fs_game, mapcycle_file) if fs_homepath else ""
+            mc_base_path = os.path.join(fs_basepath, fs_game, mapcycle_file) if fs_basepath else ""
+        except TypeError:
+            raise Exception('Server did not respond to mapcycle path request, please restart the Bot')
+        if os.path.isfile(mc_home_path):
+            mapcycle_path = mc_home_path
+        elif os.path.isfile(mc_base_path):
+            mapcycle_path = mc_base_path
+        else:
+            mapcycle_path = None
+        if mapcycle_path:
+            logger.info("Mapcycle path         : %s", mapcycle_path)
+            with open(mapcycle_path, 'r') as file_handle:
+                lines = [line for line in file_handle if line != '\n']
+            try:
+                while 1:
+                    tmp = lines.pop(0).strip()
+                    if tmp[0] == '{':
+                        while tmp[0] != '}':
+                            tmp = lines.pop(0).strip()
+                        tmp = lines.pop(0).strip()
+                    maplist.append(tmp)
+            except IndexError:
+                pass
+        return maplist
+
     def send_rcon(self, command):
         """
         send RCON command
@@ -2962,7 +3066,8 @@ class Game(object):
         @type  command: String
         """
         if self.live:
-            self.rcon_handle.push(command)
+            with self.rcon_lock:
+                self.queue.put(command)
 
     def rcon_say(self, msg):
         """
@@ -3020,13 +3125,7 @@ class Game(object):
         """
         clear RCON queue
         """
-        self.rcon_handle.clear()
-
-    def get_rcon_handle(self):
-        """
-        get RCON handle
-        """
-        return self.rcon_handle
+        self.queue.queue.clear()
 
     def kick_player(self, player_num, reason=''):
         """
@@ -3047,22 +3146,21 @@ class Game(object):
         go live
         """
         self.live = True
-        self.rcon_handle.go_live()
         self.set_all_maps()
-        self.maplist = filter(None, self.rcon_handle.get_mapcycle_path())
+        self.maplist = filter(None, self.get_mapcycle_path())
         self.set_current_map()
         self.rcon_say("^7Powered by ^8[Spunky Bot %s] ^1[www.spunkybot.de]" % __version__)
-        logger.info("*** Live tracking: Current map: %s / Next map: %s ***", self.mapname, self.next_mapname)
         logger.info("Mapcycle: %s", ', '.join(self.maplist))
-        logger.info("Server CVAR g_logsync : %s", self.get_rcon_handle().get_cvar('g_logsync'))
-        logger.info("Server CVAR g_loghits : %s", self.get_rcon_handle().get_cvar('g_loghits'))
+        logger.info("*** Live tracking: Current map: %s / Next map: %s ***", self.mapname, self.next_mapname)
+        logger.info("Server CVAR g_logsync : %s", self.get_cvar('g_logsync'))
+        logger.info("Server CVAR g_loghits : %s", self.get_cvar('g_loghits'))
 
     def set_current_map(self):
         """
         set the current and next map in rotation
         """
         try:
-            self.mapname = self.rcon_handle.get_quake_value('mapname')
+            self.mapname = self.get_quake_value('mapname')
         except KeyError:
             self.mapname = self.next_mapname
 
@@ -3090,9 +3188,9 @@ class Game(object):
         """
         set a list of all available maps
         """
-        all_maps = self.rcon_handle.get_rcon_output("dir map bsp")[1].split()
+        all_maps = self.get_rcon_output("dir map bsp")[1].split()
         all_maps_list = [maps.replace("/", "").replace(".bsp", "") for maps in all_maps if maps.startswith("/")]
-        pk3_list = self.rcon_handle.get_rcon_output("fdir *.pk3")[1].split()
+        pk3_list = self.get_rcon_output("fdir *.pk3")[1].split()
         all_pk3_list = [maps.replace("/", "").replace(".pk3", "").replace(".bsp", "") for maps in pk3_list if maps.startswith("/ut4_")]
 
         all_together = list(set(all_maps_list + all_pk3_list))
