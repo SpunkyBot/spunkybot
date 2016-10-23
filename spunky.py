@@ -1359,7 +1359,7 @@ class LogParser(object):
 ## admin level 40
             # admins - list all the online admins
             elif (sar['command'] == '!admins' or sar['command'] == '@admins') and self.game.players[sar['player_num']].get_admin_role() >= 40:
-                msg = "^7Admins online: %s" % ", ".join(["^3%s [^2%d^3]" % (player.get_name(), player.get_admin_role()) for player in self.game.players.itervalues() if player.get_admin_role() >= 20])
+                msg = self.get_admins_online()
                 self.tell_say_message(sar, msg)
 
             # aliases - list the aliases of the player
@@ -2002,6 +2002,17 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7Insufficient privileges to use command ^3%s" % sar['command'])
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Unknown command ^3%s" % sar['command'])
+
+    def get_admins_online(self):
+        """
+        return list of Admins online
+        """
+        liste = "%s" % ", ".join(["^3%s [^2%d^3]" % (player.get_name(), player.get_admin_role()) for player in self.game.players.itervalues() if player.get_admin_role() >= 20])
+        if liste:
+            msg = "^7Admins online: %s" % liste
+        else:
+            msg = "^7No admins online"
+        return msg
 
     def get_nextmap(self):
         """
