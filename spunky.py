@@ -1158,6 +1158,7 @@ class LogParser(object):
                                 self.game.rcon_tell(sar['player_num'], "^7Stats %s: ^7K ^2%d ^7D ^3%d ^7TK ^1%d ^7Ratio ^5%s ^7HS ^2%d" % (player.get_name(), player.get_db_kills(), player.get_db_deaths(), player.get_db_tks(), ratio, player.get_db_headshots()))
                             else:
                                 self.game.rcon_tell(sar['player_num'], "^7Sorry, this player is not registered")
+                            break
                     if not player_found:
                         self.game.rcon_tell(sar['player_num'], "^7No player found matching ^3%s" % arg)
                 else:
