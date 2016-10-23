@@ -22,7 +22,7 @@ Modify the files '/conf/settings.conf' and '/conf/rules.conf'
 Run the bot: python spunky.py
 """
 
-__version__ = '1.7.0'
+__version__ = '1.8.0'
 
 
 ### IMPORTS
@@ -40,8 +40,9 @@ import logging.handlers
 import lib.pygeoip as pygeoip
 import lib.schedule as schedule
 
-from lib.rcon import Rcon
-from lib.rules import Rules
+from lib.pyquake3 import PyQuake3
+from Queue import Queue
+from threading import Thread
 from threading import RLock
 
 
@@ -90,10 +91,10 @@ class LogParser(object):
                                           'seen', 'shuffleteams', 'warn', 'warninfo', 'warnremove', 'warns', 'warntest']
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'find', 'force', 'kick', 'nuke', 'say',
                                            'tempban', 'warnclear']
-        self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'scream', 'slap', 'swap', 'version', 'veto']
-        self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'kill', 'kiss', 'lastbans', 'lookup',
-                                                       'makereg', 'map', 'maps', 'maprestart', 'moon',
-                                                       'permban', 'putgroup', 'setnextmap', 'swapteams', 'unban', 'ungroup']
+        self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'rain', 'scream', 'slap', 'swap', 'version', 'veto']
+        self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'exec', 'kill', 'kiss', 'lastbans', 'lookup',
+                                                       'makereg', 'map', 'maps', 'maprestart', 'moon', 'password', 'permban',
+                                                       'putgroup', 'reload', 'setnextmap', 'swapteams', 'unban', 'ungroup']
         # alphabetic sort of the commands
         self.mod_cmds.sort()
         self.admin_cmds.sort()
@@ -174,6 +175,7 @@ class LogParser(object):
         curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `admin_role` = 100")
         self.iamgod = True if curs.fetchone()[0] < 1 else False
         logger.info("Connecting to Database: OK")
+        logger.debug("Cmd !iamgod available : %s", self.iamgod)
         # Master Server
         self.base_url = 'http://master.spunkybot.de'
         server_port = config.get('server', 'server_port') if config.has_option('server', 'server_port') else "27960"
@@ -181,7 +183,14 @@ class LogParser(object):
         data = {'v': __version__, 'p': server_port, 'o': platform.platform()}
         values = urllib.urlencode(data)
         self.ping_url = '%s/ping.php?%s' % (self.base_url, values)
-
+        # Rotating Messages and Rules
+        if config.getboolean('rules', 'show_rules'):
+            rules_frequency = config.getint('rules', 'rules_frequency')
+            self.rules_file = os.path.join(HOME, 'conf', 'rules.conf')
+            self.rules_frequency = rules_frequency if rules_frequency > 0 else 10
+            self.thread_rotate()
+            logger.info("Load rotating messages: OK")
+        # Parse Game log file
         try:
             # open game log file
             self.log_file = open(games_log, 'r')
@@ -192,8 +201,41 @@ class LogParser(object):
             # go to the end of the file
             self.log_file.seek(0, 2)
             # start parsing the games logfile
-            self.read_log()
             logger.info("Parsing Gamelog file  : %s", games_log)
+            self.read_log()
+
+    def thread_rotate(self):
+        """
+        Thread process for starting method rotate_messages
+        """
+        processor = Thread(target=self.rotating_messages)
+        processor.setDaemon(True)
+        processor.start()
+
+    def rotating_messages(self):
+        """
+        display rotating messages and rules
+        """
+        # initial wait
+        time.sleep(30)
+        while 1:
+            with open(self.rules_file, 'r') as filehandle:
+                rotation_msg = filehandle.readlines()
+            if not rotation_msg:
+                break
+            for line in rotation_msg:
+                # display rule
+                with self.players_lock:
+                    if "@admins" in line:
+                        self.game.rcon_say(self.get_admins_online())
+                    elif "@nextmap" in line:
+                        self.game.rcon_say(self.get_nextmap())
+                    elif "@time" in line:
+                        self.game.rcon_say("^7Time: %s" % time.strftime("%H:%M", time.localtime(time.time())))
+                    else:
+                        self.game.rcon_say("^2%s" % line.strip())
+                # wait for given delay in the config file
+                time.sleep(self.rules_frequency)
 
     def find_game_start(self):
         """
@@ -325,7 +367,7 @@ class LogParser(object):
         """
         try:
             # get rcon status
-            self.game.get_rcon_handle().get_status()
+            self.game.send_rcon('status')
             with self.players_lock:
                 # get number of connected players
                 counter = len(self.game.players) - 1  # bot is counted as player
@@ -400,8 +442,8 @@ class LogParser(object):
         """
         if self.max_ping > 0:
             # rcon update status
-            self.game.get_rcon_handle().quake.rcon_update()
-            for player in self.game.get_rcon_handle().quake.players:
+            self.game.quake.rcon_update()
+            for player in self.game.quake.players:
                 # if ping is too high, increase warn counter, Admins or higher levels will not get the warning
                 try:
                     ping_value = player.ping
@@ -562,6 +604,7 @@ class LogParser(object):
             challenge = True if 'challenge' in values else False
             name = values['name'].replace(' ', '') if 'name' in values else "UnnamedPlayer"
             ip_port = values['ip'] if 'ip' in values else "0.0.0.0:0"
+            auth = values['authl'] if 'authl' in values else ""
             if 'cl_guid' in values:
                 guid = values['cl_guid']
             elif 'skill' in values:
@@ -575,7 +618,7 @@ class LogParser(object):
             port = ip_port.split(":")[1].strip()
 
             if player_num not in self.game.players:
-                player = Player(player_num, ip_address, guid, name)
+                player = Player(player_num, ip_address, guid, name, auth)
                 self.game.add_player(player)
                 # kick banned player
                 player_ban_id = self.game.players[player_num].get_ban_id()
@@ -850,8 +893,9 @@ class LogParser(object):
             if player_num == BOT_PLAYER_NUM:
                 continue
             player_name = player.get_name()
+            player_authname = player.get_authname()
             player_id = "@%d" % player.get_player_id()
-            if user.upper() == player_name.upper() or user == str(player_num) or user == player_id:
+            if user.upper() == player_name.upper() or user == str(player_num) or user == player_id or user.lower() == player_authname:
                 victim = player
                 name_list = ["^3%s [^2%d^3]" % (player_name, player_num)]
                 break
@@ -1106,15 +1150,18 @@ class LogParser(object):
             elif sar['command'] == '!xlrstats':
                 if line.split(sar['command'])[1]:
                     arg = line.split(sar['command'])[1].strip()
+                    player_found = False
                     for player in self.game.players.itervalues():
                         if (arg.upper() in (player.get_name()).upper()) or arg == str(player.get_player_num()):
+                            player_found = True
                             if player.get_registered_user():
                                 ratio = round(float(player.get_db_kills()) / float(player.get_db_deaths()), 2) if player.get_db_deaths() > 0 else 1.0
                                 self.game.rcon_tell(sar['player_num'], "^7Stats %s: ^7K ^2%d ^7D ^3%d ^7TK ^1%d ^7Ratio ^5%s ^7HS ^2%d" % (player.get_name(), player.get_db_kills(), player.get_db_deaths(), player.get_db_tks(), ratio, player.get_db_headshots()))
                             else:
                                 self.game.rcon_tell(sar['player_num'], "^7Sorry, this player is not registered")
-                        else:
-                            self.game.rcon_tell(sar['player_num'], "^7No player found matching ^3%s" % arg)
+                            break
+                    if not player_found:
+                        self.game.rcon_tell(sar['player_num'], "^7No player found matching ^3%s" % arg)
                 else:
                     if self.game.players[sar['player_num']].get_registered_user():
                         ratio = round(float(self.game.players[sar['player_num']].get_db_kills()) / float(self.game.players[sar['player_num']].get_db_deaths()), 2) if self.game.players[sar['player_num']].get_db_deaths() > 0 else 1.0
@@ -1214,12 +1261,7 @@ class LogParser(object):
 
             # nextmap - display the next map in rotation
             elif (sar['command'] == '!nextmap' or sar['command'] == '@nextmap') and self.game.players[sar['player_num']].get_admin_role() >= 20:
-                g_nextmap = self.game.get_rcon_handle().get_cvar('g_nextmap')
-                if g_nextmap and g_nextmap.split(" ")[0].strip() in self.game.get_all_maps():
-                    msg = "^7Next Map: ^3%s" % g_nextmap
-                    self.game.next_mapname = g_nextmap
-                else:
-                    msg = "^7Next Map: ^3%s" % self.game.next_mapname
+                msg = self.get_nextmap()
                 self.tell_say_message(sar, msg)
 
             # mute - mute or unmute a player
@@ -1362,7 +1404,7 @@ class LogParser(object):
 ## admin level 40
             # admins - list all the online admins
             elif (sar['command'] == '!admins' or sar['command'] == '@admins') and self.game.players[sar['player_num']].get_admin_role() >= 40:
-                msg = "^7Admins online: %s" % ", ".join(["^3%s [^2%d^3]" % (player.get_name(), player.get_admin_role()) for player in self.game.players.itervalues() if player.get_admin_role() >= 20])
+                msg = self.get_admins_online()
                 self.tell_say_message(sar, msg)
 
             # aliases - list the aliases of the player
@@ -1632,8 +1674,8 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
                         # update rcon status
-                        self.game.get_rcon_handle().quake.rcon_update()
-                        for player in self.game.get_rcon_handle().quake.players:
+                        self.game.quake.rcon_update()
+                        for player in self.game.quake.players:
                             if victim.get_player_num() == player.num:
                                 player_ping = player.ping
                         if player_ping == 999:
@@ -1698,6 +1740,21 @@ class LogParser(object):
                             self.game.rcon_tell(sar['player_num'], "^3%s ^7has no active ban" % victim.get_name())
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !baninfo <name>")
+
+            # rain - enables or disables rain - !rain <on/off>
+            elif sar['command'] == '!rain' and self.game.players[sar['player_num']].get_admin_role() >= 60:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip()
+                    if arg == "off":
+                        self.game.send_rcon('g_enableprecip 0')
+                        self.game.rcon_tell(sar['player_num'], "^7Rain: ^1Off")
+                    elif arg == "on":
+                        self.game.send_rcon('g_enableprecip 1')
+                        self.game.rcon_tell(sar['player_num'], "^7Rain: ^2On")
+                    else:
+                        self.game.rcon_tell(sar['player_num'], "^7Usage: !rain <on/off>")
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7Usage: !rain <on/off>")
 
 ## senior admin level 80
             # kiss - clear all player warnings - !clear [<player>]
@@ -1776,6 +1833,14 @@ class LogParser(object):
             # swapteams - swap current teams
             elif sar['command'] == '!swapteams' and self.game.players[sar['player_num']].get_admin_role() >= 80:
                 self.game.send_rcon('swapteams')
+
+            # exec - execute given config file
+            elif sar['command'] == '!exec' and self.game.players[sar['player_num']].get_admin_role() >= 80:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip()
+                    self.game.send_rcon('exec %s' % arg)
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7Usage: !exec <filename>")
 
             # kill - kill a player
             elif sar['command'] == '!kill' and self.game.players[sar['player_num']].get_admin_role() >= 80:
@@ -1948,6 +2013,20 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !unban <@ID>")
 
 ## head admin level 100
+            # password - set private server password
+            elif sar['command'] == '!password' and self.game.players[sar['player_num']].get_admin_role() == 100:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip()
+                    self.game.send_rcon('g_password %s' % arg)
+                    self.game.rcon_tell(sar['player_num'], "^7Password set to '%s' - Server is private" % arg)
+                else:
+                    self.game.send_rcon('g_password ""')
+                    self.game.rcon_tell(sar['player_num'], "^7Password removed - Server is public")
+
+            # reload
+            elif sar['command'] == '!reload' and self.game.players[sar['player_num']].get_admin_role() == 100:
+                self.game.send_rcon('reload')
+
             # ungroup - remove the admin level from a player
             elif sar['command'] == '!ungroup' and self.game.players[sar['player_num']].get_admin_role() == 100:
                 if line.split(sar['command'])[1]:
@@ -1982,6 +2061,29 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7Insufficient privileges to use command ^3%s" % sar['command'])
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Unknown command ^3%s" % sar['command'])
+
+    def get_admins_online(self):
+        """
+        return list of Admins online
+        """
+        liste = "%s" % ", ".join(["^3%s [^2%d^3]" % (player.get_name(), player.get_admin_role()) for player in self.game.players.itervalues() if player.get_admin_role() >= 20])
+        if liste:
+            msg = "^7Admins online: %s" % liste
+        else:
+            msg = "^7No admins online"
+        return msg
+
+    def get_nextmap(self):
+        """
+        return the next map in the mapcycle
+        """
+        g_nextmap = self.game.get_cvar('g_nextmap')
+        if g_nextmap and g_nextmap.split(" ")[0].strip() in self.game.get_all_maps():
+            msg = "^7Next Map: ^3%s" % g_nextmap
+            self.game.next_mapname = g_nextmap
+        else:
+            msg = "^7Next Map: ^3%s" % self.game.next_mapname
+        return msg
 
     def tell_say_message(self, sar, msg):
         """
@@ -2258,13 +2360,14 @@ class Player(object):
     teams = {0: "green", 1: "red", 2: "blue", 3: "spectator"}
     roles = {0: "Guest", 1: "User", 2: "Regular", 20: "Moderator", 40: "Admin", 60: "Full Admin", 80: "Senior Admin", 100: "Head Admin"}
 
-    def __init__(self, player_num, ip_address, guid, name):
+    def __init__(self, player_num, ip_address, guid, name, auth=''):
         """
         create a new instance of Player
         """
         self.player_num = player_num
         self.guid = guid
         self.name = name.replace(' ', '')
+        self.authname = auth
         self.player_id = 0
         self.aliases = []
         self.registered_user = False
@@ -2527,6 +2630,9 @@ class Player(object):
 
     def get_name(self):
         return self.name
+
+    def get_authname(self):
+        return self.authname
 
     def get_aliases(self):
         if len(self.aliases) == 15:
@@ -2831,12 +2937,11 @@ class Game(object):
         self.urt_modversion = urt_modversion
         game_cfg = ConfigParser.ConfigParser()
         game_cfg.read(config_file)
-        self.rcon_handle = Rcon(game_cfg.get('server', 'server_ip'), game_cfg.get('server', 'server_port'), game_cfg.get('server', 'rcon_password'))
+        self.quake = PyQuake3("%s:%s" % (game_cfg.get('server', 'server_ip'), game_cfg.get('server', 'server_port')), game_cfg.get('server', 'rcon_password'))
+        self.queue = Queue()
+        self.rcon_lock = RLock()
+        self.thread_rcon()
         logger.info("Opening RCON socket   : OK")
-        if game_cfg.getboolean('rules', 'show_rules'):
-            # create instance of Rules to display the rules and rotation messages
-            Rules(os.path.join(HOME, 'conf', 'rules.conf'), game_cfg.getint('rules', 'rules_frequency'), self.rcon_handle)
-            logger.info("Load rotating messages: OK")
 
         # dynamic mapcycle
         self.dynamic_mapcycle = game_cfg.getboolean('mapcycle', 'dynamic_mapcycle') if game_cfg.has_option('mapcycle', 'dynamic_mapcycle') else False
@@ -2853,6 +2958,106 @@ class Game(object):
         logger.info("Spunky Bot is running until you are closing this session or pressing CTRL + C to abort this process.")
         logger.info("*** Note: Use the provided initscript to run Spunky Bot as daemon ***")
 
+    def thread_rcon(self):
+        """
+        Thread process for starting method rcon_process
+        """
+        # start Thread
+        processor = Thread(target=self.rcon_process)
+        processor.setDaemon(True)
+        processor.start()
+
+    def rcon_process(self):
+        """
+        Thread process
+        """
+        while 1:
+            if not self.queue.empty():
+                if self.live:
+                    with self.rcon_lock:
+                        try:
+                            command = self.queue.get()
+                            if command != 'status':
+                                self.quake.rcon(command)
+                            else:
+                                self.quake.rcon_update()
+                        except Exception as err:
+                            logger.error(err, exc_info=True)
+                            #pass
+            time.sleep(.33)
+
+    def get_quake_value(self, value):
+        """
+        get Quake3 value
+        """
+        if self.live:
+            with self.rcon_lock:
+                self.quake.update()
+                return self.quake.values[value]
+
+    def get_rcon_output(self, value):
+        """
+        get RCON output for value
+        """
+        if self.live:
+            with self.rcon_lock:
+                return self.quake.rcon(value)
+
+    def get_cvar(self, value):
+        """
+        get CVAR value
+        """
+        if self.live:
+            with self.rcon_lock:
+                try:
+                    ret_val = self.quake.rcon(value)[1].split(':')[1].split('^7')[0].lstrip('"')
+                except IndexError:
+                    ret_val = None
+                time.sleep(.33)
+                return ret_val
+
+    def get_mapcycle_path(self):
+        """
+        get the full path of mapcycle.txt file
+        """
+        maplist = []
+        self.quake.rcon_update()
+        # get path of fs_homepath and fs_basepath
+        fs_homepath = self.get_cvar('fs_homepath')
+        logger.debug("fs_homepath           : %s", fs_homepath)
+        fs_basepath = self.get_cvar('fs_basepath')
+        logger.debug("fs_basepath           : %s", fs_basepath)
+        fs_game = self.get_cvar('fs_game')
+        # get file name of mapcycle.txt
+        mapcycle_file = self.get_cvar('g_mapcycle')
+        try:
+            # set full path of mapcycle.txt
+            mc_home_path = os.path.join(fs_homepath, fs_game, mapcycle_file) if fs_homepath else ""
+            mc_base_path = os.path.join(fs_basepath, fs_game, mapcycle_file) if fs_basepath else ""
+        except TypeError:
+            raise Exception('Server did not respond to mapcycle path request, please restart the Bot')
+        if os.path.isfile(mc_home_path):
+            mapcycle_path = mc_home_path
+        elif os.path.isfile(mc_base_path):
+            mapcycle_path = mc_base_path
+        else:
+            mapcycle_path = None
+        if mapcycle_path:
+            logger.info("Mapcycle path         : %s", mapcycle_path)
+            with open(mapcycle_path, 'r') as file_handle:
+                lines = [line for line in file_handle if line != '\n']
+            try:
+                while 1:
+                    tmp = lines.pop(0).strip()
+                    if tmp[0] == '{':
+                        while tmp[0] != '}':
+                            tmp = lines.pop(0).strip()
+                        tmp = lines.pop(0).strip()
+                    maplist.append(tmp)
+            except IndexError:
+                pass
+        return maplist
+
     def send_rcon(self, command):
         """
         send RCON command
@@ -2861,7 +3066,8 @@ class Game(object):
         @type  command: String
         """
         if self.live:
-            self.rcon_handle.push(command)
+            with self.rcon_lock:
+                self.queue.put(command)
 
     def rcon_say(self, msg):
         """
@@ -2919,13 +3125,7 @@ class Game(object):
         """
         clear RCON queue
         """
-        self.rcon_handle.clear()
-
-    def get_rcon_handle(self):
-        """
-        get RCON handle
-        """
-        return self.rcon_handle
+        self.queue.queue.clear()
 
     def kick_player(self, player_num, reason=''):
         """
@@ -2946,20 +3146,21 @@ class Game(object):
         go live
         """
         self.live = True
-        self.rcon_handle.go_live()
         self.set_all_maps()
-        self.maplist = filter(None, self.rcon_handle.get_mapcycle_path())
+        self.maplist = filter(None, self.get_mapcycle_path())
         self.set_current_map()
         self.rcon_say("^7Powered by ^8[Spunky Bot %s] ^1[www.spunkybot.de]" % __version__)
-        logger.info("*** Live tracking: Current map: %s / Next map: %s ***", self.mapname, self.next_mapname)
         logger.info("Mapcycle: %s", ', '.join(self.maplist))
+        logger.info("*** Live tracking: Current map: %s / Next map: %s ***", self.mapname, self.next_mapname)
+        logger.info("Server CVAR g_logsync : %s", self.get_cvar('g_logsync'))
+        logger.info("Server CVAR g_loghits : %s", self.get_cvar('g_loghits'))
 
     def set_current_map(self):
         """
         set the current and next map in rotation
         """
         try:
-            self.mapname = self.rcon_handle.get_quake_value('mapname')
+            self.mapname = self.get_quake_value('mapname')
         except KeyError:
             self.mapname = self.next_mapname
 
@@ -2987,9 +3188,9 @@ class Game(object):
         """
         set a list of all available maps
         """
-        all_maps = self.rcon_handle.get_rcon_output("dir map bsp")[1].split()
+        all_maps = self.get_rcon_output("dir map bsp")[1].split()
         all_maps_list = [maps.replace("/", "").replace(".bsp", "") for maps in all_maps if maps.startswith("/")]
-        pk3_list = self.rcon_handle.get_rcon_output("fdir *.pk3")[1].split()
+        pk3_list = self.get_rcon_output("fdir *.pk3")[1].split()
         all_pk3_list = [maps.replace("/", "").replace(".pk3", "").replace(".bsp", "") for maps in pk3_list if maps.startswith("/ut4_")]
 
         all_together = list(set(all_maps_list + all_pk3_list))

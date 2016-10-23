@@ -122,6 +122,15 @@
 
 ### Full Admin [60]
 
+- **ban** - ban a player for 7 days
+	- Usage: `!ban <name> <reason>`
+- **baninfo** - display active bans of a player
+	- Usage: `!baninfo <name>`
+	- Short: `!bi <name>`
+- **ci** - kick player with connection interrupt
+	- Usage: `!ci <name>`
+- **rain** - enables or disables rain
+	- Usage: `!rain <on/off>`
 - **scream** - scream a message in different colors to all players
 	- Usage: `!scream <text>`
 - **slap** - slap a player (a number of times)
@@ -134,19 +143,16 @@
 	- Usage: `!version`
 - **veto** - stop voting process
 	- Usage: `!veto`
-- **ci** - kick player with connection interrupt
-	- Usage: `!ci <name>`
-- **ban** - ban a player for 7 days
-	- Usage: `!ban <name> <reason>`
-- **baninfo** - display active bans of a player
-	- Usage: `!baninfo <name>`
-	- Short: `!bi <name>`
 
 
 ### Senior Admin [80]
 
 - **banlist** - display the last active 10 bans
 	- Usage: `!banlist`
+- **cyclemap** - start next map in rotation
+	- Usage: `!cyclemap`
+- **exec** - execute given config file
+	- Usage: `!exec <filename>`
 - **kiss** - clear all player warnings
 	- Usage: `!kiss`
 - **kill** - kill a player
@@ -168,26 +174,29 @@
 	- Usage: `!maprestart`
 - **moon** - activate Moon mode (low gravity)
 	- Usage: `!moon <on/off>`
-- **cyclemap** - start next map in rotation
-	- Usage: `!cyclemap`
-- **setnextmap** - set the given map as nextmap
-	- Usage: `!setnextmap <ut4_name>`
-- **swapteams** - swap the current teams
-	- Usage: `!swapteams`
 - **permban** - ban a player permanent
 	- Usage: `!permban <name> <reason>`
 	- Short: `!pb <name> <reason>`
 - **putgroup** - add a client to a group
 	- Usage: `!putgroup <name> <group>`
 	- Available Groups: _user_, _regular_, _mod_, _admin_, _fulladmin_
+- **setnextmap** - set the given map as nextmap
+	- Usage: `!setnextmap <ut4_name>`
+- **swapteams** - swap the current teams
+	- Usage: `!swapteams`
 - **unban** - unban a player from the database
 	- Usage: `!unban <ID>`
 
 
 ### Head Admin [100]
 
+- **password** - set private server password
+	- Usage: `!password [<password>]`
+	- Set an empty string to remove a password
 - **putgroup** - add a client to a group
 	- Usage: `!putgroup <name> <group>`
 	- Available Groups: _user_, _regular_, _mod_, _admin_, _fulladmin_, _senioradmin_
+- **reload** - reload map
+	- Usage: `!reload`
 - **ungroup** - remove admin level from a player
 	- Usage: `!ungroup <name>`
