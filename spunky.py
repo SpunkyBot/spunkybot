@@ -603,6 +603,7 @@ class LogParser(object):
             challenge = True if 'challenge' in values else False
             name = values['name'].replace(' ', '') if 'name' in values else "UnnamedPlayer"
             ip_port = values['ip'] if 'ip' in values else "0.0.0.0:0"
+            auth = values['authl'] if 'authl' in values else ""
             if 'cl_guid' in values:
                 guid = values['cl_guid']
             elif 'skill' in values:
@@ -616,7 +617,7 @@ class LogParser(object):
             port = ip_port.split(":")[1].strip()
 
             if player_num not in self.game.players:
-                player = Player(player_num, ip_address, guid, name)
+                player = Player(player_num, ip_address, guid, name, auth)
                 self.game.add_player(player)
                 # kick banned player
                 player_ban_id = self.game.players[player_num].get_ban_id()
@@ -891,8 +892,9 @@ class LogParser(object):
             if player_num == BOT_PLAYER_NUM:
                 continue
             player_name = player.get_name()
+            player_authname = player.get_authname()
             player_id = "@%d" % player.get_player_id()
-            if user.upper() == player_name.upper() or user == str(player_num) or user == player_id:
+            if user.upper() == player_name.upper() or user == str(player_num) or user == player_id or user.lower() == player_authname:
                 victim = player
                 name_list = ["^3%s [^2%d^3]" % (player_name, player_num)]
                 break
@@ -2356,13 +2358,14 @@ class Player(object):
     teams = {0: "green", 1: "red", 2: "blue", 3: "spectator"}
     roles = {0: "Guest", 1: "User", 2: "Regular", 20: "Moderator", 40: "Admin", 60: "Full Admin", 80: "Senior Admin", 100: "Head Admin"}
 
-    def __init__(self, player_num, ip_address, guid, name):
+    def __init__(self, player_num, ip_address, guid, name, auth=''):
         """
         create a new instance of Player
         """
         self.player_num = player_num
         self.guid = guid
         self.name = name.replace(' ', '')
+        self.authname = auth
         self.player_id = 0
         self.aliases = []
         self.registered_user = False
@@ -2625,6 +2628,9 @@ class Player(object):
 
     def get_name(self):
         return self.name
+
+    def get_authname(self):
+        return self.authname
 
     def get_aliases(self):
         if len(self.aliases) == 15:
