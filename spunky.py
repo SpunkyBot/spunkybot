@@ -174,6 +174,7 @@ class LogParser(object):
         curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `admin_role` = 100")
         self.iamgod = True if curs.fetchone()[0] < 1 else False
         logger.info("Connecting to Database: OK")
+        logger.debug("Cmd !iamgod available : %s", self.iamgod)
         # Master Server
         self.base_url = 'http://master.spunkybot.de'
         server_port = config.get('server', 'server_port') if config.has_option('server', 'server_port') else "27960"
