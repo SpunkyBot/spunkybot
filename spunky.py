@@ -41,7 +41,7 @@ import lib.pygeoip as pygeoip
 import lib.schedule as schedule
 
 from lib.rcon import Rcon
-from lib.rules import Rules
+from threading import Thread
 from threading import RLock
 
 
@@ -181,7 +181,14 @@ class LogParser(object):
         data = {'v': __version__, 'p': server_port, 'o': platform.platform()}
         values = urllib.urlencode(data)
         self.ping_url = '%s/ping.php?%s' % (self.base_url, values)
-
+        # Rotating Messages and Rules
+        if config.getboolean('rules', 'show_rules'):
+            rules_frequency = config.getint('rules', 'rules_frequency')
+            self.rules_file = os.path.join(HOME, 'conf', 'rules.conf')
+            self.rules_frequency = rules_frequency if rules_frequency > 0 else 10
+            self.thread_rotate()
+            logger.info("Load rotating messages: OK")
+        # Parse Game log file
         try:
             # open game log file
             self.log_file = open(games_log, 'r')
@@ -194,6 +201,39 @@ class LogParser(object):
             # start parsing the games logfile
             logger.info("Parsing Gamelog file  : %s", games_log)
             self.read_log()
+
+    def thread_rotate(self):
+        """
+        Thread process for starting method rotate_messages
+        """
+        processor = Thread(target=self.rotating_messages)
+        processor.setDaemon(True)
+        processor.start()
+
+    def rotating_messages(self):
+        """
+        display rotating messages and rules
+        """
+        # initial wait
+        time.sleep(30)
+        while 1:
+            with open(self.rules_file, 'r') as filehandle:
+                rotation_msg = filehandle.readlines()
+            if not rotation_msg:
+                break
+            for line in rotation_msg:
+                # display rule
+                with self.players_lock:
+                    if "@admins" in line:
+                        self.game.rcon_say(self.get_admins_online())
+                    elif "@nextmap" in line:
+                        self.game.rcon_say(self.get_nextmap())
+                    elif "@time" in line:
+                        self.game.rcon_say("^7Time: %s" % time.strftime("%H:%M", time.localtime(time.time())))
+                    else:
+                        self.game.rcon_say("^2%s" % line.strip())
+                # wait for given delay in the config file
+                time.sleep(self.rules_frequency)
 
     def find_game_start(self):
         """
@@ -2876,10 +2916,6 @@ class Game(object):
         game_cfg.read(config_file)
         self.rcon_handle = Rcon(game_cfg.get('server', 'server_ip'), game_cfg.get('server', 'server_port'), game_cfg.get('server', 'rcon_password'))
         logger.info("Opening RCON socket   : OK")
-        if game_cfg.getboolean('rules', 'show_rules'):
-            # create instance of Rules to display the rules and rotation messages
-            Rules(os.path.join(HOME, 'conf', 'rules.conf'), game_cfg.getint('rules', 'rules_frequency'), self.rcon_handle)
-            logger.info("Load rotating messages: OK")
 
         # dynamic mapcycle
         self.dynamic_mapcycle = game_cfg.getboolean('mapcycle', 'dynamic_mapcycle') if game_cfg.has_option('mapcycle', 'dynamic_mapcycle') else False
