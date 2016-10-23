@@ -1216,12 +1216,7 @@ class LogParser(object):
 
             # nextmap - display the next map in rotation
             elif (sar['command'] == '!nextmap' or sar['command'] == '@nextmap') and self.game.players[sar['player_num']].get_admin_role() >= 20:
-                g_nextmap = self.game.get_rcon_handle().get_cvar('g_nextmap')
-                if g_nextmap and g_nextmap.split(" ")[0].strip() in self.game.get_all_maps():
-                    msg = "^7Next Map: ^3%s" % g_nextmap
-                    self.game.next_mapname = g_nextmap
-                else:
-                    msg = "^7Next Map: ^3%s" % self.game.next_mapname
+                msg = self.get_nextmap()
                 self.tell_say_message(sar, msg)
 
             # mute - mute or unmute a player
@@ -2007,6 +2002,18 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7Insufficient privileges to use command ^3%s" % sar['command'])
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Unknown command ^3%s" % sar['command'])
+
+    def get_nextmap(self):
+        """
+        return the next map in the mapcycle
+        """
+        g_nextmap = self.game.get_rcon_handle().get_cvar('g_nextmap')
+        if g_nextmap and g_nextmap.split(" ")[0].strip() in self.game.get_all_maps():
+            msg = "^7Next Map: ^3%s" % g_nextmap
+            self.game.next_mapname = g_nextmap
+        else:
+            msg = "^7Next Map: ^3%s" % self.game.next_mapname
+        return msg
 
     def tell_say_message(self, sar, msg):
         """
