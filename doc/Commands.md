@@ -193,5 +193,7 @@
 - **putgroup** - add a client to a group
 	- Usage: `!putgroup <name> <group>`
 	- Available Groups: _user_, _regular_, _mod_, _admin_, _fulladmin_, _senioradmin_
+- **reload** - reload map
+	- Usage: `!reload`
 - **ungroup** - remove admin level from a player
 	- Usage: `!ungroup <name>`

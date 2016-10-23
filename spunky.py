@@ -93,7 +93,7 @@ class LogParser(object):
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'rain', 'scream', 'slap', 'swap', 'version', 'veto']
         self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'exec', 'kill', 'kiss', 'lastbans', 'lookup',
                                                        'makereg', 'map', 'maps', 'maprestart', 'moon',
-                                                       'permban', 'putgroup', 'setnextmap', 'swapteams', 'unban', 'ungroup']
+                                                       'permban', 'putgroup', 'reload', 'setnextmap', 'swapteams', 'unban', 'ungroup']
         # alphabetic sort of the commands
         self.mod_cmds.sort()
         self.admin_cmds.sort()
@@ -2008,6 +2008,11 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !unban <@ID>")
 
 ## head admin level 100
+
+            # reload
+            elif sar['command'] == '!reload' and self.game.players[sar['player_num']].get_admin_role() == 100:
+                self.game.send_rcon('reload')
+
             # ungroup - remove the admin level from a player
             elif sar['command'] == '!ungroup' and self.game.players[sar['player_num']].get_admin_role() == 100:
                 if line.split(sar['command'])[1]:
