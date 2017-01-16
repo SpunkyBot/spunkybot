@@ -1000,6 +1000,7 @@ class LogParser(object):
                        'ping': 'fix your ping',
                        'afk': 'away from keyboard',
                        'tk': 'stop team killing',
+                       'sk': 'stop spawn killing'
                        'spec': 'spectator too long on full server',
                        'ci': 'connection interrupted',
                        'whiner': 'stop complaining about camp, lag or block',
