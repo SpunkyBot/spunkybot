@@ -2068,11 +2068,7 @@ class LogParser(object):
         return list of Admins online
         """
         liste = "%s" % ", ".join(["^3%s [^2%d^3]" % (player.get_name(), player.get_admin_role()) for player in self.game.players.itervalues() if player.get_admin_role() >= 20])
-        if liste:
-            msg = "^7Admins online: %s" % liste
-        else:
-            msg = "^7No admins online"
-        return msg
+        return "^7Admins online: %s" % liste if liste else "^7No admins online"
 
     def get_nextmap(self):
         """
