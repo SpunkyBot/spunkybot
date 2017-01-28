@@ -153,6 +153,8 @@
 	- Usage: `!cyclemap`
 - **exec** - execute given config file
 	- Usage: `!exec <filename>`
+- **instagib** - Set Instagib mode
+	- Usage: `!instagib <on/off>`
 - **kiss** - clear all player warnings
 	- Usage: `!kiss`
 - **kill** - kill a player

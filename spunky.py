@@ -92,9 +92,10 @@ class LogParser(object):
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'find', 'force', 'kick', 'nuke', 'say',
                                            'tempban', 'warnclear']
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'rain', 'scream', 'slap', 'swap', 'version', 'veto']
-        self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'exec', 'kill', 'kiss', 'lastbans', 'lookup',
-                                                       'makereg', 'map', 'maps', 'maprestart', 'moon', 'password', 'permban',
-                                                       'putgroup', 'reload', 'setnextmap', 'swapteams', 'unban', 'ungroup']
+        self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'exec', 'instagib', 'kill', 'kiss',
+                                                       'lastbans', 'lookup', 'makereg', 'map', 'maps', 'maprestart',
+                                                       'moon', 'password', 'permban', 'putgroup', 'reload', 'setnextmap',
+                                                       'swapteams', 'unban', 'ungroup']
         # alphabetic sort of the commands
         self.mod_cmds.sort()
         self.admin_cmds.sort()
@@ -1814,6 +1815,22 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], "^7Usage: !moon <on/off>")
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !moon <on/off>")
+
+            elif sar['command'] == '!instagib' and self.game.players[sar['player_num']].get_admin_role() >= 80:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip()
+                    if arg == "off":
+                        self.game.send_rcon('g_instagib 0')
+                        self.game.rcon_tell(sar['player_num'], "^7Instagib: ^1Off")
+                        self.game.rcon_tell(sar['player_num'], "^77Instagib changed for next map")
+                    elif arg == "on":
+                        self.game.send_rcon('g_instagib 1')
+                        self.game.rcon_tell(sar['player_num'], "^7Instagib: ^2On")
+                        self.game.rcon_tell(sar['player_num'], "^77Instagib changed for next map")
+                    else:
+                        self.game.rcon_tell(sar['player_num'], "^7Usage: !instagib <on/off>")
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7Usage: !instagib <on/off>")
 
             # cyclemap - start next map in rotation
             elif sar['command'] == '!cyclemap' and self.game.players[sar['player_num']].get_admin_role() >= 80:
