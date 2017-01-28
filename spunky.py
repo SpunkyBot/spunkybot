@@ -642,7 +642,7 @@ class LogParser(object):
                 self.kick_player_reason("Invalid GUID detected for %s -> Player kicked" % name, player_num)
 
             if challenge:
-                logger.debug("ClientUserinfo: Player %d %s is challenging the server and has the guid %s", player_num, name, guid)
+                logger.debug("ClientUserinfo: Player %d %s is challenging the server and has the guid %s", player_num, self.game.players[player_num].get_name(), guid)
                 # kick player with hax port 1337 or 1024
                 if port == "1337" or port == "1024":
                     self.kick_player_reason("Cheater Port detected for %s -> Player kicked" % name, player_num)
