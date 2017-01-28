@@ -232,6 +232,8 @@ class LogParser(object):
                         self.game.rcon_say(self.get_nextmap())
                     elif "@time" in line:
                         self.game.rcon_say("^7Time: %s" % time.strftime("%H:%M", time.localtime(time.time())))
+                    elif "@bigtext" in line:
+                        self.game.rcon_bigtext("^7%s" % line.split('@bigtext')[-1].strip())
                     else:
                         self.game.rcon_say("^2%s" % line.strip())
                 # wait for given delay in the config file
