@@ -1155,7 +1155,7 @@ class LogParser(object):
                     arg = line.split(sar['command'])[1].strip()
                     player_found = False
                     for player in self.game.players.itervalues():
-                        if (arg.upper() in (player.get_name()).upper()) or arg == str(player.get_player_num()):
+                        if (arg.upper() in (player.get_name()).upper()) or (arg == str(player.get_player_num())) or (arg == ("@%s" % player.get_player_id())) or (arg.lower() == player.get_authname()):
                             player_found = True
                             if player.get_registered_user():
                                 ratio = round(float(player.get_db_kills()) / float(player.get_db_deaths()), 2) if player.get_db_deaths() > 0 else 1.0
