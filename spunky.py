@@ -629,7 +629,7 @@ class LogParser(object):
                     self.kick_player_reason("^7%s ^1banned ^7(ID @%d)" % (name, player_ban_id), player_num)
                 else:
                     if self.show_country_on_connect:
-                        self.game.rcon_say("^7%s ^7connected from %s" % (name, self.game.players[player_num].get_country()))
+                        self.game.rcon_say("^7%s ^7connected from %s" % (self.game.players[player_num].get_name(), self.game.players[player_num].get_country()))
 
             if self.game.players[player_num].get_guid() != guid:
                 self.game.players[player_num].set_guid(guid)
