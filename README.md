@@ -54,7 +54,7 @@ It's easy to get started with Spunky Bot:
 - In-game displayed rules/advertisements are contained in the file `/conf/rules.conf`
 	- If you do not want to display the rotation messages, set the value `show_rules=0` in the config file `/conf/settings.conf`
 - Run the application manually: `python spunky.py`
-- Or use the provided initscript to run Spunky Bot as daemon
+- Or use the provided systemd or sysVinit script to run Spunky Bot as daemon
 
 **_First start instruction:_**
 
