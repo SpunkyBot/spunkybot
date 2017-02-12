@@ -35,7 +35,7 @@ If you want to know more, this is a list of selected starting points:
 - Urban Terror 4.1.1 / 4.2.023 / 4.3.2
 - Python 2.6 / 2.7
 - SQLite 3 database
-- Cross-platform (tested on Debian 6 / 7 / 8, Ubuntu 12 / 14 / 16, CentOS 6 / 7, Mac OS X 10.12, Windows 7 / 10)
+- Cross-platform (tested on Debian 6 / 7 / 8 / 9, Ubuntu 12 / 14 / 16, CentOS 6 / 7, Mac OS X 10.12, Windows 7 / 10)
 - Supporting 32-bit and 64-bit operating systems
 
 
