@@ -667,7 +667,7 @@ class LogParser(object):
                 values = self.explode_line(line)
                 team_num = int(values['t'])
                 player.set_team(team_num)
-                name = values['n'].replace(' ', '')
+                name = values['n']
             except KeyError:
                 team_num = 3
                 player.set_team(team_num)
