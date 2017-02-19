@@ -633,8 +633,6 @@ class LogParser(object):
 
             if self.game.players[player_num].get_guid() != guid:
                 self.game.players[player_num].set_guid(guid)
-            if self.game.players[player_num].get_name() != name:
-                self.game.players[player_num].set_name(name)
 
             # kick player with hax guid 'kemfew'
             if "KEMFEW" in guid.upper():
