@@ -1822,11 +1822,11 @@ class LogParser(object):
                     if arg == "off":
                         self.game.send_rcon('g_instagib 0')
                         self.game.rcon_tell(sar['player_num'], "^7Instagib: ^1Off")
-                        self.game.rcon_tell(sar['player_num'], "^77Instagib changed for next map")
+                        self.game.rcon_tell(sar['player_num'], "^7Instagib changed for next map")
                     elif arg == "on":
                         self.game.send_rcon('g_instagib 1')
                         self.game.rcon_tell(sar['player_num'], "^7Instagib: ^2On")
-                        self.game.rcon_tell(sar['player_num'], "^77Instagib changed for next map")
+                        self.game.rcon_tell(sar['player_num'], "^7Instagib changed for next map")
                     else:
                         self.game.rcon_tell(sar['player_num'], "^7Usage: !instagib <on/off>")
                 else:
