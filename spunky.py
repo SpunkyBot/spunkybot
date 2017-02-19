@@ -605,7 +605,7 @@ class LogParser(object):
             line = line[2:].lstrip("\\").lstrip()
             values = self.explode_line(line)
             challenge = True if 'challenge' in values else False
-            name = values['name'].replace(' ', '') if 'name' in values else "UnnamedPlayer"
+            name = values['name'] if 'name' in values else "UnnamedPlayer"
             ip_port = values['ip'] if 'ip' in values else "0.0.0.0:0"
             auth = values['authl'] if 'authl' in values else ""
             if 'cl_guid' in values:
@@ -2380,7 +2380,7 @@ class Player(object):
         """
         self.player_num = player_num
         self.guid = guid
-        self.name = name.replace(' ', '')
+        self.name = ''
         self.authname = auth
         self.player_id = 0
         self.aliases = []
@@ -2429,10 +2429,8 @@ class Player(object):
         self.country = None
         self.ban_id = 0
 
-        self.prettyname = self.name
-        # remove color characters from name
-        for item in xrange(10):
-            self.prettyname = self.prettyname.replace('^%d' % item, '')
+        # set player name
+        self.set_name(name)
 
         # GeoIP lookup
         info = GEOIP.lookup(ip_address)
@@ -2474,7 +2472,7 @@ class Player(object):
                 conn.commit()
                 return False
         else:
-            values = (self.player_id, self.guid, self.prettyname, self.address, expire_date, timestamp, reason)
+            values = (self.player_id, self.guid, self.name, self.address, expire_date, timestamp, reason)
             curs.execute("INSERT INTO `ban_list` (`id`,`guid`,`name`,`ip_address`,`expires`,`timestamp`,`reason`) VALUES (?,?,?,?,?,?,?)", values)
             conn.commit()
             return True
@@ -2544,13 +2542,13 @@ class Player(object):
         curs.execute("SELECT COUNT(*) FROM `player` WHERE `guid` = ?", values)
         if curs.fetchone()[0] == 0:
             # add new player to database
-            values = (self.guid, self.prettyname, self.address, now, self.prettyname)
+            values = (self.guid, self.name, self.address, now, self.name)
             curs.execute("INSERT INTO `player` (`guid`,`name`,`ip_address`,`time_joined`,`aliases`) VALUES (?,?,?,?,?)", values)
             conn.commit()
-            self.aliases.append(self.prettyname)
+            self.aliases.append(self.name)
         else:
             # update name, IP address and last join date
-            values = (self.prettyname, self.address, now, self.guid)
+            values = (self.name, self.address, now, self.guid)
             curs.execute("UPDATE `player` SET `name` = ?,`ip_address` = ?,`time_joined` = ? WHERE `guid` = ?", values)
             conn.commit()
             # get known aliases
@@ -2559,10 +2557,10 @@ class Player(object):
             result = curs.fetchone()
             # create list of aliases
             self.aliases = result[0].split(', ')
-            if self.prettyname not in self.aliases:
+            if self.name not in self.aliases:
                 # add new alias to list
                 if len(self.aliases) < 15:
-                    self.aliases.append(self.prettyname)
+                    self.aliases.append(self.name)
                     alias_string = ', '.join(self.aliases)
                     values = (alias_string, self.guid)
                     curs.execute("UPDATE `player` SET `aliases` = ? WHERE `guid` = ?", values)
@@ -2594,7 +2592,7 @@ class Player(object):
             self.admin_role = result[9]
             self.first_seen = result[10]
             # update name, last_played and increase num_played counter
-            values = (self.prettyname, now, self.guid)
+            values = (self.name, now, self.guid)
             curs.execute("UPDATE `xlrstats` SET `name` = ?,`last_played` = ?,`num_played` = `num_played` + 1 WHERE `guid` = ?", values)
             conn.commit()
 
@@ -2620,7 +2618,7 @@ class Player(object):
     def register_user_db(self, role=1):
         if not self.registered_user:
             now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-            values = (self.guid, self.prettyname, self.address, now, now, role)
+            values = (self.guid, self.name, self.address, now, now, role)
             curs.execute("INSERT INTO `xlrstats` (`guid`,`name`,`ip_address`,`first_seen`,`last_played`,`num_played`,`admin_role`) VALUES (?,?,?,?,?,1,?)", values)
             conn.commit()
             self.registered_user = True
@@ -2640,7 +2638,13 @@ class Player(object):
         return self.ban_id
 
     def set_name(self, name):
+        # remove whitespaces
         self.name = name.replace(' ', '')
+        # remove color character
+        for item in xrange(10):
+            self.name = self.name.replace('^%d' % item, '')
+        # limit length of name to 20 character
+        self.name = self.name[:20]
 
     def get_name(self):
         return self.name
