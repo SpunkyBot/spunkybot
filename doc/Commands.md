@@ -99,26 +99,25 @@
 	- Short: `!alias <name>`
 - **bigtext** - display big message on screen
 	- Usage: `!bigtext <text>`
-- **say** - say a message to all players (allow spectator to say a message to players in-game)
-	- Usage: `!say <text>`
-	- Short: `!!<text>`
 - **find** - display the slot number of the player
 	- Usage: `!find <name>`
 - **force** - force a player to the given team
 	- Usage: `!force <name> <blue/red/spec> [<lock>]`
-- **nuke** - nuke a player
-	- Usage: `!nuke <name>`
 - **kick** - kick a player
 	- Usage: `!kick <name> <reason>`
 	- Short: `!k <name> <reason>`
-- **warnclear** - clear the user warnings
-	- Usage: `!warnclear <name>`
-	- Short: `!wc <name>`
+- **nuke** - nuke a player
+	- Usage: `!nuke <name>`
+- **say** - say a message to all players (allow spectator to say a message to players in-game)
+	- Usage: `!say <text>`
+	- Short: `!!<text>`
 - **tempban** - ban a player temporary for the given period (1 min to 24 hrs)
 	-  Usage: `!tempban <name> <duration> [<reason>]`
 	-  Short: `!tb <name> <duration> [<reason>]`
 	-  Max ban duration: 24 hours
-
+- **warnclear** - clear the user warnings
+	- Usage: `!warnclear <name>`
+	- Short: `!wc <name>`
 
 ### Full Admin [60]
 
