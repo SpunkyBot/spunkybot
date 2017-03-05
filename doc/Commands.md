@@ -100,6 +100,8 @@
 	- Short: `!alias <name>`
 - **bigtext** - display big message on screen
 	- Usage: `!bigtext <text>`
+- **exit** - display last disconnected player
+	- Usage: `!exit`
 - **find** - display the slot number of the player
 	- Usage: `!find <name>`
 - **force** - force a player to the given team

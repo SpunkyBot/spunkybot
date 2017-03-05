@@ -89,7 +89,7 @@ class LogParser(object):
                           'knife', 'register', 'regtest', 'spree', 'stats', 'teams', 'time', 'xlrstats', 'xlrtopstats']
         self.mod_cmds = self.user_cmds + ['admintest', 'country', 'leveltest', 'list', 'locate', 'nextmap', 'mute', 'poke',
                                           'seen', 'shuffleteams', 'warn', 'warninfo', 'warnremove', 'warns', 'warntest']
-        self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'find', 'force', 'kick', 'nuke', 'say',
+        self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'exit', 'find', 'force', 'kick', 'nuke', 'say',
                                            'tempban', 'warnclear']
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'rain', 'scream', 'slap', 'swap', 'version', 'veto']
         self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'exec', 'instagib', 'kill', 'kiss',
@@ -145,6 +145,7 @@ class LogParser(object):
         self.firstblood = False
         self.firstnadekill = False
         self.firstknifekill = False
+        self.last_disconnected_player = None
 
         # enable/disable autokick for team killing
         self.tk_autokick = config.getboolean('bot', 'teamkill_autokick') if config.has_option('bot', 'teamkill_autokick') else True
@@ -536,6 +537,9 @@ class LogParser(object):
         if self.support_lowgravity:
             self.game.send_rcon("set g_gravity %d" % self.gravity)
 
+        # reset list of player who left server
+        self.last_disconnected_player = None
+
     def handle_flagcapturetime(self, line):
         """
         handle flag capture time
@@ -651,6 +655,8 @@ class LogParser(object):
                 # kick player with hax port 1337
                 if port == "1337":
                     self.kick_player_reason("Cheater Port detected for %s -> Player kicked" % name, player_num)
+                if self.last_disconnected_player and self.last_disconnected_player.get_guid() == self.game.players[player_num].get_guid():
+                    self.last_disconnected_player = None
 
     def kick_player_reason(self, reason, player_num):
         """
@@ -712,6 +718,7 @@ class LogParser(object):
             player = self.game.players[player_num]
             player.save_info()
             player.reset()
+            self.last_disconnected_player = player
             del self.game.players[player_num]
             logger.debug("ClientDisconnect: Player %d %s has left the game", player_num, player.get_name())
 
@@ -1446,6 +1453,10 @@ class LogParser(object):
             elif sar['command'].startswith('!!') and self.game.players[sar['player_num']].get_admin_role() >= 40:
                 if line.split('!!')[1]:
                     self.game.rcon_say("^4%s: ^7%s" % (self.game.players[sar['player_num']].get_name(), line.split('!!', 1)[1].strip()))
+
+            elif sar['command'] == '!exit' and self.game.players[sar['player_num']].get_admin_role() >= 40:
+                msg = "^3Last disconnected player: ^7%s" % self.last_disconnected_player.get_name() if self.last_disconnected_player else "^3No player left during this match"
+                self.game.rcon_tell(sar['player_num'], msg)
 
             # find - display the slot number of the player
             elif sar['command'] == '!find' and self.game.players[sar['player_num']].get_admin_role() >= 40:
