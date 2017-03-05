@@ -186,6 +186,7 @@ class LogParser(object):
         self.ping_url = '%s/ping.php?%s' % (self.base_url, values)
         # Rotating Messages and Rules
         if config.getboolean('rules', 'show_rules'):
+            self.output_rules = config.get('rules', 'display') if config.has_option('rules', 'display') else "chat"
             rules_frequency = config.getint('rules', 'rules_frequency')
             self.rules_file = os.path.join(HOME, 'conf', 'rules.conf')
             self.rules_frequency = rules_frequency if rules_frequency > 0 else 10
@@ -236,7 +237,12 @@ class LogParser(object):
                     elif "@bigtext" in line:
                         self.game.rcon_bigtext("^7%s" % line.split('@bigtext')[-1].strip())
                     else:
-                        self.game.rcon_say("^2%s" % line.strip())
+                        if self.output_rules == 'chat':
+                            self.game.rcon_say("^2%s" % line.strip())
+                        elif self.output_rules == 'bigtext':
+                            self.game.rcon_bigtext("^2%s" % line.strip())
+                        else:
+                            self.game.send_rcon("^2%s" % line.strip())
                 # wait for given delay in the config file
                 time.sleep(self.rules_frequency)
 
