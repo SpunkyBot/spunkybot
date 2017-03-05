@@ -2213,7 +2213,8 @@ class LogParser(object):
         """
         handle team balance in Team Survivor mode
         """
-        logger.debug("SurvivorWinner: %s team", line)
+        logger.debug("SurvivorWinner: %s", line)
+        self.game.send_rcon("%s%s ^7team wins" % ('^1' if line == 'Red' else '^4', line) if 'Draw' not in line else "^7Draw")
         self.autobalancer()
         if self.ts_do_team_balance:
             self.allow_cmd_teams = True
