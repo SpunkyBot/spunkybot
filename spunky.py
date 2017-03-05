@@ -3236,7 +3236,7 @@ class Game(object):
         """
         get number of players in red team, blue team and spectator
         """
-        game_data = {Player.teams[1]: 0, Player.teams[2]: 0, Player.teams[3]: 0}
+        game_data = {Player.teams[1]: 0, Player.teams[2]: 0, Player.teams[3]: -1}
         for player in self.players.itervalues():
             game_data[Player.teams[player.get_team()]] += 1
         return game_data
