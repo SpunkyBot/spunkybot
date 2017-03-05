@@ -2183,15 +2183,18 @@ class LogParser(object):
         tmp = line.split("is") if "Bombholder" in line else line.split("by")
         action = tmp[0].strip()
         player_num = int(tmp[1].rstrip('!').strip())
+        name = self.game.players[player_num].get_name()
         with self.players_lock:
             player = self.game.players[player_num]
             if action == 'Bomb was defused':
                 player.defused_bomb()
                 logger.debug("Player %d defused the bomb", player_num)
+                self.game.send_rcon("^7The ^2BOMB ^7has been defused by ^2%s^7!" % name)
                 self.handle_teams_ts_mode('Blue')
             elif action == 'Bomb was planted':
                 player.planted_bomb()
                 logger.debug("Player %d planted the bomb", player_num)
+                self.game.send_rcon("^7The ^1BOMB ^7has been planted by ^1%s^7!" % name)
                 if self.spam_bomb_planted_msg:
                     self.game.rcon_say("^1Bomb has been planted!")
                     self.game.rcon_say("^1Bomb has been planted!")
