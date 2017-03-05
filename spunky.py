@@ -2227,6 +2227,7 @@ class LogParser(object):
         """
         with self.players_lock:
             game_data = self.game.get_gamestats()
+            self.game.rcon_say("^7Red: ^1%s ^7- Blue: ^4%s ^7- Spectator: ^3%s" % (game_data[Player.teams[1]], game_data[Player.teams[2]], game_data[Player.teams[3]]))
             if (abs(game_data[Player.teams[1]] - game_data[Player.teams[2]])) > 1:
                 if self.allow_cmd_teams:
                     self.game.balance_teams(game_data)
