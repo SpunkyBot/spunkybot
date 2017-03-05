@@ -63,6 +63,7 @@
 	- Usage: `!list`
 - **locate** - display geolocation info of the player
 	- Usage: `!locate <name>`
+	- Short: `!lc <name>`
 - **nextmap** - display the next map in rotation
 	- Usage: `!nextmap`
 - **mute** - mute or unmute a player
