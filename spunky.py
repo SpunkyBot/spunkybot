@@ -881,13 +881,13 @@ class LogParser(object):
 
                 victim_color = "^1" if (victim.get_team() == 1) else "^4"
                 if victim.get_killing_streak() >= 20 and killer_name != victim_name and killer_id != BOT_PLAYER_NUM:
-                    self.game.rcon_say("%s%s's ^7godlike was ended by %s%s!" % (victim_color, victim_name, killer_color, killer_name))
+                    self.game.rcon_say("%s%s's ^7godlike (^1%s ^7kills) was ended by %s%s!" % (victim_color, victim_name, victim.get_killing_streak(), killer_color, killer_name))
                 elif victim.get_killing_streak() >= 15 and killer_name != victim_name and killer_id != BOT_PLAYER_NUM:
-                    self.game.rcon_say("%s%s's ^7unstoppable was ended by %s%s!" % (victim_color, victim_name, killer_color, killer_name))
+                    self.game.rcon_say("%s%s's ^7unstoppable (^1%s ^7kills) was ended by %s%s!" % (victim_color, victim_name, victim.get_killing_streak(), killer_color, killer_name))
                 elif victim.get_killing_streak() >= 10 and killer_name != victim_name and killer_id != BOT_PLAYER_NUM:
-                    self.game.rcon_say("%s%s's ^7rampage was ended by %s%s!" % (victim_color, victim_name, killer_color, killer_name))
+                    self.game.rcon_say("%s%s's ^7rampage (^1%s ^7kills) was ended by %s%s!" % (victim_color, victim_name, victim.get_killing_streak(), killer_color, killer_name))
                 elif victim.get_killing_streak() >= 5 and killer_name != victim_name and killer_id != BOT_PLAYER_NUM:
-                    self.game.rcon_say("%s%s's ^7killing spree was ended by %s%s!" % (victim_color, victim_name, killer_color, killer_name))
+                    self.game.rcon_say("%s%s's ^7killing spree (^1%s ^7kills) was ended by %s%s!" % (victim_color, victim_name, victim.get_killing_streak(), killer_color, killer_name))
 
                 # death counter
                 victim.die()
