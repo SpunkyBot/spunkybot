@@ -1966,10 +1966,10 @@ class LogParser(object):
                             if right == "user" and victim.get_admin_role() < 80:
                                 self.game.rcon_tell(sar['player_num'], "^3%s put in group ^7User" % victim.get_name())
                                 new_role = 1
-                            elif (right == "reg" or right == "regular") and victim.get_admin_role() < 80:
+                            elif "reg" in right and victim.get_admin_role() < 80:
                                 self.game.rcon_tell(sar['player_num'], "^3%s put in group ^7Regular" % victim.get_name())
                                 new_role = 2
-                            elif (right == "mod" or right == "moderator") and victim.get_admin_role() < 80:
+                            elif "mod" in right and victim.get_admin_role() < 80:
                                 self.game.rcon_tell(sar['player_num'], "^3%s added as ^7Moderator" % victim.get_name())
                                 self.game.rcon_tell(victim.get_player_num(), "^3You are added as ^7Moderator")
                                 new_role = 20
@@ -1977,12 +1977,12 @@ class LogParser(object):
                                 self.game.rcon_tell(sar['player_num'], "^3%s added as ^7Admin" % victim.get_name())
                                 self.game.rcon_tell(victim.get_player_num(), "^3You are added as ^7Admin")
                                 new_role = 40
-                            elif right == "fulladmin" and victim.get_admin_role() < 80:
+                            elif "fulladmin" in right and victim.get_admin_role() < 80:
                                 self.game.rcon_tell(sar['player_num'], "^3%s added as ^7Full Admin" % victim.get_name())
                                 self.game.rcon_tell(victim.get_player_num(), "^3You are added as ^7Full Admin")
                                 new_role = 60
                             # Note: senioradmin level can only be set by head admin
-                            elif right == "senioradmin" and self.game.players[sar['player_num']].get_admin_role() == 100 and victim.get_player_num() != sar['player_num']:
+                            elif "senioradmin" in right and self.game.players[sar['player_num']].get_admin_role() == 100 and victim.get_player_num() != sar['player_num']:
                                 self.game.rcon_tell(sar['player_num'], "^3%s added as ^6Senior Admin" % victim.get_name())
                                 self.game.rcon_tell(victim.get_player_num(), "^3You are added as ^6Senior Admin")
                                 new_role = 80
