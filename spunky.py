@@ -2418,7 +2418,7 @@ class Player(object):
         self.num_played = 0
         self.last_visit = 0
         self.admin_role = 0
-        self.first_seen = None
+        self.first_seen = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         self.kills = 0
         self.froze = 0
         self.thawouts = 0
