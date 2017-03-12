@@ -44,7 +44,7 @@
 - **regtest** - regtest - display current user status
 	- Usage: `!regtest`
 - **xlrstats** - display full player statistics
-	- Usage: `!xlrstats [<name>]`
+	- Usage: `!xlrstats [<name|id>]`
 - **xlrtopstats** - display the top players
 	- Usage: `!xlrtopstats`
 	- Short: `!topstats`
@@ -55,36 +55,36 @@
 - **admintest** - display current admin status
 	- Usage: `!admintest`
 - **country** - get the country of the player
-	- Usage: `!country <name>`
+	- Usage: `!country <name|id>`
 - **leveltest** - get the admin level for a given player or myself
-	- Usage: `!leveltest [<name>]`
-	- Short: `!lt [<name>]`
+	- Usage: `!leveltest [<name|id>]`
+	- Short: `!lt [<name|id>]`
 - **list** - list all connected players
 	- Usage: `!list`
 - **locate** - display geolocation info of the player
-	- Usage: `!locate <name>`
-	- Short: `!lc <name>`
+	- Usage: `!locate <name|id>`
+	- Short: `!lc <name|id>`
 - **nextmap** - display the next map in rotation
 	- Usage: `!nextmap`
 - **mute** - mute or unmute a player
-	- Usage: `!mute <name> [<seconds>]`
+	- Usage: `!mute <name|id> [<seconds>]`
 - **poke** - notify a player that he needs to move
-	- Usage: `!poke <name>`
+	- Usage: `!poke <name|id>`
 - **seen** - display when the player was last seen
-	- Usage: `!seen <name>`
+	- Usage: `!seen <name|id>`
 - **shuffleteams** - shuffle the teams
 	- Usage: `!shuffleteams`
 	- Short: `!shuffle`
 - **warn** - warn user
-	- Usage: `!warn <name> [<reason>]`
-	- Short: `!w <name> [<reason>]`
+	- Usage: `!warn <name|id> [<reason>]`
+	- Short: `!w <name|id> [<reason>]`
 	- Available short form reasons: _tk_, _obj_, _spec_, _ping_, _spam_, _camp_, _lang_,  _racism_, _name_, _skill_, _whiner_
 - **warninfo** - display how many warnings the player has
-	- Usage: `!warninfo <name>`
-	- Short: `!wi <name>`
+	- Usage: `!warninfo <name|id>`
+	- Short: `!wi <name|id>`
 - **warnremove** - remove a users last warning
-	- Usage: `!warnremove <name>`
-	- Short: `!wr <name>`
+	- Usage: `!warnremove <name|id>`
+	- Short: `!wr <name|id>`
 - **warns** - list the warnings
 	- Usage: `!warns`
 - **warntest** -  test a warning
@@ -96,47 +96,47 @@
 - **admins** - list all the online admins
 	- Usage: `!admins`
 - **aliases** - list the aliases of the player
-	- Usage: `!aliases <name>`
-	- Short: `!alias <name>`
+	- Usage: `!aliases <name|id>`
+	- Short: `!alias <name|id>`
 - **bigtext** - display big message on screen
 	- Usage: `!bigtext <text>`
 - **exit** - display last disconnected player
 	- Usage: `!exit`
 - **find** - display the slot number of the player
-	- Usage: `!find <name>`
+	- Usage: `!find <name|id>`
 - **force** - force a player to the given team
-	- Usage: `!force <name> <blue/red/spec> [<lock>]`
+	- Usage: `!force <name|id> <blue/red/spec> [<lock>]`
 - **kick** - kick a player
-	- Usage: `!kick <name> <reason>`
-	- Short: `!k <name> <reason>`
+	- Usage: `!kick <name|id> <reason>`
+	- Short: `!k <name|id> <reason>`
 - **nuke** - nuke a player
-	- Usage: `!nuke <name>`
+	- Usage: `!nuke <name|id>`
 - **say** - say a message to all players (allow spectator to say a message to players in-game)
 	- Usage: `!say <text>`
 	- Short: `!!<text>`
 - **tempban** - ban a player temporary for the given period (1 min to 24 hrs)
-	-  Usage: `!tempban <name> <duration> [<reason>]`
-	-  Short: `!tb <name> <duration> [<reason>]`
+	-  Usage: `!tempban <name|id> <duration> [<reason>]`
+	-  Short: `!tb <name|id> <duration> [<reason>]`
 	-  Max ban duration: 24 hours
 - **warnclear** - clear the user warnings
-	- Usage: `!warnclear <name>`
-	- Short: `!wc <name>`
+	- Usage: `!warnclear <name|id>`
+	- Short: `!wc <name|id>`
 
 ### Full Admin [60]
 
 - **ban** - ban a player for 7 days
-	- Usage: `!ban <name> <reason>`
+	- Usage: `!ban <name|id> <reason>`
 - **baninfo** - display active bans of a player
-	- Usage: `!baninfo <name>`
-	- Short: `!bi <name>`
+	- Usage: `!baninfo <name|id>`
+	- Short: `!bi <name|id>`
 - **ci** - kick player with connection interrupt
-	- Usage: `!ci <name>`
+	- Usage: `!ci <name|id>`
 - **rain** - enables or disables rain
 	- Usage: `!rain <on/off>`
 - **scream** - scream a message in different colors to all players
 	- Usage: `!scream <text>`
 - **slap** - slap a player (a number of times)
-	- Usage: `!slap <name> [<amount>]`
+	- Usage: `!slap <name|id> [<amount>]`
 	- Default amount: 1
 	- Max amount: 15
 - **swap** - swap teams for player A and B (if in different teams)
@@ -160,15 +160,15 @@
 - **kiss** - clear all player warnings
 	- Usage: `!kiss`
 - **kill** - kill a player
-	- Usage: `!kill <name>`
+	- Usage: `!kill <name|id>`
 - **lastbans** - list the last 4 bans
 	- Usage: `!lastbans`
 	- Short: `!bans`
 - **lookup** - search for player in database
-	- Usage: `!lookup <name>`
-	- Short: `!l <name>`
+	- Usage: `!lookup <name|id>`
+	- Short: `!l <name|id>`
 - **makereg** - make a player a regular (Level 2) user
-	- Usage: `!makereg <name>`
+	- Usage: `!makereg <name|id>`
 	- Short: `!mr <name>`
 - **map** - load given map
 	- Usage: `!map <ut4_name>`
@@ -179,10 +179,10 @@
 - **moon** - activate Moon mode (low gravity)
 	- Usage: `!moon <on/off>`
 - **permban** - ban a player permanent
-	- Usage: `!permban <name> <reason>`
-	- Short: `!pb <name> <reason>`
+	- Usage: `!permban <name|id> <reason>`
+	- Short: `!pb <name|id> <reason>`
 - **putgroup** - add a client to a group
-	- Usage: `!putgroup <name> <group>`
+	- Usage: `!putgroup <name|id> <group>`
 	- Available Groups: _user_, _regular_, _mod_, _admin_, _fulladmin_
 - **setnextmap** - set the given map as nextmap
 	- Usage: `!setnextmap <ut4_name>`
@@ -198,9 +198,9 @@
 	- Usage: `!password [<password>]`
 	- Set an empty string to remove a password
 - **putgroup** - add a client to a group
-	- Usage: `!putgroup <name> <group>`
+	- Usage: `!putgroup <name|id> <group>`
 	- Available Groups: _user_, _regular_, _mod_, _admin_, _fulladmin_, _senioradmin_
 - **reload** - reload map
 	- Usage: `!reload`
 - **ungroup** - remove admin level from a player
-	- Usage: `!ungroup <name>`
+	- Usage: `!ungroup <name|id>`
