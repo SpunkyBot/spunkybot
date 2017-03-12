@@ -2203,8 +2203,14 @@ class LogParser(object):
                     self.game.rcon_say("^1Bomb has been planted!")
             elif action == 'Bomb was tossed':
                 player.bomb_tossed()
+                for mate in self.game.players.itervalues():
+                    if mate.get_team() == 1 and mate.get_alive() and mate != player:
+                        self.game.rcon_tell(mate.get_player_num(), "^7The ^1BOMB ^7is loose!")
             elif action == 'Bomb has been collected':
                 player.is_bombholder()
+                for mate in self.game.players.itervalues():
+                    if mate.get_team() == 1 and mate.get_alive() and mate != player:
+                        self.game.rcon_tell(mate.get_player_num(), "^7Help ^1%s ^7to plant the ^1BOMB" % name)
             elif action == 'Bombholder':
                 player.is_bombholder()
 
