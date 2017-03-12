@@ -662,8 +662,11 @@ class LogParser(object):
         """
         kick player for specific reason
         """
-        self.game.send_rcon("kick %d" % player_num)
-        self.game.send_rcon(reason)
+        if self.urt_modversion > 41:
+            self.game.send_rcon('kick %d "%s"' % (player_num, reason))
+        else:
+            self.game.send_rcon("kick %d" % player_num)
+            self.game.send_rcon(reason)
 
     def handle_userinfo_changed(self, line):
         """
