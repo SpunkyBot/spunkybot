@@ -2458,6 +2458,7 @@ class Player(object):
         self.welcome_msg = True
         self.country = None
         self.ban_id = 0
+        self.alive = False
 
         # set player name
         self.set_name(name)
@@ -2552,6 +2553,7 @@ class Player(object):
         self.bomb_planted = 0
         self.bomb_defused = 0
         self.team_lock = None
+        self.alive = False
 
     def reset_flag_stats(self):
         self.flags_captured = 0
@@ -2778,6 +2780,10 @@ class Player(object):
         self.killing_streak = 0
         self.deaths += 1
         self.db_deaths += 1
+
+
+    def get_alive(self):
+        return self.alive
 
     def suicide(self):
         self.db_suicide += 1
