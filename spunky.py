@@ -2781,6 +2781,8 @@ class Player(object):
         self.deaths += 1
         self.db_deaths += 1
 
+    def set_alive(self, status):
+        self.alive = status
 
     def get_alive(self):
         return self.alive
