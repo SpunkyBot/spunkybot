@@ -475,7 +475,7 @@ class LogParser(object):
         tmp = line.split(":", 1)
         line = tmp[1].strip() if len(tmp) > 1 else tmp[0].strip()
         option = {'InitGame': self.new_game, 'Warmup': self.handle_warmup, 'InitRound': self.handle_initround,
-                  'Exit': self.handle_exit, 'say': self.handle_say, 'saytell': self.handle_saytell,
+                  'Exit': self.handle_exit, 'say': self.handle_say, 'sayteam': self.handle_say, 'saytell': self.handle_saytell,
                   'ClientUserinfo': self.handle_userinfo, 'ClientUserinfoChanged': self.handle_userinfo_changed,
                   'ClientBegin': self.handle_begin, 'ClientDisconnect': self.handle_disconnect,
                   'SurvivorWinner': self.handle_teams_ts_mode, 'Kill': self.handle_kill, 'Hit': self.handle_hit,
