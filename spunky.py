@@ -91,7 +91,7 @@ class LogParser(object):
                                           'seen', 'shuffleteams', 'spec', 'warn', 'warninfo', 'warnremove', 'warns', 'warntest']
         self.admin_cmds = self.mod_cmds + ['admins', 'afk', 'aliases', 'bigtext', 'exit', 'find', 'force', 'kick', 'nuke',
                                            'say', 'tell', 'tempban', 'warnclear']
-        self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'id', 'rain', 'scream', 'slap', 'swap',
+        self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'id', 'rain', 'scream', 'slap', 'status', 'swap',
                                                  'version', 'veto']
         self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'exec', 'instagib', 'kill', 'kiss',
                                                        'lastbans', 'lookup', 'makereg', 'map', 'maps', 'maprestart',
@@ -186,6 +186,7 @@ class LogParser(object):
         data = {'v': __version__, 'p': server_port, 'o': platform.platform()}
         values = urllib.urlencode(data)
         self.ping_url = '%s/ping.php?%s' % (self.base_url, values)
+        self.uptime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         # Rotating Messages and Rules
         if config.getboolean('rules', 'show_rules'):
             self.output_rules = config.get('rules', 'display') if config.has_option('rules', 'display') else "chat"
@@ -1720,6 +1721,11 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], "^7Usage: !swap <name1> <name2>")
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Command is disabled for this game mode")
+
+            elif sar['command'] == '!status' and self.game.players[sar['player_num']].get_admin_role() >= 60:
+                curs.execute("PRAGMA database_list")
+                msg = "^7Database is ^2UP^7 and Bot started at ^2%s" % self.uptime if curs.fetchall() else "^7Database appears to be ^1DOWN"
+                self.game.rcon_tell(sar['player_num'], msg)
 
             # version - display the version of the bot
             elif sar['command'] == '!version' and self.game.players[sar['player_num']].get_admin_role() >= 60:

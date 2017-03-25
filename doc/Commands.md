@@ -147,6 +147,8 @@
 	- Usage: `!slap <name|id> [<amount>]`
 	- Default amount: 1
 	- Max amount: 15
+- **status** - report the status of the bot
+	- Usage: `!status`
 - **swap** - swap teams for player A and B (if in different teams)
 	- Usage: `!swap <playerA> <playerB>`
 - **version** - display the version of the bot
