@@ -1058,7 +1058,7 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7freeze: ^2%d ^7- thaw out: ^2%d" % (self.game.players[sar['player_num']].get_freeze(), self.game.players[sar['player_num']].get_thawout()))
 
             elif sar['command'] == '!help' or sar['command'] == '!h':
-                ## TO DO - specific help for each command
+                ## TO DO - specific help for each command, e.g.: !help putgroup
                 if self.game.players[sar['player_num']].get_admin_role() < 20:
                     self.game.rcon_tell(sar['player_num'], "^7Available commands: ^3%s" % ', ^3'.join(self.clean_cmd_list(self.user_cmds)))
                 # help for mods - additional commands
@@ -1722,6 +1722,7 @@ class LogParser(object):
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Command is disabled for this game mode")
 
+            # status - report the status of the bot
             elif sar['command'] == '!status' and self.game.players[sar['player_num']].get_admin_role() >= 60:
                 curs.execute("PRAGMA database_list")
                 msg = "^7Database is ^2UP^7 and Bot started at ^2%s" % self.uptime if curs.fetchall() else "^7Database appears to be ^1DOWN"
