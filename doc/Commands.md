@@ -137,6 +137,8 @@
 	- Short: `!bi <name|id>`
 - **ci** - kick player with connection interrupt
 	- Usage: `!ci <name|id>`
+- **id** - show the IP, guid and authname of a player
+	- Usage: `!id <name|id>`
 - **rain** - enables or disables rain
 	- Usage: `!rain <on/off>`
 - **scream** - scream a message in different colors to all players

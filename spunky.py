@@ -91,7 +91,8 @@ class LogParser(object):
                                           'seen', 'shuffleteams', 'spec', 'warn', 'warninfo', 'warnremove', 'warns', 'warntest']
         self.admin_cmds = self.mod_cmds + ['admins', 'afk', 'aliases', 'bigtext', 'exit', 'find', 'force', 'kick', 'nuke',
                                            'say', 'tell', 'tempban', 'warnclear']
-        self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'rain', 'scream', 'slap', 'swap', 'version', 'veto']
+        self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'id', 'rain', 'scream', 'slap', 'swap',
+                                                 'version', 'veto']
         self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'exec', 'instagib', 'kill', 'kiss',
                                                        'lastbans', 'lookup', 'makereg', 'map', 'maps', 'maprestart',
                                                        'moon', 'password', 'permban', 'putgroup', 'reload', 'setnextmap',
@@ -1633,6 +1634,19 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !tempban <name> <duration> [<reason>]")
 
 ## full admin level 60
+            # id - show the IP, guid and authname of a player - !id <name>
+            elif sar['command'] == '!id' and self.game.players[sar['player_num']].get_admin_role() >= 60:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
+                    found, victim, msg = self.player_found(user)
+                    if not found:
+                        self.game.rcon_tell(sar['player_num'], msg)
+                    else:
+                        msg = "^7[^2@%s^7] %s ^2%s ^7[^3%s^7] since ^3%s" % (victim.get_player_id(), victim.get_name(), victim.get_ip_address(), victim.get_authname() if victim.get_authname() else "---", victim.get_first_seen_date())
+                        self.game.rcon_tell(sar['player_num'], msg)
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7Usage: !id <name>")
+
             # scream - scream a message in different colors to all players
             elif sar['command'] == '!scream' and self.game.players[sar['player_num']].get_admin_role() >= 60:
                 if line.split(sar['command'])[1]:
