@@ -1463,6 +1463,23 @@ class LogParser(object):
                 if line.split('!!')[1]:
                     self.game.rcon_say("^4%s: ^7%s" % (self.game.players[sar['player_num']].get_name(), line.split('!!', 1)[1].strip()))
 
+            # tell - tell a message to a specific player - !tell <name|id> <text>
+            elif sar['command'] == '!tell' and self.game.players[sar['player_num']].get_admin_role() >= 40:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].split()
+                    if len(arg) > 1:
+                        user = arg[0]
+                        message = ' '.join(arg[1:]).strip()
+                        found, victim, msg = self.player_found(user)
+                        if not found:
+                            self.game.rcon_tell(sar['player_num'], msg)
+                        else:
+                            self.game.rcon_tell(victim.get_player_num(), "^4%s: ^7%s" % (self.game.players[sar['player_num']].get_name(), message))
+                    else:
+                        self.game.rcon_tell(sar['player_num'], "^7Usage: !tell <name> <text>")
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7Usage: !tell <name> <text>")
+
             elif sar['command'] == '!exit' and self.game.players[sar['player_num']].get_admin_role() >= 40:
                 msg = "^3Last disconnected player: ^7%s" % self.last_disconnected_player.get_name() if self.last_disconnected_player else "^3No player left during this match"
                 self.game.rcon_tell(sar['player_num'], msg)
