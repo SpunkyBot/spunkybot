@@ -89,8 +89,8 @@ class LogParser(object):
                           'knife', 'register', 'regtest', 'spree', 'stats', 'teams', 'time', 'xlrstats', 'xlrtopstats']
         self.mod_cmds = self.user_cmds + ['admintest', 'country', 'leveltest', 'list', 'locate', 'nextmap', 'mute', 'poke',
                                           'seen', 'shuffleteams', 'spec', 'warn', 'warninfo', 'warnremove', 'warns', 'warntest']
-        self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'exit', 'find', 'force', 'kick', 'nuke', 'say',
-                                           'tempban', 'warnclear']
+        self.admin_cmds = self.mod_cmds + ['admins', 'afk', 'aliases', 'bigtext', 'exit', 'find', 'force', 'kick', 'nuke',
+                                           'say', 'tempban', 'warnclear']
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'rain', 'scream', 'slap', 'swap', 'version', 'veto']
         self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'exec', 'instagib', 'kill', 'kiss',
                                                        'lastbans', 'lookup', 'makereg', 'map', 'maps', 'maprestart',
@@ -1475,6 +1475,18 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], msg)
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !find <name>")
+
+            # afk - force a player to spec, because he is away from keyboard - !afk <name>
+            elif sar['command'] == '!afk' and self.game.players[sar['player_num']].get_admin_role() >= 40:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].split()[0]
+                    found, victim, msg = self.player_found(user)
+                    if not found:
+                        self.game.rcon_tell(sar['player_num'], msg)
+                    else:
+                        self.game.rcon_forceteam(victim.get_player_num(), 'spectator')
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7Usage: !afk <name>")
 
             # force - force a player to the given team
             elif sar['command'] == '!force' and self.game.players[sar['player_num']].get_admin_role() >= 40:

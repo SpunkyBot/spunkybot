@@ -97,6 +97,8 @@
 
 - **admins** - list all the online admins
 	- Usage: `!admins`
+- **afk** - force a player to spec, because he is away from keyboard
+	- Usage: `!afk <name|id>`
 - **aliases** - list the aliases of the player
 	- Usage: `!aliases <name|id>`
 	- Short: `!alias <name|id>`
