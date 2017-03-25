@@ -88,7 +88,7 @@ class LogParser(object):
         self.user_cmds = ['bombstats', 'ctfstats', 'freezestats', 'forgiveall, forgiveprev', 'hestats', 'hs', 'hits',
                           'knife', 'register', 'regtest', 'spree', 'stats', 'teams', 'time', 'xlrstats', 'xlrtopstats']
         self.mod_cmds = self.user_cmds + ['admintest', 'country', 'leveltest', 'list', 'locate', 'nextmap', 'mute', 'poke',
-                                          'seen', 'shuffleteams', 'warn', 'warninfo', 'warnremove', 'warns', 'warntest']
+                                          'seen', 'shuffleteams', 'spec', 'warn', 'warninfo', 'warnremove', 'warns', 'warntest']
         self.admin_cmds = self.mod_cmds + ['admins', 'aliases', 'bigtext', 'exit', 'find', 'force', 'kick', 'nuke', 'say',
                                            'tempban', 'warnclear']
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'rain', 'scream', 'slap', 'swap', 'version', 'veto']
@@ -1325,6 +1325,10 @@ class LogParser(object):
                     self.game.send_rcon('shuffleteams')
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Command is disabled for this game mode")
+
+            # spec - move yourself to spectator
+            elif sar['command'] == '!spec' and self.game.players[sar['player_num']].get_admin_role() >= 20:
+                self.game.rcon_forceteam(sar['player_num'], 'spectator')
 
             # warninfo - display how many warnings the player has
             elif (sar['command'] == '!warninfo' or sar['command'] == '!wi') and self.game.players[sar['player_num']].get_admin_role() >= 20:

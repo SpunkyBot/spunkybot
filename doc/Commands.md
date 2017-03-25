@@ -75,6 +75,8 @@
 - **shuffleteams** - shuffle the teams
 	- Usage: `!shuffleteams`
 	- Short: `!shuffle`
+- **spec** - move yourself to spectator
+	- Usage: `!spec`
 - **warn** - warn user
 	- Usage: `!warn <name|id> [<reason>]`
 	- Short: `!w <name|id> [<reason>]`
