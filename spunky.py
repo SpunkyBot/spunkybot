@@ -707,10 +707,15 @@ class LogParser(object):
             player_num = int(line)
             player = self.game.players[player_num]
             player_name = player.get_name()
+            player_id = player.get_player_id()
             # Welcome message for registered players
             if player.get_registered_user() and player.get_welcome_msg():
+                self.game.rcon_say("^3Everyone welcome back ^7%s^3, player number ^7#%s^3, to this server" % (player_name, player_id))
                 self.game.rcon_tell(player_num, "^7[^2Authed^7] Welcome back %s, you are ^2%s^7, last visit %s, you played %s times" % (player_name, player.roles[player.get_admin_role()], player.get_last_visit(), player.get_num_played()), False)
                 # disable welcome message for next rounds
+                player.disable_welcome_msg()
+            elif not player.get_registered_user() and player.get_welcome_msg():
+                self.game.rcon_tell(player_num, "^7Welcome %s, you are player number ^3#%s^7. Type ^2!register ^7to save your stats" % (player_name, player_id))
                 player.disable_welcome_msg()
             logger.debug("ClientBegin: Player %d %s has entered the game", player_num, player_name)
 
