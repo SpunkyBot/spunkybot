@@ -1876,7 +1876,7 @@ class LogParser(object):
                 self.tell_say_message(sar, msg)
 
             # maprestart - restart the map
-            elif sar['command'] == '!maprestart' and self.game.players[sar['player_num']].get_admin_role() >= 80:
+            elif (sar['command'] == '!maprestart' or sar['command'] == '!restart') and self.game.players[sar['player_num']].get_admin_role() >= 80:
                 self.game.send_rcon('restart')
                 self.stats_reset()
 

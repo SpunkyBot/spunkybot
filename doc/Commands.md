@@ -186,6 +186,7 @@
 	- Usage: `!maps
 - **maprestart** - restart the map
 	- Usage: `!maprestart`
+	- Short: `!restart`
 - **moon** - activate Moon mode (low gravity)
 	- Usage: `!moon <on/off>`
 - **permban** - ban a player permanent
