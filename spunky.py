@@ -481,7 +481,7 @@ class LogParser(object):
                   'ClientUserinfo': self.handle_userinfo, 'ClientUserinfoChanged': self.handle_userinfo_changed,
                   'ClientBegin': self.handle_begin, 'ClientDisconnect': self.handle_disconnect,
                   'SurvivorWinner': self.handle_teams_ts_mode, 'Kill': self.handle_kill, 'Hit': self.handle_hit,
-                  'Freeze': self.handle_freeze, 'ThawOutFinished': self.handle_thawout,
+                  'Freeze': self.handle_freeze, 'ThawOutFinished': self.handle_thawout, 'ClientSpawn': self.handle_spawn,
                   'Flag': self.handle_flag, 'FlagCaptureTime': self.handle_flagcapturetime}
 
         try:
@@ -541,6 +541,14 @@ class LogParser(object):
 
         # reset list of player who left server
         self.last_disconnected_player = None
+
+    def handle_spawn(self, line):
+        """
+        handle client spawn
+        """
+        player_num = int(line)
+        with self.players_lock:
+            self.game.players[player_num].set_alive(True)
 
     def handle_flagcapturetime(self, line):
         """
@@ -783,6 +791,7 @@ class LogParser(object):
             victim_id = int(info[1])
             death_cause = self.death_cause[int(info[2])]
             victim = self.game.players[victim_id]
+            victim.set_alive(False)
 
             if k_name == "<non-client>":
                 # killed by World
