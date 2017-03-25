@@ -118,6 +118,8 @@
 - **say** - say a message to all players (allow spectator to say a message to players in-game)
 	- Usage: `!say <text>`
 	- Short: `!!<text>`
+- **tell** - tell a message to a specific player
+	-  Usage: `!tell <name|id> <text>`
 - **tempban** - ban a player temporary for the given period (1 min to 24 hrs)
 	-  Usage: `!tempban <name|id> <duration> [<reason>]`
 	-  Short: `!tb <name|id> <duration> [<reason>]`
