@@ -3313,6 +3313,8 @@ class Game(object):
 
         if self.dynamic_mapcycle:
             self.send_rcon('g_nextmap %s' % self.next_mapname)
+            if self.mapname != self.next_mapname:
+                self.rcon_say("^7Next Map: ^3%s" % self.next_mapname)
 
     def set_all_maps(self):
         """
