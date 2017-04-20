@@ -847,7 +847,7 @@ class LogParser(object):
 
                 # first kill message
                 if self.firstblood:
-                    self.game.rcon_bigtext("^1FIRSTBLOOD: ^7%s killed by ^3%s" % (victim_name, killer_name))
+                    self.game.rcon_bigtext("^1FIRST BLOOD: ^7%s killed by ^1%s" % (victim_name, killer_name))
                     self.firstblood = False
                     if death_cause == 'UT_MOD_HEGRENADE':
                         self.firstnadekill = False
