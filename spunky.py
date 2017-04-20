@@ -1041,7 +1041,10 @@ class LogParser(object):
                        '999': 'connection interrupted',
                        'whiner': 'stop complaining about camp, lag or block',
                        'skill': 'skill too low for this server',
-                       'name': 'do not use offensive names'}
+                       'name': 'do not use offensive names',
+                       'wh': 'wallhack',
+                       'insult': 'stop insulting',
+                       'autojoin': 'use auto-join'}
 
         poke_options = ['Go', 'Wake up', '*poke*', 'Attention', 'Get up', 'Move out']
 
