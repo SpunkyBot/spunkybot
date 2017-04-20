@@ -845,6 +845,14 @@ class LogParser(object):
             elif not tk_event and int(info[2]) != 10:  # 10: MOD_CHANGE_TEAM
                 killer.kill()
 
+                # multi kill message
+                if killer.get_monsterkill() == 2:
+                    self.game.rcon_say("^7%s: ^2Double Kill!" % killer_name)
+                elif killer.get_monsterkill() == 3:
+                    self.game.rcon_say("^7%s: ^1Multi Kill!" % killer_name)
+                elif killer.get_monsterkill() == 4:
+                    self.game.rcon_say("^7%s: ^1MONSTER KILL!!" % killer_name)
+
                 # first kill message
                 if self.firstblood:
                     self.game.rcon_bigtext("^1FIRST BLOOD: ^7%s killed by ^1%s" % (victim_name, killer_name))
