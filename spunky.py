@@ -92,7 +92,7 @@ class LogParser(object):
         self.admin_cmds = self.mod_cmds + ['admins', 'afk', 'aliases', 'bigtext', 'exit', 'find', 'force', 'kick', 'nuke',
                                            'say', 'tell', 'tempban', 'warnclear']
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'id', 'kickbots', 'rain', 'scream', 'slap', 'status',
-                                                 'version', 'veto']
+                                                 'swap', 'version', 'veto']
         self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'exec', 'instagib', 'kill', 'kiss',
                                                        'lastbans', 'lookup', 'makereg', 'map', 'maps', 'maprestart',
                                                        'moon', 'password', 'permban', 'putgroup', 'reload', 'setnextmap',
