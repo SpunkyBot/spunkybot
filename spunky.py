@@ -872,7 +872,9 @@ class LogParser(object):
                 event_series_msg = {5: 'go on!',
                                     10: 'beware!',
                                     15: 'eat that!',
-                                    20: 'got pwned!'}
+                                    20: 'got pwned!',
+                                    25: 'impressive!',
+                                    30: 'dominating!'}
 
                 # HE grenade kill
                 if death_cause == 'UT_MOD_HEGRENADE':
