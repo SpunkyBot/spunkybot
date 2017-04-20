@@ -2267,8 +2267,9 @@ class LogParser(object):
                 logger.debug("Player %d planted the bomb", player_num)
                 self.game.send_rcon("^7The ^1BOMB ^7has been planted by ^1%s^7!" % name)
                 if self.spam_bomb_planted_msg:
-                    self.game.rcon_say("^1Bomb has been planted!")
-                    self.game.rcon_say("^1Bomb has been planted!")
+                    self.game.rcon_say("^7The ^1BOMB ^7has been planted by ^1%s^7!" % name)
+                    self.game.rcon_bigtext("^1The ^7BOMB ^1has been planted by ^7%s^1!" % name)
+                    self.game.rcon_bigtext("^7The ^1BOMB ^7has been planted by ^1%s^7!" % name)
             elif action == 'Bomb was tossed':
                 player.bomb_tossed()
                 for mate in self.game.players.itervalues():
