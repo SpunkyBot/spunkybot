@@ -91,7 +91,7 @@ class LogParser(object):
                                           'seen', 'shuffleteams', 'spec', 'warn', 'warninfo', 'warnremove', 'warns', 'warntest']
         self.admin_cmds = self.mod_cmds + ['admins', 'afk', 'aliases', 'bigtext', 'exit', 'find', 'force', 'kick', 'nuke',
                                            'say', 'tell', 'tempban', 'warnclear']
-        self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'id', 'rain', 'scream', 'slap', 'status', 'swap',
+        self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'id', 'kickbots', 'rain', 'scream', 'slap', 'status',
                                                  'version', 'veto']
         self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'exec', 'instagib', 'kill', 'kiss',
                                                        'lastbans', 'lookup', 'makereg', 'map', 'maps', 'maprestart',
@@ -1661,6 +1661,10 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], msg)
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !id <name>")
+
+            # !kickbots - kick all bots
+            elif (sar['command'] == '!kickbots' or sar['command'] == '!kb') and self.game.players[sar['player_num']].get_admin_role() >= 60:
+                self.game.send_rcon('kick allbots')
 
             # scream - scream a message in different colors to all players
             elif sar['command'] == '!scream' and self.game.players[sar['player_num']].get_admin_role() >= 60:

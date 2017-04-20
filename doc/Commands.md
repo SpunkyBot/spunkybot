@@ -139,6 +139,9 @@
 	- Usage: `!ci <name|id>`
 - **id** - show the IP, guid and authname of a player
 	- Usage: `!id <name|id>`
+- **kickbots** kick all bots
+	- Usage: `!kickbots`
+	- Short: `!kb`
 - **rain** - enables or disables rain
 	- Usage: `!rain <on/off>`
 - **scream** - scream a message in different colors to all players
