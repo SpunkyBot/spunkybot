@@ -1038,6 +1038,7 @@ class LogParser(object):
                        'sk': 'stop spawn killing',
                        'spec': 'spectator too long on full server',
                        'ci': 'connection interrupted',
+                       '999': 'connection interrupted',
                        'whiner': 'stop complaining about camp, lag or block',
                        'skill': 'skill too low for this server',
                        'name': 'do not use offensive names'}
