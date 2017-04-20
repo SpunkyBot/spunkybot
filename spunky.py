@@ -2533,6 +2533,7 @@ class Player(object):
         self.country = None
         self.ban_id = 0
         self.alive = False
+        self.monsterkill = {'time': 999, 'kills': 0}
 
         # set player name
         self.set_name(name)
@@ -2628,6 +2629,7 @@ class Player(object):
         self.bomb_defused = 0
         self.team_lock = None
         self.alive = False
+        self.monsterkill = {'time': 999, 'kills': 0}
 
     def reset_flag_stats(self):
         self.flags_captured = 0
@@ -2842,9 +2844,14 @@ class Player(object):
         return self.max_kill_streak
 
     def kill(self):
+        now = time.time()
         self.killing_streak += 1
         self.kills += 1
         self.db_kills += 1
+            self.monsterkill['kills'] += 1
+        else:
+            self.monsterkill['time'] = now
+            self.monsterkill['kills'] = 1
 
     def die(self):
         if self.killing_streak > self.max_kill_streak:
@@ -2854,6 +2861,10 @@ class Player(object):
         self.killing_streak = 0
         self.deaths += 1
         self.db_deaths += 1
+        self.monsterkill = {'time': 999, 'kills': 0}
+
+    def get_monsterkill(self):
+        return self.monsterkill['kills']
 
     def set_alive(self, status):
         self.alive = status
