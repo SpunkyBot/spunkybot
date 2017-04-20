@@ -93,7 +93,7 @@ class LogParser(object):
                                            'say', 'tell', 'tempban', 'warnclear']
         self.fulladmin_cmds = self.admin_cmds + ['ban', 'baninfo', 'ci', 'id', 'kickbots', 'rain', 'scream', 'slap', 'status',
                                                  'swap', 'version', 'veto']
-        self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'exec', 'instagib', 'kill', 'kiss',
+        self.senioradmin_cmds = self.fulladmin_cmds + ['banlist', 'cyclemap', 'exec', 'instagib', 'kickall', 'kill', 'kiss',
                                                        'lastbans', 'lookup', 'makereg', 'map', 'maps', 'maprestart',
                                                        'moon', 'password', 'permban', 'putgroup', 'reload', 'setnextmap',
                                                        'swapteams', 'unban', 'ungroup']
@@ -1853,6 +1853,27 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !rain <on/off>")
 
 ## senior admin level 80
+            # !kickall <pattern> [<reason>]- kick all players matching <pattern>
+            elif (sar['command'] == '!kickall' or sar['command'] == '!kall') and self.game.players[sar['player_num']].get_admin_role() >= 80:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].split()
+                    user = arg[0]
+                    reason = ' '.join(arg[1:])[:40].strip() if len(arg) > 1 else ''
+                    if len(user) > 2:
+                        pattern_list = [player for player in self.game.players.itervalues() if user.upper() in player.get_name().upper()]
+                        if pattern_list:
+                            for player in pattern_list:
+                                if player.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
+                                    self.game.rcon_tell(sar['player_num'], "^3Insufficient privileges to kick an admin")
+                                else:
+                                    self.game.kick_player(player.get_player_num(), reason)
+                        else:
+                            self.game.rcon_say("^3No Players found matching %s" % user)
+                    else:
+                        self.game.rcon_say("^3Pattern must be at least 3 characters long")
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7Usage: !kickall <pattern> [<reason>]")
+
             # kiss - clear all player warnings - !clear [<player>]
             elif (sar['command'] == '!kiss' or sar['command'] == '!clear') and self.game.players[sar['player_num']].get_admin_role() >= 80:
                 if line.split(sar['command'])[1]:

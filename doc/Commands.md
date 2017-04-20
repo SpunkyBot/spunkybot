@@ -170,6 +170,9 @@
 	- Usage: `!exec <filename>`
 - **instagib** - Set Instagib mode
 	- Usage: `!instagib <on/off>`
+- **kickall** - kick all players matching pattern
+	- Usage: `!kickall <pattern> [<reason>]`
+	- Short: `!kall`
 - **kiss** - clear all player warnings
 	- Usage: `!kiss`
 - **kill** - kill a player
