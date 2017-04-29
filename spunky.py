@@ -2595,6 +2595,7 @@ class Player(object):
         self.welcome_msg = True
         self.country = None
         self.ban_id = 0
+        self.ban_msg = ''
         self.alive = False
         self.monsterkill = {'time': 999, 'kills': 0}
 
@@ -2609,16 +2610,18 @@ class Player(object):
         # check ban_list
         now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(self.time_joined))
         values = (self.guid, now)
-        curs.execute("SELECT `id` FROM `ban_list` WHERE `guid` = ? AND `expires` > ?", values)
+        curs.execute("SELECT `id`,`reason` FROM `ban_list` WHERE `guid` = ? AND `expires` > ?", values)
         result = curs.fetchone()
         if result:
             self.ban_id = result[0]
+            self.ban_msg = str(result[1]).split(',')[0]
         else:
             values = (self.address, now)
-            curs.execute("SELECT `id` FROM `ban_list` WHERE `ip_address` = ? AND `expires` > ?", values)
+            curs.execute("SELECT `id`,`reason` FROM `ban_list` WHERE `ip_address` = ? AND `expires` > ?", values)
             result = curs.fetchone()
             if result:
                 self.ban_id = result[0]
+                self.ban_msg = str(result[1]).split(',')[0]
 
     def ban(self, duration=900, reason='tk', admin=None):
         if admin:
@@ -2807,6 +2810,9 @@ class Player(object):
 
     def get_ban_id(self):
         return self.ban_id
+
+    def get_ban_msg(self):
+        return REASONS[self.ban_msg] if self.ban_msg in REASONS else self.ban_msg
 
     def set_name(self, name):
         # remove whitespaces
