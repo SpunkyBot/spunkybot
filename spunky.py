@@ -1427,8 +1427,8 @@ class LogParser(object):
                                     self.game.kick_player(victim.get_player_num(), reason='too many warnings')
                                     msg = "^2%s ^7was kicked, too many warnings" % victim.get_name()
                                 else:
-                                    if reason in reason_dict:
-                                        warning = reason_dict[reason]
+                                    if reason in REASONS:
+                                        warning = REASONS[reason]
                                         if reason == 'tk' and victim.get_warning() > 1:
                                             ban_duration = victim.add_ban_point('tk, ban by %s' % self.game.players[sar['player_num']].get_name(), 600)
                                         elif reason == 'lang' and victim.get_warning() > 1:
@@ -1474,7 +1474,7 @@ class LogParser(object):
 
             # warns - list the warnings
             elif sar['command'] == '!warns' and self.game.players[sar['player_num']].get_admin_role() >= 20:
-                keylist = reason_dict.keys()
+                keylist = REASONS.keys()
                 keylist.sort()
                 self.game.rcon_tell(sar['player_num'], "^7Warnings: ^3%s" % ", ^3".join([key for key in keylist]))
 
@@ -1482,7 +1482,7 @@ class LogParser(object):
             elif (sar['command'] == '!warntest' or sar['command'] == '!wt') and self.game.players[sar['player_num']].get_admin_role() >= 20:
                 if line.split(sar['command'])[1]:
                     reason = line.split(sar['command'])[1].strip()
-                    warning = reason_dict[reason] if reason in reason_dict else reason
+                    warning = REASONS[reason] if reason in REASONS else reason
                 else:
                     warning = 'behave yourself'
                 self.game.rcon_tell(sar['player_num'], "^2TEST: ^1WARNING ^7[^31^7]: ^4%s" % warning)
@@ -1637,8 +1637,8 @@ class LogParser(object):
                                 self.game.rcon_tell(sar['player_num'], "^3Insufficient privileges to kick an admin")
                             else:
                                 msg = "^2%s ^7was kicked by %s" % (victim.get_name(), self.game.players[sar['player_num']].get_name())
-                                if reason in reason_dict:
-                                    kick_reason = reason_dict[reason]
+                                if reason in REASONS:
+                                    kick_reason = REASONS[reason]
                                     msg = "%s: ^3%s" % (msg, kick_reason)
                                 elif reason == '.':
                                     kick_reason = ''
@@ -1673,7 +1673,7 @@ class LogParser(object):
                         user = arg[0]
                         duration, duration_output = self.convert_time(arg[1])
                         reason = ' '.join(arg[2:])[:40].strip() if len(arg) > 2 else 'tempban'
-                        kick_reason = reason_dict[reason] if reason in reason_dict else '' if reason == 'tempban' else reason
+                        kick_reason = REASONS[reason] if reason in REASONS else '' if reason == 'tempban' else reason
                         found, victim, msg = self.player_found(user)
                         if not found:
                             self.game.rcon_tell(sar['player_num'], msg)
@@ -1842,7 +1842,7 @@ class LogParser(object):
                         user = reason = None
                     if user and reason:
                         found, victim, msg = self.player_found(user)
-                        kick_reason = reason_dict[reason] if reason in reason_dict else '' if reason == 'tempban' else reason
+                        kick_reason = REASONS[reason] if reason in REASONS else '' if reason == 'tempban' else reason
                         if not found:
                             self.game.rcon_tell(sar['player_num'], msg)
                         else:
