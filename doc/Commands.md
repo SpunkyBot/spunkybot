@@ -56,6 +56,8 @@
 	- Usage: `!admintest`
 - **country** - get the country of the player
 	- Usage: `!country <name|id>`
+- **lastmaps** - list the last played maps
+	- Usage: `!lastmaps`
 - **leveltest** - get the admin level for a given player or myself
 	- Usage: `!leveltest [<name|id>]`
 	- Short: `!lt [<name|id>]`
