@@ -2888,7 +2888,7 @@ class Player(object):
         self.killing_streak += 1
         self.kills += 1
         self.db_kills += 1
-        if now - self.monsterkill['time'] < 6:
+        if now - self.monsterkill['time'] < 5:
             self.monsterkill['kills'] += 1
         else:
             self.monsterkill['time'] = now
