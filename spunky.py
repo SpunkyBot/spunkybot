@@ -170,6 +170,7 @@ class LogParser(object):
         self.firstnadekill = False
         self.firstknifekill = False
         self.last_disconnected_player = None
+        self.allow_nextmap_vote = True
 
         # enable/disable autokick for team killing
         self.tk_autokick = config.getboolean('bot', 'teamkill_autokick') if config.has_option('bot', 'teamkill_autokick') else True
@@ -564,6 +565,9 @@ class LogParser(object):
 
         # reset list of player who left server
         self.last_disconnected_player = None
+
+        # allow nextmap votes
+        self.allow_nextmap_vote = True
 
     def handle_spawn(self, line):
         """
