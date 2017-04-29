@@ -54,6 +54,9 @@ logger.propagate = False
 # Bot player number
 BOT_PLAYER_NUM = 1022
 
+# RCON Delay in seconds, recommended range: 0.18 - 0.33
+RCON_DELAY = 0.3
+
 
 REASONS = {'obj': 'go for objective',
            'camp': 'stop camping',
