@@ -3190,7 +3190,7 @@ class Game(object):
                         except Exception as err:
                             logger.error(err, exc_info=True)
                             #pass
-            time.sleep(.33)
+            time.sleep(RCON_DELAY)
 
     def get_quake_value(self, value):
         """
@@ -3219,7 +3219,7 @@ class Game(object):
                     ret_val = self.quake.rcon(value)[1].split(':')[1].split('^7')[0].lstrip('"')
                 except IndexError:
                     ret_val = None
-                time.sleep(.33)
+                time.sleep(RCON_DELAY)
                 return ret_val
 
     def get_mapcycle_path(self):
