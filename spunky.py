@@ -3012,6 +3012,7 @@ class Player(object):
         self.warn_list = []
         self.tk_victim_names = []
         self.tk_killer_names = []
+        self.last_warn_time = 0
         # clear ban_points
         now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         values = (self.guid, now)
