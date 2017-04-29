@@ -2218,7 +2218,7 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
                         if 1 < victim.get_admin_role() < 100:
-                            self.game.rcon_tell(sar['player_num'], "^3%s put in group User" % victim.get_name())
+                            self.game.rcon_tell(sar['player_num'], "^3%s put in group ^7User" % victim.get_name())
                             victim.update_db_admin_role(role=1)
                         else:
                             self.game.rcon_tell(sar['player_num'], "^3Sorry, you cannot put %s in group User" % victim.get_name())
