@@ -3148,6 +3148,7 @@ class Game(object):
         self.next_mapname = ''
         self.mapname = ''
         self.maplist = []
+        self.last_maps_list = []
         self.players = {}
         self.live = False
         self.urt_modversion = urt_modversion
@@ -3375,6 +3376,8 @@ class Game(object):
         """
         set the current and next map in rotation
         """
+        if self.mapname:
+            self.last_maps_list = self.last_maps_list[-3:] + [self.mapname]
         try:
             self.mapname = self.get_quake_value('mapname')
         except KeyError:
@@ -3421,6 +3424,12 @@ class Game(object):
         get a list of all available maps
         """
         return self.all_maps_list
+
+    def get_last_maps(self):
+        """
+        get a list of the last played maps
+        """
+        return self.last_maps_list
 
     def add_player(self, player):
         """
