@@ -1064,25 +1064,6 @@ class LogParser(object):
         """
         handle say commands
         """
-        reason_dict = {'obj': 'go for objective',
-                       'camp': 'stop camping',
-                       'spam': 'do not spam, shut-up!',
-                       'lang': 'bad language',
-                       'racism': 'racism is not tolerated',
-                       'ping': 'fix your ping',
-                       'afk': 'away from keyboard',
-                       'tk': 'stop team killing',
-                       'sk': 'stop spawn killing',
-                       'spec': 'spectator too long on full server',
-                       'ci': 'connection interrupted',
-                       '999': 'connection interrupted',
-                       'whiner': 'stop complaining about camp, lag or block',
-                       'skill': 'skill too low for this server',
-                       'name': 'do not use offensive names',
-                       'wh': 'wallhack',
-                       'insult': 'stop insulting',
-                       'autojoin': 'use auto-join'}
-
         poke_options = ['Go', 'Wake up', '*poke*', 'Attention', 'Get up', 'Move out']
 
         with self.players_lock:
