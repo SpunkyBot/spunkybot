@@ -134,6 +134,7 @@
 
 - **ban** - ban a player for 7 days
 	- Usage: `!ban <name|id> <reason>`
+	- Short: `!b <name|id> <reason>`
 - **baninfo** - display active bans of a player
 	- Usage: `!baninfo <name|id>`
 	- Short: `!bi <name|id>`
@@ -166,23 +167,24 @@
 
 - **banlist** - display the last active 10 bans
 	- Usage: `!banlist`
-- **cyclemap** - start next map in rotation
+- **cyclemap** - cycle to the next map
 	- Usage: `!cyclemap`
 - **exec** - execute given config file
 	- Usage: `!exec <filename>`
-- **instagib** - Set Instagib mode
+- **instagib** - set Instagib mode
 	- Usage: `!instagib <on/off>`
 - **kickall** - kick all players matching pattern
 	- Usage: `!kickall <pattern> [<reason>]`
 	- Short: `!kall`
 - **kiss** - clear all player warnings
 	- Usage: `!kiss`
+	- Short: `!clear`
 - **kill** - kill a player
 	- Usage: `!kill <name|id>`
 - **lastbans** - list the last 4 bans
 	- Usage: `!lastbans`
 	- Short: `!bans`
-- **lookup** - search for player in database
+- **lookup** - search for player in the database
 	- Usage: `!lookup <name|id>`
 	- Short: `!l <name|id>`
 - **makereg** - make a player a regular (Level 2) user
@@ -203,7 +205,7 @@
 - **putgroup** - add a client to a group
 	- Usage: `!putgroup <name|id> <group>`
 	- Available Groups: _user_, _regular_, _mod_, _admin_, _fulladmin_
-- **setnextmap** - set the given map as nextmap
+- **setnextmap** - set the next map
 	- Usage: `!setnextmap <ut4_name>`
 - **swapteams** - swap the current teams
 	- Usage: `!swapteams`
