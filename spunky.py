@@ -507,7 +507,8 @@ class LogParser(object):
                   'ClientBegin': self.handle_begin, 'ClientDisconnect': self.handle_disconnect,
                   'SurvivorWinner': self.handle_teams_ts_mode, 'Kill': self.handle_kill, 'Hit': self.handle_hit,
                   'Freeze': self.handle_freeze, 'ThawOutFinished': self.handle_thawout, 'ClientSpawn': self.handle_spawn,
-                  'Flag': self.handle_flag, 'FlagCaptureTime': self.handle_flagcapturetime}
+                  'Flag': self.handle_flag, 'FlagCaptureTime': self.handle_flagcapturetime,
+                  'VotePassed': self.handle_vote_passed, 'Callvote': self.handle_callvote}
 
         try:
             action = tmp[0].strip()
@@ -539,6 +540,25 @@ class LogParser(object):
                 key_val = None
                 key = True
         return values
+
+    def handle_vote_passed(self, line):
+        """
+        handle vote passed
+        """
+        # nextmap vote
+        if "g_nextmap" in line:
+            self.game.next_mapname = line.split("g_nextmap")[-1].strip('"').strip()
+            self.game.rcon_say("^7Next Map: ^3%s" % self.game.next_mapname)
+
+    def handle_callvote(self, line):
+        """
+        handle callvote
+        """
+        spam_msg = True
+        if spam_msg:
+            self.game.rcon_bigtext("^7Press ^2F1 ^7or ^1F2 ^7to vote!")
+            if self.game.get_last_maps():
+                self.game.rcon_say("^7Last Maps: ^3%s" % ", ".join(self.game.get_last_maps()))
 
     def new_game(self, line):
         """
