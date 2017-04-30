@@ -190,6 +190,7 @@ class LogParser(object):
         # set teams autobalancer
         self.teams_autobalancer = config.getboolean('bot', 'autobalancer') if config.has_option('bot', 'autobalancer') else False
         self.allow_cmd_teams_round_end = config.getboolean('bot', 'allow_teams_round_end') if config.has_option('bot', 'allow_teams_round_end') else False
+        self.limit_nextmap_votes = config.getboolean('bot', 'limit_nextmap_votes') if config.has_option('bot', 'limit_nextmap_votes') else False
         self.spam_bomb_planted_msg = config.getboolean('bot', 'spam_bomb_planted') if config.has_option('bot', 'spam_bomb_planted') else False
         self.spam_knife_kills_msg = config.getboolean('bot', 'spam_knife_kills') if config.has_option('bot', 'spam_knife_kills') else False
         self.spam_nade_kills_msg = config.getboolean('bot', 'spam_nade_kills') if config.has_option('bot', 'spam_nade_kills') else False
@@ -549,12 +550,18 @@ class LogParser(object):
         if "g_nextmap" in line:
             self.game.next_mapname = line.split("g_nextmap")[-1].strip('"').strip()
             self.game.rcon_say("^7Next Map: ^3%s" % self.game.next_mapname)
+            self.allow_nextmap_vote = False
 
     def handle_callvote(self, line):
         """
         handle callvote
         """
         spam_msg = True
+        if "g_nextmap" in line:
+            if self.limit_nextmap_votes and not self.allow_nextmap_vote:
+                self.game.send_rcon('veto')
+                self.game.rcon_say("^7Voting for Next Map is now disabled until the end of this map")
+                spam_msg = False
         if spam_msg:
             self.game.rcon_bigtext("^7Press ^2F1 ^7or ^1F2 ^7to vote!")
             if self.game.get_last_maps():
