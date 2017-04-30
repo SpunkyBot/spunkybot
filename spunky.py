@@ -2120,11 +2120,16 @@ class LogParser(object):
                                 self.game.rcon_tell(sar['player_num'], "^3%s added as ^7Full Admin" % victim.get_name())
                                 self.game.rcon_tell(victim.get_player_num(), "^3You are added as ^7Full Admin")
                                 new_role = 60
-                            # Note: senioradmin level can only be set by head admin
-                            elif "senioradmin" in right and self.game.players[sar['player_num']].get_admin_role() == 100 and victim.get_player_num() != sar['player_num']:
+                            # Note: senioradmin level can only be set by head admin or super admin
+                            elif "senioradmin" in right and self.game.players[sar['player_num']].get_admin_role() >= 90 and victim.get_player_num() != sar['player_num']:
                                 self.game.rcon_tell(sar['player_num'], "^3%s added as ^6Senior Admin" % victim.get_name())
                                 self.game.rcon_tell(victim.get_player_num(), "^3You are added as ^6Senior Admin")
                                 new_role = 80
+                            # Note: superadmin level can only be set by head admin
+                            elif "superadmin" in right and self.game.players[sar['player_num']].get_admin_role() == 100 and victim.get_player_num() != sar['player_num']:
+                                self.game.rcon_tell(sar['player_num'], "^3%s added as ^2Super Admin" % victim.get_name())
+                                self.game.rcon_tell(victim.get_player_num(), "^3You are added as ^2Super Admin")
+                                new_role = 90
                             else:
                                 self.game.rcon_tell(sar['player_num'], "^3Sorry, you cannot put %s in group <%s>" % (victim.get_name(), right))
                             victim.update_db_admin_role(role=new_role)
@@ -2175,9 +2180,9 @@ class LogParser(object):
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Usage: !unban <@ID>")
 
-## head admin level 100
+## head admin level 100 or super admin level 90
             # password - set private server password
-            elif sar['command'] == '!password' and self.game.players[sar['player_num']].get_admin_role() == 100:
+            elif sar['command'] == '!password' and self.game.players[sar['player_num']].get_admin_role() >= 90:
                 if line.split(sar['command'])[1]:
                     arg = line.split(sar['command'])[1].strip()
                     self.game.send_rcon('g_password %s' % arg)
@@ -2187,18 +2192,18 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7Password removed - Server is public")
 
             # reload
-            elif sar['command'] == '!reload' and self.game.players[sar['player_num']].get_admin_role() == 100:
+            elif sar['command'] == '!reload' and self.game.players[sar['player_num']].get_admin_role() >= 90:
                 self.game.send_rcon('reload')
 
             # ungroup - remove the admin level from a player
-            elif sar['command'] == '!ungroup' and self.game.players[sar['player_num']].get_admin_role() == 100:
+            elif sar['command'] == '!ungroup' and self.game.players[sar['player_num']].get_admin_role() >= 90:
                 if line.split(sar['command'])[1]:
                     user = line.split(sar['command'])[1].strip()
                     found, victim, msg = self.player_found(user)
                     if not found:
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
-                        if 1 < victim.get_admin_role() < 100:
+                        if 1 < victim.get_admin_role() < 90 or self.game.players[sar['player_num']].get_admin_role() == 100:
                             self.game.rcon_tell(sar['player_num'], "^3%s put in group ^7User" % victim.get_name())
                             victim.update_db_admin_role(role=1)
                         else:

@@ -211,7 +211,7 @@
 	- Usage: `!unban <ID>`
 
 
-### Head Admin [100]
+### Super Admin [90]
 
 - **password** - set private server password
 	- Usage: `!password [<password>]`
@@ -223,3 +223,9 @@
 	- Usage: `!reload`
 - **ungroup** - remove admin level from a player
 	- Usage: `!ungroup <name|id>`
+
+
+### Head Admin [100]
+- **putgroup** - add a client to a group
+	- Usage: `!putgroup <name|id> <group>`
+	- Available Groups: _user_, _regular_, _mod_, _admin_, _fulladmin_, _senioradmin_, _superadmin_
