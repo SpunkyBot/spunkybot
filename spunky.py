@@ -208,8 +208,8 @@ class LogParser(object):
         server_port = config.get('server', 'server_port') if config.has_option('server', 'server_port') else "27960"
         # Heartbeat packet
         data = {'v': __version__, 'p': server_port, 'o': platform.platform()}
-        values = urllib.urlencode(data)
-        self.ping_url = '%s/ping.php?%s' % (self.base_url, values)
+        self.heartbeat = config.getboolean('bot', 'heartbeat') if config.has_option('bot', 'heartbeat') else True
+        self.ping_url = '%s/ping.php?%s' % (self.base_url, urllib.urlencode(data))
         self.uptime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         # Rotating Messages and Rules
         if config.getboolean('rules', 'show_rules'):
@@ -355,8 +355,9 @@ class LogParser(object):
                 schedule.every(10).seconds.do(self.taskmanager)
             else:
                 schedule.every(self.task_frequency).seconds.do(self.taskmanager)
-        # schedule the task
-        schedule.every(12).hours.do(self.send_heartbeat)
+        if self.heartbeat:
+            # schedule the task
+            schedule.every(12).hours.do(self.send_heartbeat)
         # schedule the task
         schedule.every(2).hours.do(self.remove_expired_db_entries)
 
