@@ -57,9 +57,7 @@ BOT_PLAYER_NUM = 1022
 # RCON Delay in seconds, recommended range: 0.18 - 0.33
 RCON_DELAY = 0.3
 
-COMMANDS = {
-            # guest commands, level 0
-            'help': {'desc': 'display all available commands', 'syntax': '^7Usage: ^2!help', 'level': 0, 'short': 'h'},
+COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usage: ^2!help', 'level': 0, 'short': 'h'},
             'forgiveall': {'desc': 'forgive all team kills', 'syntax': '^7Usage: ^2!forgiveall', 'level': 0, 'short': 'fa'},
             'forgiveprev': {'desc': 'forgive last team kill', 'syntax': '^7Usage: ^2!forgiveprev', 'level': 0, 'short': 'fp'},
             'bombstats': {'desc': 'display Bomb mode stats', 'syntax': '^7Usage: ^2!bombstats', 'level': 0},
@@ -148,8 +146,7 @@ COMMANDS = {
             # superadmin commands, level 90
             'ungroup': {'desc': 'remove admin level from a player', 'syntax': '^7Usage: ^2!ungroup ^7<name>', 'level': 90},
             'password': {'desc': 'set private server password', 'syntax': '^7Usage: ^2!password ^7[<password>]', 'level': 90},
-            'reload': {'desc': 'reload map', 'syntax': '^7Usage: ^2!reload', 'level': 90},
-            }
+            'reload': {'desc': 'reload map', 'syntax': '^7Usage: ^2!reload', 'level': 90}}
 
 REASONS = {'obj': 'go for objective',
            'camp': 'stop camping',
