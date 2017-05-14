@@ -176,6 +176,7 @@ class LogParser(object):
         self.tk_autokick = config.getboolean('bot', 'teamkill_autokick') if config.has_option('bot', 'teamkill_autokick') else True
         # enable/disable autokick of players with low score
         self.noob_autokick = config.getboolean('bot', 'noob_autokick') if config.has_option('bot', 'noob_autokick') else False
+        self.spawnkill_autokick = config.getboolean('bot', 'spawnkill_autokick') if config.has_option('bot', 'spawnkill_autokick') else False
         # set the maximum allowed ping
         self.max_ping = config.getint('bot', 'max_ping') if config.has_option('bot', 'max_ping') else 200
         # kick spectator on full server
@@ -899,6 +900,18 @@ class LogParser(object):
             # kill counter
             elif not tk_event and int(info[2]) != 10:  # 10: MOD_CHANGE_TEAM
                 killer.kill()
+
+                # spawn kill warning
+                if self.spawnkill_autokick and killer.get_admin_role() < 40:
+                    # Spawn Protection time between players deaths in seconds to issue a warning
+                    warn_time = 3
+                    if victim.get_respawn_time() + warn_time > time.time():
+                        killer.add_warning("stop spawn killing")
+                        if killer.get_warning() > 3:
+                            self.game.rcon_say("^7Player ^2%s ^7kicked for spawn killing" % killer_name)
+                            self.game.kick_player(killer_id, reason='stop spawn killing')
+                        else:
+                            self.game.rcon_tell(killer_id, "^1WARNING ^7[^3%d^7]: Spawn Camping and Spawn Killing are not allowed" % killer.get_warning())
 
                 # multi kill message
                 if killer.get_monsterkill() == 2:
@@ -2620,6 +2633,7 @@ class Player(object):
         self.ban_id = 0
         self.ban_msg = ''
         self.alive = False
+        self.respawn_time = 0
         self.monsterkill = {'time': 999, 'kills': 0}
 
         # set player name
@@ -2718,6 +2732,7 @@ class Player(object):
         self.bomb_defused = 0
         self.team_lock = None
         self.alive = False
+        self.respawn_time = 0
         self.monsterkill = {'time': 999, 'kills': 0}
 
     def reset_flag_stats(self):
@@ -2961,9 +2976,14 @@ class Player(object):
 
     def set_alive(self, status):
         self.alive = status
+        if status:
+            self.respawn_time = time.time()
 
     def get_alive(self):
         return self.alive
+
+    def get_respawn_time(self):
+        return self.respawn_time
 
     def suicide(self):
         self.db_suicide += 1
