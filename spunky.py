@@ -193,6 +193,7 @@ class LogParser(object):
         self.allow_cmd_teams_round_end = config.getboolean('bot', 'allow_teams_round_end') if config.has_option('bot', 'allow_teams_round_end') else False
         self.limit_nextmap_votes = config.getboolean('bot', 'limit_nextmap_votes') if config.has_option('bot', 'limit_nextmap_votes') else False
         self.spam_bomb_planted_msg = config.getboolean('bot', 'spam_bomb_planted') if config.has_option('bot', 'spam_bomb_planted') else False
+        self.kill_survived_opponents = config.getboolean('bot', 'kill_survived_opponents') if config.has_option('bot', 'kill_survived_opponents') else False
         self.spam_knife_kills_msg = config.getboolean('bot', 'spam_knife_kills') if config.has_option('bot', 'spam_knife_kills') else False
         self.spam_nade_kills_msg = config.getboolean('bot', 'spam_nade_kills') if config.has_option('bot', 'spam_nade_kills') else False
         self.spam_headshot_hits_msg = config.getboolean('bot', 'spam_headshot_hits') if config.has_option('bot', 'spam_headshot_hits') else False
@@ -2360,6 +2361,11 @@ class LogParser(object):
                 logger.debug("Player %d defused the bomb", player_num)
                 self.game.send_rcon("^7The ^2BOMB ^7has been defused by ^2%s^7!" % name)
                 self.handle_teams_ts_mode('Blue')
+                # kill all survived red players
+                if self.kill_survived_opponents and self.urt_modversion > 41:
+                    for player in self.game.players.itervalues():
+                        if player.get_team() == 1 and player.get_alive():
+                            self.game.send_rcon("smite %d" % player.get_player_num())
             elif action == 'Bomb was planted':
                 player.planted_bomb()
                 logger.debug("Player %d planted the bomb", player_num)
@@ -2386,7 +2392,22 @@ class LogParser(object):
         handle bomb exploded
         """
         logger.debug("Bomb exploded!")
+        if self.kill_survived_opponents and self.urt_modversion > 41:
+            # start Thread to kill all survived blue players
+            processor = Thread(target=self.kill_blue_team_bomb_exploded)
+            processor.setDaemon(True)
+            processor.start()
         self.handle_teams_ts_mode('Red')
+
+    def kill_blue_team_bomb_exploded(self):
+        """
+        Kill all survived blue players when the bomb exploded
+        """
+        time.sleep(1.3)
+        with self.players_lock:
+            for player in self.game.players.itervalues():
+                if player.get_team() == 2 and player.get_alive():
+                    self.game.send_rcon("smite %d" % player.get_player_num())
 
     def handle_teams_ts_mode(self, line):
         """
