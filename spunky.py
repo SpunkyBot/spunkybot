@@ -124,7 +124,9 @@ COMMANDS = {
             'version': {'desc': 'display the version of the bot', 'syntax': '^7Usage: ^2!version', 'level': 60},
             'veto': {'desc': 'stop voting process', 'syntax': '^7Usage: ^2!veto', 'level': 60},
             # senioradmin commands, level 80
+            'addbots': {'desc': 'add bots to the game', 'syntax': '^7Usage: ^2!addbots', 'level': 80},
             'banlist': {'desc': 'display the last active 10 bans', 'syntax': '^7Usage: ^2!banlist', 'level': 80},
+            'bots': {'desc': 'enables or disables bot support', 'syntax': '^7Usage: ^2!bots ^7<on/off>', 'level': 80},
             'cyclemap': {'desc': 'cycle to the next map', 'syntax': '^7Usage: ^2!cyclemap', 'level': 80},
             'exec': {'desc': 'execute given config file', 'syntax': '^7Usage: ^2!exec ^7<filename>', 'level': 80},
             'instagib': {'desc': 'set Instagib mode', 'syntax': '^7Usage: ^2!instagib ^7<on/off>', 'level': 80},
@@ -2077,6 +2079,30 @@ class LogParser(object):
                         self.game.rcon_say("^3Pattern must be at least 3 characters long")
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['kickall']['syntax'])
+
+            # !addbots
+            elif sar['command'] == '!addbots' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['addbots']['level']:
+                self.game.send_rcon('addbot boa 3 blue 50 BOT1')
+                self.game.send_rcon('addbot python 4 blue 50 BOT2')
+                self.game.send_rcon('addbot cheetah 3 red 50 BOT3')
+                self.game.send_rcon('addbot cobra 4 red 50 BOT4')
+
+            # !bots on/off
+            elif sar['command'] == '!bots' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['bots']['level']:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip()
+                    if arg == "on":
+                        self.game.send_rcon('bot_enable 1')
+                        self.game.send_rcon('bot_minplayers 0')
+                        self.game.rcon_tell(sar['player_num'], "^7Bot support: ^2On")
+                    elif arg == "off":
+                        self.game.send_rcon('bot_enable 0')
+                        self.game.send_rcon('kick allbots')
+                        self.game.rcon_tell(sar['player_num'], "^7Bot support: ^1Off")
+                    else:
+                        self.game.rcon_tell(sar['player_num'], COMMANDS['bots']['syntax'])
+                else:
+                    self.game.rcon_tell(sar['player_num'], COMMANDS['bots']['syntax'])
 
             # kiss - clear all player warnings - !clear [<player>]
             elif (sar['command'] == '!kiss' or sar['command'] == '!clear') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['kiss']['level']:

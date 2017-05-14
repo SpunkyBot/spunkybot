@@ -165,8 +165,12 @@
 
 ### Senior Admin [80]
 
+- **addbots** - add bots to the game
+	- Usage: `!addbots`
 - **banlist** - display the last active 10 bans
 	- Usage: `!banlist`
+- **bots** - enables or disables bot support
+	- Usage: `!bots <on/off>`
 - **cyclemap** - cycle to the next map
 	- Usage: `!cyclemap`
 - **exec** - execute given config file
