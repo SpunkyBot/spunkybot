@@ -149,7 +149,7 @@ COMMANDS = {
             'ungroup': {'desc': 'remove admin level from a player', 'syntax': '^7Usage: ^2!ungroup ^7<name>', 'level': 90},
             'password': {'desc': 'set private server password', 'syntax': '^7Usage: ^2!password ^7[<password>]', 'level': 90},
             'reload': {'desc': 'reload map', 'syntax': '^7Usage: ^2!reload', 'level': 90},
-            }
+           }
 
 REASONS = {'obj': 'go for objective',
            'camp': 'stop camping',
