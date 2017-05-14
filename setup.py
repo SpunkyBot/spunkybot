@@ -93,6 +93,6 @@ setup(name='spunkybot',
           'Topic :: Games/Entertainment',
           'Topic :: Utilities',
       ],
-      data_files=[('', ['debian-startscript', 'README.md', 'LICENSE']),
+      data_files=[('', ['debian-startscript', 'systemd-spunkybot.service', 'README.md', 'LICENSE']),
                   ('lib', ['lib/GeoIP.dat'])],
       )

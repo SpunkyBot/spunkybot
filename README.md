@@ -3,15 +3,17 @@ This README is just a quick start document. You can find more detailed documenta
 # What is Spunky Bot?
 
 **Spunky Bot** is a lightweight game server administration bot and RCON tool.
-Its purpose is to administer, manage and maintain an [Urban Terror](http://www.urbanterror.info) 4.1 / 4.2 / 4.3 server and to provide real time statistical data for players.
+Its purpose is to administer, manage and maintain an [Urban Terror](http://www.urbanterror.info) 4.1 / 4.2 / 4.3 server and to provide real time statistics data for players.
 Spunky Bot is a cross-platform package and offers in-game commands without authentication and automated administration even when no admin is online.
 The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was released under the Beerware License.
 
 [![Build Status](https://travis-ci.org/SpunkyBot/spunkybot.png?branch=master)](https://travis-ci.org/SpunkyBot/spunkybot)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/SpunkyBot/spunkybot/blob/master/LICENSE)
-![Version](https://img.shields.io/badge/version-1.8.0-orange.svg)
+![Version](https://img.shields.io/badge/version-1.9.0-orange.svg)
 [![PyPI version](https://img.shields.io/pypi/v/spunkybot.svg)](https://pypi.python.org/pypi/spunkybot)
+[![Python version](https://img.shields.io/badge/python-2.6,%202.7-yellow.svg)](https://pypi.python.org/pypi/spunkybot)
 [![Code Health](https://landscape.io/github/SpunkyBot/spunkybot/master/landscape.svg)](https://landscape.io/github/SpunkyBot/spunkybot/master)
+[![Codacy Grade](https://api.codacy.com/project/badge/Grade/07b16a60bcce41ac89dc19dd3316c127)](https://www.codacy.com/app/alexanderkress/spunkybot)
 
 If you want to know more, this is a list of selected starting points:
 
@@ -32,10 +34,10 @@ If you want to know more, this is a list of selected starting points:
 
 
 ## Environment
-- Urban Terror 4.1.1 / 4.2.023 / 4.3.1
+- Urban Terror 4.1.1 / 4.2.023 / 4.3.2
 - Python 2.6 / 2.7
 - SQLite 3 database
-- Cross-platform (tested on Debian 6 / 7 / 8, Ubuntu 12 / 14 / 16, CentOS 6 / 7, Mac OS X 10.12, Windows 7 / 10)
+- Cross-platform (tested on Debian 6 / 7 / 8 / 9, Ubuntu 12 / 14 / 16, CentOS 6 / 7, Mac OS X 10.12, Windows 7 / 10)
 - Supporting 32-bit and 64-bit operating systems
 
 
@@ -54,7 +56,7 @@ It's easy to get started with Spunky Bot:
 - In-game displayed rules/advertisements are contained in the file `/conf/rules.conf`
 	- If you do not want to display the rotation messages, set the value `show_rules=0` in the config file `/conf/settings.conf`
 - Run the application manually: `python spunky.py`
-- Or use the provided initscript to run Spunky Bot as daemon
+- Or use the provided systemd or sysVinit script to run Spunky Bot as daemon
 
 **_First start instruction:_**
 

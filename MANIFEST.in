@@ -3,4 +3,5 @@ include lib/GeoIP.dat
 recursive-include conf *.conf
 recursive-include doc *.md
 include debian-startscript
+include systemd-spunkybot.service
 exclude MANIFEST.in
