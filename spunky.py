@@ -701,9 +701,8 @@ class LogParser(object):
                 player = Player(player_num, ip_address, guid, name, auth)
                 self.game.add_player(player)
                 # kick banned player
-                player_ban_id = player.get_ban_id()
-                if player_ban_id:
-                    self.kick_player_reason("^7%s ^1banned ^7(ID @%s): %s" % (player.get_name(), player_ban_id, player.get_ban_msg()), player_num)
+                if player.get_ban_id():
+                    self.kick_player_reason("^7%s ^1banned ^7(ID @%s): %s" % (player.get_name(), player.get_ban_id(), player.get_ban_msg()), player_num)
                 else:
                     if self.show_country_on_connect:
                         self.game.rcon_say("^7%s ^7connected from %s" % (player.get_name(), player.get_country()))
