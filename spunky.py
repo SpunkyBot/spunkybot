@@ -771,6 +771,8 @@ class LogParser(object):
             player_num = int(line)
             player = self.game.players[player_num]
             player_name = player.get_name()
+            player_auth = player.get_authname()
+            player_name = "%s [^5%s^7]" % (player_name, player_auth) if player_auth else player_name
             player_id = player.get_player_id()
             # Welcome message for registered players
             if player.get_registered_user() and player.get_welcome_msg():
