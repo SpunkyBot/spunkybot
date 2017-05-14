@@ -7,21 +7,13 @@
 - **help** - display all available commands
 	- Usage: `!help`
 	- Short: `!h`
-- **forgiveprev** - forgive last team kill
-	- Usage: `!forgiveprev`
-	- Short: `!fp`
 - **forgiveall** - forgive all team kills
 	- Usage: `!forgiveall`
 	- Short: `!fa`
-- **hs** - display headshot counter
-	- Usage: `!hs`
-- **register** - register yourself as a basic user
-	- Usage: `!register`
-- **spree** - display current kill streak
-	- Usage: `!spree`
-- **stats** - display current map stats
-	- Usage: `!stats`
-- **bombstats** - display bomb stats
+- **forgiveprev** - forgive last team kill
+	- Usage: `!forgiveprev`
+	- Short: `!fp`
+- **bombstats** - display Bomb mode stats
 	- Usage: `!bombstats`
 - **ctfstats** - display Capture the Flag stats
 	- Usage: `!ctfstats`
@@ -29,10 +21,18 @@
 	- Usage: `!freezestats`
 - **hestats** - display HE grenade kill stats
 	- Usage: `!hestats`
-- **knife** - display knife kill stats
-	- Usage: `!knife`
 - **hits** - display hit stats
 	- Usage: `!hits`
+- **hs** - display headshot counter
+	- Usage: `!hs`
+- **knife** - display knife kill stats
+	- Usage: `!knife`
+- **register** - register yourself as a basic user
+	- Usage: `!register`
+- **spree** - display current kill streak
+	- Usage: `!spree`
+- **stats** - display current map stats
+	- Usage: `!stats`
 - **teams** - balance teams
 	- Usage: `!teams`
 - **time** - display the current server time
@@ -41,7 +41,7 @@
 
 ### User [1]
 
-- **regtest** - regtest - display current user status
+- **regtest** - display current user status
 	- Usage: `!regtest`
 - **xlrstats** - display full player statistics
 	- Usage: `!xlrstats [<name|id>]`
@@ -54,7 +54,7 @@
 
 - **admintest** - display current admin status
 	- Usage: `!admintest`
-- **country** - get the country of the player
+- **country** - get the country of a player
 	- Usage: `!country <name|id>`
 - **lastmaps** - list the last played maps
 	- Usage: `!lastmaps`
@@ -63,7 +63,7 @@
 	- Short: `!lt [<name|id>]`
 - **list** - list all connected players
 	- Usage: `!list`
-- **locate** - display geolocation info of the player
+- **locate** - display geolocation info of a player
 	- Usage: `!locate <name|id>`
 	- Short: `!lc <name|id>`
 - **nextmap** - display the next map in rotation
@@ -72,7 +72,7 @@
 	- Usage: `!mute <name|id> [<seconds>]`
 - **poke** - notify a player that he needs to move
 	- Usage: `!poke <name|id>`
-- **seen** - display when the player was last seen
+- **seen** - display when a player was last seen
 	- Usage: `!seen <name|id>`
 - **shuffleteams** - shuffle the teams
 	- Usage: `!shuffleteams`
@@ -83,7 +83,7 @@
 	- Usage: `!warn <name|id> [<reason>]`
 	- Short: `!w <name|id> [<reason>]`
 	- Available short form reasons: _tk_, _obj_, _spec_, _ping_, _spam_, _camp_, _lang_,  _racism_, _name_, _skill_, _whiner_
-- **warninfo** - display how many warnings the player has
+- **warninfo** - display how many warnings a player has
 	- Usage: `!warninfo <name|id>`
 	- Short: `!wi <name|id>`
 - **warnremove** - remove a users last warning
@@ -101,14 +101,14 @@
 	- Usage: `!admins`
 - **afk** - force a player to spec, because he is away from keyboard
 	- Usage: `!afk <name|id>`
-- **aliases** - list the aliases of the player
+- **aliases** - list the aliases of a player
 	- Usage: `!aliases <name|id>`
 	- Short: `!alias <name|id>`
 - **bigtext** - display big message on screen
 	- Usage: `!bigtext <text>`
 - **exit** - display last disconnected player
 	- Usage: `!exit`
-- **find** - display the slot number of the player
+- **find** - display the slot number of a player
 	- Usage: `!find <name|id>`
 - **force** - force a player to the given team
 	- Usage: `!force <name|id> <blue/red/spec> [<lock>]`
