@@ -3,7 +3,7 @@ This README is just a quick start document. You can find more detailed documenta
 # What is Spunky Bot?
 
 **Spunky Bot** is a lightweight game server administration bot and RCON tool.
-Its purpose is to administer, manage and maintain an [Urban Terror](http://www.urbanterror.info) 4.1 / 4.2 / 4.3 server and to provide real time statistical data for players.
+Its purpose is to administer, manage and maintain an [Urban Terror](http://www.urbanterror.info) 4.1 / 4.2 / 4.3 server and to provide real time statistics data for players.
 Spunky Bot is a cross-platform package and offers in-game commands without authentication and automated administration even when no admin is online.
 The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was released under the Beerware License.
 
