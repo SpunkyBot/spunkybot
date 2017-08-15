@@ -130,8 +130,10 @@ The code of Spunky Bot is released under the MIT License. See the [LICENSE](http
 	- The library has been modified to fix some error handling issues and fulfill the PEP8 conformance. This file is released under the GNU General Public License.
  - GeoIP: [pygeoip.py](https://github.com/urthub/pygeoip)
 	- The library has been extended with the list `GeoIP_country_name` to support full country names (e.g. Germany for country_code DE). This file is released under the MIT License.
+ - GeoLite database: [www.maxmind.com](http://www.maxmind.com)
+    - The GeoLite databases created by MaxMind are distributed under the Creative Commons Attribution-ShareAlike 4.0 International License.
  - Schedule: [schedule.py](https://github.com/dbader/schedule)
-	- This file is released under the MIT License. 
+	- This file is released under the MIT License.
 
 Urban Terror™ and FrozenSand™ are trademarks of Frozensand Games Limited.
 
