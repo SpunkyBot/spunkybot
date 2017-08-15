@@ -20,7 +20,7 @@ long_description = """Overview
 ========
 `Spunky Bot`_ is a lightweight game server administration bot and RCON tool.
 Its purpose is to administer, manage and maintain an `Urban Terror`_ server and
-to provide real time statistical data for players.
+to provide real time statistics data for players.
 
 Spunky Bot is a cross-platform package and offers in-game commands without
 authentication and automated administration even when no admin is online.
