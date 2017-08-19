@@ -6,6 +6,10 @@ __pycache__
 build
 dist
 spunkybot.egg-info
+*.tar.gz
+*.zip
+*.asc
+*.deb
 
 # SVN
 .svn/
