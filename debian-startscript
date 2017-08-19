@@ -13,7 +13,7 @@
 # Installation:
 # Move this file to /etc/init.d/spunkybot
 # Make it executable: sudo chmod +x /etc/init.d/spunkybot
-# Start at boot: sudo update-rc.d spunkybot defaults
+# Start at boot: sudo update-rc.d spunkybot defaults 80 10
 # Manual start: sudo /etc/init.d/spunkybot start
 
 # Change the next 3 lines to suit where you installed Spunky Bot, and which user is running the Urban Terror server
