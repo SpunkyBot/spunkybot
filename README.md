@@ -62,6 +62,10 @@ It's easy to get started with Spunky Bot:
 
 - Connect to your game server and type `!iamgod` in the global chat to get the admin level "Head Admin". This command is only once available.
 
+### Heartbeat
+Spunky Bot has an option to send a heartbeat signal to our masterserver. There is no client data sent to the masterserver at all! Data in the heartbeat packet contain: Spunky Bot version, the port of the game server and the operating system version.
+The information is used for generating global statistics and to determine operating system popularity.
+
 
 ## Documentation
 You can find all the documentation in the [Wiki](https://github.com/SpunkyBot/spunkybot/wiki).
@@ -131,7 +135,7 @@ The code of Spunky Bot is released under the MIT License. See the [LICENSE](http
  - GeoIP: [pygeoip.py](https://github.com/urthub/pygeoip)
 	- The library has been extended with the list `GeoIP_country_name` to support full country names (e.g. Germany for country_code DE). This file is released under the MIT License.
  - GeoLite database: [www.maxmind.com](http://www.maxmind.com)
-    - The GeoLite databases created by MaxMind are distributed under the Creative Commons Attribution-ShareAlike 4.0 International License.
+	- The GeoLite databases created by MaxMind are distributed under the Creative Commons Attribution-ShareAlike 4.0 International License.
  - Schedule: [schedule.py](https://github.com/dbader/schedule)
 	- This file is released under the MIT License.
 
