@@ -110,8 +110,9 @@
 	- Usage: `!exit`
 - **find** - display the slot number of a player
 	- Usage: `!find <name|id>`
-- **force** - force a player to the given team
-	- Usage: `!force <name|id> <blue/red/spec> [<lock>]`
+- **force** - force a player to the given team or release the player from a forced team (free)
+	- Usage: `!force <name|id> <blue/red/spec/free> [<lock>]`
+	- Adding `lock` will lock the player where it is forced to.
 - **kick** - kick a player
 	- Usage: `!kick <name|id> <reason>`
 	- Short: `!k <name|id> <reason>`

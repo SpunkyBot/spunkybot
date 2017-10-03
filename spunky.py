@@ -1751,6 +1751,9 @@ class LogParser(object):
                                     victim.set_team_lock(team_dict[team])
                                 else:
                                     victim.set_team_lock(None)
+                            # release the player from a forced team
+                            elif team == "free":
+                                victim.set_team_lock(None)
                             else:
                                 self.game.rcon_tell(sar['player_num'], COMMANDS['force']['syntax'])
                     else:
