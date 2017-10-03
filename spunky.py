@@ -2229,9 +2229,9 @@ class LogParser(object):
                     arg = line.split(sar['command'])[1].strip()
                     search = '%' + arg + '%'
                     lookup = (search,)
-                    result = curs.execute("SELECT * FROM `player` WHERE `name` like ? ORDER BY `time_joined` DESC LIMIT 8", lookup).fetchall()
+                    result = curs.execute("SELECT `id`,`name`,`time_joined` FROM `player` WHERE `name` like ? ORDER BY `time_joined` DESC LIMIT 8", lookup).fetchall()
                     for row in result:
-                        self.game.rcon_tell(sar['player_num'], "^7[^2@%s^7] %s ^7[^1%s^7]" % (str(row[0]), str(row[2]), str(row[4])), False)  # 0=ID, 1=GUID, 2=Name, 3=IP, 4=Date
+                        self.game.rcon_tell(sar['player_num'], "^7[^2@%s^7] %s ^7[^1%s^7]" % (str(row[0]), str(row[1]), str(row[2])), False)
                     if not result:
                         self.game.rcon_tell(sar['player_num'], "^3No Player found matching %s" % arg)
                 else:
@@ -2340,17 +2340,16 @@ class LogParser(object):
 
             # banlist - display the last active 10 bans
             elif sar['command'] == '!banlist' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['banlist']['level']:
-                timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-                values = (timestamp,)
-                result = curs.execute("SELECT * FROM `ban_list` WHERE `expires` > ? ORDER BY `timestamp` DESC LIMIT 10", values).fetchall()
-                banlist = ['^7[^2@%s^7] %s' % (result[item][0], result[item][2]) for item in xrange(len(result))]  # 0=ID,2=Name
+                values = (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())),)
+                result = curs.execute("SELECT `id`,`name` FROM `ban_list` WHERE `expires` > ? ORDER BY `timestamp` DESC LIMIT 10", values).fetchall()
+                banlist = ['^7[^2@%s^7] %s' % (row[0], row[1]) for row in result]
                 msg = 'Currently no one is banned' if not banlist else str(", ".join(banlist))
                 self.game.rcon_tell(sar['player_num'], "^7Banlist: %s" % msg)
 
             # lastbans - list the last 4 bans
             elif (sar['command'] == '!lastbans' or sar['command'] == '!bans') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['lastbans']['level']:
-                result = curs.execute("SELECT * FROM `ban_list` ORDER BY `timestamp` DESC LIMIT 4").fetchall()
-                lastbanlist = ['^3[^2@%s^3] ^7%s ^3(^1%s^3)' % (result[item][0], result[item][2], result[item][4]) for item in xrange(len(result))]
+                result = curs.execute("SELECT id,name,expires FROM `ban_list` ORDER BY `timestamp` DESC LIMIT 4").fetchall()
+                lastbanlist = ['^3[^2@%s^3] ^7%s ^3(^1%s^3)' % (row[0], row[1], row[2]) for row in result]
                 for item in lastbanlist:
                     self.game.rcon_tell(sar['player_num'], str(item))
 
