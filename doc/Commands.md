@@ -91,7 +91,7 @@
 	- Short: `!wr <name|id>`
 - **warns** - list the warnings
 	- Usage: `!warns`
-- **warntest** -  test a warning
+- **warntest** - test a warning
 	- Usage: `!warntest <warning>`
 
 
@@ -121,11 +121,11 @@
 	- Usage: `!say <text>`
 	- Short: `!!<text>`
 - **tell** - tell a message to a specific player
-	-  Usage: `!tell <name|id> <text>`
+	- Usage: `!tell <name|id> <text>`
 - **tempban** - ban a player temporary for the given period (1 min to 24 hrs)
-	-  Usage: `!tempban <name|id> <duration> [<reason>]`
-	-  Short: `!tb <name|id> <duration> [<reason>]`
-	-  Max ban duration: 24 hours
+	- Usage: `!tempban <name|id> <duration> [<reason>]`
+	- Short: `!tb <name|id> <duration> [<reason>]`
+	- Max ban duration: 24 hours
 - **warnclear** - clear the user warnings
 	- Usage: `!warnclear <name|id>`
 	- Short: `!wc <name|id>`
