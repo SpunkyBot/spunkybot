@@ -839,7 +839,8 @@ class LogParser(object):
             if challenge:
                 logger.debug("ClientUserinfo: Player %d %s is challenging the server and has the guid %s", player_num, self.game.players[player_num].get_name(), guid)
                 # kick player with hax port 1337
-                if port == "1337":
+                invalid_port_range = ["1337"]
+                if port in invalid_port_range:
                     self.kick_player_reason("Cheater Port detected for %s -> Player kicked" % name, player_num)
                 if self.last_disconnected_player and self.last_disconnected_player.get_guid() == self.game.players[player_num].get_guid():
                     self.last_disconnected_player = None
