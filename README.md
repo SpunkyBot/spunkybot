@@ -139,7 +139,7 @@ The code of Spunky Bot is released under the MIT License. See the [LICENSE](http
  - Schedule: [schedule.py](https://github.com/dbader/schedule)
 	- This file is released under the MIT License.
 
-Urban Terror™ and FrozenSand™ are trademarks of Frozensand Games Limited.
+Urban Terror® and FrozenSand™ are trademarks of Frozensand Games Limited.
 
 
 ## Thank you!
