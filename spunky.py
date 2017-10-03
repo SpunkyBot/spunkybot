@@ -686,7 +686,7 @@ class LogParser(object):
                 spam_msg = False
         if spam_msg:
             self.game.rcon_bigtext("^7Press ^2F1 ^7or ^1F2 ^7to vote!")
-            if self.game.get_last_maps():
+            if self.game.get_last_maps() and ('"g_nextmap' in line or '"map' in line):
                 self.game.rcon_say("^7Last Maps: ^3%s" % ", ".join(self.game.get_last_maps()))
 
     def new_game(self, line):
