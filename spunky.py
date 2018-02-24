@@ -321,6 +321,7 @@ class LogParser(object):
         # support for low gravity server
         self.support_lowgravity = config.getboolean('lowgrav', 'support_lowgravity') if config.has_option('lowgrav', 'support_lowgravity') else False
         self.gravity = config.getint('lowgrav', 'gravity') if config.has_option('lowgrav', 'gravity') else 800
+        self.explode_time = "40"
         logger.info("Configuration loaded  : OK")
         # enable/disable option to get Head Admin by checking existence of head admin in database
         curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `admin_role` = 100")
@@ -716,6 +717,12 @@ class LogParser(object):
         # support for low gravity server
         if self.support_lowgravity:
             self.game.send_rcon("set g_gravity %d" % self.gravity)
+
+        # detonation timer
+        if self.bomb_gametype:
+            # bomb detonation timer
+            detonation_timer = self.game.get_cvar('g_bombexplodetime')
+            self.explode_time = detonation_timer if detonation_timer else "40"
 
         # reset list of player who left server
         self.last_disconnected_player = None
@@ -2534,7 +2541,7 @@ class LogParser(object):
             elif action == 'Bomb was planted':
                 player.planted_bomb()
                 logger.debug("Player %d planted the bomb", player_num)
-                self.game.send_rcon("^7The ^1BOMB ^7has been planted by ^1%s^7!" % name)
+                self.game.send_rcon("^7The ^1BOMB ^7has been planted by ^1%s^7! ^2%s ^7seconds to detonation." % (name, self.explode_time))
                 if self.spam_bomb_planted_msg:
                     self.game.rcon_bigtext("^1The ^7BOMB ^1has been planted by ^7%s^1!" % name)
                     self.game.rcon_bigtext("^7The ^1BOMB ^7has been planted by ^1%s^7!" % name)
