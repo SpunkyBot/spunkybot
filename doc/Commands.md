@@ -133,7 +133,7 @@
 
 ### Full Admin [60]
 
-- **ban** - ban a player for 7 days
+- **ban** - ban a player for several days
 	- Usage: `!ban <name|id> <reason>`
 	- Short: `!b <name|id> <reason>`
 - **baninfo** - display active bans of a player

@@ -317,6 +317,7 @@ class LogParser(object):
         self.spam_knife_kills_msg = config.getboolean('bot', 'spam_knife_kills') if config.has_option('bot', 'spam_knife_kills') else False
         self.spam_nade_kills_msg = config.getboolean('bot', 'spam_nade_kills') if config.has_option('bot', 'spam_nade_kills') else False
         self.spam_headshot_hits_msg = config.getboolean('bot', 'spam_headshot_hits') if config.has_option('bot', 'spam_headshot_hits') else False
+        self.ban_duration = config.getint('bot', 'ban_duration') if config.has_option('bot', 'ban_duration') else 7
         # support for low gravity server
         self.support_lowgravity = config.getboolean('lowgrav', 'support_lowgravity') if config.has_option('lowgrav', 'support_lowgravity') else False
         self.gravity = config.getint('lowgrav', 'gravity') if config.has_option('lowgrav', 'gravity') else 800
@@ -2010,9 +2011,9 @@ class LogParser(object):
                             if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
                                 self.game.rcon_tell(sar['player_num'], "^3Insufficient privileges to ban an admin")
                             else:
-                                # ban for 7 days
-                                if victim.ban(duration=604800, reason=reason, admin=self.game.players[sar['player_num']].get_name()):
-                                    msg = "^2%s ^1banned ^7for ^37 days ^7by %s" % (victim.get_name(), self.game.players[sar['player_num']].get_name())
+                                # ban for given duration in days
+                                if victim.ban(duration=(self.ban_duration * 86400), reason=reason, admin=self.game.players[sar['player_num']].get_name()):
+                                    msg = "^2%s ^1banned ^7for ^3%d day%s ^7by %s" % (victim.get_name(), self.ban_duration, 's' if self.ban_duration > 1 else '', self.game.players[sar['player_num']].get_name())
                                     if kick_reason:
                                         msg = "%s: ^3%s" % (msg, kick_reason)
                                     self.game.rcon_say(msg)
