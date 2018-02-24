@@ -336,13 +336,16 @@ class LogParser(object):
         self.ping_url = '%s/ping.php?%s' % (self.base_url, urllib.urlencode(data))
         self.uptime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         # Rotating Messages and Rules
-        if config.getboolean('rules', 'show_rules'):
+        if config.has_option('rules', 'show_rules') and config.getboolean('rules', 'show_rules'):
             self.output_rules = config.get('rules', 'display') if config.has_option('rules', 'display') else "chat"
-            rules_frequency = config.getint('rules', 'rules_frequency')
+            rules_frequency = config.getint('rules', 'rules_frequency') if config.has_option('rules', 'rules_frequency') else 90
             self.rules_file = os.path.join(HOME, 'conf', 'rules.conf')
             self.rules_frequency = rules_frequency if rules_frequency > 0 else 10
-            self.thread_rotate()
-            logger.info("Load rotating messages: OK")
+            if os.path.isfile(self.rules_file):
+                self.thread_rotate()
+                logger.info("Load rotating messages: OK")
+            else:
+                logger.error("ERROR: Rotating messages will be ignored, file '%s' has not been found", self.rules_file)
         # Parse Game log file
         try:
             # open game log file
