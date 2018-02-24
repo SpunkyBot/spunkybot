@@ -999,12 +999,8 @@ class LogParser(object):
                         self.game.rcon_tell(killer_id, "^7Do not attack teammates, you ^1killed ^7%s" % victim_name)
                         self.game.rcon_tell(victim_id, "^7Type ^3!fp ^7to forgive ^3%s" % killer_name)
                         if len(killer.get_tk_victim_names()) >= 5:
-                            # add TK ban points - 15 minutes
-                            duration = killer.add_ban_point('tk, auto-kick', 900)
-                            if duration > 0:
-                                self.game.rcon_say("^3%s ^7banned for ^1%d minutes ^7for team killing" % (killer_name, duration))
-                            else:
-                                self.game.rcon_say("^7Player ^2%s ^7kicked for team killing" % killer_name)
+                            killer.ban(duration=900, reason='auto-kick for team killing', admin='bot')
+                            self.game.rcon_say("^3%s ^7banned for ^115 minutes ^7for team killing" % killer_name)
                             self.game.kick_player(killer_id, reason='stop team killing')
                         elif len(killer.get_tk_victim_names()) == 2:
                             self.game.rcon_tell(killer_id, "^1WARNING ^7[^31^7]: ^7For team killing you will get kicked", False)
