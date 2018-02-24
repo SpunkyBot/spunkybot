@@ -815,8 +815,12 @@ class LogParser(object):
                 guid = "None"
                 self.kick_player_reason(reason="Player with invalid GUID kicked", player_num=player_num)
 
-            ip_address = ip_port.split(":")[0].strip()
-            port = ip_port.split(":")[1].strip()
+            try:
+                ip_address = ip_port.split(":")[0].strip()
+                port = ip_port.split(":")[1].strip()
+            except IndexError:
+                ip_address = ip_port.strip()
+                port = "27960"
 
             if player_num not in self.game.players:
                 player = Player(player_num, ip_address, guid, name, auth)
