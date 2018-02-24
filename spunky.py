@@ -2735,6 +2735,13 @@ class LogParser(object):
             if most_hs > 1:
                 append("^7%s: ^2%d ^1heads" % (headshooter, most_hs))
 
+            # Bomb statistics
+            if most_planted > 1 or most_defused > 1:
+                self.game.rcon_say("^2Top Objectives: ^7%s [^1%s^7]" % ((planted_by, most_planted) if most_planted > most_defused else (defused_by, most_defused)))
+            # CTF statistics
+            if most_flags > 1:
+                self.game.rcon_say("^2Top Objectives: ^7%s [^1%s^7]" % (flagrunner, most_flags))
+
             # HE grenade kills
             if most_he_kills > 1:
                 self.game.rcon_say("^2Most HE grenade kills: ^7%s (^1%d ^7HE kills)" % (nader, most_he_kills))
