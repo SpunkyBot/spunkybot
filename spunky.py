@@ -12,7 +12,7 @@ This program is released under the MIT License. See LICENSE for more details.
 Spunky Bot is a lightweight game server administration bot and RCON tool,
 inspired by the eb2k9 bot by Shawn Haggard.
 The purpose of Spunky Bot is to administrate an Urban Terror 4.1 / 4.2 / 4.3
-server and provide statistical data for players.
+server and provide statistics data for players.
 
 ## Configuration ##
 Modify the UrT server config as follows:
