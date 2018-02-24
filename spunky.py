@@ -2566,6 +2566,7 @@ class LogParser(object):
         """
         Kill all survived blue players when the bomb exploded
         """
+        self.game.rcon_say("^7Planted?")
         time.sleep(1.3)
         with self.players_lock:
             for player in self.game.players.itervalues():
