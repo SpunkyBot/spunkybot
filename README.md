@@ -13,7 +13,7 @@ The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was 
 [![PyPI version](https://img.shields.io/pypi/v/spunkybot.svg)](https://pypi.python.org/pypi/spunkybot)
 [![Python version](https://img.shields.io/badge/python-2.6,%202.7-yellow.svg)](https://pypi.python.org/pypi/spunkybot)
 [![Code Health](https://landscape.io/github/SpunkyBot/spunkybot/master/landscape.svg)](https://landscape.io/github/SpunkyBot/spunkybot/master)
-[![Codacy Grade](https://api.codacy.com/project/badge/Grade/07b16a60bcce41ac89dc19dd3316c127)](https://www.codacy.com/app/alexanderkress/spunkybot)
+[![Codacy Grade](https://api.codacy.com/project/badge/Grade/07b16a60bcce41ac89dc19dd3316c127)](https://www.codacy.com/app/SpunkyBot/spunkybot)
 
 If you want to know more, this is a list of selected starting points:
 
