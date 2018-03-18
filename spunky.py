@@ -2476,7 +2476,10 @@ class LogParser(object):
         """
         convert time string in duration and time unit
         """
-        if time_string.endswith('h'):
+        if time_string.endswith('d'):
+            duration_string = time_string.rstrip('d')
+            duration = int(duration_string) * 86400 if duration_string.isdigit() else 86400
+        elif time_string.endswith('h'):
             duration_string = time_string.rstrip('h')
             duration = int(duration_string) * 3600 if duration_string.isdigit() else 3600
             duration_output = "1 hour" if duration == 3600 else "%s hours" % duration_string
