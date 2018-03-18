@@ -3479,7 +3479,6 @@ class Game(object):
         get the full path of mapcycle.txt file
         """
         maplist = []
-        self.quake.rcon_update()
         # get path of fs_homepath and fs_basepath
         fs_homepath = self.get_cvar('fs_homepath')
         logger.debug("fs_homepath           : %s", fs_homepath)
