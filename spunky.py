@@ -1838,7 +1838,7 @@ class LogParser(object):
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['warnclear']['syntax'])
 
-            # tempban - ban a player temporary for the given period (1 min to 24 hrs)
+            # tempban - ban a player temporary for the given period
             elif (sar['command'] == '!tempban' or sar['command'] == '!tb') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['tempban']['level']:
                 if line.split(sar['command'])[1]:
                     arg = line.split(sar['command'])[1].split()
