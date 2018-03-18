@@ -2482,29 +2482,36 @@ class LogParser(object):
         elif time_string.endswith('h'):
             duration_string = time_string.rstrip('h')
             duration = int(duration_string) * 3600 if duration_string.isdigit() else 3600
-            duration_output = "1 hour" if duration == 3600 else "%s hours" % duration_string
         elif time_string.endswith('m'):
             duration_string = time_string.rstrip('m')
             duration = int(duration_string) * 60 if duration_string.isdigit() else 60
-            duration_output = "1 minute" if duration == 60 else "%s minutes" % duration_string
-            if duration > 3600:
-                calc = int(round(duration / 3600))
-                duration_output = "1 hour" if calc == 1 else "%s hours" % calc
         elif time_string.endswith('s'):
             duration_string = time_string.rstrip('s')
             duration = int(duration_string) if duration_string.isdigit() else 30
         else:
             duration = 3600
-            duration_output = "1 hour"
         # minimum ban duration = 1 hour
         if duration == 0:
             duration = 3600
-            duration_output = "1 hour"
         # limit to max duration = 72 hours
         elif duration > 259200:
             duration = 259200
-            duration_output = "3 days"
-        return duration, duration_output
+        # modulo
+        days = (duration - (duration % 86400)) / 86400
+        hours = ((duration % 86400) - (duration % 3600)) / 3600
+        mins = ((duration % 3600) - (duration % 60)) / 60
+        secs = duration % 60
+        duration_output = []
+        append = duration_output.append
+        if days > 0:
+            append("%s day%s" % (days, 's' if days > 1 else ''))
+        if hours > 0:
+            append("%s hour%s" % (hours, 's' if hours > 1 else ''))
+        if mins > 0:
+            append("%s minute%s" % (mins, 's' if mins > 1 else ''))
+        if secs > 0:
+            append("%s second%s" % (secs, 's' if secs > 1 else ''))
+        return duration, ' '.join(duration_output)
 
     def handle_flag(self, line):
         """
