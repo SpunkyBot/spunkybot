@@ -159,6 +159,7 @@ REASONS = {'obj': 'go for objective',
            'tk': 'stop team killing',
            'sk': 'stop spawn killing',
            'spec': 'spectator too long on full server',
+           'score' 'score too low for this server'
            'ci': 'connection interrupted',
            '999': 'connection interrupted',
            'whiner': 'stop complaining about camp, lag or block',
