@@ -330,13 +330,12 @@ class LogParser(object):
         self.iamgod = True if curs.fetchone()[0] < 1 else False
         logger.info("Connecting to Database: OK")
         logger.debug("Cmd !iamgod available : %s", self.iamgod)
-        # Master Server
-        self.base_url = 'http://master.spunkybot.de'
         server_port = config.get('server', 'server_port') if config.has_option('server', 'server_port') else "27960"
         # Heartbeat packet
         data = {'v': __version__, 'p': server_port, 'o': platform.platform()}
         self.heartbeat = config.getboolean('bot', 'heartbeat') if config.has_option('bot', 'heartbeat') else True
-        self.ping_url = '%s/ping.php?%s' % (self.base_url, urllib.urlencode(data))
+        # Master Server
+        self.ping_url = 'http://master.spunkybot.de/ping.php?%s' % urllib.urlencode(data)
         self.uptime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         # Rotating Messages and Rules
         if config.has_option('rules', 'show_rules') and config.getboolean('rules', 'show_rules'):
