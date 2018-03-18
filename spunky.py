@@ -3272,6 +3272,8 @@ class Player(object):
     def get_last_warn_msg(self):
         if len(self.warn_list) > 0:
             return self.warn_list[-1]
+        else:
+            return ''
 
     def get_last_warn_time(self):
         return self.last_warn_time
