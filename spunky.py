@@ -143,6 +143,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'setnextmap': {'desc': 'set the next map', 'syntax': '^7Usage: ^2!setnextmap ^7<ut4_name>', 'level': 80},
             'swapteams': {'desc': 'swap the current teams', 'syntax': '^7Usage: ^2!swapteams', 'level': 80},
             'unban': {'desc': 'unban a player from the database', 'syntax': '^7Usage: ^2!unban ^7<@ID>', 'level': 80},
+            'unreg': {'desc': 'remove a player from the regular group', 'syntax': '^7Usage: ^2!unreg ^7<name>', 'level': 80},
             # superadmin commands, level 90
             'ungroup': {'desc': 'remove admin level from a player', 'syntax': '^7Usage: ^2!ungroup ^7<name>', 'level': 90},
             'password': {'desc': 'set private server password', 'syntax': '^7Usage: ^2!password ^7[<password>]', 'level': 90},
@@ -2298,6 +2299,22 @@ class LogParser(object):
                             self.game.rcon_tell(sar['player_num'], "^3%s put in group ^7Regular" % victim.get_name())
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['makereg']['syntax'])
+
+            # !unreg <player> - remove a player from the regular group
+            elif sar['command'] == '!unreg' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['unreg']['level']:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
+                    found, victim, msg = self.player_found(user)
+                    if not found:
+                        self.game.rcon_tell(sar['player_num'], msg)
+                    else:
+                        if victim.get_admin_role() == 2:
+                            victim.update_db_admin_role(role=1)
+                            self.game.rcon_tell(sar['player_num'], "^3%s put in group ^7User" % victim.get_name())
+                        else:
+                            self.game.rcon_tell(sar['player_num'], "^3%s is not in the regular group" % victim.get_name())
+                else:
+                    self.game.rcon_tell(sar['player_num'], COMMANDS['unreg']['syntax'])
 
             # putgroup - add a client to a group
             elif sar['command'] == '!putgroup' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['putgroup']['level']:

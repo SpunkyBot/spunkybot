@@ -216,6 +216,8 @@
 	- Usage: `!swapteams`
 - **unban** - unban a player from the database
 	- Usage: `!unban <ID>`
+- **unreg** - remove a player from the regular group
+	- Usage: `!unreg <name|id>`
 
 
 ### Super Admin [90]
