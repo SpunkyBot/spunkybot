@@ -1426,7 +1426,7 @@ class LogParser(object):
                 self.game.rcon_tell(sar['player_num'], msg)
 
             # forgive last team kill
-            elif sar['command'] == '!forgiveprev' or sar['command'] == '!fp' or sar['command'] == '!f':
+            elif sar['command'] == '!forgiveprev' or sar['command'] == '!fp':
                 victim = self.game.players[sar['player_num']]
                 if victim.get_killed_me():
                     forgive_player_num = victim.get_killed_me()[-1]
