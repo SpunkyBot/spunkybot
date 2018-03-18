@@ -2494,10 +2494,10 @@ class LogParser(object):
         if duration == 0:
             duration = 3600
             duration_output = "1 hour"
-        # limit to max duration = 24 hours
-        elif duration > 86400:
-            duration = 86400
-            duration_output = "24 hours"
+        # limit to max duration = 72 hours
+        elif duration > 259200:
+            duration = 259200
+            duration_output = "3 days"
         return duration, duration_output
 
     def handle_flag(self, line):
