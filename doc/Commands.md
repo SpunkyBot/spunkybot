@@ -156,8 +156,8 @@
 	- Max amount: 15
 - **status** - report the status of the bot
 	- Usage: `!status`
-- **swap** - swap teams for player A and B (if in different teams)
-	- Usage: `!swap <playerA> <playerB>`
+- **swap** - swap teams for player A and B (if in different teams). If player B is not specified, the admin using the command is swapped with player A
+	- Usage: `!swap <playerA> [<playerB>]`
 - **version** - display the version of the bot
 	- Usage: `!version`
 - **veto** - stop voting process

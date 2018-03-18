@@ -118,7 +118,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'scream': {'desc': 'scream a message in different colors to all players', 'syntax': '^7Usage: ^2!scream ^7<text>', 'level': 60},
             'slap': {'desc': 'slap a player (a number of times)', 'syntax': '^7Usage: ^2!slap ^7<name> [<amount>]', 'level': 60},
             'status': {'desc': 'report the status of the bot', 'syntax': '^7Usage: ^2!status', 'level': 60},
-            'swap': {'desc': 'swap teams for player A and B', 'syntax': '^7Usage: ^2!swap ^7<name1> <name2>', 'level': 60},
+            'swap': {'desc': 'swap teams for player A and B', 'syntax': '^7Usage: ^2!swap ^7<name1> [<name2>]', 'level': 60},
             'version': {'desc': 'display the version of the bot', 'syntax': '^7Usage: ^2!version', 'level': 60},
             'veto': {'desc': 'stop voting process', 'syntax': '^7Usage: ^2!veto', 'level': 60},
             # senioradmin commands, level 80
