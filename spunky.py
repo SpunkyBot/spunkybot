@@ -1443,8 +1443,7 @@ class LogParser(object):
                 msg = []
                 append = msg.append
                 if victim.get_killed_me():
-                    all_forgive_player_num_list = victim.get_killed_me()
-                    forgive_player_num_list = list(set(all_forgive_player_num_list))
+                    forgive_player_num_list = list(set(victim.get_killed_me()))
                     victim.clear_all_tk()
                     for forgive_player_num in forgive_player_num_list:
                         forgive_player = self.game.players[forgive_player_num]
