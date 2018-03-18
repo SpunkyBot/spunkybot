@@ -1968,7 +1968,7 @@ class LogParser(object):
             elif sar['command'] == '!version' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['version']['level']:
                 self.game.rcon_tell(sar['player_num'], "^7Spunky Bot ^2v%s" % __version__)
                 try:
-                    get_latest = urllib2.urlopen('%s/version.txt' % self.base_url).read().strip()
+                    get_latest = urllib2.urlopen('https://raw.githubusercontent.com/SpunkyBot/spunkybot/master/VERSION').read().strip()
                 except urllib2.URLError:
                     get_latest = __version__
                 if __version__ < get_latest:
