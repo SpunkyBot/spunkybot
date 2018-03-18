@@ -2490,6 +2490,9 @@ class LogParser(object):
             if duration > 3600:
                 calc = int(round(duration / 3600))
                 duration_output = "1 hour" if calc == 1 else "%s hours" % calc
+        elif time_string.endswith('s'):
+            duration_string = time_string.rstrip('s')
+            duration = int(duration_string) if duration_string.isdigit() else 30
         else:
             duration = 3600
             duration_output = "1 hour"
