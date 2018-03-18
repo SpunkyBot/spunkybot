@@ -1928,11 +1928,10 @@ class LogParser(object):
                 if not self.ffa_lms_gametype:
                     if line.split(sar['command'])[1]:
                         arg = line.split(sar['command'])[1].split()
-                        if len(arg) > 1:
-                            player1 = arg[0]
-                            player2 = arg[1]
-                            found1, victim1, _ = self.player_found(player1)
-                            found2, victim2, _ = self.player_found(player2)
+                        # swap given player(s)
+                        if len(arg) >= 1:
+                            found1, victim1, _ = self.player_found(arg[0])
+                            found2, victim2, _ = (True, self.game.players[sar['player_num']], "") if len(arg) == 1 else self.player_found(arg[1])
                             if not found1 or not found2:
                                 self.game.rcon_tell(sar['player_num'], '^3Player not found')
                             else:
