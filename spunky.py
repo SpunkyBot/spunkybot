@@ -1450,7 +1450,7 @@ class LogParser(object):
                         forgive_player.clear_killed_me(victim.get_player_num())
                         append(forgive_player.get_name())
                 if msg:
-                    self.game.rcon_say("^7%s has forgiven: %s" % (victim.get_name(), ", ".join(msg)))
+                    self.game.rcon_say("^7%s has forgiven: ^3%s" % (victim.get_name(), ", ".join(msg)))
                 else:
                     self.game.rcon_tell(sar['player_num'], "^3No one to forgive")
 
