@@ -10,6 +10,9 @@
 - **forgiveall** - forgive all team kills
 	- Usage: `!forgiveall`
 	- Short: `!fa`
+- **forgivelist** - list all players who killed you
+	- Usage: `!forgivelist`
+	- Short: `!fl`
 - **forgiveprev** - forgive last team kill
 	- Usage: `!forgiveprev`
 	- Short: `!fp`

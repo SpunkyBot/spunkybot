@@ -59,6 +59,7 @@ RCON_DELAY = 0.3
 
 COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usage: ^2!help', 'level': 0, 'short': 'h'},
             'forgiveall': {'desc': 'forgive all team kills', 'syntax': '^7Usage: ^2!forgiveall', 'level': 0, 'short': 'fa'},
+            'forgivelist': {'desc': 'list all players who killed you', 'syntax': '^7Usage: ^2!forgivelist', 'level': 0, 'short': 'fl'},
             'forgiveprev': {'desc': 'forgive last team kill', 'syntax': '^7Usage: ^2!forgiveprev', 'level': 0, 'short': 'fp'},
             'bombstats': {'desc': 'display Bomb mode stats', 'syntax': '^7Usage: ^2!bombstats', 'level': 0},
             'ctfstats': {'desc': 'display Capture the Flag stats', 'syntax': '^7Usage: ^2!ctfstats', 'level': 0},
@@ -1436,6 +1437,14 @@ class LogParser(object):
                 else:
                     self.game.rcon_tell(sar['player_num'], "^3No one to forgive")
 
+
+            # !forgivelist - list all players who killed you
+            elif sar['command'] == '!forgivelist' or sar['command'] == '!fl':
+                victim = self.game.players[sar['player_num']]
+                if victim.get_killed_me():
+                    self.game.rcon_tell(sar['player_num'], "^7Whom to forgive? %s" % ", ".join(["^3%s [^2%s^3]" % (self.game.players[playernum].get_name(), playernum) for playernum in list(set(victim.get_killed_me()))]))
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^3No one to forgive")
             # forgive all team kills
             elif sar['command'] == '!forgiveall' or sar['command'] == '!fa':
                 victim = self.game.players[sar['player_num']]
