@@ -113,6 +113,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'ban': {'desc': 'ban a player for 7 days', 'syntax': '^7Usage: ^2!ban ^7<name> <reason>', 'level': 60, 'short': 'b'},
             'baninfo': {'desc': 'display active bans of a player', 'syntax': '^7Usage: ^2!baninfo ^7<name>', 'level': 60, 'short': 'bi'},
             'ci': {'desc': 'kick player with connection interrupt', 'syntax': '^7Usage: ^2!ci ^7<name>', 'level': 60},
+            'forgiveclear': {'desc': 'clear a players team kills', 'syntax': '^7Usage: ^2!forgiveclear ^7[<name>]', 'level': 60, 'short': 'fc'},
             'forgiveinfo': {'desc': 'display a players team kills', 'syntax': '^7Usage: ^2!forgiveinfo ^7<name>', 'level': 60, 'short': 'fi'},
             'id': {'desc': 'show the IP, guid and authname of a player', 'syntax': '^7Usage: ^2!id ^7<name>', 'level': 60},
             'kickbots': {'desc': 'kick all bots', 'syntax': '^7Usage: ^2!kickbots', 'level': 60, 'short': 'kb'},
@@ -1890,6 +1891,24 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], "^3%s ^7killed ^1%s ^7teammate%s" % (victim.get_name(), tks, 's' if tks > 1 else '') if tks > 0 else "^3%s ^7has not killed teammates" % victim.get_name())
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['forgiveinfo']['syntax'])
+
+            # !forgiveclear [<name>] - clear a players team kills
+            elif (sar['command'] == '!forgiveclear' or sar['command'] == '!fc') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['forgiveclear']['level']:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
+                    found, victim, msg = self.player_found(user)
+                    if not found:
+                        self.game.rcon_tell(sar['player_num'], msg)
+                    else:
+                        victim.clear_all_killed_me()
+                        for player in self.game.players.itervalues():
+                            player.clear_tk(victim.get_player_num())
+                        self.game.rcon_say("^1All team kills cleared for ^2%s" % victim.get_name())
+                else:
+                    for player in self.game.players.itervalues():
+                        player.clear_all_tk(clear_grudge=True)
+                        player.clear_all_killed_me()
+                    self.game.rcon_say("^1All player team kills cleared")
 
             # id - show the IP, guid and authname of a player - !id <name>
             elif sar['command'] == '!id' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['id']['level']:

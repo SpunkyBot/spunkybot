@@ -144,6 +144,9 @@
 	- Short: `!bi <name|id>`
 - **ci** - kick player with connection interrupt
 	- Usage: `!ci <name|id>`
+- **forgiveclear** - clear a players team kills
+    - Usage: `!forgiveclear [<name|id>]`
+	- Short: `!fc [<name|id>]`
 - **forgiveinfo** - display a players team kills
     - Usage: `!forgiveinfo <name|id>`
 	- Short: `!fi <name|id>`
