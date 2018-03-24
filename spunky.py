@@ -1579,7 +1579,7 @@ class LogParser(object):
                     if not found:
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
-                        self.game.rcon_tell(sar['player_num'], "^3%s ^7has ^2%s ^7active warning(s)" % (victim.get_name(), victim.get_warning()))
+                        self.game.rcon_tell(sar['player_num'], "^3%s ^7has ^2%s ^7active warning%s" % (victim.get_name(), victim.get_warning(), 's' if victim.get_warning() > 1 else ''))
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['warninfo']['syntax'])
 
