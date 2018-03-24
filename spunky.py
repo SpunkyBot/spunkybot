@@ -113,6 +113,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'ban': {'desc': 'ban a player for 7 days', 'syntax': '^7Usage: ^2!ban ^7<name> <reason>', 'level': 60, 'short': 'b'},
             'baninfo': {'desc': 'display active bans of a player', 'syntax': '^7Usage: ^2!baninfo ^7<name>', 'level': 60, 'short': 'bi'},
             'ci': {'desc': 'kick player with connection interrupt', 'syntax': '^7Usage: ^2!ci ^7<name>', 'level': 60},
+            'forgiveinfo': {'desc': 'display a players team kills', 'syntax': '^7Usage: ^2!forgiveinfo ^7<name>', 'level': 60, 'short': 'fi'},
             'id': {'desc': 'show the IP, guid and authname of a player', 'syntax': '^7Usage: ^2!id ^7<name>', 'level': 60},
             'kickbots': {'desc': 'kick all bots', 'syntax': '^7Usage: ^2!kickbots', 'level': 60, 'short': 'kb'},
             'rain': {'desc': 'enables or disables rain', 'syntax': '^7Usage: ^2!rain ^7<on/off>', 'level': 60},
@@ -1877,6 +1878,19 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], COMMANDS['tempban']['syntax'])
 
 ## full admin level 60
+            # !forgiveinfo <name> - display a players team kills
+            elif (sar['command'] == '!forgiveinfo' or sar['command'] == '!fi') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['forgiveinfo']['level']:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
+                    found, victim, msg = self.player_found(user)
+                    if not found:
+                        self.game.rcon_tell(sar['player_num'], msg)
+                    else:
+                        tks = len(victim.get_tk_victim_names())
+                        self.game.rcon_tell(sar['player_num'], "^3%s ^7killed ^1%s ^7teammate%s" % (victim.get_name(), tks, 's' if tks > 1 else '') if tks > 0 else "^3%s ^7has not killed teammates" % victim.get_name())
+                else:
+                    self.game.rcon_tell(sar['player_num'], COMMANDS['forgiveinfo']['syntax'])
+
             # id - show the IP, guid and authname of a player - !id <name>
             elif sar['command'] == '!id' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['id']['level']:
                 if line.split(sar['command'])[1]:

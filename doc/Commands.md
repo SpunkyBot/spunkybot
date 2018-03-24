@@ -144,6 +144,9 @@
 	- Short: `!bi <name|id>`
 - **ci** - kick player with connection interrupt
 	- Usage: `!ci <name|id>`
+- **forgiveinfo** - display a players team kills
+    - Usage: `!forgiveinfo <name|id>`
+	- Short: `!fi <name|id>`
 - **id** - show the IP, guid and authname of a player
 	- Usage: `!id <name|id>`
 - **kickbots** kick all bots
