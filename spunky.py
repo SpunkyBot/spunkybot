@@ -3144,6 +3144,9 @@ class Player(object):
     def get_name(self):
         return self.name
 
+    def set_authname(self, authname):
+        self.authname = authname
+
     def get_authname(self):
         return self.authname
 
