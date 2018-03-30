@@ -2896,6 +2896,7 @@ class Player(object):
         self.db_team_death = 0
         self.tk_victim_names = []
         self.tk_killer_names = []
+        self.grudged_player = []
         self.ping_value = 0
         self.warn_list = []
         self.last_warn_time = 0
@@ -3003,6 +3004,7 @@ class Player(object):
         self.tk_count = 0
         self.tk_victim_names = []
         self.tk_killer_names = []
+        self.grudged_player = []
         self.warn_list = []
         self.last_warn_time = 0
         self.flags_captured = 0
