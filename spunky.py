@@ -839,6 +839,10 @@ class LogParser(object):
                 ip_address = ip_port.strip()
                 port = "27960"
 
+            # convert loopback/localhost address
+            if ip_address in ['loopback', 'localhost']:
+                ip_address = '127.0.0.1'
+
             if player_num not in self.game.players:
                 player = Player(player_num, ip_address, guid, name, auth)
                 self.game.add_player(player)
