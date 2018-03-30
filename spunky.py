@@ -1441,7 +1441,6 @@ class LogParser(object):
                 else:
                     self.game.rcon_tell(sar['player_num'], "^3No one to forgive")
 
-
             # !forgivelist - list all players who killed you
             elif sar['command'] == '!forgivelist' or sar['command'] == '!fl':
                 victim = self.game.players[sar['player_num']]
