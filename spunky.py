@@ -3521,7 +3521,6 @@ class Game(object):
                                 self.quake.rcon_update()
                         except Exception as err:
                             logger.error(err, exc_info=True)
-                            #pass
             time.sleep(RCON_DELAY)
 
     def get_quake_value(self, value):
