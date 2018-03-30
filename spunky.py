@@ -856,6 +856,9 @@ class LogParser(object):
             if self.game.players[player_num].get_guid() != guid:
                 self.game.players[player_num].set_guid(guid)
 
+            if self.game.players[player_num].get_authname() != auth:
+                self.game.players[player_num].set_authname(auth)
+
             # kick player with hax guid 'kemfew'
             if "KEMFEW" in guid.upper():
                 self.kick_player_reason("Cheater GUID detected for %s -> Player kicked" % name, player_num)
