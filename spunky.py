@@ -313,6 +313,7 @@ class LogParser(object):
         # enable/disable message 'Firstblood / first nade kill...'
         self.show_first_kill_msg = config.getboolean('bot', 'show_first_kill') if config.has_option('bot', 'show_first_kill') else True
         self.show_hit_stats_msg = config.getboolean('bot', 'show_hit_stats_respawn') if config.has_option('bot', 'show_hit_stats_respawn') else True
+        self.show_multikill_msg = config.getboolean('bot', 'show_multi_kill') if config.has_option('bot', 'show_multi_kill') else True
         # set teams autobalancer
         self.teams_autobalancer = config.getboolean('bot', 'autobalancer') if config.has_option('bot', 'autobalancer') else False
         self.allow_cmd_teams_round_end = config.getboolean('bot', 'allow_teams_round_end') if config.has_option('bot', 'allow_teams_round_end') else False
@@ -1054,12 +1055,13 @@ class LogParser(object):
                             self.game.rcon_tell(killer_id, "^1WARNING ^7[^3%d^7]: Spawn Camping and Spawn Killing are not allowed" % killer.get_warning())
 
                 # multi kill message
-                if killer.get_monsterkill() == 2:
-                    self.game.rcon_say("^7%s: ^2Double Kill!" % killer_name)
-                elif killer.get_monsterkill() == 3:
-                    self.game.rcon_say("^7%s: ^1Multi Kill!" % killer_name)
-                elif killer.get_monsterkill() == 4:
-                    self.game.rcon_say("^7%s: ^1MONSTER KILL!!" % killer_name)
+                if self.show_multikill_msg:
+                    if killer.get_monsterkill() == 2:
+                        self.game.rcon_say("^7%s: ^2Double Kill!" % killer_name)
+                    elif killer.get_monsterkill() == 3:
+                        self.game.rcon_say("^7%s: ^1Multi Kill!" % killer_name)
+                    elif killer.get_monsterkill() == 4:
+                        self.game.rcon_say("^7%s: ^1MONSTER KILL!!" % killer_name)
 
                 # first kill message
                 if self.firstblood:
