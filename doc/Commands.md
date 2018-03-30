@@ -203,7 +203,7 @@
 	- Short: `!l <name|id>`
 - **makereg** - make a player a regular (Level 2) user
 	- Usage: `!makereg <name|id>`
-	- Short: `!mr <name>`
+	- Short: `!mr <name|id>`
 - **map** - load given map
 	- Usage: `!map <ut4_name>`
 - **maps** - display all available maps
