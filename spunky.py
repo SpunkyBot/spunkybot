@@ -3740,7 +3740,7 @@ class Game(object):
             all_maps = self.get_rcon_output("dir map bsp")[1].split()
             all_maps_list = [maps.replace("/", "").replace(".bsp", "") for maps in all_maps if maps.startswith("/")]
             pk3_list = self.get_rcon_output("fdir *.pk3")[1].split()
-            all_pk3_list = [maps.replace("/", "").replace(".pk3", "").replace(".bsp", "") for maps in pk3_list if maps.startswith("/ut4_")]
+            all_pk3_list = [maps.replace("/", "").replace(".pk3", "").replace(".bsp", "") for maps in pk3_list if maps.startswith("/ut4_") or maps.startswith("/ut_")]
 
             all_together = list(set(all_maps_list + all_pk3_list))
             all_together.sort()
