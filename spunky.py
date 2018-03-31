@@ -3356,16 +3356,13 @@ class Player(object):
         return len(self.warn_list)
 
     def get_last_warn_msg(self):
-        if len(self.warn_list) > 0:
-            return self.warn_list[-1]
-        else:
-            return ''
+        return self.warn_list[-1] if self.warn_list else ''
 
     def get_last_warn_time(self):
         return self.last_warn_time
 
     def clear_last_warning(self):
-        if len(self.warn_list) > 0:
+        if self.warn_list:
             last_warning = self.warn_list[-1]
             self.warn_list.pop()
             return last_warning
