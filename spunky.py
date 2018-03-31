@@ -537,8 +537,6 @@ class LogParser(object):
         - check for players with low score and set warning
         """
         try:
-            # get rcon status
-            self.game.send_rcon('status')
             with self.players_lock:
                 # get number of connected players
                 counter = len(self.game.players) - 1  # bot is counted as player
