@@ -121,6 +121,9 @@
 	- Short: `!k <name|id> <reason>`
 - **nuke** - nuke a player
 	- Usage: `!nuke <name|id>`
+- **regulars** - display the regular players online
+	- Usage: `!regulars`
+	- Short: `!regs`
 - **say** - say a message to all players (allow spectator to say a message to players in-game)
 	- Usage: `!say <text>`
 	- Short: `!!<text>`
