@@ -1600,7 +1600,7 @@ class LogParser(object):
             elif (sar['command'] == '!warn' or sar['command'] == '!w') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['warn']['level']:
                 if line.split(sar['command'])[1]:
                     arg = line.split(sar['command'])[1].split()
-                    if len(arg) > 0:
+                    if arg:
                         user = arg[0]
                         reason = ' '.join(arg[1:])[:40].strip() if len(arg) > 1 else 'behave yourself'
                         found, victim, msg = self.player_found(user)
