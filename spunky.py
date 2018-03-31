@@ -2361,7 +2361,7 @@ class LogParser(object):
                     else:
                         if victim.get_admin_role() == 2:
                             victim.update_db_admin_role(role=1)
-                            self.game.rcon_tell(sar['player_num'], "^3%s put in group ^7User" % victim.get_name())
+                            self.game.rcon_tell(sar['player_num'], "^1%s ^7put in group User" % victim.get_name())
                         else:
                             self.game.rcon_tell(sar['player_num'], "^3%s is not in the regular group" % victim.get_name())
                 else:
