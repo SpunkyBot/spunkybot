@@ -2341,13 +2341,13 @@ class LogParser(object):
                         if victim.get_registered_user():
                             if victim.get_admin_role() < 2:
                                 victim.update_db_admin_role(role=2)
-                                self.game.rcon_tell(sar['player_num'], "^3%s put in group ^7Regular" % victim.get_name())
+                                self.game.rcon_tell(sar['player_num'], "^1%s ^7put in group Regular" % victim.get_name())
                             else:
                                 self.game.rcon_tell(sar['player_num'], "^3%s is already in a higher level group" % victim.get_name())
                         else:
                             # register new user in DB and set role to 2
                             victim.register_user_db(role=2)
-                            self.game.rcon_tell(sar['player_num'], "^3%s put in group ^7Regular" % victim.get_name())
+                            self.game.rcon_tell(sar['player_num'], "^1%s ^7put in group Regular" % victim.get_name())
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['makereg']['syntax'])
 
