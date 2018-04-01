@@ -58,6 +58,7 @@ BOT_PLAYER_NUM = 1022
 RCON_DELAY = 0.3
 
 COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usage: ^2!help', 'level': 0, 'short': 'h'},
+            'forgive': {'desc': 'forgive a player for team killing', 'syntax': '^7Usage: ^2!forgive ^7[<name>]', 'level': 0, 'short': 'f'},
             'forgiveall': {'desc': 'forgive all team kills', 'syntax': '^7Usage: ^2!forgiveall', 'level': 0, 'short': 'fa'},
             'forgivelist': {'desc': 'list all players who killed you', 'syntax': '^7Usage: ^2!forgivelist', 'level': 0, 'short': 'fl'},
             'forgiveprev': {'desc': 'forgive last team kill', 'syntax': '^7Usage: ^2!forgiveprev', 'level': 0, 'short': 'fp'},
@@ -1436,6 +1437,29 @@ class LogParser(object):
                 toplist = ['^1#%s ^7%s' % (index + 1, result[index][0]) for index in xrange(len(result))]
                 msg = "^3Top players: %s" % str(", ".join(toplist)) if toplist else "^3Awards still available"
                 self.game.rcon_tell(sar['player_num'], msg)
+
+            # !forgive [<name>] - forgive a player for team killing
+            elif sar['command'] == '!forgive' or sar['command'] == '!f':
+                victim = self.game.players[sar['player_num']]
+                if victim.get_killed_me():
+                    if line.split(sar['command'])[1]:
+                        user = line.split(sar['command'])[1].strip()
+                        found, forgive_player, _ = self.player_found(user)
+                        if not found:
+                            forgive_player_num = False
+                        else:
+                            forgive_player_num = forgive_player.get_player_num() if forgive_player.get_player_num() in victim.get_killed_me() else False
+                    else:
+                        forgive_player_num = victim.get_killed_me()[-1]
+                        forgive_player = self.game.players[forgive_player_num]
+                    if forgive_player_num is not False:
+                        victim.clear_tk(forgive_player_num)
+                        forgive_player.clear_killed_me(victim.get_player_num())
+                        self.game.rcon_say("^7%s has forgiven %s's attack" % (victim.get_name(), forgive_player.get_name()))
+                    else:
+                        self.game.rcon_tell(sar['player_num'], "^7Whom to forgive? %s" % ", ".join(["^3%s [^2%s^3]" % (self.game.players[playernum].get_name(), playernum) for playernum in list(set(victim.get_killed_me()))]))
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^3No one to forgive")
 
             # forgive last team kill
             elif sar['command'] == '!forgiveprev' or sar['command'] == '!fp':

@@ -7,6 +7,9 @@
 - **help** - display all available commands
 	- Usage: `!help`
 	- Short: `!h`
+- **forgive** - forgive a player for team killing
+	- Usage: `!forgive [<name|id>]`
+	- Short: `!f [<name|id>]`
 - **forgiveall** - forgive all team kills
 	- Usage: `!forgiveall`
 	- Short: `!fa`
