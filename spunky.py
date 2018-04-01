@@ -3367,6 +3367,10 @@ class Player(object):
     def clear_all_tk(self):
         self.tk_killer_names = []
 
+    def clear_all_killed_me(self):
+        self.tk_victim_names = []
+        self.clear_specific_warning("stop team killing")
+
     def add_high_ping(self, value):
         self.warn_list.append('fix your ping')
         self.ping_value = value
