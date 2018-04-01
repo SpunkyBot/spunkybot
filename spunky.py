@@ -91,9 +91,9 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'seen': {'desc': 'display when a player was last seen', 'syntax': '^7Usage: ^2!seen ^7<name>', 'level': 20},
             'shuffleteams': {'desc': 'shuffle the teams', 'syntax': '^7Usage: ^2!shuffleteams', 'level': 20, 'short': 'shuffle'},
             'spec': {'desc': 'move yourself to spectator', 'syntax': '^7Usage: ^2!spec', 'level': 20},
-            'warn': {'desc': 'warn user', 'syntax': '^7Usage: ^2!warn ^7<name> [<reason>]', 'level': 20, 'short': 'w'},
+            'warn': {'desc': 'warn player', 'syntax': '^7Usage: ^2!warn ^7<name> [<reason>]', 'level': 20, 'short': 'w'},
             'warninfo': {'desc': 'display how many warnings a player has', 'syntax': '^7Usage: ^2!warninfo ^7<name>', 'level': 20, 'short': 'wi'},
-            'warnremove': {'desc': 'remove a users last warning', 'syntax': '^7Usage: ^2!warnremove ^7<name>', 'level': 20, 'short': 'wr'},
+            'warnremove': {'desc': "remove a player's last warning", 'syntax': '^7Usage: ^2!warnremove ^7<name>', 'level': 20, 'short': 'wr'},
             'warns': {'desc': 'list the warnings', 'syntax': '^7Usage: ^2!warns', 'level': 20},
             'warntest': {'desc': 'test a warning', 'syntax': '^7Usage: ^2!warntest ^7<warning>', 'level': 20},
             # admin commands, level 40
@@ -110,13 +110,13 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'say': {'desc': 'say a message to all players', 'syntax': '^7Usage: ^2!say ^7<text>', 'level': 40, 'short': '!!'},
             'tell': {'desc': 'tell a message to a specific player', 'syntax': '^7Usage: ^2!tell ^7<name> <text>', 'level': 40},
             'tempban': {'desc': 'ban a player temporary for the given period', 'syntax': '^7Usage: ^2!tempban ^7<name> <duration> [<reason>]', 'level': 40, 'short': 'tb'},
-            'warnclear': {'desc': 'clear the user warnings', 'syntax': '^7Usage: ^2!warnclear ^7<name>', 'level': 40, 'short': 'wc'},
+            'warnclear': {'desc': 'clear the player warnings', 'syntax': '^7Usage: ^2!warnclear ^7<name>', 'level': 40, 'short': 'wc'},
             # fulladmin commands, level 60
             'ban': {'desc': 'ban a player for 7 days', 'syntax': '^7Usage: ^2!ban ^7<name> <reason>', 'level': 60, 'short': 'b'},
             'baninfo': {'desc': 'display active bans of a player', 'syntax': '^7Usage: ^2!baninfo ^7<name>', 'level': 60, 'short': 'bi'},
             'ci': {'desc': 'kick player with connection interrupt', 'syntax': '^7Usage: ^2!ci ^7<name>', 'level': 60},
-            'forgiveclear': {'desc': 'clear a players team kills', 'syntax': '^7Usage: ^2!forgiveclear ^7[<name>]', 'level': 60, 'short': 'fc'},
-            'forgiveinfo': {'desc': 'display a players team kills', 'syntax': '^7Usage: ^2!forgiveinfo ^7<name>', 'level': 60, 'short': 'fi'},
+            'forgiveclear': {'desc': "clear a player's team kills", 'syntax': '^7Usage: ^2!forgiveclear ^7[<name>]', 'level': 60, 'short': 'fc'},
+            'forgiveinfo': {'desc': "display a player's team kills", 'syntax': '^7Usage: ^2!forgiveinfo ^7<name>', 'level': 60, 'short': 'fi'},
             'id': {'desc': 'show the IP, guid and authname of a player', 'syntax': '^7Usage: ^2!id ^7<name>', 'level': 60},
             'kickbots': {'desc': 'kick all bots', 'syntax': '^7Usage: ^2!kickbots', 'level': 60, 'short': 'kb'},
             'rain': {'desc': 'enables or disables rain', 'syntax': '^7Usage: ^2!rain ^7<on/off>', 'level': 60},
@@ -1670,7 +1670,7 @@ class LogParser(object):
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['warn']['syntax'])
 
-            # warnremove - remove a users last warning
+            # warnremove - remove a player's last warning
             elif (sar['command'] == '!warnremove' or sar['command'] == '!wr') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['warnremove']['level']:
                 if line.split(sar['command'])[1]:
                     user = line.split(sar['command'])[1].strip()
@@ -1918,7 +1918,7 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], COMMANDS['tempban']['syntax'])
 
 ## full admin level 60
-            # !forgiveinfo <name> - display a players team kills
+            # !forgiveinfo <name> - display a player's team kills
             elif (sar['command'] == '!forgiveinfo' or sar['command'] == '!fi') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['forgiveinfo']['level']:
                 if line.split(sar['command'])[1]:
                     user = line.split(sar['command'])[1].strip()
@@ -1931,7 +1931,7 @@ class LogParser(object):
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['forgiveinfo']['syntax'])
 
-            # !forgiveclear [<name>] - clear a players team kills
+            # !forgiveclear [<name>] - clear a player's team kills
             elif (sar['command'] == '!forgiveclear' or sar['command'] == '!fc') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['forgiveclear']['level']:
                 if line.split(sar['command'])[1]:
                     user = line.split(sar['command'])[1].strip()

@@ -85,14 +85,14 @@
 	- Short: `!shuffle`
 - **spec** - move yourself to spectator
 	- Usage: `!spec`
-- **warn** - warn user
+- **warn** - warn player
 	- Usage: `!warn <name|id> [<reason>]`
 	- Short: `!w <name|id> [<reason>]`
 	- Available short form reasons: _tk_, _obj_, _spec_, _ping_, _spam_, _camp_, _lang_,  _racism_, _name_, _skill_, _whiner_
 - **warninfo** - display how many warnings a player has
 	- Usage: `!warninfo <name|id>`
 	- Short: `!wi <name|id>`
-- **warnremove** - remove a user's last warning
+- **warnremove** - remove a player's last warning
 	- Usage: `!warnremove <name|id>`
 	- Short: `!wr <name|id>`
 - **warns** - list the warnings
@@ -136,7 +136,7 @@
 	- Usage: `!tempban <name|id> <duration> [<reason>]`
 	- Short: `!tb <name|id> <duration> [<reason>]`
 	- Max ban duration: 24 hours
-- **warnclear** - clear the user warnings
+- **warnclear** - clear the player warnings
 	- Usage: `!warnclear <name|id>`
 	- Short: `!wc <name|id>`
 
@@ -150,10 +150,10 @@
 	- Short: `!bi <name|id>`
 - **ci** - kick player with connection interrupt
 	- Usage: `!ci <name|id>`
-- **forgiveclear** - clear a players team kills
+- **forgiveclear** - clear a player's team kills
     - Usage: `!forgiveclear [<name|id>]`
 	- Short: `!fc [<name|id>]`
-- **forgiveinfo** - display a players team kills
+- **forgiveinfo** - display a player's team kills
     - Usage: `!forgiveinfo <name|id>`
 	- Short: `!fi <name|id>`
 - **id** - show the IP, guid and authname of a player
