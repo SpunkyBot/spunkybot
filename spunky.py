@@ -3384,6 +3384,9 @@ class Player(object):
     def get_warning(self):
         return len(self.warn_list)
 
+    def get_all_warn_msg(self):
+        return list(set(self.warn_list))
+
     def get_last_warn_msg(self):
         return self.warn_list[-1] if self.warn_list else ''
 
