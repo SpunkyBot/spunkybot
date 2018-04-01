@@ -3571,6 +3571,9 @@ class Game(object):
     def get_quake_value(self, value):
         """
         get Quake3 value
+
+        @param value: The Quake3 value
+        @type  value: String
         """
         if self.live:
             with self.rcon_lock:
@@ -3580,6 +3583,9 @@ class Game(object):
     def get_rcon_output(self, value):
         """
         get RCON output for value
+
+        @param value: The RCON output for value
+        @type  value: String
         """
         if self.live:
             with self.rcon_lock:
@@ -3588,6 +3594,9 @@ class Game(object):
     def get_cvar(self, value):
         """
         get CVAR value
+
+        @param value: The CVAR value
+        @type  value: String
         """
         if self.live:
             with self.rcon_lock:
