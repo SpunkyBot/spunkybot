@@ -1028,14 +1028,13 @@ class LogParser(object):
                         self.game.rcon_tell(victim_id, "^7Type ^3!fp ^7to forgive ^3%s" % killer_name)
                         if len(killer.get_tk_victim_names()) >= 5:
                             killer.ban(duration=900, reason='auto-kick for team killing', admin='bot')
-                            self.game.rcon_say("^3%s ^7banned for ^115 minutes ^7for team killing" % killer_name)
-                            self.game.kick_player(killer_id, reason='stop team killing')
-                        elif len(killer.get_tk_victim_names()) == 2:
-                            self.game.rcon_tell(killer_id, "^1WARNING ^7[^31^7]: ^7For team killing you will get kicked", False)
-                        elif len(killer.get_tk_victim_names()) == 3:
-                            self.game.rcon_tell(killer_id, "^1WARNING ^7[^32^7]: ^7For team killing you will get kicked", False)
-                        elif len(killer.get_tk_victim_names()) == 4:
-                            self.game.rcon_tell(killer_id, "^1WARNING ^7[^33^7]: ^7For team killing you will get kicked", False)
+                            self.game.rcon_say("^3%s ^7banned for ^115 minutes ^7for team killing over limit" % killer_name)
+                            self.game.kick_player(killer_id, reason='team killing over limit')
+                        elif len(killer.get_tk_victim_names()) > 1:
+                            killer.add_warning('stop team killing')
+                            self.game.rcon_tell(killer_id, "^1WARNING ^7[^3%d^7]: ^7For team killing you will get kicked" % killer.get_warning(), False)
+                            if killer.get_warning() == 3 and killer.get_admin_role() < 40:
+                                self.game.rcon_say("^1ALERT: ^2%s ^7auto-kick from warnings if not cleared" % killer_name)
 
             suicide_reason = ['UT_MOD_SUICIDE', 'MOD_FALLING', 'MOD_WATER', 'MOD_LAVA', 'MOD_TRIGGER_HURT',
                               'UT_MOD_SPLODED', 'UT_MOD_SLAPPED', 'UT_MOD_SMITED']
