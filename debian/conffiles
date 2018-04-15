@@ -1,0 +1,4 @@
+/opt/spunkybot/conf/settings.conf
+/opt/spunkybot/conf/rules.conf
+/etc/init.d/spunkybot
+/etc/systemd/system/spunkybot.service
