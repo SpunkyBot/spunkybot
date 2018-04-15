@@ -325,7 +325,8 @@ class LogParser(object):
         self.spam_knife_kills_msg = config.getboolean('bot', 'spam_knife_kills') if config.has_option('bot', 'spam_knife_kills') else False
         self.spam_nade_kills_msg = config.getboolean('bot', 'spam_nade_kills') if config.has_option('bot', 'spam_nade_kills') else False
         self.spam_headshot_hits_msg = config.getboolean('bot', 'spam_headshot_hits') if config.has_option('bot', 'spam_headshot_hits') else False
-        self.ban_duration = config.getint('bot', 'ban_duration') if config.has_option('bot', 'ban_duration') else 7
+        ban_duration = config.getint('bot', 'ban_duration') if config.has_option('bot', 'ban_duration') else 7
+        self.ban_duration = ban_duration if ban_duration > 0 else 1
         # support for low gravity server
         self.support_lowgravity = config.getboolean('lowgrav', 'support_lowgravity') if config.has_option('lowgrav', 'support_lowgravity') else False
         self.gravity = config.getint('lowgrav', 'gravity') if config.has_option('lowgrav', 'gravity') else 800
