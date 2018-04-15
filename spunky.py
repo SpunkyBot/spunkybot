@@ -517,7 +517,7 @@ class LogParser(object):
         send heartbeat packet
         """
         try:
-            urllib2.urlopen(self.ping_url)
+            urllib2.urlopen(self.ping_url, timeout=3)
         except urllib2.URLError:
             pass
 
@@ -2049,7 +2049,7 @@ class LogParser(object):
             elif sar['command'] == '!version' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['version']['level']:
                 self.game.rcon_tell(sar['player_num'], "^7Spunky Bot ^2v%s" % __version__)
                 try:
-                    get_latest = urllib2.urlopen('https://raw.githubusercontent.com/SpunkyBot/spunkybot/master/VERSION').read().strip()
+                    get_latest = urllib2.urlopen('https://raw.githubusercontent.com/SpunkyBot/spunkybot/master/VERSION', timeout=3).read().strip()
                 except urllib2.URLError:
                     get_latest = __version__
                 if __version__ < get_latest:
