@@ -957,6 +957,7 @@ class LogParser(object):
             del self.game.players[player_num]
             for player in self.game.players.itervalues():
                 player.clear_tk(player_num)
+                player.clear_grudged_player(player_num)
             logger.debug("ClientDisconnect: Player %d %s has left the game", player_num, player.get_name())
 
     def handle_hit(self, line):
