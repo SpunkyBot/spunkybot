@@ -152,6 +152,14 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'unban': {'desc': 'unban a player from the database', 'syntax': '^7Usage: ^2!unban ^7<@ID>', 'level': 80},
             'unreg': {'desc': 'remove a player from the regular group', 'syntax': '^7Usage: ^2!unreg ^7<name>', 'level': 80},
             # superadmin commands, level 90
+            'bomb': {'desc': 'change gametype to Bomb', 'syntax': '^7Usage: ^2!bomb', 'level': 90},
+            'ctf': {'desc': 'change gametype to Capture the Flag', 'syntax': '^7Usage: ^2!ctf', 'level': 90},
+            'ffa': {'desc': 'change gametype to Free For All', 'syntax': '^7Usage: ^2!ffa', 'level': 90},
+            'gungame': {'desc': 'change gametype to Gun Game', 'syntax': '^7Usage: ^2!gungame', 'level': 90},
+            'jump': {'desc': 'change gametype to Jump', 'syntax': '^7Usage: ^2!jump', 'level': 90},
+            'lms': {'desc': 'change gametype to Last Man Standing', 'syntax': '^7Usage: ^2!lms', 'level': 90},
+            'tdm': {'desc': 'change gametype to Team Deathmatch', 'syntax': '^7Usage: ^2!tdm', 'level': 90},
+            'ts': {'desc': 'change gametype to Team Survivor', 'syntax': '^7Usage: ^2!ts', 'level': 90},
             'ungroup': {'desc': 'remove admin level from a player', 'syntax': '^7Usage: ^2!ungroup ^7<name>', 'level': 90},
             'password': {'desc': 'set private server password', 'syntax': '^7Usage: ^2!password ^7[<password>]', 'level': 90},
             'reload': {'desc': 'reload map', 'syntax': '^7Usage: ^2!reload', 'level': 90}}
@@ -2583,6 +2591,43 @@ class LogParser(object):
                             self.game.rcon_tell(sar['player_num'], "^3Sorry, you cannot put %s in group User" % victim.get_name())
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['ungroup']['syntax'])
+
+            # switch to gametype
+            elif sar['command'] == '!ffa' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['ffa']['level']:
+                self.game.send_rcon('g_gametype 0')
+                self.game.rcon_tell(sar['player_num'], "^7Game Mode: ^2Free For All")
+                self.game.rcon_tell(sar['player_num'], "^7Mode changed for next map")
+            elif sar['command'] == '!lms' and self.urt_modversion > 42 and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['lms']['level']:
+                self.game.send_rcon('g_gametype 1')
+                self.game.rcon_tell(sar['player_num'], "^7Game Mode: ^2Last Man Standing")
+                self.game.rcon_tell(sar['player_num'], "^7Mode changed for next map")
+            elif sar['command'] == '!tdm' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['tdm']['level']:
+                self.game.send_rcon('g_gametype 3')
+                self.game.rcon_tell(sar['player_num'], "^7Game Mode: ^2Team Deathmatch")
+                self.game.rcon_tell(sar['player_num'], "^7Mode changed for next map")
+            elif sar['command'] == '!ts' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['ts']['level']:
+                self.game.send_rcon('g_gametype 4')
+                self.game.rcon_tell(sar['player_num'], "^7Game Mode: ^2Team Survivor")
+                self.game.rcon_tell(sar['player_num'], "^7Mode changed for next map")
+            # 5: Follow The Leader
+            # 6: Capture And Hold
+            elif sar['command'] == '!ctf' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['ctf']['level']:
+                self.game.send_rcon('g_gametype 7')
+                self.game.rcon_tell(sar['player_num'], "^7Game Mode: ^2Capture the Flag")
+                self.game.rcon_tell(sar['player_num'], "^7Mode changed for next map")
+            elif sar['command'] == '!bomb' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['bomb']['level']:
+                self.game.send_rcon('g_gametype 8')
+                self.game.rcon_tell(sar['player_num'], "^7Game Mode: ^2Bomb")
+                self.game.rcon_tell(sar['player_num'], "^7Mode changed for next map")
+            elif sar['command'] == '!jump' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['jump']['level']:
+                self.game.send_rcon('g_gametype 9')
+                self.game.rcon_tell(sar['player_num'], "^7Game Mode: ^2Jump")
+                self.game.rcon_tell(sar['player_num'], "^7Mode changed for next map")
+            # 10 Freeze Tag
+            elif sar['command'] == '!gungame' and self.urt_modversion > 42 and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['gungame']['level']:
+                self.game.send_rcon('g_gametype 11')
+                self.game.rcon_tell(sar['player_num'], "^7Game Mode: ^2Gun Game")
+                self.game.rcon_tell(sar['player_num'], "^7Mode changed for next map")
 
 ## iamgod
             # iamgod - register user as Head Admin

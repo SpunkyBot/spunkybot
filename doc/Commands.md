@@ -241,6 +241,22 @@
 
 ### Super Admin [90]
 
+- **bomb** - change gametype to Bomb
+	- Usage: `!bomb`
+- **ctf** - change gametype to Capture the Flag
+	- Usage: `!ctf`
+- **ffa** - change gametype to Free For All
+	- Usage: `!ffa`
+- **gungame** - change gametype to Gun Game
+	- Usage: `!gungame`
+- **jump** - change gametype to Jump
+	- Usage: `!jump`
+- **lms** - change gametype to Last Man Standing
+	- Usage: `!lms`
+- **tdm** - change gametype to Team Deathmatch
+	- Usage: `!tdm`
+- **ts** - change gametype to Team Survivor
+	- Usage: `!ts`
 - **password** - set private server password
 	- Usage: `!password [<password>]`
 	- Set an empty string to remove a password
