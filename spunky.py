@@ -3404,6 +3404,7 @@ class Player(object):
         if self.warn_list:
             last_warning = self.warn_list[-1]
             self.warn_list.pop()
+            self.last_warn_time = self.last_warn_time - 60 if self.warn_list else 0
             if "stop team killing" in last_warning:
                 self.tk_victim_names.pop()
             return last_warning
