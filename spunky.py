@@ -62,7 +62,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'forgiveall': {'desc': 'forgive all team kills', 'syntax': '^7Usage: ^2!forgiveall', 'level': 0, 'short': 'fa'},
             'forgivelist': {'desc': 'list all players who killed you', 'syntax': '^7Usage: ^2!forgivelist', 'level': 0, 'short': 'fl'},
             'forgiveprev': {'desc': 'forgive last team kill', 'syntax': '^7Usage: ^2!forgiveprev', 'level': 0, 'short': 'fp'},
-            'bombstats': {'desc': 'display Bomb mode stats', 'syntax': '^7Usage: ^2!bombstats', 'level': 0},
+            'bombstats': {'desc': 'display Bomb stats', 'syntax': '^7Usage: ^2!bombstats', 'level': 0},
             'ctfstats': {'desc': 'display Capture the Flag stats', 'syntax': '^7Usage: ^2!ctfstats', 'level': 0},
             'freezestats': {'desc': 'display freeze/thawout stats', 'syntax': '^7Usage: ^2!freezestats', 'level': 0},
             'hestats': {'desc': 'display HE grenade kill stats', 'syntax': '^7Usage: ^2!hestats', 'level': 0},
@@ -1369,7 +1369,7 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7planted: ^2%d ^7- defused: ^2%d" % (self.game.players[sar['player_num']].get_planted_bomb(), self.game.players[sar['player_num']].get_defused_bomb()))
                     self.game.rcon_tell(sar['player_num'], "^7bomb carrier killed: ^2%d ^7- enemies bombed: ^2%d" % (self.game.players[sar['player_num']].get_bomb_carrier_kills(), self.game.players[sar['player_num']].get_kills_with_bomb()))
                 else:
-                    self.game.rcon_tell(sar['player_num'], "^7You are not playing Bomb Mode")
+                    self.game.rcon_tell(sar['player_num'], "^7You are not playing Bomb")
 
             # ctfstats - display ctf statistics
             elif sar['command'] == '!ctfstats':
@@ -1379,7 +1379,7 @@ class LogParser(object):
                     else:
                         self.game.rcon_tell(sar['player_num'], "^7flags captured: ^2%d ^7- flags returned: ^2%d" % (self.game.players[sar['player_num']].get_flags_captured(), self.game.players[sar['player_num']].get_flags_returned()))
                 else:
-                    self.game.rcon_tell(sar['player_num'], "^7You are not playing Capture The Flag")
+                    self.game.rcon_tell(sar['player_num'], "^7You are not playing Capture the Flag")
 
             # freezestats - display freeze tag statistics
             elif sar['command'] == '!freezestats':
