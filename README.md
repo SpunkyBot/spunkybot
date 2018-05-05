@@ -124,6 +124,8 @@ You can help us in different ways:
 
 By contributing code to this project in any form, including sending a pull request via GitHub, a code fragment or patch via mail or public discussion groups, you agree to release your code under the terms of the MIT license that you can find in the [LICENSE](https://github.com/SpunkyBot/spunkybot/blob/master/LICENSE) file included in this source distribution.
 
+Please see the [CONTRIBUTING](https://github.com/SpunkyBot/spunkybot/blob/master/CONTRIBUTING.md) guide for information regarding the contribution process.
+
 
 ## License
 The code of Spunky Bot is released under the MIT License. See the [LICENSE](https://github.com/SpunkyBot/spunkybot/blob/master/LICENSE) file for the full license text.
