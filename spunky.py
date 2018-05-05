@@ -298,6 +298,7 @@ class LogParser(object):
         self.firstknifekill = False
         self.last_disconnected_player = None
         self.allow_nextmap_vote = True
+        self.default_gear = ''
 
         # enable/disable autokick for team killing
         self.tk_autokick = config.getboolean('bot', 'teamkill_autokick') if config.has_option('bot', 'teamkill_autokick') else True
@@ -466,6 +467,10 @@ class LogParser(object):
                         self.bomb_gametype = True
                     elif 'g_gametype\\10\\' in line:
                         self.freeze_gametype = True
+
+                    # get default g_gear value
+                    self.default_gear = line.split('g_gear\\')[-1].split('\\')[0] if 'g_gear\\' in line else "%s" % '' if self.urt_modversion > 41 else '0'
+
                 if self.log_file.tell() > end_pos:
                     break
                 elif not line:
