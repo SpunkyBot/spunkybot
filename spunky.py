@@ -1947,7 +1947,7 @@ class LogParser(object):
                         self.game.rcon_say("^1All team kills cleared for ^2%s" % victim.get_name())
                 else:
                     for player in self.game.players.itervalues():
-                        player.clear_all_tk(clear_grudge=True)
+                        player.clear_all_tk()
                         player.clear_all_killed_me()
                     self.game.rcon_say("^1All player team kills cleared")
 
