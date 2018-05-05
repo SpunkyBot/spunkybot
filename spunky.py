@@ -132,6 +132,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'bots': {'desc': 'enables or disables bot support', 'syntax': '^7Usage: ^2!bots ^7<on/off>', 'level': 80},
             'cyclemap': {'desc': 'cycle to the next map', 'syntax': '^7Usage: ^2!cyclemap', 'level': 80},
             'exec': {'desc': 'execute given config file', 'syntax': '^7Usage: ^2!exec ^7<filename>', 'level': 80},
+            'gear': {'desc': 'set allowed weapons', 'syntax': '^7Usage: ^2!gear ^7<default/all/knife/pistol/shotgun/sniper>', 'level': 80},
             'instagib': {'desc': 'set Instagib mode', 'syntax': '^7Usage: ^2!instagib ^7<on/off>', 'level': 80},
             'kickall': {'desc': 'kick all players matching pattern', 'syntax': '^7Usage: ^2!kickall ^7<pattern> [<reason>]', 'level': 80, 'short': 'kall'},
             'kill': {'desc': 'kill a player', 'syntax': '^7Usage: ^2!kill ^7<name>', 'level': 80},
@@ -2309,6 +2310,34 @@ class LogParser(object):
                     self.game.send_rcon('exec %s' % arg)
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['exec']['syntax'])
+
+            # !gear - set allowed weapons
+            elif sar['command'] == '!gear' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['gear']['level']:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip()
+                    # docs: http://www.urbanterror.info/support/180-server-cvars/#2
+                    if "all" in arg:
+                        self.game.send_rcon('g_gear 0')
+                        self.game.rcon_say("^7Gear: ^2All weapons enabled")
+                    elif "default" in arg:
+                        self.game.send_rcon('g_gear "%s"' % self.default_gear)
+                        self.game.rcon_say("^7Gear: ^2Server defaults enabled")
+                    elif "knife" in arg:
+                        self.game.send_rcon('g_gear "%s"' % 'FGHIJKLMNZacefghijklOQRSTUVWX' if self.urt_modversion > 41 else '63')
+                        self.game.rcon_say("^7Gear: ^2Knife only")
+                    elif "pistol" in arg:
+                        self.game.send_rcon('g_gear "%s"' % 'HIJKLMNZacehijkOQ' if self.urt_modversion > 41 else '55')
+                        self.game.rcon_say("^7Gear: ^2Pistols only")
+                    elif "shotgun" in arg:
+                        self.game.send_rcon('g_gear "%s"' % 'FGIJKLMNZacefghiklOQ' if self.urt_modversion > 41 else '59')
+                        self.game.rcon_say("^7Gear: ^2Shotguns only")
+                    elif "sniper" in arg:
+                        self.game.send_rcon('g_gear "%s"' % 'FGHIJKLMacefghjklOQ' if self.urt_modversion > 41 else '61')
+                        self.game.rcon_say("^7Gear: ^2Sniper rifles only")
+                    else:
+                        self.game.rcon_tell(sar['player_num'], COMMANDS['gear']['syntax'])
+                else:
+                    self.game.rcon_tell(sar['player_num'], COMMANDS['gear']['syntax'])
 
             # kill - kill a player
             elif sar['command'] == '!kill' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['kill']['level']:

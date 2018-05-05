@@ -191,6 +191,8 @@
 	- Usage: `!cyclemap`
 - **exec** - execute given config file
 	- Usage: `!exec <filename>`
+- **gear** - set allowed weapons
+	- Usage: `!gear <default/all/knife/pistol/shotgun/sniper>`
 - **instagib** - set Instagib mode
 	- Usage: `!instagib <on/off>`
 - **kickall** - kick all players matching pattern
