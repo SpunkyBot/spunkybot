@@ -3352,9 +3352,8 @@ class Player(object):
 
     def clear_killed_me(self, victim):
         while self.tk_victim_names.count(victim) > 0:
+            self.warn_list.remove("stop team killing")
             self.tk_victim_names.remove(victim)
-            if self.tk_victim_names.count(victim) >= 1:
-                self.warn_list.remove("stop team killing")
 
     def add_tk_victims(self, victim):
         self.tk_victim_names.append(victim)
