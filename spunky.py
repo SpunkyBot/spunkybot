@@ -1035,7 +1035,8 @@ class LogParser(object):
                         # list of players of TK victim
                         killer.add_tk_victims(victim_id)
                         # list of players who killed victim
-                        victim.add_killed_me(killer_id)
+                        if killer_id not in victim.get_grudged_player():
+                            victim.add_killed_me(killer_id)
                         self.game.rcon_tell(killer_id, "^7Do not attack teammates, you ^1killed ^7%s" % victim_name)
                         self.game.rcon_tell(victim_id, "^7Type ^3!fp ^7to forgive ^3%s" % killer_name)
                         if len(killer.get_tk_victim_names()) > 3:
