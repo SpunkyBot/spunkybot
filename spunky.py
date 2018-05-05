@@ -562,6 +562,7 @@ class LogParser(object):
                             kick_msg = reason = "score too low for this server"
                         elif 'team killing' in player.get_last_warn_msg():
                             kick_msg = reason = "team killing over limit"
+                            player.add_ban_point('auto-kick for team killing', 600)
                         else:
                             kick_msg = reason = "too many warnings"
                         self.game.rcon_say("^2%s ^7was kicked, %s" % (player_name, kick_msg))
