@@ -19,6 +19,8 @@
 - **forgiveprev** - forgive last team kill
 	- Usage: `!forgiveprev`
 	- Short: `!fp`
+- **grudge** - grudge a player for team killing (a grudged player will not be forgiven)
+	- Usage: `!grudge [<name|id>]`
 - **bombstats** - display Bomb mode stats
 	- Usage: `!bombstats`
 - **ctfstats** - display Capture the Flag stats

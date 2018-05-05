@@ -62,6 +62,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'forgiveall': {'desc': 'forgive all team kills', 'syntax': '^7Usage: ^2!forgiveall', 'level': 0, 'short': 'fa'},
             'forgivelist': {'desc': 'list all players who killed you', 'syntax': '^7Usage: ^2!forgivelist', 'level': 0, 'short': 'fl'},
             'forgiveprev': {'desc': 'forgive last team kill', 'syntax': '^7Usage: ^2!forgiveprev', 'level': 0, 'short': 'fp'},
+            'grudge': {'desc': 'grudge a player for team killing, a grudged player will not be forgiven', 'syntax': '^7Usage: ^2!grudge ^7[<name>]', 'level': 0},
             'bombstats': {'desc': 'display Bomb stats', 'syntax': '^7Usage: ^2!bombstats', 'level': 0},
             'ctfstats': {'desc': 'display Capture the Flag stats', 'syntax': '^7Usage: ^2!ctfstats', 'level': 0},
             'freezestats': {'desc': 'display freeze/thawout stats', 'syntax': '^7Usage: ^2!freezestats', 'level': 0},
@@ -1506,6 +1507,27 @@ class LogParser(object):
                     self.game.rcon_say("^7%s has forgiven: ^3%s" % (victim.get_name(), ", ".join(msg)))
                 else:
                     self.game.rcon_tell(sar['player_num'], "^3No one to forgive")
+
+            # grudge - grudge a player for team killing (a grudged player will not be forgiven) - !grudge [<name>]
+            elif sar['command'] == '!grudge':
+                victim = self.game.players[sar['player_num']]
+                if victim.get_killed_me():
+                    if line.split(sar['command'])[1]:
+                        user = line.split(sar['command'])[1].strip()
+                        found, grudge_player, _ = self.player_found(user)
+                        if not found:
+                            self.game.rcon_tell(sar['player_num'], "^7Whom to grudge? %s" % ", ".join(["^3%s [^2%s^3]" % (self.game.players[playernum].get_name(), playernum) for playernum in list(set(victim.get_killed_me()))]))
+                        else:
+                            victim.set_grudge(grudge_player.get_player_num())
+                            self.game.rcon_say("^7%s has grudge against ^1%s" % (victim.get_name(), grudge_player.get_name()))
+                    else:
+                        grudge_player = self.game.players[victim.get_killed_me()[-1]]
+                        victim.set_grudge(grudge_player.get_player_num())
+                        self.game.rcon_say("^7%s has grudge against ^1%s" % (victim.get_name(), grudge_player.get_name()))
+                elif victim.get_grudged_player():
+                    self.game.rcon_tell(sar['player_num'], "^7No one to grudge. You already have a grudge against: %s" % ", ".join(["^3%s" % self.game.players[playernum].get_name() for playernum in victim.get_grudged_player()]))
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^3No one to grudge")
 
 ## mod level 20
             # admintest - display current admin status
@@ -3396,6 +3418,17 @@ class Player(object):
 
     def get_tk_victim_names(self):
         return self.tk_victim_names
+
+    def set_grudge(self, killer):
+        self.grudged_player.append(killer)
+        self.clear_tk(killer)
+
+    def get_grudged_player(self):
+        return self.grudged_player
+
+    def clear_grudged_player(self, killer):
+        while self.grudged_player.count(killer) > 0:
+            self.grudged_player.remove(killer)
 
     def clear_tk(self, killer):
         while self.tk_killer_names.count(killer) > 0:
