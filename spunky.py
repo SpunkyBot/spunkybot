@@ -1663,6 +1663,9 @@ class LogParser(object):
                     if not found:
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
+                        # clear if already expired
+                        if victim.get_last_warn_time() + self.warn_expiration < time.time():
+                            victim.clear_warning()
                         warn_count = victim.get_warning()
                         warn_time = int(math.ceil(float(victim.get_last_warn_time() + self.warn_expiration - time.time())/60))
                         self.game.rcon_tell(sar['player_num'], "^3%s ^7has ^2%s ^7active warning%s%s" % (victim.get_name(), warn_count if warn_count > 0 else 'no', 's' if warn_count > 1 else '', ", expires in ^1%s ^7minute%s: ^3%s" % (warn_time, "s" if warn_time > 1 else "", ", ^3".join(victim.get_all_warn_msg())) if warn_count > 0 else ''))
@@ -1686,6 +1689,9 @@ class LogParser(object):
                             elif victim.get_last_warn_time() + warn_delay > time.time():
                                 self.game.rcon_tell(sar['player_num'], "^3Only one warning per %d seconds can be issued" % warn_delay)
                             else:
+                                # clear if already expired
+                                if victim.get_last_warn_time() + self.warn_expiration < time.time():
+                                    victim.clear_warning()
                                 show_alert = False
                                 ban_duration = 0
                                 if victim.get_warning() > 2:
