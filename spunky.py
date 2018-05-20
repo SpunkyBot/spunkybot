@@ -321,6 +321,7 @@ class LogParser(object):
         self.num_kick_specs = config.getint('bot', 'kick_spec_full_server') if config.has_option('bot', 'kick_spec_full_server') else 10
         # set task frequency
         self.task_frequency = config.getint('bot', 'task_frequency') if config.has_option('bot', 'task_frequency') else 60
+        self.warn_expiration = config.getint('bot', 'warn_expiration') if config.has_option('bot', 'warn_expiration') else 240
         self.bad_words_autokick = config.getint('bot', 'bad_words_autokick') if config.has_option('bot', 'bad_words_autokick') else 0
         # enable/disable message 'Player connected from...'
         self.show_country_on_connect = config.getboolean('bot', 'show_country_on_connect') if config.has_option('bot', 'show_country_on_connect') else True
@@ -566,6 +567,11 @@ class LogParser(object):
                         continue
                     player_name = player.get_name()
                     player_admin_role = player.get_admin_role()
+
+                    # clear expired warnings
+                    if self.warn_expiration > 0 and player.get_warning() > 0 and player.get_last_warn_time():
+                        if player.get_last_warn_time() + self.warn_expiration < time.time():
+                            player.clear_warning()
 
                     # kick player with 3 or more warnings, Admins will never get kicked
                     if player.get_warning() > 2 and player_admin_role < 40:
