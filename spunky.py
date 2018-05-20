@@ -1664,7 +1664,8 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
                         warn_count = victim.get_warning()
-                        self.game.rcon_tell(sar['player_num'], "^3%s ^7has ^2%s ^7active warning%s%s" % (victim.get_name(), warn_count if warn_count > 0 else 'no', 's' if warn_count > 1 else '', ": ^3%s" % ", ".join(victim.get_all_warn_msg()) if warn_count > 0 else ''))
+                        warn_time = int(math.ceil(float(victim.get_last_warn_time() + self.warn_expiration - time.time())/60))
+                        self.game.rcon_tell(sar['player_num'], "^3%s ^7has ^2%s ^7active warning%s%s" % (victim.get_name(), warn_count if warn_count > 0 else 'no', 's' if warn_count > 1 else '', ", expires in ^1%s ^7minute%s: ^3%s" % (warn_time, "s" if warn_time > 1 else "", ", ^3".join(victim.get_all_warn_msg())) if warn_count > 0 else ''))
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['warninfo']['syntax'])
 
