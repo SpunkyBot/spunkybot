@@ -1,0 +1,19 @@
+#!/bin/sh
+set -e
+
+# byte-compile Python libraries
+python -m compileall /opt/spunkybot/
+
+# install init script
+pidof systemd >/dev/null 2>&1 && systemctl enable spunkybot.service
+update-rc.d -f spunkybot defaults 80 10
+
+# add user/group
+id -u q3ut4 >/dev/null 2>&1 || useradd -M -s /bin/false q3ut4
+
+# change owner
+chown -R q3ut4:q3ut4 /opt/spunkybot
+
+#DEBHELPER#
+
+exit 0
