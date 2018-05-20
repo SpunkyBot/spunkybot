@@ -321,6 +321,7 @@ class LogParser(object):
         self.num_kick_specs = config.getint('bot', 'kick_spec_full_server') if config.has_option('bot', 'kick_spec_full_server') else 10
         # set task frequency
         self.task_frequency = config.getint('bot', 'task_frequency') if config.has_option('bot', 'task_frequency') else 60
+        self.bad_words_autokick = config.getint('bot', 'bad_words_autokick') if config.has_option('bot', 'bad_words_autokick') else 0
         # enable/disable message 'Player connected from...'
         self.show_country_on_connect = config.getboolean('bot', 'show_country_on_connect') if config.has_option('bot', 'show_country_on_connect') else True
         # enable/disable message 'Firstblood / first nade kill...'
@@ -1271,6 +1272,11 @@ class LogParser(object):
         handle say commands
         """
         poke_options = ['Go', 'Wake up', '*poke*', 'Attention', 'Get up', 'Move out']
+
+        bad_words = ['fuck', 'ass', 'bastard', 'retard', 'slut', 'bitch', 'whore', 'cunt', 'pussy', 'dick', 'sucker',
+                     'fick', 'arsch', 'nutte', 'schlampe', 'hure', 'fotze', 'penis', 'wichser', 'nazi', 'hitler',
+                     'putain', 'merde', 'chienne',
+                     'kurwa', 'suka', 'dupa', 'dupek', 'puta']
 
         with self.players_lock:
             line = line.strip()
@@ -2643,6 +2649,12 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7Insufficient privileges to use command ^3%s" % sar['command'])
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Unknown command ^3%s" % sar['command'])
+
+## bad words
+            elif self.bad_words_autokick and [sample for sample in bad_words if sample in line.lower()] and self.game.players[sar['player_num']].get_admin_role() < 40:
+                victim = self.game.players[sar['player_num']]
+                victim.add_warning('bad language')
+                self.kick_high_warns(victim, 'bad language', 'Behave, stop using bad language')
 
     def kick_high_warns(self, player, reason, text):
         if player.get_warning() > 3:
