@@ -594,7 +594,7 @@ class LogParser(object):
                         elif counter > self.num_kick_specs and player.get_team() == 3 and player.get_time_joined() < (time.time() - 30):
                             player.add_warning(warning='spectator too long on full server', timer=False)
                             logger.debug("%s is spectator too long on full server", player_name)
-                            warnmsg = "^1WARNING ^7[^3%d^7]: ^7You are spectator too long on full server" % player.get_warning()
+                            warnmsg = "^1WARNING ^7[^3%d^7]: You are spectator too long on full server" % player.get_warning()
                             self.game.rcon_tell(player_num, warnmsg, False)
                         # reset spec warning
                         else:
@@ -610,7 +610,7 @@ class LogParser(object):
                         if kills > 0 and ratio < 0.33:
                             player.add_warning(warning='score too low for this server', timer=False)
                             logger.debug("Score of %s is too low, ratio: %s", player_name, ratio)
-                            warnmsg = "^1WARNING ^7[^3%d^7]: ^7Your score is too low for this server" % player.get_warning()
+                            warnmsg = "^1WARNING ^7[^3%d^7]: Your score is too low for this server" % player.get_warning()
                             self.game.rcon_tell(player_num, warnmsg, False)
                         else:
                             player.clear_specific_warning('score too low for this server')
@@ -642,7 +642,7 @@ class LogParser(object):
                 else:
                     if self.max_ping < ping_value < 999 and gameplayer.get_admin_role() < 40:
                         gameplayer.add_high_ping(ping_value)
-                        self.game.rcon_tell(player.num, "^1WARNING ^7[^3%d^7]: ^7Your ping is too high [^4%d^7]. ^3The maximum allowed ping is %d." % (gameplayer.get_warning(), ping_value, self.max_ping), False)
+                        self.game.rcon_tell(player.num, "^1WARNING ^7[^3%d^7]: Your ping is too high [^4%d^7]. ^3The maximum allowed ping is %d." % (gameplayer.get_warning(), ping_value, self.max_ping), False)
                     else:
                         gameplayer.clear_specific_warning('fix your ping')
 
