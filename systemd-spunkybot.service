@@ -7,7 +7,7 @@
 
 [Unit]
 Description=Spunky Bot
-After=multi-user.target
+After=network.target
 
 [Service]
 User=q3ut4
