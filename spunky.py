@@ -1075,11 +1075,7 @@ class LogParser(object):
                     warn_time = 3
                     if victim.get_respawn_time() + warn_time > time.time():
                         killer.add_warning("stop spawn killing")
-                        if killer.get_warning() > 3:
-                            self.game.rcon_say("^7Player ^2%s ^7kicked for spawn killing" % killer_name)
-                            self.game.kick_player(killer_id, reason='stop spawn killing')
-                        else:
-                            self.game.rcon_tell(killer_id, "^1WARNING ^7[^3%d^7]: Spawn Camping and Spawn Killing are not allowed" % killer.get_warning())
+                        self.kick_high_warns(killer, 'stop spawn killing', 'Spawn Camping and Spawn Killing are not allowed')
 
                 # multi kill message
                 if self.show_multikill_msg:
@@ -2647,6 +2643,15 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7Insufficient privileges to use command ^3%s" % sar['command'])
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7Unknown command ^3%s" % sar['command'])
+
+    def kick_high_warns(self, player, reason, text):
+        if player.get_warning() > 3:
+            self.game.rcon_say("^2%s ^7was kicked, %s" % (player.get_name(), reason))
+            self.game.kick_player(player.get_player_num(), reason=reason)
+        else:
+            self.game.rcon_tell(player.get_player_num(), "^1WARNING ^7[^3%d^7]: %s" % (player.get_warning(), text))
+            if player.get_warning() == 3:
+                self.game.rcon_say("^1ALERT: ^2%s ^7auto-kick from warnings if not cleared" % player.get_name())
 
     def get_admins_online(self):
         """
