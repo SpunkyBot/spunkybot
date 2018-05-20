@@ -351,7 +351,7 @@ class LogParser(object):
         server_port = config.get('server', 'server_port') if config.has_option('server', 'server_port') else "27960"
         # Heartbeat packet
         data = {'v': __version__, 'p': server_port, 'o': platform.platform()}
-        self.heartbeat = config.getboolean('bot', 'heartbeat') if config.has_option('bot', 'heartbeat') else True
+        self.heartbeat = config.getboolean('bot', 'heartbeat') if config.has_option('bot', 'heartbeat') else False
         # Master Server
         self.ping_url = 'http://master.spunkybot.de/ping.php?%s' % urllib.urlencode(data)
         self.uptime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
