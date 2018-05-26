@@ -94,7 +94,7 @@ Spunky Bot is currently maintained under the [Semantic Versioning](http://semver
 ## Additional Information
 For additional information, visit the Spunky Bot website at [https://www.spunkybot.de](https://www.spunkybot.de).
 
-If you have any questions about Spunky Bot or need help, please use the [mailing list](https://groups.google.com/group/spunkybot) or post the question on our [forum](http://forum.spunkybot.de). If you need help right now, you can also find us on [Twitter](https://twitter.com/spunkybot).
+If you have any questions about Spunky Bot or need help, please use the [mailing list](https://groups.google.com/group/spunkybot). If you need help right now, you can also find us on [Twitter](https://twitter.com/spunkybot).
 
 * Joining the mailing list:
 	* Send an email to <mailto:spunkybot+subscribe@googlegroups.com>
