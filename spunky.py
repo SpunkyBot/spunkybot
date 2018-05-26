@@ -1941,7 +1941,9 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
                         victim.clear_warning()
-                        self.game.rcon_say("^1All warnings cleared for ^2%s" % victim.get_name())
+                        for player in self.game.players.itervalues():
+                            player.clear_tk(victim.get_player_num())
+                        self.game.rcon_say("^1All warnings and team kills cleared for ^2%s" % victim.get_name())
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['warnclear']['syntax'])
 
@@ -2263,11 +2265,13 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
                         victim.clear_warning()
-                        self.game.rcon_say("^1All warnings cleared for ^2%s" % victim.get_name())
+                        for player in self.game.players.itervalues():
+                            player.clear_tk(victim.get_player_num())
+                        self.game.rcon_say("^1All warnings and team kills cleared for ^2%s" % victim.get_name())
                 else:
                     for player in self.game.players.itervalues():
                         player.clear_warning()
-                    self.game.rcon_say("^1All player warnings cleared")
+                    self.game.rcon_say("^1All player warnings and team kills cleared")
 
             # map - load given map
             elif sar['command'] == '!map' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['map']['level']:
