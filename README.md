@@ -45,7 +45,7 @@ If you want to know more, this is a list of selected starting points:
 It's easy to get started with Spunky Bot:
 
 - Download the [latest release](https://spunkybot.de/download)
-- Read our [quickstart guide](https://spunkybot.de/#get-started) to get up and running
+- Read our [quickstart guide](https://spunkybot.de/docs/start) to get up and running
 
 ### Configuration
 - Modify the Urban Terror server config file as follows:
