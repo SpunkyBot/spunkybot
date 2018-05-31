@@ -1,0 +1,20 @@
+Package: spunkybot
+Version: 1.10.0
+Section: utils
+Priority: optional
+Architecture: all
+Depends: python (>= 2.6.6-3~), python-minimal
+Maintainer: Alexander Kress <feedback@spunkybot.de>
+Homepage: https://www.spunkybot.de/
+Description: Multi-platform administration and RCON tool for Urban Terror
+ Spunky Bot is the most advanced RCON tool for managing your game server.
+ .
+ It is a cross-platform package and offers in-game commands without
+ authentication and automated administration.
+ .
+ Spunky Bot includes the following features:
+   * Real time game statistics
+   * Different user groups and levels
+   * Supports all RCON commands
+   * Supports temporary and permanent bans of players
+   * Supports rotation messages

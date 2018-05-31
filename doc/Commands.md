@@ -7,12 +7,20 @@
 - **help** - display all available commands
 	- Usage: `!help`
 	- Short: `!h`
+- **forgive** - forgive a player for team killing
+	- Usage: `!forgive [<name|id>]`
+	- Short: `!f [<name|id>]`
 - **forgiveall** - forgive all team kills
 	- Usage: `!forgiveall`
 	- Short: `!fa`
+- **forgivelist** - list all players who killed you
+	- Usage: `!forgivelist`
+	- Short: `!fl`
 - **forgiveprev** - forgive last team kill
 	- Usage: `!forgiveprev`
 	- Short: `!fp`
+- **grudge** - grudge a player for team killing (a grudged player will not be forgiven)
+	- Usage: `!grudge [<name|id>]`
 - **bombstats** - display Bomb mode stats
 	- Usage: `!bombstats`
 - **ctfstats** - display Capture the Flag stats
@@ -79,19 +87,19 @@
 	- Short: `!shuffle`
 - **spec** - move yourself to spectator
 	- Usage: `!spec`
-- **warn** - warn user
+- **warn** - warn player
 	- Usage: `!warn <name|id> [<reason>]`
 	- Short: `!w <name|id> [<reason>]`
 	- Available short form reasons: _tk_, _obj_, _spec_, _ping_, _spam_, _camp_, _lang_,  _racism_, _name_, _skill_, _whiner_
 - **warninfo** - display how many warnings a player has
 	- Usage: `!warninfo <name|id>`
 	- Short: `!wi <name|id>`
-- **warnremove** - remove a users last warning
+- **warnremove** - remove a player's last warning
 	- Usage: `!warnremove <name|id>`
 	- Short: `!wr <name|id>`
 - **warns** - list the warnings
 	- Usage: `!warns`
-- **warntest** -  test a warning
+- **warntest** - test a warning
 	- Usage: `!warntest <warning>`
 
 
@@ -110,29 +118,33 @@
 	- Usage: `!exit`
 - **find** - display the slot number of a player
 	- Usage: `!find <name|id>`
-- **force** - force a player to the given team
-	- Usage: `!force <name|id> <blue/red/spec> [<lock>]`
+- **force** - force a player to the given team or release the player from a forced team (free)
+	- Usage: `!force <name|id> <blue/red/spec/free> [<lock>]`
+	- Adding `lock` will lock the player where it is forced to.
 - **kick** - kick a player
 	- Usage: `!kick <name|id> <reason>`
 	- Short: `!k <name|id> <reason>`
 - **nuke** - nuke a player
 	- Usage: `!nuke <name|id>`
+- **regulars** - display the regular players online
+	- Usage: `!regulars`
+	- Short: `!regs`
 - **say** - say a message to all players (allow spectator to say a message to players in-game)
 	- Usage: `!say <text>`
 	- Short: `!!<text>`
 - **tell** - tell a message to a specific player
-	-  Usage: `!tell <name|id> <text>`
-- **tempban** - ban a player temporary for the given period (1 min to 24 hrs)
-	-  Usage: `!tempban <name|id> <duration> [<reason>]`
-	-  Short: `!tb <name|id> <duration> [<reason>]`
-	-  Max ban duration: 24 hours
-- **warnclear** - clear the user warnings
+	- Usage: `!tell <name|id> <text>`
+- **tempban** - ban a player temporary for the given period (1 min to 3 days)
+	- Usage: `!tempban <name|id> <duration> [<reason>]`
+	- Short: `!tb <name|id> <duration> [<reason>]`
+	- Max ban duration: 24 hours
+- **warnclear** - clear the player warnings
 	- Usage: `!warnclear <name|id>`
 	- Short: `!wc <name|id>`
 
 ### Full Admin [60]
 
-- **ban** - ban a player for 7 days
+- **ban** - ban a player for several days
 	- Usage: `!ban <name|id> <reason>`
 	- Short: `!b <name|id> <reason>`
 - **baninfo** - display active bans of a player
@@ -140,6 +152,12 @@
 	- Short: `!bi <name|id>`
 - **ci** - kick player with connection interrupt
 	- Usage: `!ci <name|id>`
+- **forgiveclear** - clear a player's team kills
+    - Usage: `!forgiveclear [<name|id>]`
+	- Short: `!fc [<name|id>]`
+- **forgiveinfo** - display a player's team kills
+    - Usage: `!forgiveinfo <name|id>`
+	- Short: `!fi <name|id>`
 - **id** - show the IP, guid and authname of a player
 	- Usage: `!id <name|id>`
 - **kickbots** kick all bots
@@ -155,8 +173,8 @@
 	- Max amount: 15
 - **status** - report the status of the bot
 	- Usage: `!status`
-- **swap** - swap teams for player A and B (if in different teams)
-	- Usage: `!swap <playerA> <playerB>`
+- **swap** - swap teams for player A and B (if in different teams). If player B is not specified, the admin using the command is swapped with player A
+	- Usage: `!swap <playerA> [<playerB>]`
 - **version** - display the version of the bot
 	- Usage: `!version`
 - **veto** - stop voting process
@@ -175,6 +193,8 @@
 	- Usage: `!cyclemap`
 - **exec** - execute given config file
 	- Usage: `!exec <filename>`
+- **gear** - set allowed weapons
+	- Usage: `!gear <default/all/knife/pistol/shotgun/sniper>`
 - **instagib** - set Instagib mode
 	- Usage: `!instagib <on/off>`
 - **kickall** - kick all players matching pattern
@@ -193,7 +213,7 @@
 	- Short: `!l <name|id>`
 - **makereg** - make a player a regular (Level 2) user
 	- Usage: `!makereg <name|id>`
-	- Short: `!mr <name>`
+	- Short: `!mr <name|id>`
 - **map** - load given map
 	- Usage: `!map <ut4_name>`
 - **maps** - display all available maps
@@ -215,10 +235,28 @@
 	- Usage: `!swapteams`
 - **unban** - unban a player from the database
 	- Usage: `!unban <ID>`
+- **unreg** - remove a player from the regular group
+	- Usage: `!unreg <name|id>`
 
 
 ### Super Admin [90]
 
+- **bomb** - change gametype to Bomb
+	- Usage: `!bomb`
+- **ctf** - change gametype to Capture the Flag
+	- Usage: `!ctf`
+- **ffa** - change gametype to Free For All
+	- Usage: `!ffa`
+- **gungame** - change gametype to Gun Game
+	- Usage: `!gungame`
+- **jump** - change gametype to Jump
+	- Usage: `!jump`
+- **lms** - change gametype to Last Man Standing
+	- Usage: `!lms`
+- **tdm** - change gametype to Team Deathmatch
+	- Usage: `!tdm`
+- **ts** - change gametype to Team Survivor
+	- Usage: `!ts`
 - **password** - set private server password
 	- Usage: `!password [<password>]`
 	- Set an empty string to remove a password

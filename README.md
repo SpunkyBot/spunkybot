@@ -9,11 +9,11 @@ The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was 
 
 [![Build Status](https://travis-ci.org/SpunkyBot/spunkybot.png?branch=master)](https://travis-ci.org/SpunkyBot/spunkybot)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/SpunkyBot/spunkybot/blob/master/LICENSE)
-![Version](https://img.shields.io/badge/version-1.9.0-orange.svg)
+[![Version](https://img.shields.io/badge/version-1.10.0-orange.svg)](https://github.com/SpunkyBot/spunkybot/releases)
 [![PyPI version](https://img.shields.io/pypi/v/spunkybot.svg)](https://pypi.python.org/pypi/spunkybot)
 [![Python version](https://img.shields.io/badge/python-2.6,%202.7-yellow.svg)](https://pypi.python.org/pypi/spunkybot)
 [![Code Health](https://landscape.io/github/SpunkyBot/spunkybot/master/landscape.svg)](https://landscape.io/github/SpunkyBot/spunkybot/master)
-[![Codacy Grade](https://api.codacy.com/project/badge/Grade/07b16a60bcce41ac89dc19dd3316c127)](https://www.codacy.com/app/alexanderkress/spunkybot)
+[![Codacy Grade](https://api.codacy.com/project/badge/Grade/07b16a60bcce41ac89dc19dd3316c127)](https://www.codacy.com/app/SpunkyBot/spunkybot)
 
 If you want to know more, this is a list of selected starting points:
 
@@ -34,18 +34,18 @@ If you want to know more, this is a list of selected starting points:
 
 
 ## Environment
-- Urban Terror 4.1.1 / 4.2.023 / 4.3.2
+- Urban Terror 4.1.1 / 4.2.023 / 4.3.3
 - Python 2.6 / 2.7
 - SQLite 3 database
-- Cross-platform (tested on Debian 6 / 7 / 8 / 9, Ubuntu 12 / 14 / 16, CentOS 6 / 7, Mac OS X 10.12, Windows 7 / 10)
+- Cross-platform (tested on Debian 6 / 7 / 8 / 9, Ubuntu 12 / 14 / 16 / 18, CentOS 6 / 7, macOS 10.13, Windows 7 / 10)
 - Supporting 32-bit and 64-bit operating systems
 
 
 ## Quickstart
 It's easy to get started with Spunky Bot:
 
-- Download the [latest release](https://spunkybot.de/#download)
-- Read our [quickstart guide](https://spunkybot.de/#get-started) to get up and running
+- Download the [latest release](https://spunkybot.de/download)
+- Read our [quickstart guide](https://spunkybot.de/docs/start) to get up and running
 
 ### Configuration
 - Modify the Urban Terror server config file as follows:
@@ -61,6 +61,10 @@ It's easy to get started with Spunky Bot:
 **_First start instruction:_**
 
 - Connect to your game server and type `!iamgod` in the global chat to get the admin level "Head Admin". This command is only once available.
+
+### Heartbeat
+Spunky Bot has an option to send a heartbeat signal to our masterserver. There is no client data sent to the masterserver at all! Data in the heartbeat packet contain: Spunky Bot version, the port of the game server and the operating system version.
+The information is used for generating global statistics and to determine operating system popularity.
 
 
 ## Documentation
@@ -90,7 +94,7 @@ Spunky Bot is currently maintained under the [Semantic Versioning](http://semver
 ## Additional Information
 For additional information, visit the Spunky Bot website at [https://www.spunkybot.de](https://www.spunkybot.de).
 
-If you have any questions about Spunky Bot or need help, please use the [mailing list](https://groups.google.com/group/spunkybot) or post the question on our [forum](http://forum.spunkybot.de). If you need help right now, you can also find us on [Twitter](https://twitter.com/spunkybot).
+If you have any questions about Spunky Bot or need help, please use the [mailing list](https://groups.google.com/group/spunkybot). If you need help right now, you can also find us on [Twitter](https://twitter.com/spunkybot).
 
 * Joining the mailing list:
 	* Send an email to <mailto:spunkybot+subscribe@googlegroups.com>
@@ -120,6 +124,8 @@ You can help us in different ways:
 
 By contributing code to this project in any form, including sending a pull request via GitHub, a code fragment or patch via mail or public discussion groups, you agree to release your code under the terms of the MIT license that you can find in the [LICENSE](https://github.com/SpunkyBot/spunkybot/blob/master/LICENSE) file included in this source distribution.
 
+Please see the [CONTRIBUTING](https://github.com/SpunkyBot/spunkybot/blob/master/CONTRIBUTING.md) guide for information regarding the contribution process.
+
 
 ## License
 The code of Spunky Bot is released under the MIT License. See the [LICENSE](https://github.com/SpunkyBot/spunkybot/blob/master/LICENSE) file for the full license text.
@@ -130,10 +136,12 @@ The code of Spunky Bot is released under the MIT License. See the [LICENSE](http
 	- The library has been modified to fix some error handling issues and fulfill the PEP8 conformance. This file is released under the GNU General Public License.
  - GeoIP: [pygeoip.py](https://github.com/urthub/pygeoip)
 	- The library has been extended with the list `GeoIP_country_name` to support full country names (e.g. Germany for country_code DE). This file is released under the MIT License.
+ - GeoLite database: [www.maxmind.com](http://www.maxmind.com)
+	- The GeoLite databases created by MaxMind are distributed under the Creative Commons Attribution-ShareAlike 4.0 International License.
  - Schedule: [schedule.py](https://github.com/dbader/schedule)
-	- This file is released under the MIT License. 
+	- This file is released under the MIT License.
 
-Urban Terror® and FrozenSand™ are trademarks of Frozensand Games Limited.
+Urban Terror® and FrozenSand™ are trademarks, or registered trademarks of Frozensand Games Limited.
 
 
 ## Thank you!

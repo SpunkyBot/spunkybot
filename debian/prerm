@@ -1,0 +1,19 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+    remove)
+        if [ -x /etc/init.d/spunkybot ]; then
+            invoke-rc.d spunkybot stop || exit $?
+        fi
+        rm -f /opt/spunkybot/*.py[co]
+        rm -f /opt/spunkybot/devel.log
+        rm -f /opt/spunkybot/lib/*.py[co]
+        pidof systemd >/dev/null 2>&1 && systemctl disable spunkybot.service
+        update-rc.d -f spunkybot remove
+    ;;
+esac
+
+#DEBHELPER#
+
+exit 0

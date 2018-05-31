@@ -10,10 +10,15 @@
 # Description:       Start/Stop/Restart the Spunky Bot service daemon
 ### END INIT INFO
 
+set -e
+
+# Get LSB functions
+. /lib/lsb/init-functions
+
 # Installation:
 # Move this file to /etc/init.d/spunkybot
 # Make it executable: sudo chmod +x /etc/init.d/spunkybot
-# Start at boot: sudo update-rc.d spunkybot defaults
+# Start at boot: sudo update-rc.d spunkybot defaults 80 10
 # Manual start: sudo /etc/init.d/spunkybot start
 
 # Change the next 3 lines to suit where you installed Spunky Bot, and which user is running the Urban Terror server
@@ -29,15 +34,11 @@ DAEMON=$DIR/spunky.py
 RUNDIR=/var/run/$NAME
 PIDFILE=$RUNDIR/$NAME.pid
 
-# Get LSB functions
-. /lib/lsb/init-functions
-
 # See if the daemon is present
-if [ -e "$DAEMON" ]
-    then
-        chmod +x "$DAEMON"
-        chown -R "$USER:$GROUP" "$DIR"
-    fi
+if [ -e "$DAEMON" ]; then
+    chmod +x "$DAEMON"
+    chown -R "$USER:$GROUP" "$DIR"
+fi
 
 # Make sure /var/run/spunkybot exists
 test -d "$RUNDIR" || {
@@ -47,8 +48,7 @@ test -d "$RUNDIR" || {
 
 case "$1" in
     start)
-        if [ -e "$PIDFILE" ]
-        then
+        if [ -e "$PIDFILE" ]; then
             echo "$0:"
             echo "  Another instance of \`${DAEMON##*/}' seems to be running."
             echo "  If this is not the case, please remove \"$PIDFILE\"."
@@ -80,7 +80,7 @@ case "$1" in
         ;;
 
     *)
-        echo "Usage: $0 {start|stop|restart}" >&2
+        echo "Usage: $0 {start|stop|restart}"
         exit 1
         ;;
 esac
