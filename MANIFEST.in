@@ -1,7 +1,7 @@
 include README.md LICENSE
 include lib/GeoIP.dat
+include doc/Commands.md
 recursive-include conf *.conf
-recursive-include doc *.md
 include debian-startscript
 include systemd-spunkybot.service
 exclude MANIFEST.in
