@@ -106,7 +106,7 @@ All notable changes to this project will be documented in this file. This projec
 * Various minor bug fixes
 
 
-## [1.8.0] - 2017-10-23
+## [1.8.0] - 2016-10-23
 ### Added
 * Added support of bot commands in rotating messages: `@admins`, `@nextmap` and `@time`
 * Added command `!rain <on/off>` to enable/disable raindrops in maps
@@ -129,7 +129,47 @@ All notable changes to this project will be documented in this file. This projec
 * Various minor bug fixes
 
 
+## [1.7.0] - 2016-10-02
+### Added
+* Added full support for Urban Terror release 4.3
+* Added command `!locate` to display geolocation info of a player
+* Added first knife kill message
+* Added more warning reasons
+
+### Changed
+* Improved some feedback messages
+* Imported latest GeoIP database
+
+
+## [1.6.0] - 2016-04-03
+### Added
+* Added option to display headshot hit series
+* Added option to display nade kill series
+* Added option to display knife kill series
+* Added command `!knife` to display number of knife kills
+* Added most knife kills to Awards output
+* Added output of message 'added to group'
+* Added output of capture count as server msg in CTF mode
+* Added PyPi support
+
+### Changed
+* Consolidated warnings in one list
+* Improved error message for missing games.log file
+* Imported latest GeoIP database
+* Performance improvements
+
+### Fixed
+* Fixed #31: tell command suppports all player numbers
+* Fixed chat message issue with single "!" content
+* Fixed possible loop if games.log file is empty
+* Fixed missing reason in database for command `!tb`
+* Fixed missing text color setup
+* Various minor bug fixes
+
+
 [Unreleased]: https://github.com/SpunkyBot/spunkybot/compare/1.10.0...HEAD
 [1.10.0]: https://github.com/SpunkyBot/spunkybot/compare/1.9.0...1.10.0
 [1.9.0]: https://github.com/SpunkyBot/spunkybot/compare/1.8.0...1.9.0
 [1.8.0]: https://github.com/SpunkyBot/spunkybot/compare/1.7.0...1.8.0
+[1.7.0]: https://github.com/SpunkyBot/spunkybot/compare/1.6.0...1.7.0
+[1.6.0]: https://github.com/SpunkyBot/spunkybot/compare/1.5.0...1.6.0
