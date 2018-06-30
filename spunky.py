@@ -2225,7 +2225,7 @@ class LogParser(object):
                     user = arg[0]
                     reason = ' '.join(arg[1:])[:40].strip() if len(arg) > 1 else ''
                     if len(user) > 2:
-                        pattern_list = [player for player in self.game.players.itervalues() if user.upper() in player.get_name().upper()]
+                        pattern_list = [player for player in self.game.players.itervalues() if user.upper() in player.get_name().upper() and player.get_player_num() != BOT_PLAYER_NUM]
                         if pattern_list:
                             for player in pattern_list:
                                 if player.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
