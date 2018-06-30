@@ -316,6 +316,7 @@ class LogParser(object):
         # enable/disable autokick of players with low score
         self.noob_autokick = config.getboolean('bot', 'noob_autokick') if config.has_option('bot', 'noob_autokick') else False
         self.spawnkill_autokick = config.getboolean('bot', 'spawnkill_autokick') if config.has_option('bot', 'spawnkill_autokick') else False
+        self.kill_spawnkiller = config.getboolean('bot', 'instant_kill_spawnkiller') if config.has_option('bot', 'instant_kill_spawnkiller') else False
         # set the maximum allowed ping
         self.max_ping = config.getint('bot', 'max_ping') if config.has_option('bot', 'max_ping') else 200
         # kick spectator on full server
@@ -1077,13 +1078,20 @@ class LogParser(object):
             elif not tk_event and int(info[2]) != 10:  # 10: MOD_CHANGE_TEAM
                 killer.kill()
 
-                # spawn kill warning
-                if self.spawnkill_autokick and killer.get_admin_role() < 40:
+                # spawn killing - warn/kick or instant kill
+                if (self.spawnkill_autokick or self.kill_spawnkiller) and killer.get_admin_role() < 40:
                     # Spawn Protection time between players deaths in seconds to issue a warning
                     warn_time = 3
                     if victim.get_respawn_time() + warn_time > time.time():
-                        killer.add_warning("stop spawn killing")
-                        self.kick_high_warns(killer, 'stop spawn killing', 'Spawn Camping and Spawn Killing are not allowed')
+                        if killer.get_ip_address() != '0.0.0.0':
+                            if self.kill_spawnkiller:
+                                self.game.send_rcon("smite %d" % killer_id)
+                                self.game.rcon_say("^7%s got killed for Spawn Killing", killer_id)
+                            if self.spawnkill_autokick:
+                                killer.add_warning("stop spawn killing")
+                                self.kick_high_warns(killer, 'stop spawn killing', 'Spawn Camping and Spawn Killing are not allowed')
+                        else:
+                            self.game.send_rcon("smite %d" % killer_id)
 
                 # multi kill message
                 if self.show_multikill_msg:
