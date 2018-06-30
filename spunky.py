@@ -2284,7 +2284,7 @@ class LogParser(object):
                         self.game.send_rcon('bot_enable 1')
                         self.game.send_rcon('bot_minplayers 0')
                         self.game.rcon_tell(sar['player_num'], "^7Bot support: ^2On")
-                        self.game.rcon_tell(sar['player_num'], "^3Note: Map cycle may needed to activate bot support")
+                        self.game.rcon_tell(sar['player_num'], "^3Map cycle may be required to enable bot support")
                     elif arg == "off":
                         self.game.send_rcon('bot_enable 0')
                         self.game.send_rcon('kick allbots')
