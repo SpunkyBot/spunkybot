@@ -1082,8 +1082,11 @@ class LogParser(object):
                     # Spawn Protection time between players deaths in seconds to issue a warning
                     warn_time = 3
                     if victim.get_respawn_time() + warn_time > time.time():
-                        killer.add_warning("stop spawn killing")
-                        self.kick_high_warns(killer, 'stop spawn killing', 'Spawn Camping and Spawn Killing are not allowed')
+                        if killer.get_ip_address() != '0.0.0.0':
+                            killer.add_warning("stop spawn killing")
+                            self.kick_high_warns(killer, 'stop spawn killing', 'Spawn Camping and Spawn Killing are not allowed')
+                        else:
+                            self.game.send_rcon("smite %d" % killer_id)
 
                 # multi kill message
                 if self.show_multikill_msg:
