@@ -2233,9 +2233,9 @@ class LogParser(object):
                                 else:
                                     self.game.kick_player(player.get_player_num(), reason)
                         else:
-                            self.game.rcon_say("^3No Players found matching %s" % user)
+                            self.game.rcon_tell(sar['player_num'], "^3No Players found matching %s" % user)
                     else:
-                        self.game.rcon_say("^3Pattern must be at least 3 characters long")
+                        self.game.rcon_tell(sar['player_num'], "^3Pattern must be at least 3 characters long")
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['kickall']['syntax'])
 
