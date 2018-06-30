@@ -609,7 +609,7 @@ class LogParser(object):
                             player.clear_specific_warning('spectator too long on full server')
 
                     # check for players with low score and set warning
-                    if self.noob_autokick and player_admin_role < 2:
+                    if self.noob_autokick and player_admin_role < 2 and player.get_ip_address() != '0.0.0.0':
                         kills = player.get_kills()
                         deaths = player.get_deaths()
                         ratio = round(float(kills) / float(deaths), 2) if deaths > 0 else 1.0
