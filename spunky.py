@@ -1047,7 +1047,7 @@ class LogParser(object):
                     # increase team death counter for victim
                     victim.team_death()
                     # Regular and higher will not get punished
-                    if killer.get_admin_role() < 2 and self.tk_autokick:
+                    if killer.get_admin_role() < 2 and self.tk_autokick and killer.get_ip_address() != '0.0.0.0':
                         # list of players of TK victim
                         killer.add_tk_victims(victim_id)
                         # list of players who killed victim
