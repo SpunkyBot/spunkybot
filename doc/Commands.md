@@ -185,6 +185,9 @@
 
 - **addbots** - add bots to the game
 	- Usage: `!addbots`
+- **banall** - ban all players matching pattern
+	- Usage: `!banall <pattern> [<reason>]`
+	- Short: `!ball`
 - **banlist** - display the last active 10 bans
 	- Usage: `!banlist`
 - **bots** - enables or disables bot support

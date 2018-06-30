@@ -129,6 +129,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'veto': {'desc': 'stop voting process', 'syntax': '^7Usage: ^2!veto', 'level': 60},
             # senioradmin commands, level 80
             'addbots': {'desc': 'add bots to the game', 'syntax': '^7Usage: ^2!addbots', 'level': 80},
+            'banall': {'desc': 'ban all players matching pattern', 'syntax': '^7Usage: ^2!banall ^7<pattern> [<reason>]', 'level': 80, 'short': 'ball'},
             'banlist': {'desc': 'display the last active 10 bans', 'syntax': '^7Usage: ^2!banlist', 'level': 80},
             'bots': {'desc': 'enables or disables bot support', 'syntax': '^7Usage: ^2!bots ^7<on/off>', 'level': 80},
             'cyclemap': {'desc': 'cycle to the next map', 'syntax': '^7Usage: ^2!cyclemap', 'level': 80},
@@ -2238,6 +2239,28 @@ class LogParser(object):
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['kickall']['syntax'])
 
+            # !banall <pattern> [<reason>]- ban all players matching <pattern>
+            elif (sar['command'] == '!banall' or sar['command'] == '!ball') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['banall']['level']:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].split()
+                    user = arg[0]
+                    reason = ' '.join(arg[1:])[:40].strip() if len(arg) > 1 else 'tempban'
+                    if len(user) > 2:
+                        pattern_list = [player for player in self.game.players.itervalues() if user.upper() in player.get_name().upper() and player.get_player_num() != BOT_PLAYER_NUM]
+                        if pattern_list:
+                            for player in pattern_list:
+                                if player.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
+                                    self.game.rcon_tell(sar['player_num'], "^3Insufficient privileges to ban an admin")
+                                else:
+                                    player.ban(duration=(self.ban_duration * 86400), reason=reason, admin=self.game.players[sar['player_num']].get_name())
+                                    self.game.rcon_say("^2%s ^1banned ^7for ^3%d day%s ^7by %s" % (player.get_name(), self.ban_duration, 's' if self.ban_duration > 1 else '', self.game.players[sar['player_num']].get_name()))
+                        else:
+                            self.game.rcon_tell(sar['player_num'], "^3No Players found matching %s" % user)
+                    else:
+                        self.game.rcon_tell(sar['player_num'], "^3Pattern must be at least 3 characters long")
+                else:
+                    self.game.rcon_tell(sar['player_num'], COMMANDS['banall']['syntax'])
+
             # !addbots
             elif sar['command'] == '!addbots' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['addbots']['level']:
                 self.game.send_rcon('addbot boa 3 blue 50 BOT1')
@@ -2253,6 +2276,7 @@ class LogParser(object):
                         self.game.send_rcon('bot_enable 1')
                         self.game.send_rcon('bot_minplayers 0')
                         self.game.rcon_tell(sar['player_num'], "^7Bot support: ^2On")
+                        self.game.rcon_tell(sar['player_num'], "^3Note: Map cycle may needed to activate bot support")
                     elif arg == "off":
                         self.game.send_rcon('bot_enable 0')
                         self.game.send_rcon('kick allbots')
