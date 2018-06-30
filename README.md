@@ -34,7 +34,7 @@ If you want to know more, this is a list of selected starting points:
 
 
 ## Environment
-- Urban Terror 4.1.1 / 4.2.023 / 4.3.3
+- Urban Terror 4.1.1 / 4.2.023 / 4.3.4
 - Python 2.6 / 2.7
 - SQLite 3 database
 - Cross-platform (tested on Debian 6 / 7 / 8 / 9, Ubuntu 12 / 14 / 16 / 18, CentOS 6 / 7, macOS 10.13, Windows 7 / 10)
