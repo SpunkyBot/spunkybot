@@ -2328,7 +2328,8 @@ class LogParser(object):
 
             # maps - display all available maps
             elif (sar['command'] == '!maps' or sar['command'] == '@maps') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['maps']['level']:
-                msg = "^7Available Maps: ^3%s" % ', ^3'.join(self.game.get_all_maps())
+                map_list = self.game.get_all_maps()
+                msg = "^7Available Maps [^2%s^7]: ^3%s" % (len(map_list), ', ^3'.join(map_list))
                 self.tell_say_message(sar, msg)
 
             # maprestart - restart the map
