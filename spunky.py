@@ -3973,15 +3973,20 @@ class Game(object):
         set a list of all available maps
         """
         try:
-            all_maps = self.get_rcon_output("dir map bsp")[1].split()
-            all_maps_list = [maps.replace("/", "").replace(".bsp", "") for maps in all_maps if maps.startswith("/")]
-            pk3_list = self.get_rcon_output("fdir *.pk3")[1].split()
-            all_pk3_list = [maps.replace("/", "").replace(".pk3", "").replace(".bsp", "") for maps in pk3_list if maps.startswith("/ut4_") or maps.startswith("/ut_")]
-
-            all_together = list(set(all_maps_list + all_pk3_list))
-            all_together.sort()
-            if all_together:
-                self.all_maps_list = all_together
+            all_maps = []
+            count = 0
+            while True:
+                ret_val = self.get_rcon_output("dir map bsp")[1].split()
+                if "Directory" in ret_val:
+                    count += 1
+                if count >= 2:
+                    break
+                else:
+                    all_maps += ret_val
+            all_maps_list = list(set([maps.replace("/", "").replace(".bsp", "") for maps in all_maps if maps.startswith("/")]))
+            all_maps_list.sort()
+            if all_maps_list:
+                self.all_maps_list = all_maps_list
         except Exception as err:
             logger.error(err, exc_info=True)
 
