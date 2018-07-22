@@ -3156,8 +3156,10 @@ class Player(object):
     def ban(self, duration=900, reason='tk', admin=None):
         if admin:
             reason = "%s, ban by %s" % (reason, admin)
-        unix_expiration = duration + time.time()
-        expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(unix_expiration))
+        try:
+            expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() + duration))
+        except ValueError:
+            expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(2147483647))
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         values = (self.guid,)
         curs.execute("SELECT `expires` FROM `ban_list` WHERE `guid` = ?", values)
@@ -3180,8 +3182,10 @@ class Player(object):
             return True
 
     def add_ban_point(self, point_type, duration):
-        unix_expiration = duration + time.time()
-        expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(unix_expiration))
+        try:
+            expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() + duration))
+        except ValueError:
+            expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(2147483647))
         values = (self.guid, point_type, expire_date)
         # add ban_point to database
         curs.execute("INSERT INTO `ban_points` (`guid`,`point_type`,`expires`) VALUES (?,?,?)", values)
