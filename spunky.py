@@ -560,7 +560,7 @@ class LogParser(object):
         try:
             with self.players_lock:
                 # get number of connected players
-                counter = len(self.game.players) - 1  # bot is counted as player
+                counter = self.game.get_number_players()
 
                 # check amount of warnings and kick player if needed
                 for player in self.game.players.itervalues():
@@ -3802,6 +3802,12 @@ class Game(object):
                 time.sleep(RCON_DELAY)
                 return ret_val
 
+    def get_number_players(self):
+        """
+        get the number of online players
+        """
+        return len(self.players) - 1  # bot is counted as player
+
     def get_mapcycle_path(self):
         """
         get the full path of mapcycle.txt file
@@ -3953,8 +3959,8 @@ class Game(object):
             self.mapname = self.next_mapname
 
         if self.dynamic_mapcycle:
-            self.maplist = filter(None, (self.small_cycle if len(self.players) < (self.switch_count + 1) else self.big_cycle))
-            logger.debug("Players online: %s / Mapcycle: %s", (len(self.players) - 1), self.maplist)
+            self.maplist = filter(None, (self.small_cycle if self.get_number_players() < self.switch_count else self.big_cycle))
+            logger.debug("Players online: %s / Mapcycle: %s", self.get_number_players(), self.maplist)
 
         if self.maplist:
             if self.mapname in self.maplist:
