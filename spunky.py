@@ -1041,7 +1041,7 @@ class LogParser(object):
 
             # teamkill event - disabled for FFA, LMS, Jump, for all other game modes team kills are counted and punished
             if not self.ffa_lms_gametype:
-                if (victim.get_team() == killer.get_team() and victim_id != killer_id) and death_cause != "UT_MOD_BOMBED":
+                if victim.get_team() == killer.get_team() and victim.get_team() != 3 and victim_id != killer_id and death_cause != "UT_MOD_BOMBED":
                     tk_event = True
                     # increase team kill counter for killer and kick for too many team kills
                     killer.team_kill()
