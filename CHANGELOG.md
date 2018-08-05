@@ -3,6 +3,27 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+## [1.11.0] - 2018-08-05
+### Added
+* Added command `!banall <pattern>` to ban all players matching pattern
+* Added command `!rebuild` to sync up all available maps
+* Added option to kill spawnkillers instantly
+* Added support for Urban Terror 4.3.4
+
+### Changed
+* Command `!maps` is showing the total number of available maps
+* Exclude bots from autokick for team kills to avoid unbalanced teams
+* Exclude bots from autokick of low score players to avoid unbalanced teams
+* Improved some feedback messages
+
+### Fixed
+* Fixed #55: Make bots immune from spawnkill autokick
+* Fixed #56: Command `!maps` does not show all maps
+* Fixed #57: Fix year 2038 problem on 32-bit systems
+* Fixed version check, issued by string compare
+* Various minor bug fixes
+
+
 ## [1.10.0] - 2018-05-31
 ### Added
 * Added option for automatic expiration of warnings
@@ -167,7 +188,8 @@ All notable changes to this project will be documented in this file. This projec
 * Various minor bug fixes
 
 
-[Unreleased]: https://github.com/SpunkyBot/spunkybot/compare/1.10.0...develop
+[Unreleased]: https://github.com/SpunkyBot/spunkybot/compare/1.11.0...develop
+[1.11.0]: https://github.com/SpunkyBot/spunkybot/compare/1.10.0...1.11.0
 [1.10.0]: https://github.com/SpunkyBot/spunkybot/compare/1.9.0...1.10.0
 [1.9.0]: https://github.com/SpunkyBot/spunkybot/compare/1.8.0...1.9.0
 [1.8.0]: https://github.com/SpunkyBot/spunkybot/compare/1.7.0...1.8.0
