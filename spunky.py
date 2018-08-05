@@ -22,7 +22,7 @@ Modify the files '/conf/settings.conf' and '/conf/rules.conf'
 Run the bot: python spunky.py
 """
 
-__version__ = '1.10.0'
+__version__ = '1.11.0'
 
 
 ### IMPORTS
@@ -288,7 +288,7 @@ class LogParser(object):
         logger.addHandler(console)
         logger.addHandler(devel_log)
 
-        logger.info("*** Spunky Bot v%s : www.spunkybot.de ***", __version__)
+        logger.info("*** Spunky Bot v%s : www.spunkybot.de ***", __version__ = '1.11.0'
         logger.info("Starting logging      : OK")
         logger.info("Loading config file   : %s", config_file)
 
@@ -355,7 +355,7 @@ class LogParser(object):
         logger.debug("Cmd !iamgod available : %s", self.iamgod)
         server_port = config.get('server', 'server_port') if config.has_option('server', 'server_port') else "27960"
         # Heartbeat packet
-        data = {'v': __version__, 'p': server_port, 'o': platform.platform()}
+        data = {'v': __version__ = '1.11.0'
         self.heartbeat = config.getboolean('bot', 'heartbeat') if config.has_option('bot', 'heartbeat') else False
         # Master Server
         self.ping_url = 'http://master.spunkybot.de/ping.php?%s' % urllib.urlencode(data)
@@ -2116,12 +2116,12 @@ class LogParser(object):
 
             # version - display the version of the bot
             elif sar['command'] == '!version' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['version']['level']:
-                self.game.rcon_tell(sar['player_num'], "^7Spunky Bot ^2v%s" % __version__)
-                current = __version__.split('.')
+                self.game.rcon_tell(sar['player_num'], "^7Spunky Bot ^2v%s" % __version__ = '1.11.0'
+                current = __version__ = '1.11.0'
                 try:
                     get_latest = urllib2.urlopen('https://raw.githubusercontent.com/SpunkyBot/spunkybot/master/VERSION', timeout=3).read().strip()
                 except urllib2.URLError:
-                    get_latest = __version__
+                    get_latest = __version__ = '1.11.0'
                 latest = get_latest.split('.')
                 if int(current[0]) < int(latest[0]):
                     self.game.rcon_tell(sar['player_num'], "^7A newer release ^6%s ^7is available, check ^3www.spunkybot.de" % get_latest)
@@ -3950,7 +3950,7 @@ class Game(object):
         self.set_all_maps()
         self.maplist = filter(None, self.get_mapcycle_path())
         self.set_current_map()
-        self.rcon_say("^7Powered by ^8[Spunky Bot %s] ^1[www.spunkybot.de]" % __version__)
+        self.rcon_say("^7Powered by ^8[Spunky Bot %s] ^1[www.spunkybot.de]" % __version__ = '1.11.0'
         logger.info("Mapcycle: %s", ', '.join(self.maplist))
         logger.info("*** Live tracking: Current map: %s / Next map: %s ***", self.mapname, self.next_mapname)
         logger.info("Total number of maps  : %s", len(self.get_all_maps()))
