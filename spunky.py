@@ -148,6 +148,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'moon': {'desc': 'activate Moon mode (low gravity)', 'syntax': '^7Usage: ^2!moon ^7<on/off>', 'level': 80},
             'permban': {'desc': 'ban a player permanent', 'syntax': '^7Usage: ^2!permban ^7<name> <reason>', 'level': 80, 'short': 'pb'},
             'putgroup': {'desc': 'add a client to a group', 'syntax': '^7Usage: ^2!putgroup ^7<name> <group>', 'level': 80},
+            'rebuild': {'desc': 'sync up all available maps', 'syntax': '^7Usage: ^2!rebuild', 'level': 80},
             'setnextmap': {'desc': 'set the next map', 'syntax': '^7Usage: ^2!setnextmap ^7<ut4_name>', 'level': 80},
             'swapteams': {'desc': 'swap the current teams', 'syntax': '^7Usage: ^2!swapteams', 'level': 80},
             'unban': {'desc': 'unban a player from the database', 'syntax': '^7Usage: ^2!unban ^7<@ID>', 'level': 80},
@@ -2388,6 +2389,15 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], "^7Next Map set to: ^3%s" % nextmap)
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['setnextmap']['syntax'])
+
+            # rebuild - sync up all available maps
+            elif sar['command'] == '!rebuild' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['rebuild']['level']:
+                # get full map list
+                self.game.set_all_maps()
+                self.game.rcon_tell(sar['player_num'], "^7Rebuild maps: ^3%s ^7maps found" % len(self.game.get_all_maps()))
+                # set current and next map
+                self.game.set_current_map()
+                self.game.rcon_tell(sar['player_num'], self.get_nextmap())
 
             # swapteams - swap current teams
             elif sar['command'] == '!swapteams' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['swapteams']['level']:
