@@ -22,7 +22,7 @@ Modify the files '/conf/settings.conf' and '/conf/rules.conf'
 Run the bot: python spunky.py
 """
 
-__version__ = '1.10.0'
+__version__ = '1.11.0'
 
 
 ### IMPORTS
@@ -2652,7 +2652,7 @@ class LogParser(object):
                     if not found:
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
-                        if 1 < victim.get_admin_role() < 90 or self.game.players[sar['player_num']].get_admin_role() == 100:
+                        if (1 < victim.get_admin_role() < COMMANDS['ungroup']['level'] or self.game.players[sar['player_num']].get_admin_role() == 100) and victim.get_player_num() != sar['player_num']:
                             self.game.rcon_tell(sar['player_num'], "^1%s ^7put in group User" % victim.get_name())
                             victim.update_db_admin_role(role=1)
                         else:
