@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
-## [1.11.0] - 2018-08-05
+## [1.11.0] - 2018-08-06
 ### Added
 * Added command `!banall <pattern>` to ban all players matching pattern
 * Added command `!rebuild` to sync up all available maps
@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file. This projec
 * Command `!maps` is showing the total number of available maps
 * Exclude bots from autokick for team kills to avoid unbalanced teams
 * Exclude bots from autokick of low score players to avoid unbalanced teams
+* Updated schedule library
 * Improved some feedback messages
 
 ### Fixed
