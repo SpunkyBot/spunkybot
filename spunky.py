@@ -22,7 +22,7 @@ Modify the files '/conf/settings.conf' and '/conf/rules.conf'
 Run the bot: python spunky.py
 """
 
-__version__ = '1.10.0'
+__version__ = '1.11.0'
 
 
 ### IMPORTS
@@ -113,7 +113,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'tempban': {'desc': 'ban a player temporary for the given period', 'syntax': '^7Usage: ^2!tempban ^7<name> <duration> [<reason>]', 'level': 40, 'short': 'tb'},
             'warnclear': {'desc': 'clear the player warnings', 'syntax': '^7Usage: ^2!warnclear ^7<name>', 'level': 40, 'short': 'wc'},
             # fulladmin commands, level 60
-            'ban': {'desc': 'ban a player for 7 days', 'syntax': '^7Usage: ^2!ban ^7<name> <reason>', 'level': 60, 'short': 'b'},
+            'ban': {'desc': 'ban a player for several days', 'syntax': '^7Usage: ^2!ban ^7<name> <reason>', 'level': 60, 'short': 'b'},
             'baninfo': {'desc': 'display active bans of a player', 'syntax': '^7Usage: ^2!baninfo ^7<name>', 'level': 60, 'short': 'bi'},
             'ci': {'desc': 'kick player with connection interrupt', 'syntax': '^7Usage: ^2!ci ^7<name>', 'level': 60},
             'forgiveclear': {'desc': "clear a player's team kills", 'syntax': '^7Usage: ^2!forgiveclear ^7[<name>]', 'level': 60, 'short': 'fc'},
@@ -129,6 +129,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'veto': {'desc': 'stop voting process', 'syntax': '^7Usage: ^2!veto', 'level': 60},
             # senioradmin commands, level 80
             'addbots': {'desc': 'add bots to the game', 'syntax': '^7Usage: ^2!addbots', 'level': 80},
+            'banall': {'desc': 'ban all players matching pattern', 'syntax': '^7Usage: ^2!banall ^7<pattern> [<reason>]', 'level': 80, 'short': 'ball'},
             'banlist': {'desc': 'display the last active 10 bans', 'syntax': '^7Usage: ^2!banlist', 'level': 80},
             'bots': {'desc': 'enables or disables bot support', 'syntax': '^7Usage: ^2!bots ^7<on/off>', 'level': 80},
             'cyclemap': {'desc': 'cycle to the next map', 'syntax': '^7Usage: ^2!cyclemap', 'level': 80},
@@ -147,6 +148,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'moon': {'desc': 'activate Moon mode (low gravity)', 'syntax': '^7Usage: ^2!moon ^7<on/off>', 'level': 80},
             'permban': {'desc': 'ban a player permanent', 'syntax': '^7Usage: ^2!permban ^7<name> <reason>', 'level': 80, 'short': 'pb'},
             'putgroup': {'desc': 'add a client to a group', 'syntax': '^7Usage: ^2!putgroup ^7<name> <group>', 'level': 80},
+            'rebuild': {'desc': 'sync up all available maps', 'syntax': '^7Usage: ^2!rebuild', 'level': 80},
             'setnextmap': {'desc': 'set the next map', 'syntax': '^7Usage: ^2!setnextmap ^7<ut4_name>', 'level': 80},
             'swapteams': {'desc': 'swap the current teams', 'syntax': '^7Usage: ^2!swapteams', 'level': 80},
             'unban': {'desc': 'unban a player from the database', 'syntax': '^7Usage: ^2!unban ^7<@ID>', 'level': 80},
@@ -315,6 +317,7 @@ class LogParser(object):
         # enable/disable autokick of players with low score
         self.noob_autokick = config.getboolean('bot', 'noob_autokick') if config.has_option('bot', 'noob_autokick') else False
         self.spawnkill_autokick = config.getboolean('bot', 'spawnkill_autokick') if config.has_option('bot', 'spawnkill_autokick') else False
+        self.kill_spawnkiller = config.getboolean('bot', 'instant_kill_spawnkiller') if config.has_option('bot', 'instant_kill_spawnkiller') else False
         # set the maximum allowed ping
         self.max_ping = config.getint('bot', 'max_ping') if config.has_option('bot', 'max_ping') else 200
         # kick spectator on full server
@@ -558,7 +561,7 @@ class LogParser(object):
         try:
             with self.players_lock:
                 # get number of connected players
-                counter = len(self.game.players) - 1  # bot is counted as player
+                counter = self.game.get_number_players()
 
                 # check amount of warnings and kick player if needed
                 for player in self.game.players.itervalues():
@@ -608,7 +611,7 @@ class LogParser(object):
                             player.clear_specific_warning('spectator too long on full server')
 
                     # check for players with low score and set warning
-                    if self.noob_autokick and player_admin_role < 2:
+                    if self.noob_autokick and player_admin_role < 2 and player.get_ip_address() != '0.0.0.0':
                         kills = player.get_kills()
                         deaths = player.get_deaths()
                         ratio = round(float(kills) / float(deaths), 2) if deaths > 0 else 1.0
@@ -1039,14 +1042,14 @@ class LogParser(object):
 
             # teamkill event - disabled for FFA, LMS, Jump, for all other game modes team kills are counted and punished
             if not self.ffa_lms_gametype:
-                if (victim.get_team() == killer.get_team() and victim_id != killer_id) and death_cause != "UT_MOD_BOMBED":
+                if victim.get_team() == killer.get_team() and victim.get_team() != 3 and victim_id != killer_id and death_cause != "UT_MOD_BOMBED":
                     tk_event = True
                     # increase team kill counter for killer and kick for too many team kills
                     killer.team_kill()
                     # increase team death counter for victim
                     victim.team_death()
                     # Regular and higher will not get punished
-                    if killer.get_admin_role() < 2 and self.tk_autokick:
+                    if killer.get_admin_role() < 2 and self.tk_autokick and killer.get_ip_address() != '0.0.0.0':
                         # list of players of TK victim
                         killer.add_tk_victims(victim_id)
                         # list of players who killed victim
@@ -1076,13 +1079,20 @@ class LogParser(object):
             elif not tk_event and int(info[2]) != 10:  # 10: MOD_CHANGE_TEAM
                 killer.kill()
 
-                # spawn kill warning
-                if self.spawnkill_autokick and killer.get_admin_role() < 40:
+                # spawn killing - warn/kick or instant kill
+                if (self.spawnkill_autokick or self.kill_spawnkiller) and killer.get_admin_role() < 40:
                     # Spawn Protection time between players deaths in seconds to issue a warning
                     warn_time = 3
                     if victim.get_respawn_time() + warn_time > time.time():
-                        killer.add_warning("stop spawn killing")
-                        self.kick_high_warns(killer, 'stop spawn killing', 'Spawn Camping and Spawn Killing are not allowed')
+                        if killer.get_ip_address() != '0.0.0.0':
+                            if self.kill_spawnkiller:
+                                self.game.send_rcon("smite %d" % killer_id)
+                                self.game.rcon_say("^7%s got killed for Spawn Killing", killer_id)
+                            if self.spawnkill_autokick:
+                                killer.add_warning("stop spawn killing")
+                                self.kick_high_warns(killer, 'stop spawn killing', 'Spawn Camping and Spawn Killing are not allowed')
+                        else:
+                            self.game.send_rcon("smite %d" % killer_id)
 
                 # multi kill message
                 if self.show_multikill_msg:
@@ -2107,11 +2117,17 @@ class LogParser(object):
             # version - display the version of the bot
             elif sar['command'] == '!version' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['version']['level']:
                 self.game.rcon_tell(sar['player_num'], "^7Spunky Bot ^2v%s" % __version__)
+                current = __version__.split('.')
                 try:
                     get_latest = urllib2.urlopen('https://raw.githubusercontent.com/SpunkyBot/spunkybot/master/VERSION', timeout=3).read().strip()
                 except urllib2.URLError:
                     get_latest = __version__
-                if __version__ < get_latest:
+                latest = get_latest.split('.')
+                if int(current[0]) < int(latest[0]):
+                    self.game.rcon_tell(sar['player_num'], "^7A newer release ^6%s ^7is available, check ^3www.spunkybot.de" % get_latest)
+                elif int(current[0]) == int(latest[0]) and int(current[1]) < int(latest[1]):
+                    self.game.rcon_tell(sar['player_num'], "^7A newer release ^6%s ^7is available, check ^3www.spunkybot.de" % get_latest)
+                elif int(current[0]) == int(latest[0]) and int(current[1]) == int(latest[1]) and int(current[2]) < int(latest[2]):
                     self.game.rcon_tell(sar['player_num'], "^7A newer release ^6%s ^7is available, check ^3www.spunkybot.de" % get_latest)
 
             # veto - stop voting process
@@ -2140,7 +2156,7 @@ class LogParser(object):
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['ci']['syntax'])
 
-            # ban - ban a player for 7 days
+            # ban - ban a player for several days
             elif (sar['command'] == '!ban' or sar['command'] == '!b') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['ban']['level']:
                 if line.split(sar['command'])[1]:
                     arg = line.split(sar['command'])[1].split()
@@ -2218,7 +2234,7 @@ class LogParser(object):
                     user = arg[0]
                     reason = ' '.join(arg[1:])[:40].strip() if len(arg) > 1 else ''
                     if len(user) > 2:
-                        pattern_list = [player for player in self.game.players.itervalues() if user.upper() in player.get_name().upper()]
+                        pattern_list = [player for player in self.game.players.itervalues() if user.upper() in player.get_name().upper() and player.get_player_num() != BOT_PLAYER_NUM]
                         if pattern_list:
                             for player in pattern_list:
                                 if player.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
@@ -2226,11 +2242,33 @@ class LogParser(object):
                                 else:
                                     self.game.kick_player(player.get_player_num(), reason)
                         else:
-                            self.game.rcon_say("^3No Players found matching %s" % user)
+                            self.game.rcon_tell(sar['player_num'], "^3No Players found matching %s" % user)
                     else:
-                        self.game.rcon_say("^3Pattern must be at least 3 characters long")
+                        self.game.rcon_tell(sar['player_num'], "^3Pattern must be at least 3 characters long")
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['kickall']['syntax'])
+
+            # !banall <pattern> [<reason>]- ban all players matching <pattern>
+            elif (sar['command'] == '!banall' or sar['command'] == '!ball') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['banall']['level']:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].split()
+                    user = arg[0]
+                    reason = ' '.join(arg[1:])[:40].strip() if len(arg) > 1 else 'tempban'
+                    if len(user) > 2:
+                        pattern_list = [player for player in self.game.players.itervalues() if user.upper() in player.get_name().upper() and player.get_player_num() != BOT_PLAYER_NUM]
+                        if pattern_list:
+                            for player in pattern_list:
+                                if player.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
+                                    self.game.rcon_tell(sar['player_num'], "^3Insufficient privileges to ban an admin")
+                                else:
+                                    player.ban(duration=(self.ban_duration * 86400), reason=reason, admin=self.game.players[sar['player_num']].get_name())
+                                    self.game.rcon_say("^2%s ^1banned ^7for ^3%d day%s ^7by %s" % (player.get_name(), self.ban_duration, 's' if self.ban_duration > 1 else '', self.game.players[sar['player_num']].get_name()))
+                        else:
+                            self.game.rcon_tell(sar['player_num'], "^3No Players found matching %s" % user)
+                    else:
+                        self.game.rcon_tell(sar['player_num'], "^3Pattern must be at least 3 characters long")
+                else:
+                    self.game.rcon_tell(sar['player_num'], COMMANDS['banall']['syntax'])
 
             # !addbots
             elif sar['command'] == '!addbots' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['addbots']['level']:
@@ -2247,6 +2285,7 @@ class LogParser(object):
                         self.game.send_rcon('bot_enable 1')
                         self.game.send_rcon('bot_minplayers 0')
                         self.game.rcon_tell(sar['player_num'], "^7Bot support: ^2On")
+                        self.game.rcon_tell(sar['player_num'], "^3Map cycle may be required to enable bot support")
                     elif arg == "off":
                         self.game.send_rcon('bot_enable 0')
                         self.game.send_rcon('kick allbots')
@@ -2290,7 +2329,8 @@ class LogParser(object):
 
             # maps - display all available maps
             elif (sar['command'] == '!maps' or sar['command'] == '@maps') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['maps']['level']:
-                msg = "^7Available Maps: ^3%s" % ', ^3'.join(self.game.get_all_maps())
+                map_list = self.game.get_all_maps()
+                msg = "^7Available Maps [^2%s^7]: ^3%s" % (len(map_list), ', ^3'.join(map_list))
                 self.tell_say_message(sar, msg)
 
             # maprestart - restart the map
@@ -2349,6 +2389,15 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], "^7Next Map set to: ^3%s" % nextmap)
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['setnextmap']['syntax'])
+
+            # rebuild - sync up all available maps
+            elif sar['command'] == '!rebuild' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['rebuild']['level']:
+                # get full map list
+                self.game.set_all_maps()
+                self.game.rcon_tell(sar['player_num'], "^7Rebuild maps: ^3%s ^7maps found" % len(self.game.get_all_maps()))
+                # set current and next map
+                self.game.set_current_map()
+                self.game.rcon_tell(sar['player_num'], self.get_nextmap())
 
             # swapteams - swap current teams
             elif sar['command'] == '!swapteams' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['swapteams']['level']:
@@ -2603,7 +2652,7 @@ class LogParser(object):
                     if not found:
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
-                        if 1 < victim.get_admin_role() < 90 or self.game.players[sar['player_num']].get_admin_role() == 100:
+                        if (1 < victim.get_admin_role() < COMMANDS['ungroup']['level'] or self.game.players[sar['player_num']].get_admin_role() == 100) and victim.get_player_num() != sar['player_num']:
                             self.game.rcon_tell(sar['player_num'], "^1%s ^7put in group User" % victim.get_name())
                             victim.update_db_admin_role(role=1)
                         else:
@@ -3117,8 +3166,10 @@ class Player(object):
     def ban(self, duration=900, reason='tk', admin=None):
         if admin:
             reason = "%s, ban by %s" % (reason, admin)
-        unix_expiration = duration + time.time()
-        expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(unix_expiration))
+        try:
+            expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() + duration))
+        except ValueError:
+            expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(2147483647))
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         values = (self.guid,)
         curs.execute("SELECT `expires` FROM `ban_list` WHERE `guid` = ?", values)
@@ -3141,8 +3192,10 @@ class Player(object):
             return True
 
     def add_ban_point(self, point_type, duration):
-        unix_expiration = duration + time.time()
-        expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(unix_expiration))
+        try:
+            expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() + duration))
+        except ValueError:
+            expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(2147483647))
         values = (self.guid, point_type, expire_date)
         # add ban_point to database
         curs.execute("INSERT INTO `ban_points` (`guid`,`point_type`,`expires`) VALUES (?,?,?)", values)
@@ -3759,6 +3812,12 @@ class Game(object):
                 time.sleep(RCON_DELAY)
                 return ret_val
 
+    def get_number_players(self):
+        """
+        get the number of online players
+        """
+        return len(self.players) - 1  # bot is counted as player
+
     def get_mapcycle_path(self):
         """
         get the full path of mapcycle.txt file
@@ -3894,6 +3953,7 @@ class Game(object):
         self.rcon_say("^7Powered by ^8[Spunky Bot %s] ^1[www.spunkybot.de]" % __version__)
         logger.info("Mapcycle: %s", ', '.join(self.maplist))
         logger.info("*** Live tracking: Current map: %s / Next map: %s ***", self.mapname, self.next_mapname)
+        logger.info("Total number of maps  : %s", len(self.get_all_maps()))
         logger.info("Server CVAR g_logsync : %s", self.get_cvar('g_logsync'))
         logger.info("Server CVAR g_loghits : %s", self.get_cvar('g_loghits'))
 
@@ -3909,8 +3969,8 @@ class Game(object):
             self.mapname = self.next_mapname
 
         if self.dynamic_mapcycle:
-            self.maplist = filter(None, (self.small_cycle if len(self.players) < (self.switch_count + 1) else self.big_cycle))
-            logger.debug("Players online: %s / Mapcycle: %s", (len(self.players) - 1), self.maplist)
+            self.maplist = filter(None, (self.small_cycle if self.get_number_players() < self.switch_count else self.big_cycle))
+            logger.debug("Players online: %s / Mapcycle: %s", self.get_number_players(), self.maplist)
 
         if self.maplist:
             if self.mapname in self.maplist:
@@ -3935,15 +3995,20 @@ class Game(object):
         set a list of all available maps
         """
         try:
-            all_maps = self.get_rcon_output("dir map bsp")[1].split()
-            all_maps_list = [maps.replace("/", "").replace(".bsp", "") for maps in all_maps if maps.startswith("/")]
-            pk3_list = self.get_rcon_output("fdir *.pk3")[1].split()
-            all_pk3_list = [maps.replace("/", "").replace(".pk3", "").replace(".bsp", "") for maps in pk3_list if maps.startswith("/ut4_") or maps.startswith("/ut_")]
-
-            all_together = list(set(all_maps_list + all_pk3_list))
-            all_together.sort()
-            if all_together:
-                self.all_maps_list = all_together
+            all_maps = []
+            count = 0
+            while True:
+                ret_val = self.get_rcon_output("dir map bsp")[1].split()
+                if "Directory" in ret_val:
+                    count += 1
+                if count >= 2:
+                    break
+                else:
+                    all_maps += ret_val
+            all_maps_list = list(set([maps.replace("/", "").replace(".bsp", "") for maps in all_maps if maps.startswith("/")]))
+            all_maps_list.sort()
+            if all_maps_list:
+                self.all_maps_list = all_maps_list
         except Exception as err:
             logger.error(err, exc_info=True)
 

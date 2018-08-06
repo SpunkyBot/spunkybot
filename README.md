@@ -9,7 +9,7 @@ The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was 
 
 [![Build Status](https://travis-ci.org/SpunkyBot/spunkybot.png?branch=master)](https://travis-ci.org/SpunkyBot/spunkybot)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/SpunkyBot/spunkybot/blob/master/LICENSE)
-[![Version](https://img.shields.io/badge/version-1.10.0-orange.svg)](https://github.com/SpunkyBot/spunkybot/releases)
+[![Version](https://img.shields.io/badge/version-1.11.0-orange.svg)](https://github.com/SpunkyBot/spunkybot/releases)
 [![PyPI version](https://img.shields.io/pypi/v/spunkybot.svg)](https://pypi.python.org/pypi/spunkybot)
 [![Python version](https://img.shields.io/badge/python-2.6,%202.7-yellow.svg)](https://pypi.python.org/pypi/spunkybot)
 [![Code Health](https://landscape.io/github/SpunkyBot/spunkybot/master/landscape.svg)](https://landscape.io/github/SpunkyBot/spunkybot/master)
@@ -34,7 +34,7 @@ If you want to know more, this is a list of selected starting points:
 
 
 ## Environment
-- Urban Terror 4.1.1 / 4.2.023 / 4.3.3
+- Urban Terror 4.1.1 / 4.2.023 / 4.3.4
 - Python 2.6 / 2.7
 - SQLite 3 database
 - Cross-platform (tested on Debian 6 / 7 / 8 / 9, Ubuntu 12 / 14 / 16 / 18, CentOS 6 / 7, macOS 10.13, Windows 7 / 10)

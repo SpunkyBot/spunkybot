@@ -9,7 +9,10 @@ spunkybot.egg-info
 *.tar.gz
 *.zip
 *.asc
+*.sig
 *.deb
+SHASUMS
+MD5SUMS
 
 # SVN
 .svn/

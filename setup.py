@@ -56,10 +56,10 @@ Installation
 See the Homepage_ for usage and documentation or visit the Git Repository_
 for the source code.
 
-.. _Spunky Bot: http://spunkybot.de/
+.. _Spunky Bot: https://spunkybot.de/
 .. _Urban Terror: http://www.urbanterror.info/
-.. _MIT: http://opensource.org/licenses/MIT
-.. _Homepage: http://spunkybot.de/
+.. _MIT: https://opensource.org/licenses/MIT
+.. _Homepage: https://spunkybot.de/
 .. _Repository: https://github.com/spunkybot/spunkybot/
 """
 
@@ -69,9 +69,9 @@ setup(name='spunkybot',
       long_description=long_description,
       author='Alexander Kress',
       author_email='feedback@spunkybot.de',
-      url='http://spunkybot.de/',
+      url='https://spunkybot.de/',
       keywords='Urban Terror Game Administration RCON Bot',
-      download_url='http://github.com/spunkybot/spunkybot/tarball/master',
+      download_url='https://github.com/spunkybot/spunkybot/tarball/master',
       license='MIT',
       install_requires=['setuptools'],
       py_modules=['spunky'],
