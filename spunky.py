@@ -341,6 +341,8 @@ class LogParser(object):
         self.spam_knife_kills_msg = config.getboolean('bot', 'spam_knife_kills') if config.has_option('bot', 'spam_knife_kills') else False
         self.spam_nade_kills_msg = config.getboolean('bot', 'spam_nade_kills') if config.has_option('bot', 'spam_nade_kills') else False
         self.spam_headshot_hits_msg = config.getboolean('bot', 'spam_headshot_hits') if config.has_option('bot', 'spam_headshot_hits') else False
+        self.reset_headshot_hits_mapcycle = config.getboolean('bot', 'reset_headshot_hits_mapcycle') if config.has_option('bot', 'reset_headshot_hits_mapcycle') else True
+        self.reset_kill_spree_mapcycle = config.getboolean('bot', 'reset_kill_spree_mapcycle') if config.has_option('bot', 'reset_kill_spree_mapcycle') else True
         ban_duration = config.getint('bot', 'ban_duration') if config.has_option('bot', 'ban_duration') else 7
         self.ban_duration = ban_duration if ban_duration > 0 else 1
         # support for low gravity server
@@ -824,7 +826,7 @@ class LogParser(object):
                     # store score in database
                     player.save_info()
                 # reset player statistics
-                player.reset()
+                player.reset(self.reset_headshot_hits_mapcycle, self.reset_kill_spree_mapcycle)
                 # reset team lock
                 player.set_team_lock(None)
 
@@ -3212,14 +3214,16 @@ class Player(object):
         else:
             return 0
 
-    def reset(self):
+    def reset(self, reset_headshot_hits=True, reset_kill_spree=True):
         self.kills = 0
         self.froze = 0
         self.thawouts = 0
-        self.killing_streak = 0
-        self.max_kill_streak = 0
+        if reset_kill_spree:
+            self.killing_streak = 0
+            self.max_kill_streak = 0
         self.deaths = 0
-        self.head_shots = 0
+        if reset_headshot_hits:
+            self.head_shots = 0
         self.hitzone = {'body': 0, 'arms': 0, 'legs': 0}
         self.all_hits = 0
         self.he_kills = 0
