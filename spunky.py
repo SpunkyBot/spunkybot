@@ -1070,7 +1070,7 @@ class LogParser(object):
                             killer.add_warning('stop team killing')
                             self.game.rcon_tell(killer_id, "^1WARNING ^7[^3%d^7]: ^7For team killing you will get kicked" % killer.get_warning(), False)
                             if killer.get_warning() == 3 and killer.get_admin_role() < 40:
-                                self.game.rcon_say("^1ALERT: ^2%s ^7auto-kick from warnings if not cleared" % killer_name)
+                                self.game.rcon_say("^1ALERT: ^2%s ^7auto-kick from warnings if not forgiven. Type ^3!forgive %s ^7to forgive" % (killer_name, killer_id))
 
             suicide_reason = ['UT_MOD_SUICIDE', 'MOD_FALLING', 'MOD_WATER', 'MOD_LAVA', 'MOD_TRIGGER_HURT',
                               'UT_MOD_SPLODED', 'UT_MOD_SLAPPED', 'UT_MOD_SMITED']
