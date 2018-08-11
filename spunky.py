@@ -1289,10 +1289,10 @@ class LogParser(object):
         """
         poke_options = ['Go', 'Wake up', '*poke*', 'Attention', 'Get up', 'Move out']
 
-        bad_words = ['fuck', 'ass', 'bastard', 'retard', 'slut', 'bitch', 'whore', 'cunt', 'pussy', 'dick', 'sucker',
+        bad_words = ['fuck', 'ass', 'bastard', 'retard', 'slut', 'bitch', 'whore', 'cunt', 'pussy', 'dick', 'cock', 'sucker',
                      'fick', 'arsch', 'nutte', 'schlampe', 'hure', 'fotze', 'penis', 'wichser', 'nazi', 'hitler',
-                     'putain', 'merde', 'chienne',
-                     'kurwa', 'suka', 'dupa', 'dupek', 'puta']
+                     'putain', 'merde', 'chienne', 'batard', 'jihad', 'nigger',
+                     'kurwa', 'suka', 'dupa', 'dupek', 'puta', 'maricon']
 
         with self.players_lock:
             line = line.strip()
