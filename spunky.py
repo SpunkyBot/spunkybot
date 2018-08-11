@@ -959,8 +959,11 @@ class LogParser(object):
                 self.game.rcon_tell(player_num, "^7[^2Authed^7] Welcome back %s, you are ^2%s^7, last visit %s, you played %s times" % (player_name, player.roles[player.get_admin_role()], player.get_last_visit(), player.get_num_played()), False)
                 # disable welcome message for next rounds
                 player.disable_welcome_msg()
-            elif not player.get_registered_user() and player.get_welcome_msg():
-                self.game.rcon_tell(player_num, "^7Welcome %s, you are player number ^3#%s^7. Type ^2!register ^7to save your stats" % (player_name, player_id))
+            elif not (player.get_registered_user() or player.get_first_time()) and player.get_welcome_msg():
+                self.game.rcon_tell(player_num, "^7Welcome back %s, you are player ^3#%s^7. ^3Type ^2!register ^3in chat to register" % (player_name, player_id))
+                player.disable_welcome_msg()
+            elif player.get_first_time() and player.get_welcome_msg():
+                self.game.rcon_tell(player_num, "^7Welcome %s, this must be your first visit, you are player ^3#%s^7. ^3Type ^2!help ^3in chat for help" % (player_name, player_id))
                 player.disable_welcome_msg()
             logger.debug("ClientBegin: Player %d %s has entered the game", player_num, player_name)
 
@@ -3134,6 +3137,7 @@ class Player(object):
         self.team_lock = None
         self.time_joined = time.time()
         self.welcome_msg = True
+        self.first_time = False
         self.country = None
         self.ban_id = 0
         self.ban_msg = ''
@@ -3270,6 +3274,7 @@ class Player(object):
             curs.execute("INSERT INTO `player` (`guid`,`name`,`ip_address`,`time_joined`,`aliases`) VALUES (?,?,?,?,?)", values)
             conn.commit()
             self.aliases.append(self.name)
+            self.first_time = True
         else:
             # update name, IP address and last join date
             values = (self.name, self.address, now, self.guid)
@@ -3363,6 +3368,9 @@ class Player(object):
 
     def get_ban_msg(self):
         return REASONS[self.ban_msg] if self.ban_msg in REASONS else self.ban_msg
+
+    def get_first_time(self):
+        return self.first_time
 
     def set_name(self, name):
         # remove whitespaces
