@@ -1547,11 +1547,11 @@ class LogParser(object):
                             self.game.rcon_tell(sar['player_num'], "^7Whom to grudge? %s" % ", ".join(["^3%s [^2%s^3]" % (self.game.players[playernum].get_name(), playernum) for playernum in list(set(victim.get_killed_me()))]))
                         else:
                             victim.set_grudge(grudge_player.get_player_num())
-                            self.game.rcon_say("^7%s has grudge against ^1%s" % (victim.get_name(), grudge_player.get_name()))
+                            self.game.rcon_say("^7%s has a grudge against ^1%s" % (victim.get_name(), grudge_player.get_name()))
                     else:
                         grudge_player = self.game.players[victim.get_killed_me()[-1]]
                         victim.set_grudge(grudge_player.get_player_num())
-                        self.game.rcon_say("^7%s has grudge against ^1%s" % (victim.get_name(), grudge_player.get_name()))
+                        self.game.rcon_say("^7%s has a grudge against ^1%s" % (victim.get_name(), grudge_player.get_name()))
                 elif victim.get_grudged_player():
                     self.game.rcon_tell(sar['player_num'], "^7No one to grudge. You already have a grudge against: %s" % ", ".join(["^3%s" % self.game.players[playernum].get_name() for playernum in victim.get_grudged_player()]))
                 else:
