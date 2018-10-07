@@ -5,3 +5,4 @@
 debian-startscript text eol=lf
 systemd-spunkybot.service text eol=lf
 debian/* text eol=lf
+setup.* text eol=lf
