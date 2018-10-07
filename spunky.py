@@ -280,7 +280,7 @@ class LogParser(object):
         console.setFormatter(formatter)
 
         # devel.log file
-        devel_log = logging.handlers.RotatingFileHandler(filename='devel.log', maxBytes=2097152, backupCount=1, encoding='utf8')
+        devel_log = logging.handlers.RotatingFileHandler(filename=os.path.join(HOME, 'devel.log'), maxBytes=2097152, backupCount=1, encoding='utf8')
         devel_log.setLevel(logging.INFO)
         devel_log.setFormatter(formatter)
 
