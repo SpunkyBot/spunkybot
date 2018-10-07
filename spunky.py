@@ -1082,6 +1082,8 @@ class LogParser(object):
                 logger.debug("Player %d %s committed suicide with %s", victim_id, victim_name, death_cause)
             # kill counter
             elif not tk_event and int(info[2]) != 10:  # 10: MOD_CHANGE_TEAM
+                if killer.get_losing_streak() >= 5:
+                    self.game.rcon_say("^7You are back in business ^7%s" % killer_name)
                 killer.kill()
 
                 # spawn killing - warn/kick or instant kill
@@ -1175,6 +1177,9 @@ class LogParser(object):
 
                 # death counter
                 victim.die()
+                if victim.get_losing_streak() == 5:
+                    self.game.rcon_say("^7Keep it up ^3%s^7, it will come eventually" % victim_name)
+
                 if self.show_hit_stats_msg:
                     self.game.rcon_tell(victim_id, "^1HIT Stats: ^7HS: ^2%s ^7BODY: ^2%s ^7ARMS: ^2%s ^7LEGS: ^2%s ^7TOTAL: ^2%s" % (victim.get_headshots(), victim.get_hitzones('body'), victim.get_hitzones('arms'), victim.get_hitzones('legs'), victim.get_all_hits()))
                 logger.debug("Player %d %s killed %d %s with %s", killer_id, killer_name, victim_id, victim_name, death_cause)
@@ -1381,8 +1386,11 @@ class LogParser(object):
             # spree - display kill streak counter
             elif sar['command'] == '!spree':
                 spree_count = self.game.players[sar['player_num']].get_killing_streak()
+                lose_count = self.game.players[sar['player_num']].get_losing_streak()
                 if spree_count > 0:
                     self.game.rcon_tell(sar['player_num'], "^7You have ^2%d ^7kill%s in a row" % (spree_count, 's' if spree_count > 1 else ''))
+                elif lose_count > 1:
+                        self.game.rcon_tell(sar['player_num'], "^7You have a losing spree with ^1%d ^7deaths in a row" % lose_count)
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7You are currently not having a killing spree")
 
@@ -3104,6 +3112,7 @@ class Player(object):
         self.thawouts = 0
         self.db_kills = 0
         self.killing_streak = 0
+        self.losing_streak = 0
         self.max_kill_streak = 0
         self.db_killing_streak = 0
         self.deaths = 0
@@ -3225,6 +3234,7 @@ class Player(object):
         if reset_kill_spree:
             self.killing_streak = 0
             self.max_kill_streak = 0
+            self.losing_streak = 0
         self.deaths = 0
         if reset_headshot_hits:
             self.head_shots = 0
@@ -3476,6 +3486,7 @@ class Player(object):
     def kill(self):
         now = time.time()
         self.killing_streak += 1
+        self.losing_streak = 0
         self.kills += 1
         self.db_kills += 1
         if now - self.monsterkill['time'] < 5:
@@ -3489,10 +3500,14 @@ class Player(object):
             self.max_kill_streak = self.killing_streak
         if self.max_kill_streak > self.db_killing_streak:
             self.db_killing_streak = self.max_kill_streak
+        self.losing_streak += 1
         self.killing_streak = 0
         self.deaths += 1
         self.db_deaths += 1
         self.monsterkill = {'time': 999, 'kills': 0}
+
+    def get_losing_streak(self):
+        return self.losing_streak
 
     def get_monsterkill(self):
         return self.monsterkill['kills']
