@@ -1,5 +1,5 @@
 # Installation:
-# Move this file to /etc/systemd/system/spunkybot.service
+# Move this file to /lib/systemd/system/spunkybot.service
 # Modify 'User' and 'WorkingDirectory' to suit where you installed Spunky Bot
 # Afterwards: sudo systemctl daemon-reload
 #             sudo systemctl enable spunkybot.service
