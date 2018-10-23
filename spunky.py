@@ -1094,7 +1094,7 @@ class LogParser(object):
                         if killer.get_ip_address() != '0.0.0.0':
                             if self.kill_spawnkiller:
                                 self.game.send_rcon("smite %d" % killer_id)
-                                self.game.rcon_say("^7%s got killed for Spawn Killing", killer_id)
+                                self.game.rcon_say("^7%s killed for Spawn Killing" % killer_name)
                             if self.spawnkill_autokick:
                                 killer.add_warning("stop spawn killing")
                                 self.kick_high_warns(killer, 'stop spawn killing', 'Spawn Camping and Spawn Killing are not allowed')
