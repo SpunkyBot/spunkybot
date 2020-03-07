@@ -1377,7 +1377,7 @@ class LogParser(object):
                 if spree_count > 0:
                     self.game.rcon_tell(sar['player_num'], "^7You have ^2%d ^7kill%s in a row" % (spree_count, 's' if spree_count > 1 else ''))
                 elif lose_count > 1:
-                        self.game.rcon_tell(sar['player_num'], "^7You have a losing spree with ^1%d ^7deaths in a row" % lose_count)
+                    self.game.rcon_tell(sar['player_num'], "^7You have a losing spree with ^1%d ^7deaths in a row" % lose_count)
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7You are currently not having a killing spree")
 
