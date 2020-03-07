@@ -61,10 +61,6 @@ It's easy to get started with Spunky Bot:
 
 - Connect to your game server and type `!iamgod` in the global chat to get the admin level "Head Admin". This command is only once available.
 
-### Heartbeat
-Spunky Bot has an option to send a heartbeat signal to our masterserver. There is no client data sent to the masterserver at all! Data in the heartbeat packet contain: Spunky Bot version, the port of the game server and the operating system version.
-The information is used for generating global statistics and to determine operating system popularity.
-
 
 ## Documentation
 You can find all the documentation in the [Wiki](https://github.com/SpunkyBot/spunkybot/wiki).

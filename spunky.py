@@ -31,9 +31,7 @@ import time
 import sqlite3
 import math
 import textwrap
-import urllib
 import urllib2
-import platform
 import random
 import ConfigParser
 import logging.handlers
@@ -355,12 +353,6 @@ class LogParser(object):
         self.iamgod = True if curs.fetchone()[0] < 1 else False
         logger.info("Connecting to Database: OK")
         logger.debug("Cmd !iamgod available : %s", self.iamgod)
-        server_port = config.get('server', 'server_port') if config.has_option('server', 'server_port') else "27960"
-        # Heartbeat packet
-        data = {'v': __version__, 'p': server_port, 'o': platform.platform()}
-        self.heartbeat = config.getboolean('bot', 'heartbeat') if config.has_option('bot', 'heartbeat') else False
-        # Master Server
-        self.ping_url = 'http://master.spunkybot.de/ping.php?%s' % urllib.urlencode(data)
         self.uptime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         # Rotating Messages and Rules
         if config.has_option('rules', 'show_rules') and config.getboolean('rules', 'show_rules'):
@@ -513,9 +505,6 @@ class LogParser(object):
                 schedule.every(10).seconds.do(self.taskmanager)
             else:
                 schedule.every(self.task_frequency).seconds.do(self.taskmanager)
-        if self.heartbeat:
-            # schedule the task
-            schedule.every(12).hours.do(self.send_heartbeat)
         # schedule the task
         schedule.every(2).hours.do(self.remove_expired_db_entries)
 
@@ -534,15 +523,6 @@ class LogParser(object):
                 if not self.game.live:
                     self.game.go_live()
                 time.sleep(.125)
-
-    def send_heartbeat(self):
-        """
-        send heartbeat packet
-        """
-        try:
-            urllib2.urlopen(self.ping_url, timeout=3)
-        except urllib2.URLError:
-            pass
 
     def remove_expired_db_entries(self):
         """
