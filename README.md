@@ -12,7 +12,6 @@ The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was 
 [![Version](https://img.shields.io/badge/version-1.11.0-orange.svg)](https://github.com/SpunkyBot/spunkybot/releases)
 [![PyPI version](https://img.shields.io/pypi/v/spunkybot.svg)](https://pypi.python.org/pypi/spunkybot)
 [![Python version](https://img.shields.io/badge/python-2.6,%202.7-yellow.svg)](https://pypi.python.org/pypi/spunkybot)
-[![Code Health](https://landscape.io/github/SpunkyBot/spunkybot/master/landscape.svg)](https://landscape.io/github/SpunkyBot/spunkybot/master)
 [![Codacy Grade](https://api.codacy.com/project/badge/Grade/07b16a60bcce41ac89dc19dd3316c127)](https://www.codacy.com/app/SpunkyBot/spunkybot)
 
 If you want to know more, this is a list of selected starting points:
@@ -94,7 +93,7 @@ Spunky Bot is currently maintained under the [Semantic Versioning](http://semver
 ## Additional Information
 For additional information, visit the Spunky Bot website at [https://www.spunkybot.de](https://www.spunkybot.de).
 
-If you have any questions about Spunky Bot or need help, please use the [mailing list](https://groups.google.com/group/spunkybot). If you need help right now, you can also find us on [Twitter](https://twitter.com/spunkybot).
+If you have any questions about Spunky Bot or need help, please use the [mailing list](https://groups.google.com/group/spunkybot).
 
 * Joining the mailing list:
 	* Send an email to <mailto:spunkybot+subscribe@googlegroups.com>
@@ -104,8 +103,6 @@ If you have any questions about Spunky Bot or need help, please use the [mailing
 	* or unsubscribe via web: [https://groups.google.com/forum/#!forum/spunkybot/unsubscribe](https://groups.google.com/forum/#!forum/spunkybot/unsubscribe)
 * If you joined the group, you can post to this group:
 	* Send an email to <spunkybot@googlegroups.com>
-
-In our [Google+ Community](https://plus.google.com/communities/116728939500870368885) we talk about anything our community is interested in. You can also follow us on [Google+](https://plus.google.com/106857192050943115434).
 
 If you have bug reports or feature suggestions, please use the [issue tracker](https://github.com/SpunkyBot/spunkybot/issues?state=open).
 
