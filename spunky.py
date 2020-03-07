@@ -3,7 +3,7 @@
 
 """
 Spunky Bot - An automated game server bot
-http://www.spunkybot.de
+http://github.com/spunkybot/spunkybot
 Author: Alexander Kress
 
 This program is released under the MIT License. See LICENSE for more details.
@@ -1072,7 +1072,7 @@ class LogParser(object):
                     warn_time = 3
                     if victim.get_respawn_time() + warn_time > time.time():
                         if killer.get_ip_address() != '0.0.0.0':
-                            if self.kill_spawnkiller:
+                            if self.kill_spawnkiller and self.urt_modversion > 41:
                                 self.game.send_rcon("smite %d" % killer_id)
                                 self.game.rcon_say("^7%s killed for Spawn Killing" % killer_name)
                             if self.spawnkill_autokick:
@@ -2315,6 +2315,7 @@ class LogParser(object):
                     else:
                         self.game.send_rcon('g_nextmap %s' % newmap)
                         self.game.next_mapname = newmap
+                        self.game.rcon_bigtext("^2Please wait...")
                         self.game.rcon_tell(sar['player_num'], "^7Changing Map to: ^3%s" % newmap)
                         self.game.send_rcon('cyclemap')
                 else:
