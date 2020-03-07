@@ -306,6 +306,7 @@ class LogParser(object):
         self.firstblood = False
         self.firstnadekill = False
         self.firstknifekill = False
+        self.firstteamkill = False
         self.last_disconnected_player = None
         self.allow_nextmap_vote = True
         self.default_gear = ''
@@ -815,10 +816,12 @@ class LogParser(object):
             self.firstblood = True
             self.firstnadekill = True
             self.firstknifekill = True
+            self.firstteamkill = True
         else:
             self.firstblood = False
             self.firstnadekill = False
             self.firstknifekill = False
+            self.firstteamkill = False
 
     def handle_userinfo(self, line):
         """
@@ -1029,6 +1032,10 @@ class LogParser(object):
             if not self.ffa_lms_gametype:
                 if victim.get_team() == killer.get_team() and victim.get_team() != 3 and victim_id != killer_id and death_cause != "UT_MOD_BOMBED":
                     tk_event = True
+                    # first teamkill message
+                    if self.firstteamkill:
+                        self.game.rcon_bigtext("^1First Team Kill: ^7%s killed by ^1%s" % (victim_name, killer_name))
+                        self.firstteamkill = False
                     # increase team kill counter for killer and kick for too many team kills
                     killer.team_kill()
                     # increase team death counter for victim
