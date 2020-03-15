@@ -4047,7 +4047,9 @@ class Game(object):
         @type  player: Instance
         """
         self.players[player.get_player_num()] = player
-        player.check_database()
+        # check DB for real players and exclude bots which have IP 0.0.0.0
+        if player.get_ip_address() != '0.0.0.0':
+            player.check_database()
 
     def get_gamestats(self):
         """
