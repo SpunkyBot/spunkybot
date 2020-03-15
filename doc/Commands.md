@@ -163,6 +163,8 @@
 - **kickbots** kick all bots
 	- Usage: `!kickbots`
 	- Short: `!kb`
+- **ping** - display the ping of a player
+	- Usage: `!ping <name|id>`
 - **rain** - enables or disables rain
 	- Usage: `!rain <on/off>`
 - **scream** - scream a message in different colors to all players

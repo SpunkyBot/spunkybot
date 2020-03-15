@@ -116,6 +116,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'ci': {'desc': 'kick player with connection interrupt', 'syntax': '^7Usage: ^2!ci ^7<name>', 'level': 60},
             'forgiveclear': {'desc': "clear a player's team kills", 'syntax': '^7Usage: ^2!forgiveclear ^7[<name>]', 'level': 60, 'short': 'fc'},
             'forgiveinfo': {'desc': "display a player's team kills", 'syntax': '^7Usage: ^2!forgiveinfo ^7<name>', 'level': 60, 'short': 'fi'},
+            'ping': {'desc': 'display the ping of a player', 'syntax': '^7Usage: ^2!ping ^7<name>', 'level': 60},
             'id': {'desc': 'show the IP, guid and authname of a player', 'syntax': '^7Usage: ^2!id ^7<name>', 'level': 60},
             'kickbots': {'desc': 'kick all bots', 'syntax': '^7Usage: ^2!kickbots', 'level': 60, 'short': 'kb'},
             'rain': {'desc': 'enables or disables rain', 'syntax': '^7Usage: ^2!rain ^7<on/off>', 'level': 60},
@@ -2017,6 +2018,19 @@ class LogParser(object):
                         player.clear_all_tk()
                         player.clear_all_killed_me()
                     self.game.rcon_say("^1All player team kills cleared")
+
+            # ping - display the ping of a player
+            elif sar['command'] == '!ping' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['ping']['level']:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
+                    found, victim, msg = self.player_found(user)
+                    if not found:
+                        self.game.rcon_tell(sar['player_num'], msg)
+                    else:
+                        msg = "^7%s has a ping of ^2%s ms" % (victim.get_name(), victim.get_ping_value())
+                        self.game.rcon_tell(sar['player_num'], msg)
+                else:
+                    self.game.rcon_tell(sar['player_num'], COMMANDS['ping']['syntax'])
 
             # id - show the IP, guid and authname of a player - !id <name>
             elif sar['command'] == '!id' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['id']['level']:
