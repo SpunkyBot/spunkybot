@@ -2748,7 +2748,12 @@ class LogParser(object):
             msg = "^7Next Map: ^3%s" % g_nextmap
             self.game.next_mapname = g_nextmap
         else:
-            msg = "^7Next Map: ^3%s" % self.game.next_mapname
+            g_nextmap = self.game.get_cvar('g_nextCycleMap')
+            if g_nextmap and g_nextmap.split(" ")[0].strip() in self.game.get_all_maps():
+                msg = "^7Next Map: ^3%s" % g_nextmap
+                self.game.next_mapname = g_nextmap
+            else:
+                msg = "^7Next Map: ^3%s" % self.game.next_mapname
         return msg
 
     def tell_say_message(self, sar, msg):
