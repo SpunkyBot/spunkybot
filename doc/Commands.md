@@ -185,7 +185,7 @@
 
 ### Senior Admin [80]
 
-- **addbots** - add bots to the game
+- **addbots** - add bots to the game (requires `!bots on` first)
 	- Usage: `!addbots`
 - **banall** - ban all players matching pattern
 	- Usage: `!banall <pattern> [<reason>]`
