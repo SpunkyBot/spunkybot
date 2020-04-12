@@ -2023,11 +2023,17 @@ class LogParser(object):
             elif sar['command'] == '!ping' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['ping']['level']:
                 if line.split(sar['command'])[1]:
                     user = line.split(sar['command'])[1].strip()
+                    player_ping = 0
                     found, victim, msg = self.player_found(user)
                     if not found:
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
-                        msg = "^7%s has a ping of ^2%s ms" % (victim.get_name(), victim.get_ping_value())
+                        # update rcon status
+                        self.game.quake.rcon_update()
+                        for player in self.game.quake.players:
+                            if victim.get_player_num() == player.num:
+                                player_ping = player.ping
+                        msg = "^7%s has a ping of ^2%s ms" % (victim.get_name(), player_ping)
                         self.game.rcon_tell(sar['player_num'], msg)
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['ping']['syntax'])
