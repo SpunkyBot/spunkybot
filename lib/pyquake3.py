@@ -184,23 +184,24 @@ class PyQuake3(object):
         """
         perform RCON status update
         """
-        data = self.rcon('status')[1]
-        lines = data.split('\n')
+        status, data = self.rcon('status')
+        if status == 'print' and data.startswith('map'):
+            lines = data.split('\n')
 
-        players = lines[3:]
-        self.players = []
-        for ply in players:
-            while ply.find('  ') != -1:
-                ply = ply.replace('  ', ' ')
-            while ply.find(' ') == 0:
-                ply = ply[1:]
-            if ply == '':
-                continue
-            ply = ply.split(' ')
-            try:
-                self.players.append(Player(int(ply[0]), ply[3], int(ply[1]), int(ply[2]), ply[5]))
-            except (IndexError, ValueError):
-                continue
+            players = lines[3:]
+            self.players = []
+            for ply in players:
+                while ply.find('  ') != -1:
+                    ply = ply.replace('  ', ' ')
+                while ply.find(' ') == 0:
+                    ply = ply[1:]
+                if ply == '':
+                    continue
+                ply = ply.split(' ')
+                try:
+                    self.players.append(Player(int(ply[0]), ply[3], int(ply[1]), int(ply[2]), ply[5]))
+                except (IndexError, ValueError):
+                    continue
 
 
 if __name__ == '__main__':
