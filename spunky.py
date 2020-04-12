@@ -2417,6 +2417,7 @@ class LogParser(object):
             elif sar['command'] == '!rebuild' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['rebuild']['level']:
                 # get full map list
                 self.game.set_all_maps()
+                self.game.maplist = filter(None, self.game.get_mapcycle_path())
                 self.game.rcon_tell(sar['player_num'], "^7Rebuild maps: ^3%s ^7maps found" % len(self.game.get_all_maps()))
                 # set current and next map
                 self.game.set_current_map()
