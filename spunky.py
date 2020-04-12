@@ -1302,6 +1302,8 @@ class LogParser(object):
                 sar = {'player_num': int(number), 'command': cmd}
             except IndexError:
                 sar = {'player_num': BOT_PLAYER_NUM, 'command': ''}
+            except ValueError:
+                sar = {'player_num': 0, 'command': str(line.split(": ", 1)).split(" ", 1)[0]}
 
             if sar['command'] == '!mapstats':
                 self.game.rcon_tell(sar['player_num'], "^2%d ^7kills - ^2%d ^7deaths" % (self.game.players[sar['player_num']].get_kills(), self.game.players[sar['player_num']].get_deaths()))
