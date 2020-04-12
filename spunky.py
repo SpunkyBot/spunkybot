@@ -4048,7 +4048,7 @@ class Game(object):
                     break
                 else:
                     all_maps += ret_val
-            all_maps_list = list(set([maps.replace("/", "").replace(".bsp", "") for maps in all_maps if maps.startswith("/")]))
+            all_maps_list = list(set([maps.replace("/", "").replace(".bsp", "").lower() for maps in all_maps if maps.startswith("/")]))
             all_maps_list.sort()
             if all_maps_list:
                 self.all_maps_list = all_maps_list
