@@ -6,6 +6,15 @@ branches:
     - master
     - develop
 install:
-  - pip install flake8
+  - pip install --upgrade pip
+  - pip install -r requirements.txt
 script:
+  # Run Python linting / https://pycodestyle.readthedocs.io/en/latest/intro.html#error-codes
   - flake8 --ignore=E501,E265,E266,E402,E722 .
+  # Make sure that the README is formatted properly
+  - python setup.py check --restructuredtext --strict --metadata
+  # Run reStructuredText linter
+  - rst-lint README.md CONTRIBUTING.md CHANGELOG.md LICENSE
+  # Run build and test
+  - python setup.py build
+  - python setup.py test
