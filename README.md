@@ -48,14 +48,14 @@ It's easy to get started with Spunky Bot:
 
 ### Configuration
 - Modify the Urban Terror server config file as follows:
-
-    - `seta g_logsync "1"`
-    - `seta g_loghits "1"`
-
+```
+seta g_logsync "1"
+seta g_loghits "1"
+```
 - Restart your Urban Terror server
 - Modify the Spunky Bot configuration file `/conf/settings.conf` and set game server port and RCON password
 - In-game displayed rules/advertisements are contained in the file `/conf/rules.conf`
-	- If you do not want to display the rotation messages, set the value `show_rules=0` in the config file `/conf/settings.conf`
+- If you do not want to display the rotation messages, set the value `show_rules=0` in the config file `/conf/settings.conf`
 - Run the application manually: `python spunky.py`
 - Or use the provided systemd or sysVinit script to run Spunky Bot as daemon
 
