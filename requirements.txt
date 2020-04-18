@@ -4,4 +4,5 @@ markdown
 wheel
 twine
 flake8
+restructuredtext_lint
 mkdocs
