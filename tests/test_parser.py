@@ -35,3 +35,8 @@ def test_ctf_gametype():
     if "g_gametype\7" in line:
         ret_val = "CTF"
     assert ret_val == "CTF"
+
+
+def test_gear_value():
+    gear = line.split('g_gear\\')[-1].split('\\')[0] if 'g_gear\\' in line else "%s" % ''
+    assert gear == "KQ"
