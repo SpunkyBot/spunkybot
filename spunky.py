@@ -4138,7 +4138,7 @@ if __name__ == "__main__":
     if x == True:
         print (("1"))
     else:
-        print (y,)
+        print "y"
 
     # close database connection
     conn.close()
