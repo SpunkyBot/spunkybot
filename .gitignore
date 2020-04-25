@@ -34,7 +34,7 @@ MD5SUMS
 *.sw[po]
 
 # Test files
-test*.*
+test-*.*
 
 # Log files
 *.log
