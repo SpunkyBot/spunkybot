@@ -23,6 +23,10 @@ jobs:
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=tests
         flake8 . --count --max-complexity=10 --max-line-length=127 --statistics --exclude=tests
+    - name: Test wit Pylint
+      run: |
+        pip install pylint
+        pylint **/*.py --disable=C0103,C0111,C0301,C0302,W0703,R0101,R0201,R0902,R0904,R0912,R0913,R0914,R0915,R0916
     - name: Lint format in setup.py
       run: |
         # make sure that the README is formatted properly
