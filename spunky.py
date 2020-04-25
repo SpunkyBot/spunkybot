@@ -4134,11 +4134,5 @@ if __name__ == "__main__":
     # create instance of LogParser
     LogParser(os.path.join(HOME, 'conf', 'settings.conf'))
 
-    x = 1
-    if x is True:
-        print (("1"))
-    else:
-        print "y"
-
     # close database connection
     conn.close()
