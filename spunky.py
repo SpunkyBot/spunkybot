@@ -35,13 +35,12 @@ import urllib2
 import random
 import ConfigParser
 import logging.handlers
-import lib.pygeoip as pygeoip
-import lib.schedule as schedule
-
-from lib.pyquake3 import PyQuake3
 from Queue import Queue
 from threading import Thread
 from threading import RLock
+import lib.pygeoip as pygeoip
+import lib.schedule as schedule
+from lib.pyquake3 import PyQuake3
 
 
 # Get an instance of a logger
