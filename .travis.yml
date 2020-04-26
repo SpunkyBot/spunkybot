@@ -10,7 +10,7 @@ install:
   - pip install -r requirements.txt
 script:
   # Run Python linting / https://pycodestyle.readthedocs.io/en/latest/intro.html#error-codes
-  - flake8 --ignore=C901,E501,E265,E266,E402,E722 .
+  - flake8 . --ignore=C901,E501,E265,E266,E402,E722 --exclude=tests
   # Make sure that the README is formatted properly
   - python setup.py check --restructuredtext --strict --metadata
   # Run reStructuredText linter
@@ -18,3 +18,5 @@ script:
   # Run build and test
   - python setup.py build
   - python setup.py test
+  - python setup.py sdist bdist_wheel
+  - twine check dist/*
