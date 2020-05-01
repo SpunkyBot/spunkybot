@@ -1196,13 +1196,14 @@ class LogParser(object):
                 append("^3%s [^2%d^3]" % (player_name, player_num))
         if not name_list:
             if user.startswith('@'):
-                return self.offline_player(user)
+                ret_val = self.offline_player(user)
             else:
-                return False, None, "^3No players found matching %s" % user
+                ret_val = False, None, "^3No players found matching %s" % user
         elif len(name_list) > 1:
-            return False, None, "^7Players matching %s: ^3%s" % (user, ', '.join(name_list))
+            ret_val = False, None, "^7Players matching %s: ^3%s" % (user, ', '.join(name_list))
         else:
-            return True, victim, "^7Found player matching %s: ^3%s" % (user, name_list[-1])
+            ret_val = True, victim, "^7Found player matching %s: ^3%s" % (user, name_list[-1])
+        return ret_val
 
     def offline_player(self, user_id):
         """
