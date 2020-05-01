@@ -1238,11 +1238,12 @@ class LogParser(object):
             elif map_name.lower() in maps:
                 append(maps)
         if not map_list:
-            return False, None, "^3Map not found"
+            ret_val = False, None, "^3Map not found"
         elif len(map_list) > 1:
-            return False, None, "^7Maps matching %s: ^3%s" % (map_name, ', '.join(map_list))
+            ret_val = False, None, "^7Maps matching %s: ^3%s" % (map_name, ', '.join(map_list))
         else:
-            return True, map_list[0], None
+            ret_val = True, map_list[0], None
+        return ret_val
 
     def handle_saytell(self, line):
         """
