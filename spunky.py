@@ -692,6 +692,7 @@ class LogParser(object):
         """
         # nextmap vote
         if "g_nextmap" in line:
+            self.game.rcon_say("^7Vote for ^3Next Map ^2passed")
             self.game.next_mapname = line.split("g_nextmap")[-1].strip('"').strip()
             self.game.rcon_say("^7Next Map: ^3%s" % self.game.next_mapname)
             self.allow_nextmap_vote = False
@@ -704,7 +705,7 @@ class LogParser(object):
         if "g_nextmap" in line:
             if self.limit_nextmap_votes and not self.allow_nextmap_vote:
                 self.game.send_rcon('veto')
-                self.game.rcon_say("^7Voting for Next Map is now disabled until the end of this map")
+                self.game.rcon_say("^7Voting for Next Map is disabled until the end of this map")
                 spam_msg = False
         if spam_msg:
             self.game.rcon_bigtext("^7Press ^2F1 ^7or ^1F2 ^7to vote!")
@@ -987,7 +988,7 @@ class LogParser(object):
                      'ARMS': 'arms', 'LEFT_ARM': 'arms', 'RIGHT_ARM': 'arms'}
 
             if hitpoint in self.hit_points:
-                if self.hit_points[hitpoint] == 'HEAD' or self.hit_points[hitpoint] == 'HELMET':
+                if self.hit_points[hitpoint] in ('HEAD', 'HELMET'):
                     hitter.headshot()
                     hitter_hs_count = hitter.get_headshots()
                     hs_msg = {5: 'watch out!',
@@ -1108,7 +1109,7 @@ class LogParser(object):
                 elif self.firstnadekill and death_cause == 'UT_MOD_HEGRENADE':
                     self.game.rcon_bigtext("^3%s: ^7first HE grenade kill" % killer_name)
                     self.firstnadekill = False
-                elif self.firstknifekill and (death_cause == 'UT_MOD_KNIFE' or death_cause == 'UT_MOD_KNIFE_THROWN'):
+                elif self.firstknifekill and (death_cause in ('UT_MOD_KNIFE', 'UT_MOD_KNIFE_THROWN')):
                     self.game.rcon_bigtext("^3%s: ^7first knife kill" % killer_name)
                     self.firstknifekill = False
 
@@ -1320,7 +1321,7 @@ class LogParser(object):
                 elif self.freeze_gametype:
                     self.game.rcon_tell(sar['player_num'], "^7freeze: ^2%d ^7- thaw out: ^2%d" % (self.game.players[sar['player_num']].get_freeze(), self.game.players[sar['player_num']].get_thawout()))
 
-            elif sar['command'] == '!help' or sar['command'] == '!h':
+            elif sar['command'] in ('!help', '!h'):
                 if line.split(sar['command'])[1]:
                     cmd = line.split(sar['command'])[1].strip()
                     if cmd in COMMANDS:
@@ -1429,7 +1430,7 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7You are not playing Freeze Tag")
 
             # time - display the servers current time
-            elif sar['command'] == '!time' or sar['command'] == '@time':
+            elif sar['command'] in ('!time', '@time'):
                 msg = "^7%s" % time.strftime("%H:%M", time.localtime(time.time()))
                 self.tell_say_message(sar, msg)
 
@@ -1471,7 +1472,7 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], "^7You need to ^2!register ^7first")
 
             # xlrtopstats
-            elif (sar['command'] == '!xlrtopstats' or sar['command'] == '!topstats') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['xlrtopstats']['level']:
+            elif (sar['command'] in ('!xlrtopstats', '!topstats')) and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['xlrtopstats']['level']:
                 values = (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime((time.time() - 10368000))),)  # last played within the last 120 days
                 result = curs.execute("SELECT name FROM `xlrstats` WHERE (`rounds` > 35 or `kills` > 500) and `last_played` > ? ORDER BY `ratio` DESC LIMIT 3", values).fetchall()
                 toplist = ['^1#%s ^7%s' % (index + 1, result[index][0]) for index in xrange(len(result))]
@@ -3879,12 +3880,7 @@ class Game(object):
             mc_base_path = os.path.join(fs_basepath, fs_game, mapcycle_file) if fs_basepath else ""
         except TypeError:
             raise Exception('Server did not respond to mapcycle path request, please restart the Bot')
-        if os.path.isfile(mc_home_path):
-            mapcycle_path = mc_home_path
-        elif os.path.isfile(mc_base_path):
-            mapcycle_path = mc_base_path
-        else:
-            mapcycle_path = None
+        mapcycle_path = mc_home_path if os.path.isfile(mc_home_path) else mc_base_path if os.path.isfile(mc_base_path) else None
         if mapcycle_path:
             logger.info("Mapcycle path         : %s", mapcycle_path)
             with open(mapcycle_path, 'r') as file_handle:
@@ -3983,6 +3979,7 @@ class Game(object):
             self.send_rcon('kick %d "%s"' % (player_num, reason))
         else:
             self.send_rcon('kick %d' % player_num)
+        logger.debug("%s kicked%s%s", player_num, ": " if reason else '', reason)
 
     def go_live(self):
         """
