@@ -853,7 +853,7 @@ class LogParser(object):
                 port = "27960"
 
             # convert loopback/localhost address
-            if ip_address in ['loopback', 'localhost']:
+            if ip_address in ('loopback', 'localhost'):
                 ip_address = '127.0.0.1'
 
             if player_num not in self.game.players:
@@ -916,7 +916,7 @@ class LogParser(object):
                 name = self.game.players[player_num].get_name()
 
             # set new name, if player changed name
-            if not self.game.players[player_num].get_name() == name:
+            if self.game.players[player_num].get_name() != name:
                 self.game.players[player_num].set_name(name)
 
             # move locked player to the defined team, if player tries to change teams
@@ -958,6 +958,7 @@ class LogParser(object):
         with self.players_lock:
             player_num = int(line)
             player = self.game.players[player_num]
+            player_name = player.get_name()
             player.save_info()
             player.reset()
             self.last_disconnected_player = player
@@ -965,7 +966,7 @@ class LogParser(object):
             for player in self.game.players.itervalues():
                 player.clear_tk(player_num)
                 player.clear_grudged_player(player_num)
-            logger.debug("ClientDisconnect: Player %d %s has left the game", player_num, player.get_name())
+            logger.debug("ClientDisconnect: Player %d %s has left the game", player_num, player_name)
 
     def handle_hit(self, line):
         """
@@ -2833,33 +2834,34 @@ class LogParser(object):
         """
         handle flag
         """
-        tmp = line.split()
-        player_num = int(tmp[0])
-        action = tmp[1]
         with self.players_lock:
+            tmp = line.split()
+            player_num = int(tmp[0])
             player = self.game.players[player_num]
+            player_name = player.get_name()
+            action = tmp[1]
             if action == '1:':
                 player.return_flag()
-                logger.debug("Player %d returned the flag", player_num)
+                logger.debug("Player %d %s returned the flag", player_num, player_name)
             elif action == '2:':
                 player.capture_flag()
                 cap_count = player.get_flags_captured()
-                self.game.send_rcon("^7%s has captured ^2%s ^7flag%s" % (player.get_name(), cap_count, 's' if cap_count > 1 else ''))
-                logger.debug("Player %d captured the flag", player_num)
+                self.game.send_rcon("^7%s has captured ^2%s ^7flag%s" % (player_name, cap_count, 's' if cap_count > 1 else ''))
+                logger.debug("Player %d %s captured the flag", player_num, player_name)
 
     def handle_bomb(self, line):
         """
         handle bomb
         """
-        tmp = line.split("is") if "Bombholder" in line else line.split("by")
-        action = tmp[0].strip()
-        player_num = int(tmp[1].rstrip('!').strip())
-        name = self.game.players[player_num].get_name()
         with self.players_lock:
+            tmp = line.split("is") if "Bombholder" in line else line.split("by")
+            action = tmp[0].strip()
+            player_num = int(tmp[1].rstrip('!').strip())
+            name = self.game.players[player_num].get_name()
             player = self.game.players[player_num]
             if action == 'Bomb was defused':
                 player.defused_bomb()
-                logger.debug("Player %d defused the bomb", player_num)
+                logger.debug("Player %d %s defused the bomb", player_num, name)
                 self.game.send_rcon("^7The ^2BOMB ^7has been defused by ^2%s^7!" % name)
                 self.handle_teams_ts_mode('Blue')
                 # kill all survived red players
@@ -2869,7 +2871,7 @@ class LogParser(object):
                             self.game.send_rcon("smite %d" % player.get_player_num())
             elif action == 'Bomb was planted':
                 player.planted_bomb()
-                logger.debug("Player %d planted the bomb", player_num)
+                logger.debug("Player %d %s planted the bomb", player_num, name)
                 self.game.send_rcon("^7The ^1BOMB ^7has been planted by ^1%s^7! ^2%s ^7seconds to detonation." % (name, self.explode_time))
                 if self.spam_bomb_planted_msg:
                     self.game.rcon_bigtext("^1The ^7BOMB ^1has been planted by ^7%s^1!" % name)
@@ -2961,18 +2963,18 @@ class LogParser(object):
         """
         handle freeze
         """
-        info = line.split(":", 1)[0].split()
-        player_num = int(info[0])
         with self.players_lock:
+            info = line.split(":", 1)[0].split()
+            player_num = int(info[0])
             self.game.players[player_num].freeze()
 
     def handle_thawout(self, line):
         """
         handle thaw out
         """
-        info = line.split(":", 1)[0].split()
-        player_num = int(info[0])
         with self.players_lock:
+            info = line.split(":", 1)[0].split()
+            player_num = int(info[0])
             self.game.players[player_num].thawout()
 
     def handle_awards(self):
