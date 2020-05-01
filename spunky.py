@@ -3654,6 +3654,7 @@ class Player(object):
             if "stop team killing" in last_warning:
                 self.tk_victim_names.pop()
             return last_warning
+        return None
 
     def clear_warning(self):
         self.warn_list = []
@@ -3827,6 +3828,7 @@ class Game(object):
             with self.rcon_lock:
                 self.quake.update()
                 return self.quake.values[value]
+        return ''
 
     def get_rcon_output(self, value):
         """
@@ -3838,6 +3840,7 @@ class Game(object):
         if self.live:
             with self.rcon_lock:
                 return self.quake.rcon(value)
+        return ''
 
     def get_cvar(self, value):
         """
@@ -3854,6 +3857,7 @@ class Game(object):
                     ret_val = None
                 time.sleep(RCON_DELAY)
                 return ret_val
+        return ''
 
     def get_number_players(self):
         """
