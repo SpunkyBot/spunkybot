@@ -22,8 +22,9 @@ jobs:
     - run: markdown-link-check ./CHANGELOG.md
     # https://github.com/igorshubovych/markdownlint-cli
     - run: npm install -g markdownlint-cli
-    - run: |
-        touch .markdownlint.json <<'EOF'
+    - name: run markdownlint
+      run: |
+        touch .markdownlint.json && cat >> .markdownlint.json <<'EOF'
         {
           "MD013": false,
           "MD026": false,
