@@ -12,9 +12,17 @@ The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was 
 [![License](https://img.shields.io/github/license/SpunkyBot/spunkybot)](https://github.com/SpunkyBot/spunkybot/blob/master/LICENSE)
 
 [![Version](https://img.shields.io/badge/version-1.11.0-orange.svg)](https://github.com/SpunkyBot/spunkybot/releases)
+[![Release](https://img.shields.io/github/v/release/SpunkyBot/spunkybot.svg?color=orange)](https://github.com/SpunkyBot/spunkybot/releases)
 [![PyPI version](https://img.shields.io/pypi/v/spunkybot.svg)](https://pypi.python.org/pypi/spunkybot)
+
+[![PyPi Downloads](https://pepy.tech/badge/spunkybot)](https://pepy.tech/project/spunkybot)
+![GitHub Downloads](https://img.shields.io/github/downloads/SpunkyBot/spunkybot/total.svg)
+
 [![Python version](https://img.shields.io/badge/python-2.6,%202.7-yellow.svg)](https://pypi.python.org/pypi/spunkybot)
-[![Codacy Grade](https://api.codacy.com/project/badge/Grade/07b16a60bcce41ac89dc19dd3316c127)](https://www.codacy.com/app/SpunkyBot/spunkybot)
+[![PyPI - Python version](https://img.shields.io/pypi/pyversions/spunkybot?color=yellow)](https://pypi.org/project/spunkybot)
+
+![Ubuntu package](https://img.shields.io/ubuntu/v/spunkybot)
+![Ubuntu package](https://img.shields.io/ubuntu/v/Spunkybot/spunkybot)
 
 If you want to know more, this is a list of selected starting points:
 
@@ -24,6 +32,7 @@ If you want to know more, this is a list of selected starting points:
 
 
 ## Features
+
 - Lightweight and fast
 - Real time game statistics
 - Different user groups and levels
@@ -35,6 +44,7 @@ If you want to know more, this is a list of selected starting points:
 
 
 ## Environment
+
 - Urban Terror 4.1.1 / 4.2.023 / 4.3.4
 - Python 2.6 / 2.7
 - SQLite 3 database
@@ -49,10 +59,12 @@ It's easy to get started with Spunky Bot:
 - Read our [quickstart guide](https://spunkybot.de/docs/start) to get up and running
 
 ### Configuration
+
 - Modify the Urban Terror server config file as follows:
 ```
 seta g_logsync "1"
 seta g_loghits "1"
+seta g_friendlyfire "2"
 ```
 - Restart your Urban Terror server
 - Modify the Spunky Bot configuration file `/conf/settings.conf` and set game server port and RCON password
@@ -74,6 +86,7 @@ The description of all available [commands](https://github.com/SpunkyBot/spunkyb
 
 
 ## Resources
+
 * [Documentation](https://github.com/SpunkyBot/spunkybot/wiki)
 * [Troubleshooting](https://github.com/SpunkyBot/spunkybot/wiki/Troubleshooting)
 * [Bug Tracker](https://github.com/SpunkyBot/spunkybot/issues)
@@ -96,13 +109,13 @@ For additional information, visit the Spunky Bot website at [https://www.spunkyb
 If you have any questions about Spunky Bot or need help, please use the [mailing list](https://groups.google.com/group/spunkybot).
 
 * Joining the mailing list:
-	* Send an email to <mailto:spunkybot+subscribe@googlegroups.com>
-	* or subscribe via web: [https://groups.google.com/forum/#!forum/spunkybot/join](https://groups.google.com/forum/#!forum/spunkybot/join)
+  * Send an email to <mailto:spunkybot+subscribe@googlegroups.com>
+  * or subscribe via web: [https://groups.google.com/forum/#!forum/spunkybot/join](https://groups.google.com/forum/#!forum/spunkybot/join)
 * Leaving the mailing list:
-	* Send an email to <mailto:spunkybot+unsubscribe@googlegroups.com>
-	* or unsubscribe via web: [https://groups.google.com/forum/#!forum/spunkybot/unsubscribe](https://groups.google.com/forum/#!forum/spunkybot/unsubscribe)
+  * Send an email to <mailto:spunkybot+unsubscribe@googlegroups.com>
+  * or unsubscribe via web: [https://groups.google.com/forum/#!forum/spunkybot/unsubscribe](https://groups.google.com/forum/#!forum/spunkybot/unsubscribe)
 * If you joined the group, you can post to this group:
-	* Send an email to <spunkybot@googlegroups.com>
+  * Send an email to <spunkybot@googlegroups.com>
 
 If you have bug reports or feature suggestions, please use the [issue tracker](https://github.com/SpunkyBot/spunkybot/issues?state=open).
 
@@ -112,11 +125,11 @@ You can help us in different ways:
 
 * Open an [issue](https://github.com/SpunkyBot/spunkybot/issues) with suggestions for improvements
 * Fork this repository and submit a pull request:
-	* Click the Fork button to create your personal fork 
-	* Create your feature branch (`git checkout -b new-feature`)
-	* Commit your changes (`git commit -am 'Add some feature'`)
-	* Push to the branch (`git push origin new-feature`)
-	* Create a new pull request
+  * Click the Fork button to create your personal fork
+  * Create your feature branch (`git checkout -b new-feature`)
+  * Commit your changes (`git commit -am 'Add some feature'`)
+  * Push to the branch (`git push origin new-feature`)
+  * Create a new pull request
 * Improve the [documentation](https://github.com/SpunkyBot/spunkybot-docs) (separate repository)
 
 By contributing code to this project in any form, including sending a pull request via GitHub, a code fragment or patch via mail or public discussion groups, you agree to release your code under the terms of the MIT license that you can find in the [LICENSE](https://github.com/SpunkyBot/spunkybot/blob/master/LICENSE) file included in this source distribution.
@@ -129,14 +142,15 @@ The code of Spunky Bot is released under the MIT License. See the [LICENSE](http
 
 
 ### Third Party Libraries
- - RCON: [pyquake3.py](https://github.com/urthub/pyquake3)
-	- The library has been modified to fix some error handling issues and fulfill the PEP8 conformance. This file is released under the GNU General Public License.
- - GeoIP: [pygeoip.py](https://github.com/urthub/pygeoip)
-	- The library has been extended with the list `GeoIP_country_name` to support full country names (e.g. Germany for country_code DE). This file is released under the MIT License.
- - GeoLite database: [www.maxmind.com](http://www.maxmind.com)
-	- The GeoLite databases created by MaxMind are distributed under the Creative Commons Attribution-ShareAlike 4.0 International License and the MaxMind Open Data License.
- - Schedule: [schedule.py](https://github.com/dbader/schedule)
-	- This file is released under the MIT License.
+
+* RCON: [pyquake3.py](https://github.com/urthub/pyquake3)
+  * The library has been modified to fix some error handling issues and fulfill the PEP8 conformance. This file is released under the GNU General Public License.
+* GeoIP: [pygeoip.py](https://github.com/urthub/pygeoip)
+  * The library has been extended with the list `GeoIP_country_name` to support full country names (e.g. Germany for country_code DE). This file is released under the MIT License.
+* GeoLite database: [www.maxmind.com](http://www.maxmind.com)
+  * The GeoLite databases created by MaxMind are distributed under the Creative Commons Attribution-ShareAlike 4.0 International License and the MaxMind Open Data License.
+* Schedule: [schedule.py](https://github.com/dbader/schedule)
+  * This file is released under the MIT License.
 
 Urban Terror® and FrozenSand™ are trademarks, or registered trademarks of Frozensand Games Limited.
 
