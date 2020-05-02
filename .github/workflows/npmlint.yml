@@ -24,11 +24,9 @@ jobs:
     - run: npm install -g markdownlint-cli
     - name: run markdownlint
       run: |
-        touch .markdownlint.json && cat >> .markdownlint.json <<'EOF'
-        {
-          "MD013": false,
-          "MD026": false,
-          "MD040": false
-        }
+        touch .markdownlint.yaml && cat >> .markdownlint.yaml <<'EOF'
+        MD013: false
+        MD026: false
+        MD040: false
         EOF
-        markdownlint '**/*.md' --config .markdownlint.json
+        markdownlint '**/*.md' --config .markdownlint.yaml
