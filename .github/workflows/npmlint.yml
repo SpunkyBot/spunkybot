@@ -21,9 +21,12 @@ jobs:
 
     # Runs a single command using the runners shell
     - name: Install markdownlint
-    - run: npm install markdownlint-cli
-    - run: markdownlint '**/*.md'
+      run: |
+        npm install markdownlint-cli
+        markdownlint '**/*.md'
       env:
         CI: true
-    - name: npm install -g markdown-link-check
-    - run: markdown-link-check ./README.md
+    - name: Install markdown-link-check
+      run: |
+        nmp install markdown-link-check
+        markdown-link-check ./README.md
