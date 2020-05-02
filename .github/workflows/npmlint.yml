@@ -28,7 +28,7 @@ jobs:
         {
           "MD013": false,
           "MD026": false,
-          "MD040": false,
+          "MD040": false
         }
         EOF
         markdownlint '**/*.md' --config .markdownlint.json
