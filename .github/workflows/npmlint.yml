@@ -10,20 +10,16 @@ jobs:
   # This workflow contains a single job called "build"
   build:
     runs-on: ubuntu-latest
-
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
-
     - uses: actions/setup-node@v1
       with:
         node-version: '12.x'
-
-    # Runs a single command using the runners shell
     - name: Install markdownlint
       run: |
-        npm install markdownlint-cli
-        markdownlint '**/*.md'
+        npm install -g markdownlint-cli
+        npm markdownlint '**/*.md'
       env:
         CI: true
     - name: Install markdown-link-check
