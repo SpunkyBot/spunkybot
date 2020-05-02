@@ -10,26 +10,16 @@ The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was 
 [![Build Status](https://travis-ci.org/SpunkyBot/spunkybot.png)](https://travis-ci.org/SpunkyBot/spunkybot)
 [![Actions Status](https://github.com/SpunkyBot/spunkybot/workflows/Test/badge.svg)](https://github.com/SpunkyBot/spunkybot/actions)
 [![License](https://img.shields.io/github/license/SpunkyBot/spunkybot)](https://github.com/SpunkyBot/spunkybot/blob/master/LICENSE)
-
-[![Version](https://img.shields.io/badge/version-1.11.0-orange.svg)](https://github.com/SpunkyBot/spunkybot/releases)
 [![Release](https://img.shields.io/github/v/release/SpunkyBot/spunkybot.svg?color=orange)](https://github.com/SpunkyBot/spunkybot/releases)
 [![PyPI version](https://img.shields.io/pypi/v/spunkybot.svg)](https://pypi.python.org/pypi/spunkybot)
+[![Python version](https://img.shields.io/pypi/pyversions/spunkybot?color=yellow)](https://pypi.org/project/spunkybot)
 
-[![PyPi Downloads](https://pepy.tech/badge/spunkybot)](https://pepy.tech/project/spunkybot)
-![GitHub Downloads](https://img.shields.io/github/downloads/SpunkyBot/spunkybot/total.svg)
-
-[![Python version](https://img.shields.io/badge/python-2.6,%202.7-yellow.svg)](https://pypi.python.org/pypi/spunkybot)
-[![PyPI - Python version](https://img.shields.io/pypi/pyversions/spunkybot?color=yellow)](https://pypi.org/project/spunkybot)
-
-![Ubuntu package](https://img.shields.io/ubuntu/v/spunkybot)
-![Ubuntu package](https://img.shields.io/ubuntu/v/Spunkybot/spunkybot)
 
 If you want to know more, this is a list of selected starting points:
 
 * Introduction to [Spunky Bot](https://spunkybot.de)
 * The full list of [commands](https://github.com/SpunkyBot/spunkybot/blob/master/doc/Commands.md)
 * There is much more inside the [official documentation](https://github.com/SpunkyBot/spunkybot/wiki)
-
 
 ## Features
 
@@ -42,7 +32,6 @@ If you want to know more, this is a list of selected starting points:
 - Stores all player related information in a SQLite database
 - Runs 'out of the box', no other software requirements
 
-
 ## Environment
 
 - Urban Terror 4.1.1 / 4.2.023 / 4.3.4
@@ -51,8 +40,8 @@ If you want to know more, this is a list of selected starting points:
 - Cross-platform (tested on Debian 6 / 7 / 8 / 9, Ubuntu 12 / 14 / 16 / 18, CentOS 6 / 7, macOS 10.13, Windows 7 / 10)
 - Supporting 32-bit and 64-bit operating systems
 
-
 ## Quickstart
+
 It's easy to get started with Spunky Bot:
 
 - Download the [latest release](https://spunkybot.de/download)
@@ -61,11 +50,13 @@ It's easy to get started with Spunky Bot:
 ### Configuration
 
 - Modify the Urban Terror server config file as follows:
+
 ```
 seta g_logsync "1"
 seta g_loghits "1"
 seta g_friendlyfire "2"
 ```
+
 - Restart your Urban Terror server
 - Modify the Spunky Bot configuration file `/conf/settings.conf` and set game server port and RCON password
 - In-game displayed rules/advertisements are contained in the file `/conf/rules.conf`
@@ -77,13 +68,13 @@ seta g_friendlyfire "2"
 
 - Connect to your game server and type `!iamgod` in the global chat to get the admin level "Head Admin". This command is only once available.
 
-
 ## Documentation
+
 You can find all the documentation in the [Wiki](https://github.com/SpunkyBot/spunkybot/wiki).
 
 ### Bot Commands
-The description of all available [commands](https://github.com/SpunkyBot/spunkybot/blob/master/doc/Commands.md) as well as the admin levels and rights is located under the subfolder `/doc`.
 
+The description of all available [commands](https://github.com/SpunkyBot/spunkybot/blob/master/doc/Commands.md) as well as the admin levels and rights is located under the subfolder `/doc`.
 
 ## Resources
 
@@ -94,16 +85,16 @@ The description of all available [commands](https://github.com/SpunkyBot/spunkyb
 * [Code](https://github.com/SpunkyBot/spunkybot)
 * [Homepage](https://spunkybot.de)
 
-
 ## Changelog
+
 You can keep up-to-date with the changes that we have made via our [releases page](https://github.com/Spunkybot/spunkybot/releases).
 
-
 ## Versioning
+
 Spunky Bot is currently maintained under the [Semantic Versioning](http://semver.org) guidelines. Releases will be numbered with the following format: `<major>.<minor>.<patch>`
 
-
 ## Additional Information
+
 For additional information, visit the Spunky Bot website at [https://www.spunkybot.de](https://www.spunkybot.de).
 
 If you have any questions about Spunky Bot or need help, please use the [mailing list](https://groups.google.com/group/spunkybot).
@@ -119,8 +110,8 @@ If you have any questions about Spunky Bot or need help, please use the [mailing
 
 If you have bug reports or feature suggestions, please use the [issue tracker](https://github.com/SpunkyBot/spunkybot/issues?state=open).
 
-
 ## Contributing
+
 You can help us in different ways:
 
 * Open an [issue](https://github.com/SpunkyBot/spunkybot/issues) with suggestions for improvements
@@ -136,10 +127,9 @@ By contributing code to this project in any form, including sending a pull reque
 
 Please see the [CONTRIBUTING](https://github.com/SpunkyBot/spunkybot/blob/master/CONTRIBUTING.md) guide for information regarding the contribution process.
 
-
 ## License
-The code of Spunky Bot is released under the MIT License. See the [LICENSE](https://github.com/SpunkyBot/spunkybot/blob/master/LICENSE) file for the full license text.
 
+The code of Spunky Bot is released under the MIT License. See the [LICENSE](https://github.com/SpunkyBot/spunkybot/blob/master/LICENSE) file for the full license text.
 
 ### Third Party Libraries
 
@@ -154,6 +144,6 @@ The code of Spunky Bot is released under the MIT License. See the [LICENSE](http
 
 Urban Terror® and FrozenSand™ are trademarks, or registered trademarks of Frozensand Games Limited.
 
-
 ## Thank you!
+
 We really appreciate all kinds of feedback and contributions. Thanks for using and supporting Spunky Bot!
