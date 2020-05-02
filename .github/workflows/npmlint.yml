@@ -1,0 +1,29 @@
+# This workflow will install node dependencies and run tests
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: MarkdownLint
+
+on: [push, pull_request]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+
+    # Runs a single command using the runners shell
+    - name: Install markdownlint
+    - run: npm install markdownlint-cli
+    - run: markdownlint '**/*.md'
+      env:
+        CI: true
+    - name: npm install -g markdown-link-check
+    - run: markdown-link-check ./README.md
