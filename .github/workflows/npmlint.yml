@@ -16,7 +16,9 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: '12.x'
-    - run: npm install -g markdownlint-cli
-    - run: markdownlint '**/*.md'
     - run: nmp install -g markdown-link-check
     - run: markdown-link-check ./README.md
+    - run: npm install -g markdownlint-cli
+    - run: markdownlint '**/*.md'
+      env:
+        CI: true
