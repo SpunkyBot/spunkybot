@@ -14,7 +14,6 @@ The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was 
 [![PyPI version](https://img.shields.io/pypi/v/spunkybot.svg)](https://pypi.python.org/pypi/spunkybot)
 [![Python version](https://img.shields.io/pypi/pyversions/spunkybot?color=yellow)](https://pypi.org/project/spunkybot)
 
-
 If you want to know more, this is a list of selected starting points:
 
 * Introduction to [Spunky Bot](https://spunkybot.de)
