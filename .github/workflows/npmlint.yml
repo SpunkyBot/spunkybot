@@ -17,7 +17,11 @@ jobs:
       with:
         node-version: '12.x'
     - run: npm install -g markdown-link-check
-    - run: markdown-link-check ./README.md ./CONTRIBUTING.md ./CHANGELOG.md
+    - run: markdown-link-check ./README.md
+    - run: markdown-link-check ./CONTRIBUTING.md
+    - run: markdown-link-check ./CHANGELOG.md
+    # https://github.com/igorshubovych/markdownlint-cli
+    - run: npm install -g markdownlint-cli
     - run: |
         touch .markdownlint.json <<'EOF'
         {
@@ -26,6 +30,4 @@ jobs:
           "MD040": false,
         }
         EOF
-    # https://github.com/igorshubovych/markdownlint-cli
-    - run: npm install -g markdownlint-cli
-    - run: markdownlint '**/*.md'
+        markdownlint '**/*.md' --config .markdownlint.json
