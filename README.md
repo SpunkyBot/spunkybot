@@ -105,7 +105,7 @@ If you have any questions about Spunky Bot or need help, please use the [mailing
   * Send an email to <mailto:spunkybot+unsubscribe@googlegroups.com>
   * or unsubscribe via web: [https://groups.google.com/forum/#!forum/spunkybot/unsubscribe](https://groups.google.com/forum/#!forum/spunkybot/unsubscribe)
 * If you joined the group, you can post to this group:
-  * Send an email to <spunkybot@googlegroups.com>
+  * Send an email to spunkybot@googlegroups.com
 
 If you have bug reports or feature suggestions, please use the [issue tracker](https://github.com/SpunkyBot/spunkybot/issues?state=open).
 
