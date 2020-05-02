@@ -19,10 +19,10 @@ jobs:
     - name: Install markdownlint
       run: |
         npm install -g markdownlint-cli
-        npm markdownlint '**/*.md'
+        markdownlint '**/*.md'
       env:
         CI: true
     - name: Install markdown-link-check
       run: |
-        nmp install markdown-link-check
+        nmp install -g markdown-link-check
         markdown-link-check ./README.md
