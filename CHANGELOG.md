@@ -1,16 +1,20 @@
 # Changelog
+
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [Unreleased](https://github.com/SpunkyBot/spunkybot/compare/1.11.0...develop)
 
 ## [1.11.0] - 2018-08-06
+
 ### Added
+
 * Added command `!banall <pattern>` to ban all players matching pattern
 * Added command `!rebuild` to sync up all available maps
 * Added option to kill spawnkillers instantly
 * Added support for Urban Terror 4.3.4
 
 ### Changed
+
 * Command `!maps` is showing the total number of available maps
 * Exclude bots from autokick for team kills to avoid unbalanced teams
 * Exclude bots from autokick of low score players to avoid unbalanced teams
@@ -18,15 +22,17 @@ All notable changes to this project will be documented in this file. This projec
 * Improved some feedback messages
 
 ### Fixed
+
 * Fixed #55: Make bots immune from spawnkill autokick
 * Fixed #56: Command `!maps` does not show all maps
 * Fixed #57: Fix year 2038 problem on 32-bit systems
 * Fixed version check, issued by string compare
 * Various minor bug fixes
 
-
 ## [1.10.0] - 2018-05-31
+
 ### Added
+
 * Added option for automatic expiration of warnings
 * Added option to kick players for using bad words
 * Added option to display multi-kill messages
@@ -49,6 +55,7 @@ All notable changes to this project will be documented in this file. This projec
 * Added "Top Objectives" awards for CTF and Bomb mode
 
 ### Changed
+
 * Do not show forgive notice for grudged players
 * Clear team kills for command `!warnclear`  and `!clear`
 * Clear warnings if already expired
@@ -62,6 +69,7 @@ All notable changes to this project will be documented in this file. This projec
 * Converted loopback/localhost to 127.0.0.1
 
 ### Fixed
+
 * Fixed #50: Improve parsing rotation messages file
 * Fixed #49: Ban directly for 15 mins
 * Fixed #48: Extend max tempban duration to 3 days
@@ -70,9 +78,10 @@ All notable changes to this project will be documented in this file. This projec
 * Fixed #15: Add command `!grudge [<name>]` to grudge a player for team killing
 * Various minor bug fixes
 
-
 ## [1.9.0] - 2017-05-14
+
 ### Added
+
 * Added Monster Kill counter
 * Added group Super Admins (level 90) with same rights as Head admins
 * Added option to kill all opponents when bomb exploded or is defused
@@ -101,6 +110,7 @@ All notable changes to this project will be documented in this file. This projec
 * Added support for Debian 9 Stretch and Ubuntu 16.10
 
 ### Changed
+
 * Show team mates that bomb was tossed or collected
 * Show number of players in each team when using command `!teams`
 * Show number of kills when killspree is ended
@@ -118,6 +128,7 @@ All notable changes to this project will be documented in this file. This projec
 * Imported latest GeoIP database
 
 ### Fixed
+
 * Fixed issue #43: added command `!exit` to display last disconnected player
 * Fixed issue #42: added support for `@bigtext MESSAGE` in rotation messages
 * Fixed issue #41: added bot support
@@ -127,9 +138,10 @@ All notable changes to this project will be documented in this file. This projec
 * Fixed issue #32: limit length of name to 20 characters
 * Various minor bug fixes
 
-
 ## [1.8.0] - 2016-10-23
+
 ### Added
+
 * Added support of bot commands in rotating messages: `@admins`, `@nextmap` and `@time`
 * Added command `!rain <on/off>` to enable/disable raindrops in maps
 * Added command `!exec <file>` to execute the given scriptfile
@@ -139,32 +151,37 @@ All notable changes to this project will be documented in this file. This projec
 * Added additional debug logging and display server CVARs
 
 ### Changed
+
 * Reworked Rules/Rotation Messages class
 * Reworked RCON class
 * Improved debug messages
 * Imported latest GeoIP database
 
 ### Fixed
+
 * Fixed issue #33: avoid output of duplicate messages
 * Fixed issue #34: catch python exception
 * Fixed debug output of gamelog path
 * Various minor bug fixes
 
-
 ## [1.7.0] - 2016-10-02
+
 ### Added
+
 * Added full support for Urban Terror release 4.3
 * Added command `!locate` to display geolocation info of a player
 * Added first knife kill message
 * Added more warning reasons
 
 ### Changed
+
 * Improved some feedback messages
 * Imported latest GeoIP database
 
-
 ## [1.6.0] - 2016-04-03
+
 ### Added
+
 * Added option to display headshot hit series
 * Added option to display nade kill series
 * Added option to display knife kill series
@@ -175,12 +192,14 @@ All notable changes to this project will be documented in this file. This projec
 * Added PyPi support
 
 ### Changed
+
 * Consolidated warnings in one list
 * Improved error message for missing games.log file
 * Imported latest GeoIP database
 * Performance improvements
 
 ### Fixed
+
 * Fixed #31: tell command suppports all player numbers
 * Fixed chat message issue with single "!" content
 * Fixed possible loop if games.log file is empty
@@ -188,8 +207,6 @@ All notable changes to this project will be documented in this file. This projec
 * Fixed missing text color setup
 * Various minor bug fixes
 
-
-[Unreleased]: https://github.com/SpunkyBot/spunkybot/compare/1.11.0...develop
 [1.11.0]: https://github.com/SpunkyBot/spunkybot/compare/1.10.0...1.11.0
 [1.10.0]: https://github.com/SpunkyBot/spunkybot/compare/1.9.0...1.10.0
 [1.9.0]: https://github.com/SpunkyBot/spunkybot/compare/1.8.0...1.9.0
