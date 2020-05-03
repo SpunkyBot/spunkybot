@@ -3218,20 +3218,21 @@ class Player(object):
         result = curs.fetchone()
         if result:
             if result[0] < expire_date:
-                values = (self.address, expire_date, self.guid)
-                curs.execute("UPDATE `ban_list` SET `ip_address` = ?,`expires` = ? WHERE `guid` = ?", values)
+                # update already existing ban
+                values = (self.address, expire_date, reason, self.guid)
+                curs.execute("UPDATE `ban_list` SET `ip_address` = ?,`expires` = ?,`reason` = ? WHERE `guid` = ?", values)
                 conn.commit()
                 return True
-            else:
-                values = (self.address, self.guid)
-                curs.execute("UPDATE `ban_list` SET `ip_address` = ? WHERE `guid` = ?", values)
-                conn.commit()
-                return False
-        else:
-            values = (self.player_id, self.guid, self.name, self.address, expire_date, timestamp, reason)
-            curs.execute("INSERT INTO `ban_list` (`id`,`guid`,`name`,`ip_address`,`expires`,`timestamp`,`reason`) VALUES (?,?,?,?,?,?,?)", values)
+            values = (self.address, self.guid)
+            # update IP address of existing ban
+            curs.execute("UPDATE `ban_list` SET `ip_address` = ? WHERE `guid` = ?", values)
             conn.commit()
-            return True
+            return False
+        # create new ban
+        values = (self.player_id, self.guid, self.name, self.address, expire_date, timestamp, reason)
+        curs.execute("INSERT INTO `ban_list` (`id`,`guid`,`name`,`ip_address`,`expires`,`timestamp`,`reason`) VALUES (?,?,?,?,?,?,?)", values)
+        conn.commit()
+        return True
 
     def add_ban_point(self, point_type, duration):
         try:
