@@ -3249,8 +3249,7 @@ class Player(object):
             ban_duration = duration * 3
             self.ban(duration=ban_duration, reason=point_type)
             return ban_duration / 60
-        else:
-            return 0
+        return 0
 
     def reset(self, reset_headshot_hits=True, reset_kill_spree=True):
         self.kills = 0
