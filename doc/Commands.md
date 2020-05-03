@@ -150,10 +150,10 @@
 * **ci** - kick player with connection interrupt
   * Usage: `!ci <name|id>`
 * **forgiveclear** - clear a player's team kills
-    - Usage: `!forgiveclear [<name|id>]`
+  * Usage: `!forgiveclear [<name|id>]`
   * Short: `!fc [<name|id>]`
 * **forgiveinfo** - display a player's team kills
-    - Usage: `!forgiveinfo <name|id>`
+  * Usage: `!forgiveinfo <name|id>`
   * Short: `!fi <name|id>`
 * **id** - show the IP, guid and authname of a player
   * Usage: `!id <name|id>`
