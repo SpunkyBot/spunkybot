@@ -131,10 +131,10 @@
   * Short: `!!<text>`
 * **tell** - tell a message to a specific player
   * Usage: `!tell <name|id> <text>`
-* **tempban** - ban a player temporary for the given period (1 min to 3 days)
+* **tempban** - ban a player temporary for the given period of 1 sec to 3 days
   * Usage: `!tempban <name|id> <duration> [<reason>]`
   * Short: `!tb <name|id> <duration> [<reason>]`
-  * Max ban duration: 24 hours
+  * Maximum ban duration: 72 hours
 * **warnclear** - clear the player warnings
   * Usage: `!warnclear <name|id>`
   * Short: `!wc <name|id>`

@@ -107,7 +107,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'regulars': {'desc': 'display the regular players online', 'syntax': '^7Usage: ^2!regulars', 'level': 40, 'short': 'regs'},
             'say': {'desc': 'say a message to all players', 'syntax': '^7Usage: ^2!say ^7<text>', 'level': 40, 'short': '!!'},
             'tell': {'desc': 'tell a message to a specific player', 'syntax': '^7Usage: ^2!tell ^7<name> <text>', 'level': 40},
-            'tempban': {'desc': 'ban a player temporary for the given period', 'syntax': '^7Usage: ^2!tempban ^7<name> <duration> [<reason>]', 'level': 40, 'short': 'tb'},
+            'tempban': {'desc': 'ban a player temporary for the given period of 1 sec to 3 days', 'syntax': '^7Usage: ^2!tempban ^7<name> <duration> [<reason>]', 'level': 40, 'short': 'tb'},
             'warnclear': {'desc': 'clear the player warnings', 'syntax': '^7Usage: ^2!warnclear ^7<name>', 'level': 40, 'short': 'wc'},
             # fulladmin commands, level 60
             'ban': {'desc': 'ban a player for several days', 'syntax': '^7Usage: ^2!ban ^7<name> <reason>', 'level': 60, 'short': 'b'},
@@ -2816,7 +2816,7 @@ class LogParser(object):
             duration = int(duration_string) if duration_string.isdigit() else 30
         else:
             duration = 3600
-        # minimum ban duration = 1 hour
+        # default ban duration = 1 hour
         if duration == 0:
             duration = 3600
         # limit to max duration = 72 hours
