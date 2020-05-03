@@ -3808,17 +3808,16 @@ class Game(object):
         Thread process
         """
         while 1:
-            if not self.queue.empty():
-                if self.live:
-                    with self.rcon_lock:
-                        try:
-                            command = self.queue.get()
-                            if command != 'status':
-                                self.quake.rcon(command)
-                            else:
-                                self.quake.rcon_update()
-                        except Exception as err:
-                            logger.error(err, exc_info=True)
+            if not self.queue.empty() and self.live:
+                with self.rcon_lock:
+                    try:
+                        command = self.queue.get()
+                        if command != 'status':
+                            self.quake.rcon(command)
+                        else:
+                            self.quake.rcon_update()
+                    except Exception as err:
+                        logger.error(err, exc_info=True)
             time.sleep(RCON_DELAY)
 
     def get_quake_value(self, value):
