@@ -1976,7 +1976,9 @@ class LogParser(object):
                         if not found:
                             self.game.rcon_tell(sar['player_num'], msg)
                         else:
-                            if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
+                            if sar['player_num'] == victim.get_player_num():
+                                self.game.rcon_tell(sar['player_num'], "^7You cannot ban yourself")
+                            elif victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
                                 self.game.rcon_tell(sar['player_num'], "^3Insufficient privileges to ban an admin")
                             else:
                                 if victim.ban(duration=duration, reason=reason, admin=self.game.players[sar['player_num']].get_name()):
@@ -2199,7 +2201,9 @@ class LogParser(object):
                         if not found:
                             self.game.rcon_tell(sar['player_num'], msg)
                         else:
-                            if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
+                            if sar['player_num'] == victim.get_player_num():
+                                self.game.rcon_tell(sar['player_num'], "^7You cannot ban yourself")
+                            elif victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
                                 self.game.rcon_tell(sar['player_num'], "^3Insufficient privileges to ban an admin")
                             else:
                                 # ban for given duration in days
@@ -2379,6 +2383,7 @@ class LogParser(object):
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['moon']['syntax'])
 
+            # instagib on/off
             elif sar['command'] == '!instagib' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['instagib']['level']:
                 if self.urt_modversion >= 43:
                     if line.split(sar['command'])[1]:
@@ -2509,7 +2514,9 @@ class LogParser(object):
                         if not found:
                             self.game.rcon_tell(sar['player_num'], msg)
                         else:
-                            if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
+                            if sar['player_num'] == victim.get_player_num():
+                                self.game.rcon_tell(sar['player_num'], "^7You cannot ban yourself")
+                            elif victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
                                 self.game.rcon_tell(sar['player_num'], "^3Insufficient privileges to ban an admin")
                             else:
                                 # ban for 20 years
