@@ -1210,21 +1210,19 @@ class LogParser(object):
         return True and instance of player or False and message text
         """
         player_id = user_id.lstrip('@')
-        if player_id.isdigit():
-            if int(player_id) > 1:
-                values = (player_id,)
-                curs.execute("SELECT `guid`,`name`,`ip_address` FROM `player` WHERE `id` = ?", values)
-                result = curs.fetchone()
-                if result:
-                    victim = Player(player_num=1023, ip_address=str(result[2]), guid=str(result[0]), name=str(result[1]))
-                    victim.define_offline_player(player_id=int(player_id))
-                    return True, victim, None
-                else:
-                    return False, None, "^3No Player found"
+        if player_id.isdigit() and int(player_id) > 1:
+            values = (player_id,)
+            curs.execute("SELECT `guid`,`name`,`ip_address` FROM `player` WHERE `id` = ?", values)
+            result = curs.fetchone()
+            if result:
+                victim = Player(player_num=1023, ip_address=str(result[2]), guid=str(result[0]), name=str(result[1]))
+                victim.define_offline_player(player_id=int(player_id))
+                ret_val = True, victim, None
             else:
-                return False, None, "^3No Player found"
+                ret_val = False, None, "^3No Player found"
         else:
-            return False, None, "^3No Player found"
+            ret_val = False, None, "^3No Player found"
+        return ret_val
 
     def map_found(self, map_name):
         """
