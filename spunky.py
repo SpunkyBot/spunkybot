@@ -2349,11 +2349,8 @@ class LogParser(object):
                     if not found:
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
-                        self.game.send_rcon('g_nextmap %s' % newmap)
-                        self.game.next_mapname = newmap
-                        self.game.rcon_bigtext("^2Please wait...")
-                        self.game.rcon_tell(sar['player_num'], "^7Changing Map to: ^3%s" % newmap)
-                        self.game.send_rcon('cyclemap')
+                        self.game.rcon_bigtext("^7Changing map to %s" % newmap)
+                        self.game.send_rcon('map %s' % newmap)
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['map']['syntax'])
 
