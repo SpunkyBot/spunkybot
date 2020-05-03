@@ -2774,16 +2774,16 @@ class LogParser(object):
         return the next map in the mapcycle
         """
         g_nextmap = self.game.get_cvar('g_nextmap')
-        if g_nextmap and g_nextmap.split(" ")[0].strip() in self.game.get_all_maps():
+        if not g_nextmap or "num score ping name" in g_nextmap:
+            g_nextmap = self.game.get_cvar('g_nextCycleMap')
+        if not g_nextmap:
+            g_nextmap = self.game.get_cvar('g_nextCycleMap')
+
+        if g_nextmap in self.game.get_all_maps():
             msg = "^7Next Map: ^3%s" % g_nextmap
             self.game.next_mapname = g_nextmap
         else:
-            g_nextmap = self.game.get_cvar('g_nextCycleMap')
-            if g_nextmap and g_nextmap.split(" ")[0].strip() in self.game.get_all_maps():
-                msg = "^7Next Map: ^3%s" % g_nextmap
-                self.game.next_mapname = g_nextmap
-            else:
-                msg = "^7Next Map: ^3%s" % self.game.next_mapname
+            msg = "^7Next Map: ^3%s" % self.game.next_mapname
         return msg
 
     def tell_say_message(self, sar, msg):
