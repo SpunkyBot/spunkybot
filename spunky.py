@@ -943,7 +943,7 @@ class LogParser(object):
                 self.game.rcon_tell(player_num, "^7[^2Authed^7] Welcome back %s, you are ^2%s^7, last visit %s, you played %s times" % (player_name, player.roles[player.get_admin_role()], player.get_last_visit(), player.get_num_played()), False)
                 # disable welcome message for next rounds
                 player.disable_welcome_msg()
-            elif not (player.get_registered_user() or player.get_first_time()) and player.get_welcome_msg():
+            elif not player.get_registered_user() and not player.get_first_time() and player.get_welcome_msg():
                 self.game.rcon_tell(player_num, "^7Welcome back %s, you are player ^3#%s^7. ^3Type ^2!register ^3in chat to register" % (player_name, player_id))
                 player.disable_welcome_msg()
             elif player.get_first_time() and player.get_welcome_msg():
