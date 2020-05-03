@@ -1927,7 +1927,9 @@ class LogParser(object):
                         if not found:
                             self.game.rcon_tell(sar['player_num'], msg)
                         else:
-                            if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
+                            if sar['player_num'] == victim.get_player_num():
+                                self.game.rcon_tell(sar['player_num'], "^7You cannot kick yourself")
+                            elif victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
                                 self.game.rcon_tell(sar['player_num'], "^3Insufficient privileges to kick an admin")
                             else:
                                 msg = "^2%s ^7was kicked by %s" % (victim.get_name(), self.game.players[sar['player_num']].get_name())
