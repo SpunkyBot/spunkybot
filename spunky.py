@@ -556,9 +556,8 @@ class LogParser(object):
                     player_admin_role = player.get_admin_role()
 
                     # clear expired warnings
-                    if self.warn_expiration > 0 and player.get_warning() > 0 and player.get_last_warn_time():
-                        if player.get_last_warn_time() + self.warn_expiration < time.time():
-                            player.clear_warning()
+                    if self.warn_expiration > 0 and player.get_warning() > 0 and player.get_last_warn_time() and player.get_last_warn_time() + self.warn_expiration < time.time():
+                        player.clear_warning()
 
                     # kick player with 3 or more warnings, Admins will never get kicked
                     if player.get_warning() > 2 and player_admin_role < 40:
