@@ -317,6 +317,7 @@ class LogParser(object):
         self.noob_autokick = config.getboolean('bot', 'noob_autokick') if config.has_option('bot', 'noob_autokick') else False
         self.spawnkill_autokick = config.getboolean('bot', 'spawnkill_autokick') if config.has_option('bot', 'spawnkill_autokick') else False
         self.kill_spawnkiller = config.getboolean('bot', 'instant_kill_spawnkiller') if config.has_option('bot', 'instant_kill_spawnkiller') else False
+        self.spawnkill_warn_time = config.getint('bot', 'spawnkill_warn_time') if config.has_option('bot', 'spawnkill_warn_time') else 3
         # set the maximum allowed ping
         self.max_ping = config.getint('bot', 'max_ping') if config.has_option('bot', 'max_ping') else 200
         # kick spectator on full server
@@ -1076,10 +1077,9 @@ class LogParser(object):
                 killer.kill()
 
                 # spawn killing - warn/kick or instant kill
-                if (self.spawnkill_autokick or self.kill_spawnkiller) and killer.get_admin_role() < 40:
+                if (self.spawnkill_autokick or self.kill_spawnkiller) and self.spawnkill_warn_time and killer.get_admin_role() < 40:
                     # Spawn Protection time between players deaths in seconds to issue a warning
-                    warn_time = 3
-                    if victim.get_respawn_time() + warn_time > time.time():
+                    if victim.get_respawn_time() + self.spawnkill_warn_time > time.time():
                         if killer.get_ip_address() != '0.0.0.0':
                             if self.kill_spawnkiller and self.urt_modversion > 41:
                                 self.game.send_rcon("smite %d" % killer_id)
