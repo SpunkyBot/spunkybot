@@ -5,4 +5,5 @@ wheel
 twine
 flake8
 restructuredtext_lint
+check-manifest
 mkdocs

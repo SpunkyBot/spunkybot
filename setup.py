@@ -77,7 +77,7 @@ setup(name='spunkybot',
       install_requires=['setuptools'],
       py_modules=['spunky'],
       package_dir={'conf': 'conf', 'lib': 'lib'},
-      packages=find_packages(exclude=['tests*']),
+      packages=find_packages(exclude=['tests']),
       classifiers=[
           'Development Status :: 5 - Production/Stable',
           'Environment :: Console',
