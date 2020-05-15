@@ -11,7 +11,7 @@ assignees: ''
 Please describe what the problem is.
 
 **Motivation**
-Please describe the soluation and what you want to happen.
+Please describe the solution and what you want to happen.
 
 **Additional context**
 Add any other context or screenshots about the feature request here.
