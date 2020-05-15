@@ -33,4 +33,4 @@ jobs:
       run: python setup.py check --restructuredtext --strict --metadata
     # run reStructuredText linter
     - name: Lint with RST
-      run: rst-lint README.md CHANGELOG.md LICENSE 
+      run: rst-lint README.md CHANGELOG.md LICENSE
