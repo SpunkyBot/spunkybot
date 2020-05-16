@@ -1,11 +1,11 @@
-# Python
-*.py[co]
-__pycache__
+# Byte-compiled / optimized / DLL files
+*.py[cod]
+__pycache__/
 
-# build products
-build
-dist
-spunkybot.egg-info
+# Distribution / packaging
+build/
+dist/
+*.egg-info
 *.tar.gz
 *.zip
 *.asc
@@ -13,6 +13,13 @@ spunkybot.egg-info
 *.deb
 SHASUMS
 MD5SUMS
+
+# C extensions
+*.so
+
+# Translations
+*.mo
+*.pot
 
 # SVN
 .svn/
