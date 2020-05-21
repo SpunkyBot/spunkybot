@@ -1,6 +1,9 @@
 # Changelog
+All notable changes to this project will be documented in this file.
 
-All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
 
 ## [Unreleased](https://github.com/SpunkyBot/spunkybot/compare/1.11.0...develop)
 
@@ -207,9 +210,84 @@ All notable changes to this project will be documented in this file. This projec
 * Fixed missing text color setup
 * Various minor bug fixes
 
+## [1.5.0] - 2015-08-03
+
+### Added
+
+* Added option to autokick players with low score
+* Added dynamic mapcycle support
+* Added support to get flag capture time
+* Added fastest cap info to command `!ctfstats`
+* Added CTF statistics to Awards output
+* Added command `!makereg` to make player a regular user
+* Added command `!poke` to notify a player that he needs to move
+* Added command `!swapteams` to swap the teams
+* Added command `!hits` to display hit stats
+* Added command `!lastbans` to display the last 4 bans
+* Added support to get the register date of a player
+* Added support of TDM and FTL gametype
+* Added support of Gun Game gametype introduced in Urban Terror 4.3
+* Added acronym 'reg' for regular players
+
+### Changed
+
+* Improved output of command `!regtest`, `!leveltest` and `!country`
+* Improved output of Award 'Most HE kills'
+* Improved output of `!xlrtopstats` by using filtering for active players
+* Improved check for spectators on full server
+* Hide commands which are not available in the current gametype
+* Senior Admins or higher levels do not need to enter reason when using the command `!ban`
+* Imported latest GeoIP database
+* Performance enhancements
+* Code improvements
+
+### Fixed
+
+* Fixed issue #26: Text wrapping
+* Fixed issue #27: Stats reset
+* Fixed issue #28: Add dynamic mapcycle support
+* Fixed issue #29: Supporting mapcycle file with newlines
+* Fixed issue with empty lines in mapcycle.txt file
+* Fixed issue with missing maps
+* Fixed possible issue if mapname cannot be read out
+* Fixed issue with output of the register date
+* Fixed output of command `!leveltest` for guests
+* Various minor bug fixes
+
+## [1.4.0] - 2015-02-10
+
+### Added
+
+* Added support for console tell command
+* Added command `!hestats` to display HE grenade kills
+* Added most HE kills to the awards
+* Added option to display a message when the bomb has been planted
+* Added the warn/kick/ban reasons 'whiner' and 'name' (for offensive names)
+* Added command `!regtest` to display current user status
+* Added command `!admintest` to display current admin status
+* Added command `!warntest` to test a warning
+* Added command `!warns` to display the list of warnings
+* Added command `!!<text>` (equal to `!say` command)
+* Added command `!find` to display the slot number of a player
+
+### Changed
+
+* Improved the output of the player found method
+* Improved response of `!nextmap` command
+* Imported latest GeoIP database
+
+### Fixed
+
+* Fixed issue #25: Remove autobalancer after team swap
+* Fixed issue #24: Hardening get_cvar, add exception handling
+* Fixed issue #13: Add support of console tell command
+* Various minor bug fixes
+
 [1.11.0]: https://github.com/SpunkyBot/spunkybot/compare/1.10.0...1.11.0
 [1.10.0]: https://github.com/SpunkyBot/spunkybot/compare/1.9.0...1.10.0
 [1.9.0]: https://github.com/SpunkyBot/spunkybot/compare/1.8.0...1.9.0
 [1.8.0]: https://github.com/SpunkyBot/spunkybot/compare/1.7.0...1.8.0
 [1.7.0]: https://github.com/SpunkyBot/spunkybot/compare/1.6.0...1.7.0
 [1.6.0]: https://github.com/SpunkyBot/spunkybot/compare/1.5.0...1.6.0
+[1.5.0]: https://github.com/SpunkyBot/spunkybot/compare/1.4.0...1.5.0
+[1.4.0]: https://github.com/SpunkyBot/spunkybot/compare/1.3.0...1.4.0
