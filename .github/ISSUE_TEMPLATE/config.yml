@@ -1,0 +1,7 @@
+# https://help.github.com/en/github/building-a-strong-community/configuring-issue-templates-for-your-repository
+
+blank_issues_enabled: true
+contact_links:
+- name: 📝 Spunky Bot Code of Conduct
+  url: https://github.com/SpunkyBot/spunkybot/blob/master/.github/CODE_OF_CONDUCT.md
+  about: Be nice to other members of the community.
