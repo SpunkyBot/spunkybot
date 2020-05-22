@@ -24,8 +24,13 @@ jobs:
         pip --version
         twine --version
         wheel version
+        python setup.py sdist bdist_wheel
+        ls -ahl
+        ls sdist/* -alh
     - name: Build and check with twine
       run: |
+        ls -ahl
+        ls sdist/* -alh
         check-manifest
         python setup.py check --metadata --strict
         python setup.py build
