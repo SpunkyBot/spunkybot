@@ -218,7 +218,7 @@
 * **map** - load given map
   * Usage: `!map <ut4_name>`
 * **maps** - display all available maps
-  * Usage: `!maps
+  * Usage: `!maps`
 * **maprestart** - restart the map
   * Usage: `!maprestart`
   * Short: `!restart`
