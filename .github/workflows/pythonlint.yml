@@ -37,4 +37,4 @@ jobs:
       run: python setup.py check --restructuredtext --strict --metadata
 
     - name: Lint with RST reStructuredText
-      run: rst-lint README.md CHANGELOG.md LICENSE .github/CONTRIBUTING.md .github/CODE_OF_CONDUCT.md
+      run: rst-lint README.md CHANGELOG.md LICENSE doc/Commands.md .github/CONTRIBUTING.md .github/CODE_OF_CONDUCT.md

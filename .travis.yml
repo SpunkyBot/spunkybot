@@ -14,7 +14,7 @@ script:
   # Make sure that the README is formatted properly
   - python setup.py check --restructuredtext --strict --metadata
   # Run reStructuredText linter
-  - rst-lint README.md CONTRIBUTING.md CHANGELOG.md LICENSE
+  - rst-lint README.md CHANGELOG.md LICENSE doc/Commands.md
   # Run build and test
   - python setup.py build
   - python setup.py test
