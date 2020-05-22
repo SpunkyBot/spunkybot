@@ -11,26 +11,24 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 2.7
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: 2.7
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install setuptools wheel twine check-manifest
+
     - name: Show versions
       run: |
         python --version
         pip --version
         twine --version
         wheel version
-        python setup.py sdist bdist_wheel
-        ls -ahl
-        ls dist/* -alh
+
     - name: Build and check with twine
       run: |
-        ls -ahl
-        ls dist/* -alh
         check-manifest
         python setup.py check --metadata --strict
         python setup.py build
