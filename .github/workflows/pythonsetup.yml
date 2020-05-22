@@ -26,11 +26,11 @@ jobs:
         wheel version
         python setup.py sdist bdist_wheel
         ls -ahl
-        ls sdist/* -alh
+        ls dist/* -alh
     - name: Build and check with twine
       run: |
         ls -ahl
-        ls sdist/* -alh
+        ls dist/* -alh
         check-manifest
         python setup.py check --metadata --strict
         python setup.py build
