@@ -217,6 +217,8 @@
   * Short: `!mr <name|id>`
 * **map** - load given map
   * Usage: `!map <ut4_name>`
+* **mapcycle** - list the map rotation
+  * Usage: `!mapcycle`
 * **maps** - display all available maps
   * Usage: `!maps`
 * **maprestart** - restart the map
