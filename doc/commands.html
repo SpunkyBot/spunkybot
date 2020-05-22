@@ -1,23 +1,18 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spunky Bot Commands</title>
-  <meta name="description" content="Spunky Bot, a game server administration bot and RCON tool">
-  <meta name="keywords" content="Spunky Bot, Commands, Documentation">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="author" content="Alexander Kress">
-  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/yeti/bootstrap.min.css" type="text/css">
-  <!--[if lt IE 9]>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
-  <![endif]-->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Spunky Bot Commands</title>
+    <meta name="description" content="Spunky Bot, a game server administration bot and RCON tool">
+    <meta name="keywords" content="Spunky Bot, Commands, Documentation">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="author" content="Alexander Kress">
+    <link rel="dns-prefetch" href="https://stackpath.bootstrapcdn.com">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 </head>
 <body>
-  <div class="container">
+  <div class="container py-4">
 <h1>Spunky Bot</h1>
 <h2>Admin Levels and Bot Commands</h2>
 <h3>Guest [0]</h3>
@@ -249,10 +244,10 @@
 <li>Usage: <code>!tell &lt;name|id&gt; &lt;text&gt;</code></li>
 </ul>
 </li>
-<li><strong>tempban</strong> - ban a player temporary for the given period (1 min to 3 days)<ul>
+<li><strong>tempban</strong> - ban a player temporary for the given period of 1 sec to 3 days<ul>
 <li>Usage: <code>!tempban &lt;name|id&gt; &lt;duration&gt; [&lt;reason&gt;]</code></li>
 <li>Short: <code>!tb &lt;name|id&gt; &lt;duration&gt; [&lt;reason&gt;]</code></li>
-<li>Max ban duration: 24 hours</li>
+<li>Maximum ban duration: 72 hours</li>
 </ul>
 </li>
 <li><strong>warnclear</strong> - clear the player warnings<ul>
@@ -296,6 +291,10 @@
 <li>Short: <code>!kb</code></li>
 </ul>
 </li>
+<li><strong>ping</strong> - display the ping of a player<ul>
+<li>Usage: <code>!ping &lt;name|id&gt;</code></li>
+</ul>
+</li>
 <li><strong>rain</strong> - enables or disables rain<ul>
 <li>Usage: <code>!rain &lt;on/off&gt;</code></li>
 </ul>
@@ -329,7 +328,7 @@
 </ul>
 <h3>Senior Admin [80]</h3>
 <ul>
-<li><strong>addbots</strong> - add bots to the game<ul>
+<li><strong>addbots</strong> - add bots to the game (requires <code>!bots on</code> first)<ul>
 <li>Usage: <code>!addbots</code></li>
 </ul>
 </li>
@@ -395,8 +394,12 @@
 <li>Usage: <code>!map &lt;ut4_name&gt;</code></li>
 </ul>
 </li>
+<li><strong>mapcycle</strong> - list the map rotation<ul>
+<li>Usage: <code>!mapcycle</code></li>
+</ul>
+</li>
 <li><strong>maps</strong> - display all available maps<ul>
-<li>Usage: `!maps</li>
+<li>Usage: <code>!maps</code></li>
 </ul>
 </li>
 <li><strong>maprestart</strong> - restart the map<ul>
