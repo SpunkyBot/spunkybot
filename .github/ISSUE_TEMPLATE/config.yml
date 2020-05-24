@@ -4,7 +4,7 @@ blank_issues_enabled: true
 contact_links:
 - name: 📝 Spunky Bot Code of Conduct
   url: https://github.com/SpunkyBot/spunkybot/blob/master/.github/CODE_OF_CONDUCT.md
-  about: Be nice to other members of the community.
+  about: Be nice to other members of the community
 - name: 💬 Spunky Bot Mailing List / Users Forum
   url: https://groups.google.com/forum/#!forum/spunkybot
-  about: Please ask and answer questions here.
+  about: Please ask and answer questions here
