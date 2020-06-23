@@ -658,7 +658,7 @@ class LogParser(object):
                   'SurvivorWinner': self.handle_teams_ts_mode, 'Kill': self.handle_kill, 'Hit': self.handle_hit,
                   'Freeze': self.handle_freeze, 'ThawOutFinished': self.handle_thawout, 'ClientSpawn': self.handle_spawn,
                   'Flag': self.handle_flag, 'FlagCaptureTime': self.handle_flagcapturetime,
-                  'VotePassed': self.handle_vote_passed, 'Callvote': self.handle_callvote}
+                  'VotePassed': self.handle_vote_passed, 'VoteFailed': self.handle_vote_failed, 'Callvote': self.handle_callvote}
 
         try:
             action = tmp[0].strip()
@@ -707,6 +707,19 @@ class LogParser(object):
         elif "clientkickreason" in line:
             self.game.rcon_say("^7Vote to kick %s ^2passed" % self.game.players[int(line.split('"clientkickreason "')[-1].strip('"'))].get_name())
 
+    def handle_vote_failed(self, line):
+        """
+        handle vote failed
+        """
+        # nextmap vote
+        if "g_nextmap" in line:
+            self.game.rcon_say("^7Vote to set next map to '%s' ^1failed" % line.split("g_nextmap")[-1].strip('"').strip())
+        # cyclemap vote
+        elif "cyclemap" in line:
+            self.game.rcon_say("^7Vote to cycle map ^1failed")
+        # kick vote
+        elif "clientkickreason" in line:
+            self.game.rcon_say("^7Vote to kick %s ^1failed" % self.game.players[int(line.split('"clientkickreason "')[-1].strip('"'))].get_name())
 
     def handle_callvote(self, line):
         """
