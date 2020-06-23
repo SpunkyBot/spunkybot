@@ -18,7 +18,7 @@ If you want to know more, this is a list of selected starting points:
 
 * Introduction to [Spunky Bot](https://spunkybot.de)
 * The full list of [commands](https://github.com/SpunkyBot/spunkybot/blob/master/doc/Commands.md)
-* There is much more inside the [official documentation](https://github.com/SpunkyBot/spunkybot/wiki)
+* There is much more inside the [official documentation](https://docs.spunkybot.de)
 
 ## Features
 
@@ -69,7 +69,7 @@ seta g_friendlyfire "2"
 
 ## Documentation
 
-You can find all the documentation in the [Wiki](https://github.com/SpunkyBot/spunkybot/wiki).
+You can find all details in the latest [documentation](https://docs.spunkybot.de).
 
 ### Bot Commands
 
@@ -77,11 +77,11 @@ The description of all available [commands](https://github.com/SpunkyBot/spunkyb
 
 ## Resources
 
-* [Documentation](https://github.com/SpunkyBot/spunkybot/wiki)
+* [Documentation](https://docs.spunkybot.de)
 * [Troubleshooting](https://github.com/SpunkyBot/spunkybot/wiki/Troubleshooting)
 * [Bug Tracker](https://github.com/SpunkyBot/spunkybot/issues)
 * [Mailing List](https://groups.google.com/group/spunkybot)
-* [Code](https://github.com/SpunkyBot/spunkybot)
+* [Source Code](https://github.com/SpunkyBot/spunkybot)
 * [Homepage](https://spunkybot.de)
 
 ## Changelog
