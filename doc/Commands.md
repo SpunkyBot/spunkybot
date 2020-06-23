@@ -85,6 +85,7 @@
   * Short: `!shuffle`
 * **spec** - move yourself to spectator
   * Usage: `!spec`
+  * Short: `!sp`
 * **warn** - warn player
   * Usage: `!warn <name|id> [<reason>]`
   * Short: `!w <name|id> [<reason>]`

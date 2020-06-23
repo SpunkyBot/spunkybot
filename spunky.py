@@ -88,7 +88,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'poke': {'desc': 'notify a player that he needs to move', 'syntax': '^7Usage: ^2!poke ^7<name>', 'level': 20},
             'seen': {'desc': 'display when a player was last seen', 'syntax': '^7Usage: ^2!seen ^7<name>', 'level': 20},
             'shuffleteams': {'desc': 'shuffle the teams', 'syntax': '^7Usage: ^2!shuffleteams', 'level': 20, 'short': 'shuffle'},
-            'spec': {'desc': 'move yourself to spectator', 'syntax': '^7Usage: ^2!spec', 'level': 20},
+            'spec': {'desc': 'move yourself to spectator', 'syntax': '^7Usage: ^2!spec', 'level': 20, 'short': 'sp'},
             'warn': {'desc': 'warn player', 'syntax': '^7Usage: ^2!warn ^7<name> [<reason>]', 'level': 20, 'short': 'w'},
             'warninfo': {'desc': 'display how many warnings a player has', 'syntax': '^7Usage: ^2!warninfo ^7<name>', 'level': 20, 'short': 'wi'},
             'warnremove': {'desc': "remove a player's last warning", 'syntax': '^7Usage: ^2!warnremove ^7<name>', 'level': 20, 'short': 'wr'},
@@ -1666,7 +1666,7 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7Command is disabled for this game mode")
 
             # spec - move yourself to spectator
-            elif sar['command'] == '!spec' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['spec']['level']:
+            elif sar['command'] in ('!spec', '!sp') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['spec']['level']:
                 self.game.rcon_forceteam(sar['player_num'], 'spectator')
 
             # warninfo - display how many warnings the player has
