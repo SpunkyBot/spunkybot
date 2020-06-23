@@ -10,7 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
     - name: Set up Python 2.7
       uses: actions/setup-python@v2
       with:
@@ -37,4 +38,4 @@ jobs:
       run: python setup.py check --restructuredtext --strict --metadata
 
     - name: Lint with RST reStructuredText
-      run: rst-lint README.md CHANGELOG.md LICENSE doc/Commands.md .github/CONTRIBUTING.md .github/CODE_OF_CONDUCT.md
+      run: rst-lint README.md CHANGELOG.md LICENSE doc/Commands.md .github/CONTRIBUTING.md .github/CODE_OF_CONDUCT.md .github/SUPPORT.md
