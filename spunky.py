@@ -697,9 +697,8 @@ class LogParser(object):
         """
         # nextmap vote
         if "g_nextmap" in line:
-            self.game.rcon_say("^7Vote for ^3Next Map ^2passed")
             self.game.next_mapname = line.split("g_nextmap")[-1].strip('"').strip()
-            self.game.rcon_say("^7Next Map: ^3%s" % self.game.next_mapname)
+            self.game.rcon_say("^7Vote to set next map to '%s' ^2passed" % self.game.next_mapname)
             self.allow_nextmap_vote = False
 
     def handle_callvote(self, line):
