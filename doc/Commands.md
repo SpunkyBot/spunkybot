@@ -225,8 +225,9 @@
 * **maprestart** - restart the map
   * Usage: `!maprestart`
   * Short: `!restart`
-* **moon** - activate Moon mode (low gravity)
+* **moon** - activate low gravity mode (Moon mode)
   * Usage: `!moon <on/off>`
+  * Alias: `!lowgravity <on/off>`
 * **permban** - ban a player permanent
   * Usage: `!permban <name|id> <reason>`
   * Short: `!pb <name|id> <reason>`

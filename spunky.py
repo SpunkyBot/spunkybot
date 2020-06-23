@@ -144,7 +144,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'mapcycle': {'desc': 'list the map rotation', 'syntax': '^7Usage: ^2!mapcycle', 'level': 80},
             'maps': {'desc': 'display all available maps', 'syntax': '^7Usage: ^2!maps', 'level': 80},
             'maprestart': {'desc': 'restart the map', 'syntax': '^7Usage: ^2!maprestart', 'level': 80, 'short': 'restart'},
-            'moon': {'desc': 'activate Moon mode (low gravity)', 'syntax': '^7Usage: ^2!moon ^7<on/off>', 'level': 80},
+            'moon': {'desc': 'activate low gravity mode (Moon mode)', 'syntax': '^7Usage: ^2!moon ^7<on/off>', 'level': 80, 'short': 'lowgravity'},
             'permban': {'desc': 'ban a player permanent', 'syntax': '^7Usage: ^2!permban ^7<name> <reason>', 'level': 80, 'short': 'pb'},
             'putgroup': {'desc': 'add a client to a group', 'syntax': '^7Usage: ^2!putgroup ^7<name> <group>', 'level': 80},
             'rebuild': {'desc': 'sync up all available maps', 'syntax': '^7Usage: ^2!rebuild', 'level': 80},
@@ -2372,7 +2372,7 @@ class LogParser(object):
                 self.stats_reset()
 
             # moon - activate Moon mode (low gravity)
-            elif sar['command'] == '!moon' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['moon']['level']:
+            elif sar['command'] in ('!moon', '!lowgravity') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['moon']['level']:
                 if line.split(sar['command'])[1]:
                     arg = line.split(sar['command'])[1].strip()
                     if arg == "off":
