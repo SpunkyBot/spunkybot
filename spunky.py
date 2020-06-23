@@ -1616,6 +1616,8 @@ class LogParser(object):
             elif sar['command'] == '!lastmaps' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['lastmaps']['level']:
                 if self.game.get_last_maps():
                     self.game.rcon_tell(sar['player_num'], "^7Last Maps: ^3%s" % ", ".join(self.game.get_last_maps()))
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7No maps have been played since Spunky Bot started")
 
             # list - list all connected players
             elif sar['command'] == '!list' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['list']['level']:
