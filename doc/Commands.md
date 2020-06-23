@@ -202,9 +202,9 @@
 * **kickall** - kick all players matching pattern
   * Usage: `!kickall <pattern> [<reason>]`
   * Short: `!kall`
-* **kiss** - clear all player warnings
-  * Usage: `!kiss`
-  * Short: `!clear`
+* **clear** - clear all player warnings
+  * Usage: `!clear`
+  * Alias: `!kiss`
 * **kill** - kill a player
   * Usage: `!kill <name|id>`
 * **lastbans** - list the last 4 bans
