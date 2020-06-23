@@ -89,7 +89,7 @@
 * **warn** - warn player
   * Usage: `!warn <name|id> [<reason>]`
   * Short: `!w <name|id> [<reason>]`
-  * Available short form reasons: _tk_, _obj_, _spec_, _ping_, _spam_, _camp_, _lang_,  _racism_, _name_, _skill_, _whiner_
+  * Available short form reasons: _tk_, _sk_, _wh_, _ci_, _obj_, _afk_, _spec_, _ping_, _spam_, _camp_, _score_, _skill_, _lang_, _racism_, _name_, _whiner_, _abuse_, _insult_, _teams_
 * **warninfo** - display how many warnings a player has
   * Usage: `!warninfo <name|id>`
   * Short: `!wi <name|id>`

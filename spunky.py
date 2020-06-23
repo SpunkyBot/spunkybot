@@ -178,12 +178,14 @@ REASONS = {'obj': 'go for objective',
            'score': 'score too low for this server',
            'ci': 'connection interrupted',
            '999': 'connection interrupted',
-           'whiner': 'stop complaining about camp, lag or block',
+           'whiner': 'stop complaining all the time',
            'skill': 'skill too low for this server',
            'name': 'do not use offensive names',
            'wh': 'wallhack',
            'insult': 'stop insulting',
-           'autojoin': 'use auto-join'}
+           'autojoin': 'use auto-join',
+           'abuse': 'stop abusing others',
+           'teams': 'keep the teams even'}
 
 
 ### CLASS Log Parser ###
