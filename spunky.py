@@ -353,6 +353,7 @@ class LogParser(object):
         self.support_lowgravity = config.getboolean('lowgrav', 'support_lowgravity') if config.has_option('lowgrav', 'support_lowgravity') else False
         self.gravity = config.getint('lowgrav', 'gravity') if config.has_option('lowgrav', 'gravity') else 800
         self.explode_time = "40"
+        # log that the configuration file has been loaded
         logger.info("Configuration loaded  : OK")
         # enable/disable option to get Head Admin by checking existence of head admin in database
         curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `admin_role` = 100")
