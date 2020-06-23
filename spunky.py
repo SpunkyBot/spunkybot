@@ -148,6 +148,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'permban': {'desc': 'ban a player permanent', 'syntax': '^7Usage: ^2!permban ^7<name> <reason>', 'level': 80, 'short': 'pb'},
             'putgroup': {'desc': 'add a client to a group', 'syntax': '^7Usage: ^2!putgroup ^7<name> <group>', 'level': 80},
             'rebuild': {'desc': 'sync up all available maps', 'syntax': '^7Usage: ^2!rebuild', 'level': 80},
+            'setgravity': {'desc': 'set the gravity (default: 800)', 'syntax': '^7Usage: ^2!setgravity ^7<value>', 'level': 80},
             'setnextmap': {'desc': 'set the next map', 'syntax': '^7Usage: ^2!setnextmap ^7<ut4_name>', 'level': 80},
             'swapteams': {'desc': 'swap the current teams', 'syntax': '^7Usage: ^2!swapteams', 'level': 80},
             'unban': {'desc': 'unban a player from the database', 'syntax': '^7Usage: ^2!unban ^7<@ID>', 'level': 80},
@@ -2385,6 +2386,17 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], COMMANDS['moon']['syntax'])
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['moon']['syntax'])
+
+            # !setgravity <value> - set the gravity value. default = 800 (less means less gravity)
+            elif sar['command'] == '!setgravity' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['setgravity']['level']:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip()
+                    if arg.isdigit():
+                        self.game.send_rcon('g_gravity %s' % arg)
+                    else:
+                        self.game.rcon_tell(sar['player_num'], COMMANDS['setgravity']['syntax'])
+                else:
+                    self.game.rcon_tell(sar['player_num'], COMMANDS['setgravity']['syntax'])
 
             # instagib on/off
             elif sar['command'] == '!instagib' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['instagib']['level']:

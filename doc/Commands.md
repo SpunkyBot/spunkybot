@@ -236,6 +236,8 @@
   * Available Groups: _user_, _regular_, _mod_, _admin_, _fulladmin_
 * **rebuild** - sync up all available maps
   * Usage: `!rebuild`
+* **setgravity** - set the gravity (default = 800), less means less gravity
+  * Usage: `!setgravity <value>`
 * **setnextmap** - set the next map
   * Usage: `!setnextmap <ut4_name>`
 * **swapteams** - swap the current teams
