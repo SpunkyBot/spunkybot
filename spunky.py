@@ -700,6 +700,13 @@ class LogParser(object):
             self.game.next_mapname = line.split("g_nextmap")[-1].strip('"').strip()
             self.game.rcon_say("^7Vote to set next map to '%s' ^2passed" % self.game.next_mapname)
             self.allow_nextmap_vote = False
+        # cyclemap vote
+        elif "cyclemap" in line:
+            self.game.rcon_say("^7Vote to cycle map ^2passed")
+        # kick vote
+        elif "clientkickreason" in line:
+            self.game.rcon_say("^7Vote to kick %s ^2passed" % self.game.players[int(line.split('"clientkickreason "')[-1].strip('"'))].get_name())
+
 
     def handle_callvote(self, line):
         """
