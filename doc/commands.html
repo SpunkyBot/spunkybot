@@ -162,12 +162,13 @@
 </li>
 <li><strong>spec</strong> - move yourself to spectator<ul>
 <li>Usage: <code>!spec</code></li>
+<li>Short: <code>!sp</code></li>
 </ul>
 </li>
 <li><strong>warn</strong> - warn player<ul>
 <li>Usage: <code>!warn &lt;name|id&gt; [&lt;reason&gt;]</code></li>
 <li>Short: <code>!w &lt;name|id&gt; [&lt;reason&gt;]</code></li>
-<li>Available short form reasons: <em>tk</em>, <em>obj</em>, <em>spec</em>, <em>ping</em>, <em>spam</em>, <em>camp</em>, <em>lang</em>,  <em>racism</em>, <em>name</em>, <em>skill</em>, <em>whiner</em></li>
+<li>Available short form reasons: <em>tk</em>, <em>sk</em>, <em>wh</em>, <em>ci</em>, <em>obj</em>, <em>afk</em>, <em>spec</em>, <em>ping</em>, <em>spam</em>, <em>camp</em>, <em>score</em>, <em>skill</em>, <em>lang</em>, <em>racism</em>, <em>name</em>, <em>whiner</em>, <em>abuse</em>, <em>insult</em>, <em>teams</em></li>
 </ul>
 </li>
 <li><strong>warninfo</strong> - display how many warnings a player has<ul>
@@ -366,9 +367,9 @@
 <li>Short: <code>!kall</code></li>
 </ul>
 </li>
-<li><strong>kiss</strong> - clear all player warnings<ul>
-<li>Usage: <code>!kiss</code></li>
-<li>Short: <code>!clear</code></li>
+<li><strong>clear</strong> - clear all player warnings<ul>
+<li>Usage: <code>!clear</code></li>
+<li>Alias: <code>!kiss</code></li>
 </ul>
 </li>
 <li><strong>kill</strong> - kill a player<ul>
@@ -407,8 +408,9 @@
 <li>Short: <code>!restart</code></li>
 </ul>
 </li>
-<li><strong>moon</strong> - activate Moon mode (low gravity)<ul>
+<li><strong>moon</strong> - activate low gravity mode (Moon mode)<ul>
 <li>Usage: <code>!moon &lt;on/off&gt;</code></li>
+<li>Alias: <code>!lowgravity &lt;on/off&gt;</code></li>
 </ul>
 </li>
 <li><strong>permban</strong> - ban a player permanent<ul>
@@ -423,6 +425,10 @@
 </li>
 <li><strong>rebuild</strong> - sync up all available maps<ul>
 <li>Usage: <code>!rebuild</code></li>
+</ul>
+</li>
+<li><strong>setgravity</strong> - set the gravity (default = 800), less means less gravity<ul>
+<li>Usage: <code>!setgravity &lt;value&gt;</code></li>
 </ul>
 </li>
 <li><strong>setnextmap</strong> - set the next map<ul>
