@@ -22,6 +22,7 @@ jobs:
     - run: markdown-link-check ./.github/CONTRIBUTING.md
     - run: markdown-link-check ./.github/SECURITY.md
     - run: markdown-link-check ./.github/CODE_OF_CONDUCT.md
+    - run: markdown-link-check ./.github/SUPPORT.md
     # https://github.com/igorshubovych/markdownlint-cli
     - run: npm install -g markdownlint-cli
     - name: Run markdownlint '**/*.md'
