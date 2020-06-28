@@ -317,6 +317,7 @@ class LogParser(object):
 
         # enable/disable autokick for team killing
         self.tk_autokick = config.getboolean('bot', 'teamkill_autokick') if config.has_option('bot', 'teamkill_autokick') else True
+        self.allow_tk_bots = config.getboolean('bot', 'allow_teamkill_bots') if config.has_option('bot', 'allow_teamkill_bots') else False
         # enable/disable autokick of players with low score
         self.noob_autokick = config.getboolean('bot', 'noob_autokick') if config.has_option('bot', 'noob_autokick') else False
         self.spawnkill_autokick = config.getboolean('bot', 'spawnkill_autokick') if config.has_option('bot', 'spawnkill_autokick') else False
@@ -1066,8 +1067,10 @@ class LogParser(object):
                     killer.team_kill()
                     # increase team death counter for victim
                     victim.team_death()
+                    # check if bot or human player got killed
+                    human = False if self.allow_tk_bots and victim.get_ip_address() == '0.0.0.0' else True
                     # Regular and higher will not get punished
-                    if killer.get_admin_role() < 2 and self.tk_autokick and killer.get_ip_address() != '0.0.0.0':
+                    if killer.get_admin_role() < 2 and self.tk_autokick and killer.get_ip_address() != '0.0.0.0' and human:
                         # list of players of TK victim
                         killer.add_tk_victims(victim_id)
                         # list of players who killed victim
