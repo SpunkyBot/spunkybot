@@ -31,7 +31,6 @@ import time
 import sqlite3
 import math
 import textwrap
-import urllib2
 import random
 import ConfigParser
 import logging.handlers
@@ -2172,18 +2171,6 @@ class LogParser(object):
             # version - display the version of the bot
             elif sar['command'] == '!version' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['version']['level']:
                 self.game.rcon_tell(sar['player_num'], "^7Spunky Bot ^2v%s" % __version__)
-                current = __version__.split('.')
-                try:
-                    get_latest = urllib2.urlopen('https://raw.githubusercontent.com/SpunkyBot/spunkybot/master/VERSION', timeout=3).read().strip()
-                except urllib2.URLError:
-                    get_latest = __version__
-                latest = get_latest.split('.')
-                if int(current[0]) < int(latest[0]):
-                    self.game.rcon_tell(sar['player_num'], "^7A newer release ^6%s ^7is available, check ^3www.spunkybot.de" % get_latest)
-                elif int(current[0]) == int(latest[0]) and int(current[1]) < int(latest[1]):
-                    self.game.rcon_tell(sar['player_num'], "^7A newer release ^6%s ^7is available, check ^3www.spunkybot.de" % get_latest)
-                elif int(current[0]) == int(latest[0]) and int(current[1]) == int(latest[1]) and int(current[2]) < int(latest[2]):
-                    self.game.rcon_tell(sar['player_num'], "^7A newer release ^6%s ^7is available, check ^3www.spunkybot.de" % get_latest)
 
             # veto - stop voting process
             elif sar['command'] == '!veto' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['veto']['level']:
