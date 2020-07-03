@@ -9,7 +9,7 @@ The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was 
 
 [![Build Status](https://travis-ci.org/SpunkyBot/spunkybot.png)](https://travis-ci.org/SpunkyBot/spunkybot)
 [![Actions Status](https://github.com/SpunkyBot/spunkybot/workflows/Test/badge.svg)](https://github.com/SpunkyBot/spunkybot/actions)
-[![License](https://img.shields.io/github/license/SpunkyBot/spunkybot)](https://github.com/SpunkyBot/spunkybot/blob/master/LICENSE)
+[![License](https://img.shields.io/github/license/SpunkyBot/spunkybot)](https://github.com/SpunkyBot/spunkybot/blob/develop/LICENSE)
 [![Release](https://img.shields.io/github/v/release/SpunkyBot/spunkybot.svg?color=orange)](https://github.com/SpunkyBot/spunkybot/releases)
 [![PyPI version](https://img.shields.io/pypi/v/spunkybot.svg)](https://pypi.python.org/pypi/spunkybot)
 [![Python version](https://img.shields.io/pypi/pyversions/spunkybot?color=yellow)](https://pypi.org/project/spunkybot)
@@ -17,7 +17,7 @@ The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was 
 If you want to know more, this is a list of selected starting points:
 
 * Introduction to [Spunky Bot](https://spunkybot.de)
-* The full list of [commands](https://github.com/SpunkyBot/spunkybot/blob/master/doc/Commands.md)
+* The full list of [commands](https://spunkybot.de/docs/commands)
 * There is much more inside the [official documentation](https://docs.spunkybot.de)
 
 ## Features
@@ -73,12 +73,11 @@ You can find all details in the latest [documentation](https://docs.spunkybot.de
 
 ### Bot Commands
 
-The description of all available [commands](https://github.com/SpunkyBot/spunkybot/blob/master/doc/Commands.md) as well as the admin levels and rights is located under the subfolder `/doc`.
+The description of all available [commands](https://github.com/SpunkyBot/spunkybot/blob/develop/doc/Commands.md) as well as the admin levels and rights is located under the subfolder `/doc`.
 
 ## Resources
 
 * [Documentation](https://docs.spunkybot.de)
-* [Troubleshooting](https://github.com/SpunkyBot/spunkybot/wiki/Troubleshooting)
 * [Bug Tracker](https://github.com/SpunkyBot/spunkybot/issues)
 * [Mailing List](https://groups.google.com/group/spunkybot)
 * [Source Code](https://github.com/SpunkyBot/spunkybot)
@@ -122,13 +121,13 @@ You can help us in different ways:
   * Create a new pull request
 * Improve the [documentation](https://github.com/SpunkyBot/spunkybot-docs) (separate repository)
 
-By contributing code to this project in any form, including sending a pull request via GitHub, a code fragment or patch via mail or public discussion groups, you agree to release your code under the terms of the MIT license that you can find in the [LICENSE](https://github.com/SpunkyBot/spunkybot/blob/master/LICENSE) file included in this source distribution.
+By contributing code to this project in any form, including sending a pull request via GitHub, a code fragment or patch via mail or public discussion groups, you agree to release your code under the terms of the MIT license that you can find in the [LICENSE](https://github.com/SpunkyBot/spunkybot/blob/develop/LICENSE) file included in this source distribution.
 
-Please see the [CONTRIBUTING](https://github.com/SpunkyBot/spunkybot/blob/master/CONTRIBUTING.md) guide for information regarding the contribution process.
+Please see the [CONTRIBUTING](https://github.com/SpunkyBot/spunkybot/blob/develop/.github/CONTRIBUTING.md) guide for information regarding the contribution process.
 
 ## License
 
-The code of Spunky Bot is released under the MIT License. See the [LICENSE](https://github.com/SpunkyBot/spunkybot/blob/master/LICENSE) file for the full license text.
+The code of Spunky Bot is released under the MIT License. See the [LICENSE](https://github.com/SpunkyBot/spunkybot/blob/develop/LICENSE) file for the full license text.
 
 ### Third Party Libraries
 

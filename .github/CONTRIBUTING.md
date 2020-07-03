@@ -34,4 +34,4 @@ Posts to mailing lists should remain focused on Spunky Bot and game server admin
 
 ## Contributors License Agreement
 
-By contributing you agree that these contributions are your own, and you grant a full, complete, irrevocable copyright license to all users and developers of the project, present and future, pursuant to the [license](https://github.com/SpunkyBot/spunkybot/blob/master/LICENSE) of the project.
+By contributing you agree that these contributions are your own, and you grant a full, complete, irrevocable copyright license to all users and developers of the project, present and future, pursuant to the [license](https://github.com/SpunkyBot/spunkybot/blob/develop/LICENSE) of the project.
