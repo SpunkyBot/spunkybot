@@ -312,6 +312,7 @@ class LogParser(object):
         self.firstteamkill = False
         self.last_disconnected_player = None
         self.allow_nextmap_vote = True
+        self.failed_vote_timer = 0
         self.default_gear = ''
 
         # enable/disable autokick for team killing
@@ -340,6 +341,7 @@ class LogParser(object):
         self.teams_autobalancer = config.getboolean('bot', 'autobalancer') if config.has_option('bot', 'autobalancer') else False
         self.allow_cmd_teams_round_end = config.getboolean('bot', 'allow_teams_round_end') if config.has_option('bot', 'allow_teams_round_end') else False
         self.limit_nextmap_votes = config.getboolean('bot', 'limit_nextmap_votes') if config.has_option('bot', 'limit_nextmap_votes') else False
+        self.vote_delay = config.getint('bot', 'vote_delay') if config.has_option('bot', 'vote_delay') else 0
         self.spam_bomb_planted_msg = config.getboolean('bot', 'spam_bomb_planted') if config.has_option('bot', 'spam_bomb_planted') else False
         self.kill_survived_opponents = config.getboolean('bot', 'kill_survived_opponents') if config.has_option('bot', 'kill_survived_opponents') else False
         self.spam_knife_kills_msg = config.getboolean('bot', 'spam_knife_kills') if config.has_option('bot', 'spam_knife_kills') else False
@@ -714,6 +716,8 @@ class LogParser(object):
         # nextmap vote
         if "g_nextmap" in line:
             self.game.rcon_say("^7Vote to set next map to '%s' ^1failed" % line.split("g_nextmap")[-1].strip('"').strip())
+            if self.vote_delay:
+                self.failed_vote_timer = time.time() + self.vote_delay
         # cyclemap vote
         elif "cyclemap" in line:
             self.game.rcon_say("^7Vote to cycle map ^1failed")
@@ -726,11 +730,16 @@ class LogParser(object):
         handle callvote
         """
         spam_msg = True
+        now = time.time()
         if "g_nextmap" in line:
             if self.limit_nextmap_votes and not self.allow_nextmap_vote:
                 self.game.send_rcon('veto')
                 self.game.rcon_say("^7Voting for Next Map is disabled until the end of this map")
                 spam_msg = False
+        if "map" in line and self.failed_vote_timer > now:
+            remaining_time = int(self.failed_vote_timer - now)
+            self.game.send_rcon('veto')
+            self.game.rcon_say("^7Map voting is disabled for ^2%d ^7seconds" % remaining_time)
         if spam_msg:
             self.game.rcon_bigtext("^7Press ^2F1 ^7or ^1F2 ^7to vote!")
             if self.game.get_last_maps() and ('"g_nextmap' in line or '"map' in line):
@@ -771,6 +780,7 @@ class LogParser(object):
 
         # allow nextmap votes
         self.allow_nextmap_vote = True
+        self.failed_vote_timer = 0
 
     def handle_spawn(self, line):
         """
