@@ -1,11 +1,18 @@
-Package: spunkybot
-Version: 1.11.0
+Source: spunkybot
 Section: utils
 Priority: optional
-Architecture: all
-Depends: python (>= 2.6.6-3~), python-minimal
-Maintainer: Alexander Kress <feedback@spunkybot.de>
+Maintainer: Spunky Bot Release Manager <releases@spunkybot.de>
+Uploaders: Alexander Kress <hello@alexanderkress.de>
+Build-Depends: debhelper (>= 10), dh-python, python
+X-Python-Version: >= 2.6
+Standards-Version: 4.0.0
 Homepage: https://www.spunkybot.de/
+Vcs-Git: https://github.com/SpunkyBot/spunkybot.git
+Vcs-Browser: https://github.com/SpunkyBot/spunkybot
+
+Package: spunkybot
+Architecture: all
+Depends: ${python:Depends}, ${misc:Depends}, python (>= 2.6.6-3~), adduser
 Description: Multi-platform administration and RCON tool for Urban Terror
  Spunky Bot is the most advanced RCON tool for managing your game server.
  .
