@@ -1,0 +1,33 @@
+Welcome to Spunky Bot
+---------------------
+
+Spunky Bot is a lightweight game server administration bot and RCON tool. Its purpose is to manage and maintain an
+Urban Terror 4.1 / 4.2 / 4.3 server and to provide real time statistics data for players.
+
+Spunky Bot is a cross-platform package and offers in-game commands without authentication and automated administration
+even when no admin is online.
+
+Features:
+
+* Lightweight and fast
+* Real time game statistics
+* Different user groups and levels
+* Supports all RCON commands
+* Supports temporary and permanent bans of players
+* Supports rotation messages
+
+If you want to know more, this is a list of selected starting points:
+
+Introduction to Spunky Bot:
+
+    https://spunkybot.de
+
+The full list of commands:
+
+    https://spunkybot.de/docs/commands
+
+There is much more inside the official documentation:
+
+    https://docs.spunkybot.de
+
+-- Spunky Bot <feedback@spunkybot.de>
