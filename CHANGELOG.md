@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/SpunkyBot/spunkybot/compare/1.12.0...develop)
 
+## [1.12.0](https://github.com/SpunkyBot/spunkybot/compare/1.11.0...1.12.0) - 2020-07-11
+
+### Added
+
+* Added feature for delaying votes after failed vote
+* Added messages for cyclemap and kick votes
+* Added alias `!kiss` for command `!clear` to clear all player warnings
+* Added command `!setgravity` to set the gravity value
+* Added alias `!lowgravity on/off` for command `!moon on/off`
+* Added alias `!sp` for command `!spec` to move yourself to spectator
+* Added command `!mapcycle` to list the map rotation
+* Added welcome message for first connection
+* Added option to enable/disable resetting of HS and kill spree stats on map rotation
+* Added command `!ping <name>` to display the ping of a player
+
+### Changed
+
+* Show First Teamkill message
+* Show losing streak and extend `!spree` command
+* Show message if no maps have been played when using command `!lastmaps`
+* Show message that you cannot ban/kick yourself
+* Sync mapcycle file when using command `!rebuild`
+* Removed Heartbeat option and online version check from code
+* Improved output for successful nextmap vote
+* Improved auto-kick warn message for team killing
+* Imported latest GeoIP database (January 2020)
+
+### Fixed
+
+* Fixed #60: Fix broken message output for Spawn Killing
+* Fixed #64: Handling of bots
+* Fixed #65: Nextmap does not show correct value
+* Fixed #69: move spawn kill timer into config file
+* Various minor bug fixes
+
 ## [1.11.0] - 2018-08-06
 
 ### Added
