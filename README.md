@@ -8,11 +8,12 @@ Spunky Bot is a cross-platform package and offers in-game commands without authe
 The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was released under the Beerware License.
 
 [![Build Status](https://travis-ci.org/SpunkyBot/spunkybot.png)](https://travis-ci.org/SpunkyBot/spunkybot)
-[![Actions Status](https://github.com/SpunkyBot/spunkybot/workflows/Test/badge.svg)](https://github.com/SpunkyBot/spunkybot/actions)
+[![Actions Status](https://github.com/SpunkyBot/spunkybot/workflows/CI/badge.svg)](https://github.com/SpunkyBot/spunkybot/actions)
 [![License](https://img.shields.io/github/license/SpunkyBot/spunkybot)](https://github.com/SpunkyBot/spunkybot/blob/develop/LICENSE)
 [![Release](https://img.shields.io/github/v/release/SpunkyBot/spunkybot.svg?color=orange)](https://github.com/SpunkyBot/spunkybot/releases)
 [![PyPI version](https://img.shields.io/pypi/v/spunkybot.svg)](https://pypi.python.org/pypi/spunkybot)
 [![Python version](https://img.shields.io/pypi/pyversions/spunkybot?color=yellow)](https://pypi.org/project/spunkybot)
+[![GitHub Downloads](https://img.shields.io/github/downloads/SpunkyBot/spunkybot/total?color=yellowgreen)](https://github.com/SpunkyBot/spunkybot/releases)
 
 If you want to know more, this is a list of selected starting points:
 
