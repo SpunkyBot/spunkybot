@@ -1,0 +1,8 @@
+[flake8]
+ignore = E265, E266, E402, E501, E722, C901, N806
+max-line-length = 127
+max-complexity = 10
+count = True
+statistics = True
+show-source = True
+exclude = .git,build,dist,tests

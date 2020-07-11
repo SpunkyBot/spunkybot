@@ -1,0 +1,14 @@
+[Unit]
+Description=Spunky Bot
+After=network.target
+
+[Service]
+User=q3ut4
+WorkingDirectory=/opt/spunkybot
+ExecStart=/usr/bin/python spunky.py
+StandardOutput=null
+Type=simple
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

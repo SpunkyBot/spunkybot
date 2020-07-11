@@ -1,0 +1,9 @@
+setuptools>=18.5
+docutils
+markdown
+wheel
+twine
+flake8
+restructuredtext_lint
+check-manifest
+mkdocs

@@ -2,8 +2,17 @@
 set -e
 
 case "$1" in
+    remove)
+        rm -f /opt/spunkybot/*.py[co]
+        rm -f /opt/spunkybot/devel.log*
+        rm -rf /opt/spunkybot/lib
+    ;;
     purge)
         rm -rf /opt/spunkybot
+        # remove user
+        deluser --quiet --system q3ut4
+    ;;
+    abort-install|failed-upgrade|abort-upgrade)
     ;;
 esac
 

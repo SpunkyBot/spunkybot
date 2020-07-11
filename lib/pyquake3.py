@@ -71,7 +71,7 @@ class PyQuake3(object):
         """
         try:
             self.address, self.port = server.split(':')
-        except:
+        except ValueError:
             raise ValueError('Server address format must be: "address:port"')
         self.port = int(self.port)
         self.sock.connect((self.address, self.port))
@@ -101,7 +101,7 @@ class PyQuake3(object):
         self.sock.settimeout(timeout)
         try:
             return self.sock.recv(8192)
-        except socket.error, err:
+        except socket.error as err:
             raise Exception('Error receiving the packet: %s' % err[1])
 
     def command(self, cmd, timeout=1, retries=5):
@@ -169,7 +169,6 @@ class PyQuake3(object):
                 continue
             match = self.player_reo.match(player)
             if not match:
-                print 'couldnt match', player
                 continue
             frags, ping, name = match.groups()
             self.players.append(Player(1, name, frags, ping))
@@ -185,23 +184,24 @@ class PyQuake3(object):
         """
         perform RCON status update
         """
-        data = self.rcon('status')[1]
-        lines = data.split('\n')
+        status, data = self.rcon('status')
+        if status == 'print' and data.startswith('map'):
+            lines = data.split('\n')
 
-        players = lines[3:]
-        self.players = []
-        for ply in players:
-            while ply.find('  ') != -1:
-                ply = ply.replace('  ', ' ')
-            while ply.find(' ') == 0:
-                ply = ply[1:]
-            if ply == '':
-                continue
-            ply = ply.split(' ')
-            try:
-                self.players.append(Player(int(ply[0]), ply[3], int(ply[1]), int(ply[2]), ply[5]))
-            except (IndexError, ValueError):
-                continue
+            players = lines[3:]
+            self.players = []
+            for ply in players:
+                while ply.find('  ') != -1:
+                    ply = ply.replace('  ', ' ')
+                while ply.find(' ') == 0:
+                    ply = ply[1:]
+                if ply == '':
+                    continue
+                ply = ply.split(' ')
+                try:
+                    self.players.append(Player(int(ply[0]), ply[3], int(ply[1]), int(ply[2]), ply[5]))
+                except (IndexError, ValueError):
+                    continue
 
 
 if __name__ == '__main__':
@@ -210,14 +210,14 @@ if __name__ == '__main__':
 
     QUAKE.update()
 
-    print "The server name of '%s' is %s, running map %s with %s player(s)." % (QUAKE.get_address(), QUAKE.values['sv_hostname'], QUAKE.values['mapname'], len(QUAKE.players))
+    print("The server name of '%s' is %s, running map %s with %s player(s)." % (QUAKE.get_address(), QUAKE.values['sv_hostname'], QUAKE.values['mapname'], len(QUAKE.players)))
 
     for gamer in QUAKE.players:
-        print "%s with %s frags and a %s ms ping" % (gamer.name, gamer.frags, gamer.ping)
+        print("%s with %s frags and a %s ms ping" % (gamer.name, gamer.frags, gamer.ping))
 
     QUAKE.rcon_update()
 
     for gamer in QUAKE.players:
-        print "%s (%s) has IP address of %s" % (gamer.name, gamer.num, gamer.address)
+        print("%s (%s) has IP address of %s" % (gamer.name, gamer.num, gamer.address))
 
     QUAKE.rcon('bigtext "pyquake3 is great"')
