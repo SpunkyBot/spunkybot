@@ -60,7 +60,7 @@ for the source code.
 .. _Urban Terror: http://www.urbanterror.info/
 .. _MIT: https://opensource.org/licenses/MIT
 .. _Homepage: https://spunkybot.de/
-.. _Repository: https://github.com/spunkybot/spunkybot/
+.. _Repository: https://github.com/SpunkyBot/spunkybot/
 """
 
 setup(name='spunkybot',
@@ -71,7 +71,7 @@ setup(name='spunkybot',
       author_email='feedback@spunkybot.de',
       url='https://spunkybot.de/',
       keywords='Urban Terror Game Administration RCON Bot',
-      download_url='https://github.com/spunkybot/spunkybot/releases/latest',
+      download_url='https://github.com/SpunkyBot/spunkybot/releases/latest',
       license='MIT',
       install_requires=['setuptools'],
       py_modules=['spunky'],
