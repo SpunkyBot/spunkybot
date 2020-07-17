@@ -52,7 +52,6 @@ jobs:
 
     - run: npm install -g markdown-link-check
     - run: markdown-link-check ./README.md
-    - run: markdown-link-check ./CHANGELOG.md
     - run: markdown-link-check ./.github/CONTRIBUTING.md
     - run: markdown-link-check ./.github/SECURITY.md
     - run: markdown-link-check ./.github/CODE_OF_CONDUCT.md

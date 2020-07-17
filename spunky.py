@@ -22,7 +22,7 @@ Modify the files '/conf/settings.conf' and '/conf/rules.conf'
 Run the bot: python spunky.py
 """
 
-__version__ = '1.12.0'
+__version__ = '1.12.1'
 
 
 ### IMPORTS
@@ -4077,6 +4077,7 @@ class Game(object):
 
         if self.dynamic_mapcycle:
             self.send_rcon('g_nextmap %s' % self.next_mapname)
+            self.send_rcon('g_nextCycleMap %s' % self.next_mapname)
             if self.mapname != self.next_mapname:
                 self.rcon_say("^7Next Map: ^3%s" % self.next_mapname)
 

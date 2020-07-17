@@ -24,6 +24,6 @@ jobs:
           release_name: v${{ github.ref }}
           body: |
             Changes in this Release
-            - draft status
-          draft: true
+            - to be done
+          draft: false
           prerelease: false
