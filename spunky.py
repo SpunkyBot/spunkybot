@@ -1870,8 +1870,9 @@ class LogParser(object):
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['tell']['syntax'])
 
+            # exit - display last disconnected player of this match
             elif sar['command'] == '!exit' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['exit']['level']:
-                msg = "^3Last disconnected player: ^7%s" % self.last_disconnected_player.get_name() if self.last_disconnected_player else "^3No player left during this match"
+                msg = "^7Last disconnected player: ^3%s" % self.last_disconnected_player.get_name() if self.last_disconnected_player else "^3No player left during this match"
                 self.game.rcon_tell(sar['player_num'], msg)
 
             # find - display the slot number of the player
