@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/SpunkyBot/spunkybot/compare/1.12.2...develop)
 
-## [1.12.1](https://github.com/SpunkyBot/spunkybot/compare/1.12.0...1.12.1) - 2020-07-17
+## [1.12.2](https://github.com/SpunkyBot/spunkybot/compare/1.12.0...1.12.2) - 2020-07-24
 
 ### Fixed
 
