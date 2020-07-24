@@ -1,9 +1,9 @@
-spunkybot (1.12.1-1) unstable; urgency=medium
+spunkybot (1.12.2-1) unstable; urgency=medium
 
   * New upstream release.
     - Full changelog on https://github.com/spunkybot/spunkybot/releases
 
- -- Spunky Bot Release Manager <releases@spunkybot.de>  Fri, 17 Jul 2020 18:56:14 +0200
+ -- Spunky Bot Release Manager <releases@spunkybot.de>  Fri, 24 Jul 2020 17:31:08 +0200
 
 spunkybot (1.12.0-1) unstable; urgency=medium
 

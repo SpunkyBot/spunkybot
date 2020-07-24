@@ -4,8 +4,11 @@
 name: Upload Python Package
 
 on:
-  release:
-    types: [created]
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - '1.*'
+      - '2.*'
 
 jobs:
   deploy:
@@ -15,7 +18,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Set up Python 2.7
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v2.1.1
       with:
         python-version: 2.7
 

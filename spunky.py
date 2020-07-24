@@ -18,11 +18,12 @@ server and provide statistics data for players.
 Modify the UrT server config as follows:
  * seta g_logsync "1"
  * seta g_loghits "1"
+ * seta g_friendlyfire "2"
 Modify the files '/conf/settings.conf' and '/conf/rules.conf'
 Run the bot: python spunky.py
 """
 
-__version__ = '1.12.1'
+__version__ = '1.12.2'
 
 
 ### IMPORTS
@@ -1870,8 +1871,9 @@ class LogParser(object):
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['tell']['syntax'])
 
+            # exit - display last disconnected player of this match
             elif sar['command'] == '!exit' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['exit']['level']:
-                msg = "^3Last disconnected player: ^7%s" % self.last_disconnected_player.get_name() if self.last_disconnected_player else "^3No player left during this match"
+                msg = "^7Last disconnected player: ^3%s" % self.last_disconnected_player.get_name() if self.last_disconnected_player else "^3No player left during this match"
                 self.game.rcon_tell(sar['player_num'], msg)
 
             # find - display the slot number of the player
@@ -4061,6 +4063,10 @@ class Game(object):
         if self.dynamic_mapcycle:
             self.maplist = filter(None, (self.small_cycle if self.get_number_players() < self.switch_count else self.big_cycle))
             logger.debug("Players online: %s / Mapcycle: %s", self.get_number_players(), self.maplist)
+            self.send_rcon("g_mapcycle dynamic.fake")
+        else:
+            if self.get_cvar('g_mapcycle') == "dynamic.fake":
+                self.send_rcon("g_mapcycle mapcycle.txt")
 
         if self.maplist:
             if self.mapname in self.maplist:

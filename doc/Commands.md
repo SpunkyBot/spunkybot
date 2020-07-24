@@ -112,7 +112,7 @@
   * Short: `!alias <name|id>`
 * **bigtext** - display big message on screen
   * Usage: `!bigtext <text>`
-* **exit** - display last disconnected player
+* **exit** - display last disconnected player of this match
   * Usage: `!exit`
 * **find** - display the slot number of a player
   * Usage: `!find <name|id>`
