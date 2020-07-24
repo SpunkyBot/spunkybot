@@ -4063,6 +4063,10 @@ class Game(object):
         if self.dynamic_mapcycle:
             self.maplist = filter(None, (self.small_cycle if self.get_number_players() < self.switch_count else self.big_cycle))
             logger.debug("Players online: %s / Mapcycle: %s", self.get_number_players(), self.maplist)
+            self.send_rcon("g_mapcycle dynamic.fake")
+        else:
+            if self.get_cvar('g_mapcycle') == "dynamic.fake":
+                self.send_rcon("g_mapcycle mapcycle.txt")
 
         if self.maplist:
             if self.mapname in self.maplist:
