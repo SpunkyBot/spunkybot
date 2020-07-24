@@ -18,6 +18,7 @@ server and provide statistics data for players.
 Modify the UrT server config as follows:
  * seta g_logsync "1"
  * seta g_loghits "1"
+ * seta g_friendlyfire "2"
 Modify the files '/conf/settings.conf' and '/conf/rules.conf'
 Run the bot: python spunky.py
 """
