@@ -23,7 +23,7 @@ jobs:
           tag_name: ${{ github.ref }}
           release_name: v${{ github.ref }}
           body: |
-            Changes in this Release
-            - to be done
+            Spunky Bot v${{ github.ref }} has been released.
+            This release addresses new features and several bug fixes.
           draft: false
           prerelease: false
