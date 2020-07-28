@@ -3,9 +3,9 @@ Section: utils
 Priority: optional
 Maintainer: Spunky Bot Release Manager <releases@spunkybot.de>
 Uploaders: Alexander Kress <hello@alexanderkress.de>
-Build-Depends: debhelper (>= 10), dh-python, python
+Build-Depends: debhelper (>= 9), dh-python, python
 X-Python-Version: >= 2.6
-Standards-Version: 4.0.0
+Standards-Version: 3.9.6
 Homepage: https://www.spunkybot.de/
 Vcs-Git: https://github.com/SpunkyBot/spunkybot.git
 Vcs-Browser: https://github.com/SpunkyBot/spunkybot
