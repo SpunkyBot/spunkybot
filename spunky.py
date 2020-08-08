@@ -415,6 +415,8 @@ class LogParser(object):
                 with self.players_lock:
                     if "@admins" in line:
                         self.game.rcon_say(self.get_admins_online())
+                    elif "@admincount" in line:
+                        self.game.rcon_say(self.get_admin_count())
                     elif "@nextmap" in line:
                         self.game.rcon_say(self.get_nextmap())
                     elif "@time" in line:
@@ -2842,6 +2844,13 @@ class LogParser(object):
         """
         liste = "%s" % ", ".join(["^3%s [^2%d^3]" % (player.get_name(), player.get_admin_role()) for player in self.game.players.itervalues() if player.get_admin_role() >= 20])
         return "^7Admins online: %s" % liste if liste else "^7No admins online"
+
+    def get_admin_count(self):
+        """
+        return number of Admins online
+        """
+        counter = sum(1 for player in self.game.players.itervalues() if player.get_admin_role() >= 20)
+        return "^7%d Admin%s online" % (counter, 's' if counter > 1 else '')
 
     def get_nextmap(self):
         """
