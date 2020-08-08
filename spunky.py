@@ -1757,13 +1757,19 @@ class LogParser(object):
                                     if reason in REASONS:
                                         warning = REASONS[reason]
                                         if reason == 'tk' and victim.get_warning() > 1:
-                                            ban_duration = victim.add_ban_point('tk, ban by %s' % self.game.players[sar['player_num']].get_name(), 600)
+                                            ban_duration = victim.add_ban_point('tk, ban by %s' % self.game.players[sar['player_num']].get_name(), 900)
                                         elif reason == 'lang' and victim.get_warning() > 1:
                                             ban_duration = victim.add_ban_point('lang', 300)
                                         elif reason == 'spam' and victim.get_warning() > 1:
                                             ban_duration = victim.add_ban_point('spam', 300)
                                         elif reason == 'racism' and victim.get_warning() > 1:
-                                            ban_duration = victim.add_ban_point('racism', 300)
+                                            ban_duration = victim.add_ban_point('racism', 900)
+                                        elif reason == 'name' and victim.get_warning() > 1:
+                                            ban_duration = victim.add_ban_point('name', 900)
+                                        elif reason == 'sk' and victim.get_warning() > 1:
+                                            ban_duration = victim.add_ban_point('sk', 900)
+                                        elif reason == 'camp' and victim.get_warning() > 1:
+                                            ban_duration = victim.add_ban_point('camp', 900)
                                     else:
                                         warning = reason
                                     victim.add_warning(warning)
