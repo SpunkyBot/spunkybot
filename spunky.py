@@ -80,6 +80,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'admintest': {'desc': 'display current admin status', 'syntax': '^7Usage: ^2!admintest', 'level': 20},
             'country': {'desc': 'get the country of a player', 'syntax': '^7Usage: ^2!country ^7<name>', 'level': 20},
             'lastmaps': {'desc': 'list the last played maps', 'syntax': '^7Usage: ^2!lastmaps', 'level': 20},
+            'lastvote': {'desc': 'display information about the last called vote', 'syntax': '^7Usage: ^2!lastvote', 'level': 20},
             'leveltest': {'desc': 'get the admin level for a given player or myself', 'syntax': '^7Usage: ^2!leveltest ^7[<name>]', 'level': 20, 'short': 'lt'},
             'list': {'desc': 'list all connected players', 'syntax': '^7Usage: ^2!list', 'level': 20},
             'locate': {'desc': 'display geolocation info of a player', 'syntax': '^7Usage: ^2!locate ^7<name>', 'level': 20, 'short': 'lc'},
@@ -314,6 +315,7 @@ class LogParser(object):
         self.last_disconnected_player = None
         self.allow_nextmap_vote = True
         self.failed_vote_timer = 0
+        self.last_vote = ''
         self.default_gear = ''
 
         # enable/disable autokick for team killing
@@ -730,6 +732,13 @@ class LogParser(object):
         """
         handle callvote
         """
+        if "g_nextmap" in line:
+            self.last_vote = "nextmap"
+        elif "cyclemap" in line:
+            self.last_vote = "cyclemap"
+        elif "clientkickreason" in line:
+            self.last_vote = "kick"
+
         spam_msg = True
         now = time.time()
         if "g_nextmap" in line:
@@ -1654,6 +1663,13 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7Last Maps: ^3%s" % ", ".join(self.game.get_last_maps()))
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7No maps have been played since Spunky Bot started")
+
+            # lastvote - display information about the last called vote
+            elif sar['command'] == "!lastvote" and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['lastvote']['level']:
+                if self.last_vote:
+                    self.game.rcon_tell(sar['player_num'], "^7Last vote: ^2%s" % self.last_vote)
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7No votes have been called since Spunky Bot started")
 
             # list - list all connected players
             elif sar['command'] == '!list' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['list']['level']:

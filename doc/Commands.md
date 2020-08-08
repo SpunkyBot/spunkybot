@@ -64,6 +64,8 @@
   * Usage: `!country <name|id>`
 * **lastmaps** - list the last played maps
   * Usage: `!lastmaps`
+* **lastvote** - display information about the last called vote
+  * Usage: `!lastvote`
 * **leveltest** - get the admin level for a given player or myself
   * Usage: `!leveltest [<name|id>]`
   * Short: `!lt [<name|id>]`
