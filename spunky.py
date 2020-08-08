@@ -132,7 +132,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'bots': {'desc': 'enables or disables bot support', 'syntax': '^7Usage: ^2!bots ^7<on/off>', 'level': 80},
             'cyclemap': {'desc': 'cycle to the next map', 'syntax': '^7Usage: ^2!cyclemap', 'level': 80},
             'exec': {'desc': 'execute given config file', 'syntax': '^7Usage: ^2!exec ^7<filename>', 'level': 80},
-            'gear': {'desc': 'set allowed weapons', 'syntax': '^7Usage: ^2!gear ^7<default/all/knife/pistol/shotgun/sniper>', 'level': 80},
+            'gear': {'desc': 'set allowed weapons', 'syntax': '^7Usage: ^2!gear ^7<default/all/knife/pistol/shotgun/sniper/magnum/mac>', 'level': 80},
             'instagib': {'desc': 'set Instagib mode', 'syntax': '^7Usage: ^2!instagib ^7<on/off>', 'level': 80},
             'kickall': {'desc': 'kick all players matching pattern', 'syntax': '^7Usage: ^2!kickall ^7<pattern> [<reason>]', 'level': 80, 'short': 'kall'},
             'kill': {'desc': 'kill a player', 'syntax': '^7Usage: ^2!kill ^7<name>', 'level': 80},
@@ -2515,6 +2515,12 @@ class LogParser(object):
                     elif "sniper" in arg:
                         self.game.send_rcon('g_gear "%s"' % 'FGHIJKLMacefghjklOQ' if self.urt_modversion > 41 else '61')
                         self.game.rcon_say("^7Gear: ^2Sniper rifles only")
+                    elif "magnum" in arg and self.urt_modversion > 42:
+                        self.game.send_rcon('g_gear FGHIJKLMNZacefghijkOQRSTUVWX')
+                        self.game.rcon_say("^7Gear: ^2Magnums only")
+                    elif "mac" in arg and self.urt_modversion > 42:
+                        self.game.send_rcon('g_gear FGHIJKLMNZacefgijklOQ')
+                        self.game.rcon_say("^7Gear: ^2MAC11 only")
                     else:
                         self.game.rcon_tell(sar['player_num'], COMMANDS['gear']['syntax'])
                 else:
