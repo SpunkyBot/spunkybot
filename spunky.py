@@ -138,6 +138,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'kickall': {'desc': 'kick all players matching pattern', 'syntax': '^7Usage: ^2!kickall ^7<pattern> [<reason>]', 'level': 80, 'short': 'kall'},
             'kill': {'desc': 'kill a player', 'syntax': '^7Usage: ^2!kill ^7<name>', 'level': 80},
             'clear': {'desc': 'clear all player warnings', 'syntax': '^7Usage: ^2!clear', 'level': 80, 'short': 'kiss'},
+            'lastadmin': {'desc': 'display the last disconnected admin', 'syntax': '^7Usage: ^2!lastadmin', 'level': 80},
             'lastbans': {'desc': 'list the last 4 bans', 'syntax': '^7Usage: ^2!lastbans', 'level': 80, 'short': 'bans'},
             'lookup': {'desc': 'search for a player in the database', 'syntax': '^7Usage: ^2!lookup ^7<name>', 'level': 80, 'short': 'l'},
             'makereg': {'desc': 'make a player a regular (Level 2) user', 'syntax': '^7Usage: ^2!makereg ^7<name>', 'level': 80, 'short': 'mr'},
@@ -313,6 +314,7 @@ class LogParser(object):
         self.firstknifekill = False
         self.firstteamkill = False
         self.last_disconnected_player = None
+        self.last_admin = None
         self.allow_nextmap_vote = True
         self.failed_vote_timer = 0
         self.last_vote = ''
@@ -1008,6 +1010,8 @@ class LogParser(object):
             player.save_info()
             player.reset()
             self.last_disconnected_player = player
+            if player.get_admin_role() >= 40:
+                self.last_admin = player
             del self.game.players[player_num]
             for player in self.game.players.itervalues():
                 player.clear_tk(player_num)
@@ -2561,6 +2565,11 @@ class LogParser(object):
                         self.game.rcon_tell(sar['player_num'], COMMANDS['kill']['syntax'])
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7The command ^3!kill ^7is not supported")
+
+            # lastadmin - display the last disconnected admin
+            elif sar['command'] == '!lastadmin' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['lastadmin']['level']:
+                msg = "^7Last disconnected admin: ^3%s [^2%d^3]" % (self.last_admin.get_name(), self.last_admin.get_admin_role()) if self.last_admin else "^3No admin left the server yet"
+                self.game.rcon_tell(sar['player_num'], msg)
 
             # lookup - search for player in database
             elif (sar['command'] == '!lookup' or sar['command'] == '!l') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['lookup']['level']:

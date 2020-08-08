@@ -209,6 +209,8 @@
   * Alias: `!kiss`
 * **kill** - kill a player
   * Usage: `!kill <name|id>`
+* **lastadmin** - display the last disconnected admin
+  * Usage: `!lastadmin`
 * **lastbans** - list the last 4 bans
   * Usage: `!lastbans`
   * Short: `!bans`
