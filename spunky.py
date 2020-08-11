@@ -364,7 +364,7 @@ class LogParser(object):
         logger.info("Configuration loaded  : OK")
         # enable/disable option to get Head Admin by checking existence of head admin in database
         curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `admin_role` = 100")
-        self.iamgod = True if curs.fetchone()[0] < 1 else False
+        self.iamgod = True if int(curs.fetchone()[0]) < 1 else False
         logger.info("Connecting to Database: OK")
         logger.debug("Cmd !iamgod available : %s", self.iamgod)
         self.uptime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
@@ -3394,7 +3394,7 @@ class Player(object):
         # check player table
         values = (self.guid,)
         curs.execute("SELECT COUNT(*) FROM `player` WHERE `guid` = ?", values)
-        if curs.fetchone()[0] == 0:
+        if int(curs.fetchone()[0]) == 0:
             # add new player to database
             values = (self.guid, self.name, self.address, now, self.name)
             curs.execute("INSERT INTO `player` (`guid`,`name`,`ip_address`,`time_joined`,`aliases`) VALUES (?,?,?,?,?)", values)
@@ -3427,7 +3427,7 @@ class Player(object):
         # check XLRSTATS table
         values = (self.guid,)
         curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `guid` = ?", values)
-        if curs.fetchone()[0] == 0:
+        if int(curs.fetchone()[0]) == 0:
             self.registered_user = False
         else:
             self.registered_user = True
@@ -3460,7 +3460,7 @@ class Player(object):
         # create list of aliases
         self.aliases = result[0].split(', ')
         curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `guid` = ?", values)
-        if curs.fetchone()[0] == 0:
+        if int(curs.fetchone()[0]) == 0:
             self.admin_role = 0
             self.registered_user = False
         else:
