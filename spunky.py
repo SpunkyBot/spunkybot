@@ -3291,7 +3291,7 @@ class Player(object):
             curs.execute("SELECT `id`,`reason` FROM `ban_list` WHERE `ip_address` = ? AND `expires` > ?", values)
             result = curs.fetchone()
             if result:
-                self.ban_id = result[0]
+                self.ban_id = int(result[0])
                 self.ban_msg = str(result[1]).split(',')[0]
 
     def ban(self, duration=900, reason='tk', admin=None):
