@@ -359,14 +359,15 @@ class LogParser(object):
         # dynamic and dedicated mapcycles
         self.dynamic_mapcycle = config.getboolean('mapcycle', 'dynamic_mapcycle') if config.has_option('mapcycle', 'dynamic_mapcycle') else False
         self.dedicated_mapcycle = config.getboolean('mapcycle', 'dedicated_mapcycle') if config.has_option('mapcycle', 'dedicated_mapcycle') else $
-        self.ded_bomb_mapcycle = config.get('mapcycle', 'mapcycle_bomb') if config.has_option('mapcycle', 'mapcycle_bomb') else 'mapcycle.txt'
-        self.ded_ctf_mapcycle = config.get('mapcycle', 'mapcycle_ctf') if config.has_option('mapcycle', 'mapcycle_ctf') else 'mapcycle.txt'
-        self.ded_ffa_mapcycle = config.get('mapcycle', 'mapcycle_ffa') if config.has_option('mapcycle', 'mapcycle_ffa') else 'mapcycle.txt'
-        self.ded_gg_mapcycle = config.get('mapcycle', 'mapcycle_gg') if config.has_option('mapcycle', 'mapcycle_gg') else 'mapcycle.txt'
-        self.ded_jump_mapcycle = config.get('mapcycle', 'mapcycle_jump') if config.has_option('mapcycle', 'mapcycle_jump') else 'mapcycle.txt'
-        self.ded_lms_mapcycle = config.get('mapcycle', 'mapcycle_lms') if config.has_option('mapcycle', 'mapcycle_lms') else 'mapcycle.txt'
-        self.ded_tdm_mapcycle = config.get('mapcycle', 'mapcycle_tdm') if config.has_option('mapcycle', 'mapcycle_tdm') else 'mapcycle.txt'
-        self.ded_ts_mapcycle = config.get('mapcycle', 'mapcycle_ts') if config.has_option('mapcycle', 'mapcycle_ts') else 'mapcycle.txt'
+        if not self.dynamic_mapcycle and self.dedicated_mapcycle:
+	    self.ded_bomb_mapcycle = config.get('mapcycle', 'mapcycle_bomb') if config.has_option('mapcycle', 'mapcycle_bomb') else 'mapcycle.txt'
+            self.ded_ctf_mapcycle = config.get('mapcycle', 'mapcycle_ctf') if config.has_option('mapcycle', 'mapcycle_ctf') else 'mapcycle.txt'
+            self.ded_ffa_mapcycle = config.get('mapcycle', 'mapcycle_ffa') if config.has_option('mapcycle', 'mapcycle_ffa') else 'mapcycle.txt'
+            self.ded_gg_mapcycle = config.get('mapcycle', 'mapcycle_gg') if config.has_option('mapcycle', 'mapcycle_gg') else 'mapcycle.txt'
+            self.ded_jump_mapcycle = config.get('mapcycle', 'mapcycle_jump') if config.has_option('mapcycle', 'mapcycle_jump') else 'mapcycle.txt'
+            self.ded_lms_mapcycle = config.get('mapcycle', 'mapcycle_lms') if config.has_option('mapcycle', 'mapcycle_lms') else 'mapcycle.txt'
+            self.ded_tdm_mapcycle = config.get('mapcycle', 'mapcycle_tdm') if config.has_option('mapcycle', 'mapcycle_tdm') else 'mapcycle.txt'
+            self.ded_ts_mapcycle = config.get('mapcycle', 'mapcycle_ts') if config.has_option('mapcycle', 'mapcycle_ts') else 'mapcycle.txt'
         # support for low gravity server
         self.support_lowgravity = config.getboolean('lowgrav', 'support_lowgravity') if config.has_option('lowgrav', 'support_lowgravity') else False
         self.gravity = config.getint('lowgrav', 'gravity') if config.has_option('lowgrav', 'gravity') else 800
