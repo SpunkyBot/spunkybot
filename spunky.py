@@ -360,7 +360,7 @@ class LogParser(object):
         self.dynamic_mapcycle = config.getboolean('mapcycle', 'dynamic_mapcycle') if config.has_option('mapcycle', 'dynamic_mapcycle') else False
         self.dedicated_mapcycle = config.getboolean('mapcycle', 'dedicated_mapcycle') if config.has_option('mapcycle', 'dedicated_mapcycle') else $
         if not self.dynamic_mapcycle and self.dedicated_mapcycle:
-	    self.ded_bomb_mapcycle = config.get('mapcycle', 'mapcycle_bomb') if config.has_option('mapcycle', 'mapcycle_bomb') else 'mapcycle.txt'
+            self.ded_bomb_mapcycle = config.get('mapcycle', 'mapcycle_bomb') if config.has_option('mapcycle', 'mapcycle_bomb') else 'mapcycle.txt'
             self.ded_ctf_mapcycle = config.get('mapcycle', 'mapcycle_ctf') if config.has_option('mapcycle', 'mapcycle_ctf') else 'mapcycle.txt'
             self.ded_ffa_mapcycle = config.get('mapcycle', 'mapcycle_ffa') if config.has_option('mapcycle', 'mapcycle_ffa') else 'mapcycle.txt'
             self.ded_gg_mapcycle = config.get('mapcycle', 'mapcycle_gg') if config.has_option('mapcycle', 'mapcycle_gg') else 'mapcycle.txt'
