@@ -127,7 +127,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'version': {'desc': 'display the version of the bot', 'syntax': '^7Usage: ^2!version', 'level': 60},
             'veto': {'desc': 'stop voting process', 'syntax': '^7Usage: ^2!veto', 'level': 60},
             # senioradmin commands, level 80
-            'addbots': {'desc': 'add bots to the game', 'syntax': '^7Usage: ^2!addbots', 'level': 80},
+            'addbots': {'desc': 'add up to 4 bots to the game', 'syntax': '^7Usage: ^2!addbots', 'level': 80},
             'banall': {'desc': 'ban all players matching pattern', 'syntax': '^7Usage: ^2!banall ^7<pattern> [<reason>]', 'level': 80, 'short': 'ball'},
             'banlist': {'desc': 'display the last active 10 bans', 'syntax': '^7Usage: ^2!banlist', 'level': 80},
             'bots': {'desc': 'enables or disables bot support', 'syntax': '^7Usage: ^2!bots ^7<on/off>', 'level': 80},
@@ -2354,10 +2354,16 @@ class LogParser(object):
 
             # !addbots
             elif sar['command'] == '!addbots' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['addbots']['level']:
-                self.game.send_rcon('addbot boa 3 blue 50 BOT1')
-                self.game.send_rcon('addbot python 4 blue 50 BOT2')
-                self.game.send_rcon('addbot cheetah 3 red 50 BOT3')
-                self.game.send_rcon('addbot cobra 4 red 50 BOT4')
+                self.game.send_rcon('addbot boa 4 blue 50 BOT_1')
+                self.game.send_rcon('addbot cheetah 4 red 50 BOT_2')
+                game_data = self.game.get_gamestats()
+                if game_data[Player.teams[1]] > game_data[Player.teams[2]]:
+                    self.game.send_rcon('addbot mantis 4 blue 50 BOT_3')
+                elif game_data[Player.teams[1]] < game_data[Player.teams[2]]:
+                    self.game.send_rcon('addbot chicken 4 red 50 BOT_4')
+                else:
+                    self.game.send_rcon('addbot python 4 blue 50 BOT_3')
+                    self.game.send_rcon('addbot cobra 4 red 50 BOT_4')
 
             # !bots on/off
             elif sar['command'] == '!bots' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['bots']['level']:
