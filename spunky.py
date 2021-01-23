@@ -2710,8 +2710,11 @@ class LogParser(object):
                 curs.execute("SELECT `id`,`name`,`expires` FROM `ban_list` ORDER BY `timestamp` DESC LIMIT 4")
                 result = curs.fetchall()
                 lastbanlist = ['^3[^2@%s^3] ^7%s ^3(^1%s^3)' % (row[0], row[1], row[2]) for row in result]
-                for item in lastbanlist:
-                    self.game.rcon_tell(sar['player_num'], str(item))
+                if result:
+                    for item in lastbanlist:
+                        self.game.rcon_tell(sar['player_num'], str(item))
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7Currently no one is banned")
 
             # unban - unban a player from the database via ID
             elif sar['command'] == '!unban' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['unban']['level']:
