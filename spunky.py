@@ -544,10 +544,8 @@ class LogParser(object):
         """
         delete expired ban points
         """
-        timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-        values = (timestamp,)
         # remove expired ban_points
-        curs.execute("DELETE FROM `ban_points` WHERE `expires` < ?", values)
+        curs.execute("DELETE FROM `ban_points` WHERE `expires` < '{}'".format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))))
         conn.commit()
 
     def taskmanager(self):
@@ -1266,8 +1264,7 @@ class LogParser(object):
         """
         player_id = user_id.lstrip('@')
         if player_id.isdigit() and int(player_id) > 1:
-            values = (player_id,)
-            curs.execute("SELECT `guid`,`name`,`ip_address` FROM `player` WHERE `id` = ?", values)
+            curs.execute("SELECT `guid`,`name`,`ip_address` FROM `player` WHERE `id` = {}".format(int(player_id)))
             result = curs.fetchone()
             if result:
                 victim = Player(player_num=1023, ip_address=str(result[2]), guid=str(result[0]), name=str(result[1]))
@@ -1529,8 +1526,8 @@ class LogParser(object):
 
             # xlrtopstats
             elif (sar['command'] in ('!xlrtopstats', '!topstats')) and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['xlrtopstats']['level']:
-                values = (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime((time.time() - 10368000))),)  # last played within the last 120 days
-                result = curs.execute("SELECT name FROM `xlrstats` WHERE (`rounds` > 35 or `kills` > 500) and `last_played` > ? ORDER BY `ratio` DESC LIMIT 3", values).fetchall()
+                curs.execute("SELECT name FROM `xlrstats` WHERE (`rounds` > 35 or `kills` > 500) and `last_played` > '{}' ORDER BY `ratio` DESC LIMIT 3".format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime((time.time() - 10368000)))))  # last played within the last 120 days
+                result = curs.fetchall()
                 toplist = ['^1#%s ^7%s' % (index + 1, result[index][0]) for index in xrange(len(result))]
                 msg = "^3Top players: %s" % str(", ".join(toplist)) if toplist else "^3Awards still available"
                 self.game.rcon_tell(sar['player_num'], msg)
@@ -2287,10 +2284,7 @@ class LogParser(object):
                     if not found:
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
-                        timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-                        guid = victim.get_guid()
-                        values = (timestamp, guid)
-                        curs.execute("SELECT `expires` FROM `ban_list` WHERE `expires` > ? AND `guid` = ?", values)
+                        curs.execute("SELECT `expires` FROM `ban_list` WHERE `expires` > '{}' AND `guid` = '{}'".format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())), victim.get_guid()))
                         result = curs.fetchone()
                         if result:
                             self.game.rcon_tell(sar['player_num'], "^3%s ^7has an active ban until [^1%s^7]" % (victim.get_name(), str(result[0])))
@@ -2575,9 +2569,8 @@ class LogParser(object):
             elif (sar['command'] == '!lookup' or sar['command'] == '!l') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['lookup']['level']:
                 if line.split(sar['command'])[1]:
                     arg = line.split(sar['command'])[1].strip()
-                    search = '%' + arg + '%'
-                    lookup = (search,)
-                    result = curs.execute("SELECT `id`,`name`,`time_joined` FROM `player` WHERE `name` like ? ORDER BY `time_joined` DESC LIMIT 8", lookup).fetchall()
+                    curs.execute("SELECT `id`,`name`,`time_joined` FROM `player` WHERE `name` like '%{}%' ORDER BY `time_joined` DESC LIMIT 8".format(arg))
+                    result = curs.fetchall()
                     for row in result:
                         self.game.rcon_tell(sar['player_num'], "^7[^2@%s^7] %s ^7[^1%s^7]" % (str(row[0]), str(row[1]), str(row[2])), False)
                     if not result:
@@ -2706,15 +2699,16 @@ class LogParser(object):
 
             # banlist - display the last active 10 bans
             elif sar['command'] == '!banlist' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['banlist']['level']:
-                values = (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())),)
-                result = curs.execute("SELECT `id`,`name` FROM `ban_list` WHERE `expires` > ? ORDER BY `timestamp` DESC LIMIT 10", values).fetchall()
+                curs.execute("SELECT `id`,`name` FROM `ban_list` WHERE `expires` > '{}' ORDER BY `timestamp` DESC LIMIT 10".format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))))
+                result = curs.fetchall()
                 banlist = ['^7[^2@%s^7] %s' % (row[0], row[1]) for row in result]
                 msg = 'Currently no one is banned' if not banlist else str(", ".join(banlist))
                 self.game.rcon_tell(sar['player_num'], "^7Banlist: %s" % msg)
 
             # lastbans - list the last 4 bans
             elif (sar['command'] == '!lastbans' or sar['command'] == '!bans') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['lastbans']['level']:
-                result = curs.execute("SELECT id,name,expires FROM `ban_list` ORDER BY `timestamp` DESC LIMIT 4").fetchall()
+                curs.execute("SELECT `id`,`name`,`expires` FROM `ban_list` ORDER BY `timestamp` DESC LIMIT 4")
+                result = curs.fetchall()
                 lastbanlist = ['^3[^2@%s^3] ^7%s ^3(^1%s^3)' % (row[0], row[1], row[2]) for row in result]
                 for item in lastbanlist:
                     self.game.rcon_tell(sar['player_num'], str(item))
@@ -2724,18 +2718,16 @@ class LogParser(object):
                 if line.split(sar['command'])[1]:
                     arg = line.split(sar['command'])[1].strip().lstrip('@')
                     if arg.isdigit():
-                        values = (int(arg),)
-                        curs.execute("SELECT `guid`,`name`,`ip_address` FROM `ban_list` WHERE `id` = ?", values)
+                        curs.execute("SELECT `guid`,`name`,`ip_address` FROM `ban_list` WHERE `id` = {}".format(int(arg)))
                         result = curs.fetchone()
                         if result:
                             guid = result[0]
                             name = str(result[1])
                             ip_addr = str(result[2])
-                            curs.execute("DELETE FROM `ban_list` WHERE `id` = ?", values)
+                            curs.execute("DELETE FROM `ban_list` WHERE `id` = {}".format(int(arg)))
                             conn.commit()
                             self.game.rcon_tell(sar['player_num'], "^7Player ^2%s ^7unbanned" % name)
-                            values = (guid, ip_addr)
-                            curs.execute("DELETE FROM `ban_list` WHERE `guid` = ? OR ip_address = ?", values)
+                            curs.execute("DELETE FROM `ban_list` WHERE `guid` = '{}' OR ip_address = '{}'".format(guid, ip_addr))
                             conn.commit()
                             self.game.rcon_tell(sar['player_num'], "^7Try to remove duplicates of [^1%s^7]" % ip_addr)
                         else:
@@ -3280,18 +3272,16 @@ class Player(object):
 
         # check ban_list
         now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(self.time_joined))
-        values = (self.guid, now)
-        curs.execute("SELECT `id`,`reason` FROM `ban_list` WHERE `guid` = ? AND `expires` > ?", values)
+        curs.execute("SELECT `id`,`reason` FROM `ban_list` WHERE `guid` = '{}' AND `expires` > '{}'".format(self.guid, now))
         result = curs.fetchone()
         if result:
             self.ban_id = result[0]
             self.ban_msg = str(result[1]).split(',')[0]
         else:
-            values = (self.address, now)
-            curs.execute("SELECT `id`,`reason` FROM `ban_list` WHERE `ip_address` = ? AND `expires` > ?", values)
+            curs.execute("SELECT `id`,`reason` FROM `ban_list` WHERE `ip_address` = '{}' AND `expires` > '{}'".format(self.address, now))
             result = curs.fetchone()
             if result:
-                self.ban_id = int(result[0])
+                self.ban_id = result[0]
                 self.ban_msg = str(result[1]).split(',')[0]
 
     def ban(self, duration=900, reason='tk', admin=None):
@@ -3302,24 +3292,20 @@ class Player(object):
         except ValueError:
             expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(2147483647))
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-        values = (self.guid,)
-        curs.execute("SELECT `expires` FROM `ban_list` WHERE `guid` = ?", values)
+        curs.execute("SELECT `expires` FROM `ban_list` WHERE `guid` = '{}'".format(self.guid))
         result = curs.fetchone()
         if result:
             if result[0] < expire_date:
                 # update already existing ban
-                values = (self.address, expire_date, reason, self.guid)
-                curs.execute("UPDATE `ban_list` SET `ip_address` = ?,`expires` = ?,`reason` = ? WHERE `guid` = ?", values)
+                curs.execute("UPDATE `ban_list` SET `ip_address` = '{}',`expires` = '{}',`reason` = '{}' WHERE `guid` = '{}'".format(self.address, expire_date, reason, self.guid))
                 conn.commit()
                 return True
-            values = (self.address, self.guid)
             # update IP address of existing ban
-            curs.execute("UPDATE `ban_list` SET `ip_address` = ? WHERE `guid` = ?", values)
+            curs.execute("UPDATE `ban_list` SET `ip_address` = '{}' WHERE `guid` = '{}'".format(self.address, self.guid))
             conn.commit()
             return False
         # create new ban
-        values = (self.player_id, self.guid, self.name, self.address, expire_date, timestamp, reason)
-        curs.execute("INSERT INTO `ban_list` (`id`,`guid`,`name`,`ip_address`,`expires`,`timestamp`,`reason`) VALUES (?,?,?,?,?,?,?)", values)
+        curs.execute("INSERT INTO `ban_list` (`id`,`guid`,`name`,`ip_address`,`expires`,`timestamp`,`reason`) VALUES ({},'{}','{}','{}','{}','{}','{}')".format(self.player_id, self.guid, self.name, self.address, expire_date, timestamp, reason))
         conn.commit()
         return True
 
@@ -3328,16 +3314,14 @@ class Player(object):
             expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() + duration))
         except ValueError:
             expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(2147483647))
-        values = (self.guid, point_type, expire_date)
         # add ban_point to database
-        curs.execute("INSERT INTO `ban_points` (`guid`,`point_type`,`expires`) VALUES (?,?,?)", values)
+        curs.execute("INSERT INTO `ban_points` (`guid`,`point_type`,`expires`) VALUES ('{}','{}','{}')".format(self.guid, point_type, expire_date))
         conn.commit()
         # check amount of ban_points
-        values = (self.guid, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
-        curs.execute("SELECT COUNT(*) FROM `ban_points` WHERE `guid` = ? AND `expires` > ?", values)
-        # ban player when he gets more than 1 ban_point
-        if curs.fetchone()[0] > 1:
-            # ban duration multiplied by 3
+        curs.execute("SELECT COUNT(*) FROM `ban_points` WHERE `guid` = '{}' AND `expires` > '{}'".format(self.guid, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))))
+        # ban player when he gets more than 2 ban_points
+        if int(curs.fetchone()[0]) > 2:
+            # ban duration = 3 * expiration time
             ban_duration = duration * 3
             self.ban(duration=ban_duration, reason=point_type)
             return ban_duration / 60
@@ -3385,30 +3369,25 @@ class Player(object):
     def save_info(self):
         if self.registered_user:
             ratio = round(float(self.db_kills) / float(self.db_deaths), 2) if self.db_deaths > 0 else 1.0
-            values = (self.db_kills, self.db_deaths, self.db_head_shots, self.db_tk_count, self.db_team_death, self.db_killing_streak, self.db_suicide, ratio, self.guid)
-            curs.execute("UPDATE `xlrstats` SET `kills` = ?,`deaths` = ?,`headshots` = ?,`team_kills` = ?,`team_death` = ?,`max_kill_streak` = ?,`suicides` = ?,`rounds` = `rounds` + 1,`ratio` = ? WHERE `guid` = ?", values)
+            curs.execute("UPDATE `xlrstats` SET `kills` = {},`deaths` = {},`headshots` = {},`team_kills` = {},`team_death` = {},`max_kill_streak` = {},`suicides` = {},`rounds` = `rounds` + 1,`ratio` = {} WHERE `guid` = '{}'".format(self.db_kills, self.db_deaths, self.db_head_shots, self.db_tk_count, self.db_team_death, self.db_killing_streak, self.db_suicide, ratio, self.guid))
             conn.commit()
 
     def check_database(self):
         now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         # check player table
-        values = (self.guid,)
-        curs.execute("SELECT COUNT(*) FROM `player` WHERE `guid` = ?", values)
+        curs.execute("SELECT COUNT(*) FROM `player` WHERE `guid` = '{}'".format(self.guid))
         if int(curs.fetchone()[0]) == 0:
             # add new player to database
-            values = (self.guid, self.name, self.address, now, self.name)
-            curs.execute("INSERT INTO `player` (`guid`,`name`,`ip_address`,`time_joined`,`aliases`) VALUES (?,?,?,?,?)", values)
+            curs.execute("INSERT INTO `player` (`guid`,`name`,`ip_address`,`time_joined`,`aliases`) VALUES ('{}','{}','{}','{}','{}')".format(self.guid, self.name, self.address, now, self.name))
             conn.commit()
             self.aliases.append(self.name)
             self.first_time = True
         else:
             # update name, IP address and last join date
-            values = (self.name, self.address, now, self.guid)
-            curs.execute("UPDATE `player` SET `name` = ?,`ip_address` = ?,`time_joined` = ? WHERE `guid` = ?", values)
+            curs.execute("UPDATE `player` SET `name` = '{}',`ip_address` = '{}',`time_joined` = '{}' WHERE `guid` = '{}'".format(self.name, self.address, now, self.guid))
             conn.commit()
             # get known aliases
-            values = (self.guid,)
-            curs.execute("SELECT `aliases` FROM `player` WHERE `guid` = ?", values)
+            curs.execute("SELECT `aliases` FROM `player` WHERE `guid` = '{}'".format(self.guid))
             result = curs.fetchone()
             # create list of aliases
             self.aliases = result[0].split(', ')
@@ -3421,19 +3400,16 @@ class Player(object):
                     curs.execute("UPDATE `player` SET `aliases` = ? WHERE `guid` = ?", values)
                     conn.commit()
         # get player-id
-        values = (self.guid,)
-        curs.execute("SELECT `id` FROM `player` WHERE `guid` = ?", values)
+        curs.execute("SELECT `id` FROM `player` WHERE `guid` = '{}'".format(self.guid))
         self.player_id = curs.fetchone()[0]
         # check XLRSTATS table
-        values = (self.guid,)
-        curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `guid` = ?", values)
+        curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `guid` = '{}'".format(self.guid))
         if int(curs.fetchone()[0]) == 0:
             self.registered_user = False
         else:
             self.registered_user = True
             # get DB DATA for XLRSTATS
-            values = (self.guid,)
-            curs.execute("SELECT `last_played`,`num_played`,`kills`,`deaths`,`headshots`,`team_kills`,`team_death`,`max_kill_streak`,`suicides`,`admin_role`,`first_seen` FROM `xlrstats` WHERE `guid` = ?", values)
+            curs.execute("SELECT `last_played`,`num_played`,`kills`,`deaths`,`headshots`,`team_kills`,`team_death`,`max_kill_streak`,`suicides`,`admin_role`,`first_seen` FROM `xlrstats` WHERE `guid` = '{}'".format(self.guid))
             result = curs.fetchone()
             self.last_visit = result[0]
             self.num_played = result[1]
@@ -3447,24 +3423,22 @@ class Player(object):
             self.admin_role = result[9]
             self.first_seen = result[10]
             # update name, last_played and increase num_played counter
-            values = (self.name, now, self.guid)
-            curs.execute("UPDATE `xlrstats` SET `name` = ?,`last_played` = ?,`num_played` = `num_played` + 1 WHERE `guid` = ?", values)
+            curs.execute("UPDATE `xlrstats` SET `name` = '{}',`last_played` = '{}',`num_played` = `num_played` + 1 WHERE `guid` = '{}'".format(self.name, now, self.guid))
             conn.commit()
 
     def define_offline_player(self, player_id):
         self.player_id = player_id
-        values = (self.guid,)
         # get known aliases
-        curs.execute("SELECT `aliases` FROM `player` WHERE `guid` = ?", values)
+        curs.execute("SELECT `aliases` FROM `player` WHERE `guid` = '{}'".format(self.guid))
         result = curs.fetchone()
         # create list of aliases
         self.aliases = result[0].split(', ')
-        curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `guid` = ?", values)
+        curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `guid` = '{}'".format(self.guid))
         if int(curs.fetchone()[0]) == 0:
             self.admin_role = 0
             self.registered_user = False
         else:
-            curs.execute("SELECT `last_played`,`admin_role` FROM `xlrstats` WHERE `guid` = ?", values)
+            curs.execute("SELECT `last_played`,`admin_role` FROM `xlrstats` WHERE `guid` = '{}'".format(self.guid))
             result = curs.fetchone()
             self.last_visit = result[0]
             self.admin_role = result[1]
@@ -3473,8 +3447,7 @@ class Player(object):
     def register_user_db(self, role=1):
         if not self.registered_user:
             now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-            values = (self.guid, self.name, self.address, now, now, role)
-            curs.execute("INSERT INTO `xlrstats` (`guid`,`name`,`ip_address`,`first_seen`,`last_played`,`num_played`,`admin_role`) VALUES (?,?,?,?,?,1,?)", values)
+            curs.execute("INSERT INTO `xlrstats` (`guid`,`name`,`ip_address`,`first_seen`,`last_played`,`num_played`,`admin_role`) VALUES ('{}','{}','{}','{}','{}',1,{})".format(self.guid, self.name, self.address, now, now, role))
             conn.commit()
             self.registered_user = True
             self.admin_role = role
@@ -3483,8 +3456,7 @@ class Player(object):
             self.last_visit = now
 
     def update_db_admin_role(self, role):
-        values = (role, self.guid)
-        curs.execute("UPDATE `xlrstats` SET `admin_role` = ? WHERE `guid` = ?", values)
+        curs.execute("UPDATE `xlrstats` SET `admin_role` = {} WHERE `guid` = '{}'".format(role, self.guid))
         conn.commit()
         # overwrite admin role in game, no reconnect of player required
         self.set_admin_role(role)
@@ -3762,9 +3734,7 @@ class Player(object):
         self.tk_killer_names = []
         self.last_warn_time = 0
         # clear ban_points
-        now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-        values = (self.guid, now)
-        curs.execute("DELETE FROM `ban_points` WHERE `guid` = ? and `expires` > ?", values)
+        curs.execute("DELETE FROM `ban_points` WHERE `guid` = '{}' and `expires` > '{}'".format(self.guid, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))))
         conn.commit()
 
     def team_death(self):
