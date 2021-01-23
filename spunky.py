@@ -1781,13 +1781,13 @@ class LogParser(object):
                                             ban_duration = victim.add_ban_point('lang', 300)
                                         elif reason == 'spam' and victim.get_warning() > 1:
                                             ban_duration = victim.add_ban_point('spam', 300)
-                                        elif reason == 'racism' and victim.get_warning() > 1:
+                                        elif reason == 'racism':
                                             ban_duration = victim.add_ban_point('racism', 900)
                                         elif reason == 'name' and victim.get_warning() > 1:
                                             ban_duration = victim.add_ban_point('name', 900)
                                         elif reason == 'sk' and victim.get_warning() > 1:
                                             ban_duration = victim.add_ban_point('sk', 900)
-                                        elif reason == 'camp' and victim.get_warning() > 1:
+                                        elif reason == 'camp':
                                             ban_duration = victim.add_ban_point('camp', 900)
                                     else:
                                         warning = reason
