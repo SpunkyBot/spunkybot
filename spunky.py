@@ -238,29 +238,22 @@ class LogParser(object):
                 self.admin_cmds.append(key)
                 self.fulladmin_cmds.append(key)
                 self.senioradmin_cmds.append(key)
-                self.superadmin_cmds.append(key)
             elif value['level'] == 40:
                 self.admin_cmds.append(key)
                 self.fulladmin_cmds.append(key)
                 self.senioradmin_cmds.append(key)
-                self.superadmin_cmds.append(key)
             elif value['level'] == 60:
                 self.fulladmin_cmds.append(key)
                 self.senioradmin_cmds.append(key)
-                self.superadmin_cmds.append(key)
             elif value['level'] == 80:
                 self.senioradmin_cmds.append(key)
-                self.superadmin_cmds.append(key)
-            elif value['level'] >= 90:
-                self.superadmin_cmds.append(key)
-            else:
+            elif value['level'] < 90:
                 self.user_cmds.append(key)
                 self.mod_cmds.append(key)
                 self.admin_cmds.append(key)
                 self.fulladmin_cmds.append(key)
                 self.senioradmin_cmds.append(key)
-                self.superadmin_cmds.append(key)
-
+            self.superadmin_cmds.append(key)
         # alphabetic sort of the commands
         self.user_cmds.sort()
         self.mod_cmds.sort()
@@ -376,7 +369,7 @@ class LogParser(object):
         logger.info("Configuration loaded  : OK")
         # enable/disable option to get Head Admin by checking existence of head admin in database
         curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `admin_role` = 100")
-        self.iamgod = True if int(curs.fetchone()[0]) < 1 else False
+        self.iamgod = int(curs.fetchone()[0]) < 1
         logger.info("Connecting to Database: OK")
         logger.debug("Cmd !iamgod available : %s", self.iamgod)
         self.uptime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
@@ -508,9 +501,11 @@ class LogParser(object):
                     # get default g_gear value
                     self.default_gear = line.split('g_gear\\')[-1].split('\\')[0] if 'g_gear\\' in line else "%s" % '' if self.urt_modversion > 41 else '0'
 
-                if self.log_file.tell() > end_pos:
-                    break
-                elif not line:
+                if (
+                    self.log_file.tell() > end_pos
+                    or self.log_file.tell() <= end_pos
+                    and not line
+                ):
                     break
             if self.log_file.tell() < seek_amount:
                 self.log_file.seek(0, 0)
@@ -518,8 +513,7 @@ class LogParser(object):
                 cur_pos = start_pos - seek_amount
                 end_pos = start_pos
                 start_pos = cur_pos
-                if start_pos < 0:
-                    start_pos = 0
+                start_pos = max(start_pos, 0)
                 self.log_file.seek(start_pos)
 
     def read_log(self):
@@ -648,22 +642,23 @@ class LogParser(object):
         """
         check ping of all players and set warning for high ping user
         """
-        if self.max_ping > 0:
-            # rcon update status
-            self.game.quake.rcon_update()
-            for player in self.game.quake.players:
-                # if ping is too high, increase warn counter, Admins or higher levels will not get the warning
-                try:
-                    ping_value = player.ping
-                    gameplayer = self.game.players[player.num]
-                except KeyError:
-                    continue
+        if self.max_ping <= 0:
+            return
+        # rcon update status
+        self.game.quake.rcon_update()
+        for player in self.game.quake.players:
+            # if ping is too high, increase warn counter, Admins or higher levels will not get the warning
+            try:
+                ping_value = player.ping
+                gameplayer = self.game.players[player.num]
+            except KeyError:
+                continue
+            else:
+                if self.max_ping < ping_value < 999 and gameplayer.get_admin_role() < 40:
+                    gameplayer.add_high_ping(ping_value)
+                    self.game.rcon_tell(player.num, "^1WARNING ^7[^3%d^7]: Your ping is too high [^4%d^7]. ^3The maximum allowed ping is %d." % (gameplayer.get_warning(), ping_value, self.max_ping), False)
                 else:
-                    if self.max_ping < ping_value < 999 and gameplayer.get_admin_role() < 40:
-                        gameplayer.add_high_ping(ping_value)
-                        self.game.rcon_tell(player.num, "^1WARNING ^7[^3%d^7]: Your ping is too high [^4%d^7]. ^3The maximum allowed ping is %d." % (gameplayer.get_warning(), ping_value, self.max_ping), False)
-                    else:
-                        gameplayer.clear_specific_warning('fix your ping')
+                    gameplayer.clear_specific_warning('fix your ping')
 
     def parse_line(self, string):
         """
@@ -757,11 +752,14 @@ class LogParser(object):
 
         spam_msg = True
         now = time.time()
-        if "g_nextmap" in line:
-            if self.limit_nextmap_votes and not self.allow_nextmap_vote:
-                self.game.send_rcon('veto')
-                self.game.rcon_say("^7Voting for Next Map is disabled until the end of this map")
-                spam_msg = False
+        if (
+            "g_nextmap" in line
+            and self.limit_nextmap_votes
+            and not self.allow_nextmap_vote
+        ):
+            self.game.send_rcon('veto')
+            self.game.rcon_say("^7Voting for Next Map is disabled until the end of this map")
+            spam_msg = False
         if "map" in line and self.failed_vote_timer > now:
             remaining_time = int(self.failed_vote_timer - now)
             self.game.send_rcon('veto')
@@ -775,12 +773,18 @@ class LogParser(object):
         """
         set-up a new game
         """
-        self.ffa_lms_gametype = True if ('g_gametype\\0\\' in line or 'g_gametype\\1\\' in line or 'g_gametype\\9\\' in line or 'g_gametype\\11\\' in line) else False
-        self.ctf_gametype = True if 'g_gametype\\7\\' in line else False
-        self.ts_gametype = True if ('g_gametype\\4\\' in line or 'g_gametype\\5\\' in line) else False
-        self.tdm_gametype = True if 'g_gametype\\3\\' in line else False
-        self.bomb_gametype = True if 'g_gametype\\8\\' in line else False
-        self.freeze_gametype = True if 'g_gametype\\10\\' in line else False
+        self.ffa_lms_gametype = (
+            'g_gametype\\0\\' in line
+            or 'g_gametype\\1\\' in line
+            or 'g_gametype\\9\\' in line
+            or 'g_gametype\\11\\' in line
+        )
+
+        self.ctf_gametype = 'g_gametype\\7\\' in line
+        self.ts_gametype = ('g_gametype\\4\\' in line or 'g_gametype\\5\\' in line)
+        self.tdm_gametype = 'g_gametype\\3\\' in line
+        self.bomb_gametype = 'g_gametype\\8\\' in line
+        self.freeze_gametype = 'g_gametype\\10\\' in line
         logger.debug("InitGame: Starting game...")
         self.game.rcon_clear()
         # reset the player stats
@@ -799,7 +803,7 @@ class LogParser(object):
         if self.bomb_gametype:
             # bomb detonation timer
             detonation_timer = self.game.get_cvar('g_bombexplodetime')
-            self.explode_time = detonation_timer if detonation_timer else "40"
+            self.explode_time = detonation_timer or "40"
 
         # reset list of player who left server
         self.last_disconnected_player = None
@@ -892,7 +896,7 @@ class LogParser(object):
             player_num = int(line[:2].strip())
             line = line[2:].lstrip("\\").lstrip()
             values = self.explode_line(line)
-            challenge = True if 'challenge' in values else False
+            challenge = 'challenge' in values
             name = values['name'] if 'name' in values else "UnnamedPlayer"
             ip_port = values['ip'] if 'ip' in values else "0.0.0.0:0"
             auth = values['authl'] if 'authl' in values else ""
@@ -1045,12 +1049,12 @@ class LogParser(object):
             # increase summary of all hits
             hitter.set_all_hits()
 
-            zones = {'TORSO': 'body', 'VEST': 'body', 'KEVLAR': 'body', 'BUTT': 'body', 'GROIN': 'body',
-                     'LEGS': 'legs', 'LEFT_UPPER_LEG': 'legs', 'RIGHT_UPPER_LEG': 'legs',
-                     'LEFT_LOWER_LEG': 'legs', 'RIGHT_LOWER_LEG': 'legs', 'LEFT_FOOT': 'legs', 'RIGHT_FOOT': 'legs',
-                     'ARMS': 'arms', 'LEFT_ARM': 'arms', 'RIGHT_ARM': 'arms'}
-
             if hitpoint in self.hit_points:
+                zones = {'TORSO': 'body', 'VEST': 'body', 'KEVLAR': 'body', 'BUTT': 'body', 'GROIN': 'body',
+                         'LEGS': 'legs', 'LEFT_UPPER_LEG': 'legs', 'RIGHT_UPPER_LEG': 'legs',
+                         'LEFT_LOWER_LEG': 'legs', 'RIGHT_LOWER_LEG': 'legs', 'LEFT_FOOT': 'legs', 'RIGHT_FOOT': 'legs',
+                         'ARMS': 'arms', 'LEFT_ARM': 'arms', 'RIGHT_ARM': 'arms'}
+
                 if self.hit_points[hitpoint] in ('HEAD', 'HELMET'):
                     hitter.headshot()
                     hitter_hs_count = hitter.get_headshots()
@@ -1304,12 +1308,16 @@ class LogParser(object):
             elif map_name.lower() in maps:
                 append(maps)
         if not map_list:
-            ret_val = False, None, "^3Map not found"
+            return False, None, "^3Map not found"
         elif len(map_list) > 1:
-            ret_val = False, None, "^7Maps matching %s: ^3%s" % (map_name, ', '.join(map_list))
+            return (
+                False,
+                None,
+                "^7Maps matching %s: ^3%s" % (map_name, ', '.join(map_list)),
+            )
+
         else:
-            ret_val = True, map_list[0], None
-        return ret_val
+            return True, map_list[0], None
 
     def handle_saytell(self, line):
         """
