@@ -356,6 +356,18 @@ class LogParser(object):
         self.reset_kill_spree_mapcycle = config.getboolean('bot', 'reset_kill_spree_mapcycle') if config.has_option('bot', 'reset_kill_spree_mapcycle') else True
         ban_duration = config.getint('bot', 'ban_duration') if config.has_option('bot', 'ban_duration') else 7
         self.ban_duration = ban_duration if ban_duration > 0 else 1
+        # dynamic and dedicated mapcycles
+        self.dynamic_mapcycle = config.getboolean('mapcycle', 'dynamic_mapcycle') if config.has_option('mapcycle', 'dynamic_mapcycle') else False
+        self.dedicated_mapcycle = config.getboolean('mapcycle', 'dedicated_mapcycle') if config.has_option('mapcycle', 'dedicated_mapcycle') else False
+        if not self.dynamic_mapcycle and self.dedicated_mapcycle:
+            self.ded_bomb_mapcycle = config.get('mapcycle', 'mapcycle_bomb') if config.has_option('mapcycle', 'mapcycle_bomb') else 'mapcycle.txt'
+            self.ded_ctf_mapcycle = config.get('mapcycle', 'mapcycle_ctf') if config.has_option('mapcycle', 'mapcycle_ctf') else 'mapcycle.txt'
+            self.ded_ffa_mapcycle = config.get('mapcycle', 'mapcycle_ffa') if config.has_option('mapcycle', 'mapcycle_ffa') else 'mapcycle.txt'
+            self.ded_gg_mapcycle = config.get('mapcycle', 'mapcycle_gg') if config.has_option('mapcycle', 'mapcycle_gg') else 'mapcycle.txt'
+            self.ded_jump_mapcycle = config.get('mapcycle', 'mapcycle_jump') if config.has_option('mapcycle', 'mapcycle_jump') else 'mapcycle.txt'
+            self.ded_lms_mapcycle = config.get('mapcycle', 'mapcycle_lms') if config.has_option('mapcycle', 'mapcycle_lms') else 'mapcycle.txt'
+            self.ded_tdm_mapcycle = config.get('mapcycle', 'mapcycle_tdm') if config.has_option('mapcycle', 'mapcycle_tdm') else 'mapcycle.txt'
+            self.ded_ts_mapcycle = config.get('mapcycle', 'mapcycle_ts') if config.has_option('mapcycle', 'mapcycle_ts') else 'mapcycle.txt'
         # support for low gravity server
         self.support_lowgravity = config.getboolean('lowgrav', 'support_lowgravity') if config.has_option('lowgrav', 'support_lowgravity') else False
         self.gravity = config.getint('lowgrav', 'gravity') if config.has_option('lowgrav', 'gravity') else 800
@@ -2780,37 +2792,61 @@ class LogParser(object):
             # switch to gametype
             elif sar['command'] == '!ffa' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['ffa']['level']:
                 self.game.send_rcon('g_gametype 0')
+                if not self.dynamic_mapcycle and self.dedicated_mapcycle:
+                    self.game.send_rcon('g_mapcycle "%s"' % self.ded_ffa_mapcycle if not self.ded_ffa_mapcycle else 'mapcycle.txt')
+                    self.game.rcon_tell(sar['player_num'], "^7Dedicated Free for all mapcycle set")
                 self.game.rcon_tell(sar['player_num'], "^7Game Mode: ^2Free For All")
                 self.game.rcon_tell(sar['player_num'], "^7Mode changed for next map")
             elif sar['command'] == '!lms' and self.urt_modversion > 42 and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['lms']['level']:
                 self.game.send_rcon('g_gametype 1')
+                if not self.dynamic_mapcycle and self.dedicated_mapcycle:
+                    self.game.send_rcon('g_mapcycle "%s"' % self.ded_lms_mapcycle if not self.ded_lms_mapcycle else 'mapcycle.txt')
+                    self.game.rcon_tell(sar['player_num'], "^7Dedicated Last man standing mapcycle set")
                 self.game.rcon_tell(sar['player_num'], "^7Game Mode: ^2Last Man Standing")
                 self.game.rcon_tell(sar['player_num'], "^7Mode changed for next map")
             elif sar['command'] == '!tdm' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['tdm']['level']:
                 self.game.send_rcon('g_gametype 3')
+                if not self.dynamic_mapcycle and self.dedicated_mapcycle:
+                    self.game.send_rcon('g_mapcycle "%s"' % self.ded_tdm_mapcycle if not self.ded_tdm_mapcycle else 'mapcycle.txt')
+                    self.game.rcon_tell(sar['player_num'], "^7Dedicated ^2Team Deadmatch mapcycle set")
                 self.game.rcon_tell(sar['player_num'], "^7Game Mode: ^2Team Deathmatch")
                 self.game.rcon_tell(sar['player_num'], "^7Mode changed for next map")
             elif sar['command'] == '!ts' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['ts']['level']:
                 self.game.send_rcon('g_gametype 4')
+                if not self.dynamic_mapcycle and self.dedicated_mapcycle:
+                    self.game.send_rcon('g_mapcycle "%s"' % self.ded_ts_mapcycle if not self.ded_ts_mapcycle else 'mapcycle.txt')
+                    self.game.rcon_tell(sar['player_num'], "^7Dedicated Team survivor mapcycle set")
                 self.game.rcon_tell(sar['player_num'], "^7Game Mode: ^2Team Survivor")
                 self.game.rcon_tell(sar['player_num'], "^7Mode changed for next map")
             # 5: Follow The Leader
             # 6: Capture And Hold
             elif sar['command'] == '!ctf' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['ctf']['level']:
                 self.game.send_rcon('g_gametype 7')
+                if not self.dynamic_mapcycle and self.dedicated_mapcycle:
+                    self.game.send_rcon('g_mapcycle "%s"' % self.ded_ctf_mapcycle if not self.ded_ctf_mapcycle else 'mapcycle.txt')
+                    self.game.rcon_tell(sar['player_num'], "^7Dedicated Capture the flag mapcycle set")
                 self.game.rcon_tell(sar['player_num'], "^7Game Mode: ^2Capture the Flag")
                 self.game.rcon_tell(sar['player_num'], "^7Mode changed for next map")
             elif sar['command'] == '!bomb' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['bomb']['level']:
                 self.game.send_rcon('g_gametype 8')
+                if not self.dynamic_mapcycle and self.dedicated_mapcycle:
+                    self.game.send_rcon('g_mapcycle "%s"' % self.ded_bomb_mapcycle if not self.ded_bomb_mapcycle else 'mapcycle.txt')
+                    self.game.rcon_tell(sar['player_num'], "^7Dedicated Bomb mapcycle set")
                 self.game.rcon_tell(sar['player_num'], "^7Game Mode: ^2Bomb")
                 self.game.rcon_tell(sar['player_num'], "^7Mode changed for next map")
             elif sar['command'] == '!jump' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['jump']['level']:
                 self.game.send_rcon('g_gametype 9')
+                if not self.dynamic_mapcycle and self.dedicated_mapcycle:
+                    self.game.send_rcon('g_mapcycle "%s"' % self.ded_jump_mapcycle if not self.ded_jump_mapcycle else 'mapcycle.txt')
+                    self.game.rcon_tell(sar['player_num'], "^7Dedicated Jump mapcycle set")
                 self.game.rcon_tell(sar['player_num'], "^7Game Mode: ^2Jump")
                 self.game.rcon_tell(sar['player_num'], "^7Mode changed for next map")
             # 10 Freeze Tag
             elif sar['command'] == '!gungame' and self.urt_modversion > 42 and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['gungame']['level']:
-                self.game.send_rcon('g_gametype 11')
+                self.game.send_rcon('g_gametype 11'
+                if not self.dynamic_mapcycle and self.dedicated_mapcycle:
+                    self.game.send_rcon('g_mapcycle "%s"' % self.ded_gg_mapcycle if not self.ded_gg_mapcycle else 'mapcycle.txt')
+                    self.game.rcon_tell(sar['player_num'], "^7Dedicated Gun Game mapcycle set")
                 self.game.rcon_tell(sar['player_num'], "^7Game Mode: ^2Gun Game")
                 self.game.rcon_tell(sar['player_num'], "^7Mode changed for next map")
 
