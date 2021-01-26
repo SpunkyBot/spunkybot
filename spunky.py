@@ -2843,7 +2843,7 @@ class LogParser(object):
                 self.game.rcon_tell(sar['player_num'], "^7Mode changed for next map")
             # 10 Freeze Tag
             elif sar['command'] == '!gungame' and self.urt_modversion > 42 and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['gungame']['level']:
-                self.game.send_rcon('g_gametype 11'
+                self.game.send_rcon('g_gametype 11')
                 if not self.dynamic_mapcycle and self.dedicated_mapcycle:
                     self.game.send_rcon('g_mapcycle "%s"' % self.ded_gg_mapcycle if not self.ded_gg_mapcycle else 'mapcycle.txt')
                     self.game.rcon_tell(sar['player_num'], "^7Dedicated Gun Game mapcycle set")
