@@ -12,7 +12,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Set up Python 2.7
-      uses: actions/setup-python@v2.2.1
+      uses: actions/setup-python@v2.2.2
       with:
         python-version: 2.7
 
@@ -76,7 +76,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Set up Python 2.7
-      uses: actions/setup-python@v2.2.1
+      uses: actions/setup-python@v2.2.2
       with:
         python-version: 2.7
 
@@ -97,7 +97,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Set up Python 2.7
-      uses: actions/setup-python@v2.2.1
+      uses: actions/setup-python@v2.2.2
       with:
         python-version: 2.7
 
