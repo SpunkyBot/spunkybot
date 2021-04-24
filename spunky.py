@@ -785,7 +785,7 @@ class LogParser(object):
         if self.bomb_gametype:
             # bomb detonation timer
             detonation_timer = self.game.get_cvar('g_bombexplodetime')
-            self.explode_time = detonation_timer if detonation_timer else "40"
+            self.explode_time = detonation_timer or "40"
 
         # reset list of player who left server
         self.last_disconnected_player = None
