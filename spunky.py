@@ -4078,6 +4078,9 @@ class Game(object):
         logger.info("Server CVAR g_logsync : %s", self.get_cvar('g_logsync'))
         logger.info("Server CVAR g_loghits : %s", self.get_cvar('g_loghits'))
 
+        if self.get_cvar('g_logsync') == '0':
+            logger.error("Server CVAR 'g_logsync' is set to '0' but must be '1' to support interaction with the bot")
+
     def set_current_map(self):
         """
         set the current and next map in rotation
