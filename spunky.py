@@ -506,8 +506,7 @@ class LogParser(object):
                 cur_pos = start_pos - seek_amount
                 end_pos = start_pos
                 start_pos = cur_pos
-                if start_pos < 0:
-                    start_pos = 0
+                start_pos = max(start_pos, 0)
                 self.log_file.seek(start_pos)
 
     def read_log(self):
