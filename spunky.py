@@ -878,7 +878,7 @@ class LogParser(object):
             player_num = int(line[:2].strip())
             line = line[2:].lstrip("\\").lstrip()
             values = self.explode_line(line)
-            challenge = True if 'challenge' in values else False
+            challenge = 'challenge' in values
             name = values['name'] if 'name' in values else "UnnamedPlayer"
             ip_port = values['ip'] if 'ip' in values else "0.0.0.0:0"
             auth = values['authl'] if 'authl' in values else ""
