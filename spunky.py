@@ -3331,7 +3331,7 @@ class Player(object):
         if int(curs.fetchone()[0]) > 2:
             # ban duration = 3 * expiration time
             ban_duration = duration * 3
-            self.ban(duration=ban_duration, reason=point_type)
+            self.ban(duration=ban_duration, reason=point_type, admin='bot')
             return ban_duration / 60
         return 0
 
