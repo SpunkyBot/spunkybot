@@ -2204,7 +2204,7 @@ class LogParser(object):
 
             # status - report the status of the bot
             elif sar['command'] == '!status' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['status']['level']:
-                curs.execute("PRAGMA database_list")
+                curs.execute("SELECT 1 FROM player LIMIT 1;")
                 msg = "^7Database is ^2UP^7 and Bot started at ^2%s" % self.uptime if curs.fetchall() else "^7Database appears to be ^1DOWN"
                 self.game.rcon_tell(sar['player_num'], msg)
 
