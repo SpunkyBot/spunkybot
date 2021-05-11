@@ -196,12 +196,9 @@ class LogParser(object):
     """
     log file parser
     """
-    def __init__(self, config_file):
+    def __init__(self):
         """
         create a new instance of LogParser
-
-        @param config_file: The full path of the bot configuration file
-        @type  config_file: String
         """
         # hit zone support for UrT > 4.2.013
         self.hit_points = {0: "HEAD", 1: "HEAD", 2: "HELMET", 3: "TORSO", 4: "VEST", 5: "LEFT_ARM", 6: "RIGHT_ARM",
@@ -269,12 +266,8 @@ class LogParser(object):
         self.senioradmin_cmds.sort()
         self.superadmin_cmds.sort()
 
-        self.config_file = config_file
-        config = ConfigParser.ConfigParser()
-        config.read(config_file)
         logger.info("Starting logging      : OK")
-
-        games_log = config.get('server', 'log_file')
+        games_log = CONFIG.get('server', 'log_file')
 
         self.ffa_lms_gametype = False
         self.ctf_gametype = False
@@ -299,44 +292,44 @@ class LogParser(object):
         self.default_gear = ''
 
         # enable/disable autokick for team killing
-        self.tk_autokick = config.getboolean('bot', 'teamkill_autokick') if config.has_option('bot', 'teamkill_autokick') else True
-        self.allow_tk_bots = config.getboolean('bot', 'allow_teamkill_bots') if config.has_option('bot', 'allow_teamkill_bots') else False
+        self.tk_autokick = CONFIG.getboolean('bot', 'teamkill_autokick') if CONFIG.has_option('bot', 'teamkill_autokick') else True
+        self.allow_tk_bots = CONFIG.getboolean('bot', 'allow_teamkill_bots') if CONFIG.has_option('bot', 'allow_teamkill_bots') else False
         # enable/disable autokick of players with low score
-        self.noob_autokick = config.getboolean('bot', 'noob_autokick') if config.has_option('bot', 'noob_autokick') else False
-        self.spawnkill_autokick = config.getboolean('bot', 'spawnkill_autokick') if config.has_option('bot', 'spawnkill_autokick') else False
-        self.kill_spawnkiller = config.getboolean('bot', 'instant_kill_spawnkiller') if config.has_option('bot', 'instant_kill_spawnkiller') else False
-        self.spawnkill_warn_time = config.getint('bot', 'spawnkill_warn_time') if config.has_option('bot', 'spawnkill_warn_time') else 3
+        self.noob_autokick = CONFIG.getboolean('bot', 'noob_autokick') if CONFIG.has_option('bot', 'noob_autokick') else False
+        self.spawnkill_autokick = CONFIG.getboolean('bot', 'spawnkill_autokick') if CONFIG.has_option('bot', 'spawnkill_autokick') else False
+        self.kill_spawnkiller = CONFIG.getboolean('bot', 'instant_kill_spawnkiller') if CONFIG.has_option('bot', 'instant_kill_spawnkiller') else False
+        self.spawnkill_warn_time = CONFIG.getint('bot', 'spawnkill_warn_time') if CONFIG.has_option('bot', 'spawnkill_warn_time') else 3
         # set the maximum allowed ping
-        self.max_ping = config.getint('bot', 'max_ping') if config.has_option('bot', 'max_ping') else 200
+        self.max_ping = CONFIG.getint('bot', 'max_ping') if CONFIG.has_option('bot', 'max_ping') else 200
         # kick spectator on full server
-        self.num_kick_specs = config.getint('bot', 'kick_spec_full_server') if config.has_option('bot', 'kick_spec_full_server') else 10
+        self.num_kick_specs = CONFIG.getint('bot', 'kick_spec_full_server') if CONFIG.has_option('bot', 'kick_spec_full_server') else 10
         # set task frequency
-        self.task_frequency = config.getint('bot', 'task_frequency') if config.has_option('bot', 'task_frequency') else 60
-        self.warn_expiration = config.getint('bot', 'warn_expiration') if config.has_option('bot', 'warn_expiration') else 240
-        self.bad_words_autokick = config.getint('bot', 'bad_words_autokick') if config.has_option('bot', 'bad_words_autokick') else 0
+        self.task_frequency = CONFIG.getint('bot', 'task_frequency') if CONFIG.has_option('bot', 'task_frequency') else 60
+        self.warn_expiration = CONFIG.getint('bot', 'warn_expiration') if CONFIG.has_option('bot', 'warn_expiration') else 240
+        self.bad_words_autokick = CONFIG.getint('bot', 'bad_words_autokick') if CONFIG.has_option('bot', 'bad_words_autokick') else 0
         # enable/disable message 'Player connected from...'
-        self.show_country_on_connect = config.getboolean('bot', 'show_country_on_connect') if config.has_option('bot', 'show_country_on_connect') else True
+        self.show_country_on_connect = CONFIG.getboolean('bot', 'show_country_on_connect') if CONFIG.has_option('bot', 'show_country_on_connect') else True
         # enable/disable message 'Firstblood / first nade kill...'
-        self.show_first_kill_msg = config.getboolean('bot', 'show_first_kill') if config.has_option('bot', 'show_first_kill') else True
-        self.show_hit_stats_msg = config.getboolean('bot', 'show_hit_stats_respawn') if config.has_option('bot', 'show_hit_stats_respawn') else True
-        self.show_multikill_msg = config.getboolean('bot', 'show_multi_kill') if config.has_option('bot', 'show_multi_kill') else True
+        self.show_first_kill_msg = CONFIG.getboolean('bot', 'show_first_kill') if CONFIG.has_option('bot', 'show_first_kill') else True
+        self.show_hit_stats_msg = CONFIG.getboolean('bot', 'show_hit_stats_respawn') if CONFIG.has_option('bot', 'show_hit_stats_respawn') else True
+        self.show_multikill_msg = CONFIG.getboolean('bot', 'show_multi_kill') if CONFIG.has_option('bot', 'show_multi_kill') else True
         # set teams autobalancer
-        self.teams_autobalancer = config.getboolean('bot', 'autobalancer') if config.has_option('bot', 'autobalancer') else False
-        self.allow_cmd_teams_round_end = config.getboolean('bot', 'allow_teams_round_end') if config.has_option('bot', 'allow_teams_round_end') else False
-        self.limit_nextmap_votes = config.getboolean('bot', 'limit_nextmap_votes') if config.has_option('bot', 'limit_nextmap_votes') else False
-        self.vote_delay = config.getint('bot', 'vote_delay') if config.has_option('bot', 'vote_delay') else 0
-        self.spam_bomb_planted_msg = config.getboolean('bot', 'spam_bomb_planted') if config.has_option('bot', 'spam_bomb_planted') else False
-        self.kill_survived_opponents = config.getboolean('bot', 'kill_survived_opponents') if config.has_option('bot', 'kill_survived_opponents') else False
-        self.spam_knife_kills_msg = config.getboolean('bot', 'spam_knife_kills') if config.has_option('bot', 'spam_knife_kills') else False
-        self.spam_nade_kills_msg = config.getboolean('bot', 'spam_nade_kills') if config.has_option('bot', 'spam_nade_kills') else False
-        self.spam_headshot_hits_msg = config.getboolean('bot', 'spam_headshot_hits') if config.has_option('bot', 'spam_headshot_hits') else False
-        self.reset_headshot_hits_mapcycle = config.getboolean('bot', 'reset_headshot_hits_mapcycle') if config.has_option('bot', 'reset_headshot_hits_mapcycle') else True
-        self.reset_kill_spree_mapcycle = config.getboolean('bot', 'reset_kill_spree_mapcycle') if config.has_option('bot', 'reset_kill_spree_mapcycle') else True
-        ban_duration = config.getint('bot', 'ban_duration') if config.has_option('bot', 'ban_duration') else 7
+        self.teams_autobalancer = CONFIG.getboolean('bot', 'autobalancer') if CONFIG.has_option('bot', 'autobalancer') else False
+        self.allow_cmd_teams_round_end = CONFIG.getboolean('bot', 'allow_teams_round_end') if CONFIG.has_option('bot', 'allow_teams_round_end') else False
+        self.limit_nextmap_votes = CONFIG.getboolean('bot', 'limit_nextmap_votes') if CONFIG.has_option('bot', 'limit_nextmap_votes') else False
+        self.vote_delay = CONFIG.getint('bot', 'vote_delay') if CONFIG.has_option('bot', 'vote_delay') else 0
+        self.spam_bomb_planted_msg = CONFIG.getboolean('bot', 'spam_bomb_planted') if CONFIG.has_option('bot', 'spam_bomb_planted') else False
+        self.kill_survived_opponents = CONFIG.getboolean('bot', 'kill_survived_opponents') if CONFIG.has_option('bot', 'kill_survived_opponents') else False
+        self.spam_knife_kills_msg = CONFIG.getboolean('bot', 'spam_knife_kills') if CONFIG.has_option('bot', 'spam_knife_kills') else False
+        self.spam_nade_kills_msg = CONFIG.getboolean('bot', 'spam_nade_kills') if CONFIG.has_option('bot', 'spam_nade_kills') else False
+        self.spam_headshot_hits_msg = CONFIG.getboolean('bot', 'spam_headshot_hits') if CONFIG.has_option('bot', 'spam_headshot_hits') else False
+        self.reset_headshot_hits_mapcycle = CONFIG.getboolean('bot', 'reset_headshot_hits_mapcycle') if CONFIG.has_option('bot', 'reset_headshot_hits_mapcycle') else True
+        self.reset_kill_spree_mapcycle = CONFIG.getboolean('bot', 'reset_kill_spree_mapcycle') if CONFIG.has_option('bot', 'reset_kill_spree_mapcycle') else True
+        ban_duration = CONFIG.getint('bot', 'ban_duration') if CONFIG.has_option('bot', 'ban_duration') else 7
         self.ban_duration = ban_duration if ban_duration > 0 else 1
         # support for low gravity server
-        self.support_lowgravity = config.getboolean('lowgrav', 'support_lowgravity') if config.has_option('lowgrav', 'support_lowgravity') else False
-        self.gravity = config.getint('lowgrav', 'gravity') if config.has_option('lowgrav', 'gravity') else 800
+        self.support_lowgravity = CONFIG.getboolean('lowgrav', 'support_lowgravity') if CONFIG.has_option('lowgrav', 'support_lowgravity') else False
+        self.gravity = CONFIG.getint('lowgrav', 'gravity') if CONFIG.has_option('lowgrav', 'gravity') else 800
         self.explode_time = "40"
         # log that the configuration file has been loaded
         logger.info("Configuration loaded  : OK")
@@ -347,9 +340,9 @@ class LogParser(object):
         logger.debug("Cmd !iamgod available : %s", self.iamgod)
         self.uptime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         # Rotating Messages and Rules
-        if config.has_option('rules', 'show_rules') and config.getboolean('rules', 'show_rules'):
-            self.output_rules = config.get('rules', 'display') if config.has_option('rules', 'display') else "chat"
-            rules_frequency = config.getint('rules', 'rules_frequency') if config.has_option('rules', 'rules_frequency') else 90
+        if CONFIG.has_option('rules', 'show_rules') and CONFIG.getboolean('rules', 'show_rules'):
+            self.output_rules = CONFIG.get('rules', 'display') if CONFIG.has_option('rules', 'display') else "chat"
+            rules_frequency = CONFIG.getint('rules', 'rules_frequency') if CONFIG.has_option('rules', 'rules_frequency') else 90
             self.rules_file = os.path.join(HOME, 'conf', 'rules.conf')
             self.rules_frequency = rules_frequency if rules_frequency > 0 else 10
             if os.path.isfile(self.rules_file):
@@ -504,7 +497,7 @@ class LogParser(object):
         self.find_game_start()
 
         # create instance of Game
-        self.game = Game(self.config_file, self.urt_modversion)
+        self.game = Game(self.urt_modversion)
 
         self.log_file.seek(0, 2)
         while self.log_file:
@@ -3805,12 +3798,9 @@ class Game(object):
     """
     Game class
     """
-    def __init__(self, config_file, urt_modversion):
+    def __init__(self, urt_modversion):
         """
         create a new instance of Game
-
-        @param config_file: The full path of the bot configuration file
-        @type  config_file: String
         """
         self.all_maps_list = []
         self.next_mapname = ''
@@ -3820,20 +3810,18 @@ class Game(object):
         self.players = {}
         self.live = False
         self.urt_modversion = urt_modversion
-        game_cfg = ConfigParser.ConfigParser()
-        game_cfg.read(config_file)
-        self.quake = PyQuake3("%s:%s" % (game_cfg.get('server', 'server_ip'), game_cfg.get('server', 'server_port')), game_cfg.get('server', 'rcon_password'))
+        self.quake = PyQuake3("%s:%s" % (CONFIG.get('server', 'server_ip'), CONFIG.get('server', 'server_port')), CONFIG.get('server', 'rcon_password'))
         self.queue = Queue()
         self.rcon_lock = RLock()
         self.thread_rcon()
         logger.info("Opening RCON socket   : OK")
 
         # dynamic mapcycle
-        self.dynamic_mapcycle = game_cfg.getboolean('mapcycle', 'dynamic_mapcycle') if game_cfg.has_option('mapcycle', 'dynamic_mapcycle') else False
+        self.dynamic_mapcycle = CONFIG.getboolean('mapcycle', 'dynamic_mapcycle') if CONFIG.has_option('mapcycle', 'dynamic_mapcycle') else False
         if self.dynamic_mapcycle:
-            self.switch_count = game_cfg.getint('mapcycle', 'switch_count') if game_cfg.has_option('mapcycle', 'switch_count') else 4
-            self.big_cycle = filter(None, game_cfg.get('mapcycle', 'big_cycle').replace(' ', '').split(',')) if game_cfg.has_option('mapcycle', 'big_cycle') else []
-            self.small_cycle = filter(None, game_cfg.get('mapcycle', 'small_cycle').replace(' ', '').split(',')) if game_cfg.has_option('mapcycle', 'small_cycle') else []
+            self.switch_count = CONFIG.getint('mapcycle', 'switch_count') if CONFIG.has_option('mapcycle', 'switch_count') else 4
+            self.big_cycle = filter(None, CONFIG.get('mapcycle', 'big_cycle').replace(' ', '').split(',')) if CONFIG.has_option('mapcycle', 'big_cycle') else []
+            self.small_cycle = filter(None, CONFIG.get('mapcycle', 'small_cycle').replace(' ', '').split(',')) if CONFIG.has_option('mapcycle', 'small_cycle') else []
 
         # add Spunky Bot as player 'World' to the game
         spunky_bot = Player(BOT_PLAYER_NUM, '127.0.0.1', 'NONE', 'World')
@@ -4217,7 +4205,7 @@ if __name__ == "__main__":
     curs.execute('CREATE TABLE IF NOT EXISTS ban_points (id INTEGER PRIMARY KEY NOT NULL, guid TEXT NOT NULL, point_type TEXT, expires DATETIME)')
 
     # create instance of LogParser
-    LogParser(os.path.join(HOME, 'conf', 'settings.conf'))
+    LogParser()
 
     # close database connection
     conn.close()
