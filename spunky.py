@@ -3398,14 +3398,12 @@ class Player(object):
             result = curs.fetchone()
             # create list of aliases
             self.aliases = result[0].split(', ')
-            if self.name not in self.aliases:
-                # add new alias to list
-                if len(self.aliases) < 15:
-                    self.aliases.append(self.name)
-                    alias_string = ', '.join(self.aliases)
-                    values = (alias_string, self.guid)
-                    curs.execute("UPDATE `player` SET `aliases` = ? WHERE `guid` = ?", values)
-                    conn.commit()
+            # add new alias to list
+            if self.name not in self.aliases and len(self.aliases) < 15:
+                self.aliases.append(self.name)
+                alias_string = ', '.join(self.aliases)
+                curs.execute("UPDATE `player` SET `aliases` = '{}' WHERE `guid` = '{}'".format(alias_string, self.guid))
+                conn.commit()
         # get player-id
         curs.execute("SELECT `id` FROM `player` WHERE `guid` = '{}'".format(self.guid))
         self.player_id = curs.fetchone()[0]
