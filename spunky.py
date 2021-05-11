@@ -742,11 +742,10 @@ class LogParser(object):
 
         spam_msg = True
         now = time.time()
-        if "g_nextmap" in line:
-            if self.limit_nextmap_votes and not self.allow_nextmap_vote:
-                self.game.send_rcon('veto')
-                self.game.rcon_say("^7Voting for Next Map is disabled until the end of this map")
-                spam_msg = False
+        if "g_nextmap" in line and self.limit_nextmap_votes and not self.allow_nextmap_vote:
+            self.game.send_rcon('veto')
+            self.game.rcon_say("^7Voting for Next Map is disabled until the end of this map")
+            spam_msg = False
         if "map" in line and self.failed_vote_timer > now:
             remaining_time = int(self.failed_vote_timer - now)
             self.game.send_rcon('veto')
