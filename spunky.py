@@ -272,29 +272,7 @@ class LogParser(object):
         self.config_file = config_file
         config = ConfigParser.ConfigParser()
         config.read(config_file)
-
-        # enable/disable debug output
-        verbose = config.getboolean('bot', 'verbose') if config.has_option('bot', 'verbose') else False
-        # logging format
-        formatter = logging.Formatter('[%(asctime)s] %(levelname)-8s %(message)s', datefmt='%d.%m.%Y %H:%M:%S')
-        # console logging
-        console = logging.StreamHandler()
-        if not verbose:
-            console.setLevel(logging.INFO)
-        console.setFormatter(formatter)
-
-        # devel.log file
-        devel_log = logging.handlers.RotatingFileHandler(filename=os.path.join(HOME, 'devel.log'), maxBytes=2097152, backupCount=1, encoding='utf8')
-        devel_log.setLevel(logging.INFO)
-        devel_log.setFormatter(formatter)
-
-        # add logging handler
-        logger.addHandler(console)
-        logger.addHandler(devel_log)
-
-        logger.info("*** Spunky Bot v%s : www.spunkybot.de ***", __version__)
         logger.info("Starting logging      : OK")
-        logger.info("Loading config file   : %s", config_file)
 
         games_log = config.get('server', 'log_file')
 
@@ -4213,6 +4191,25 @@ if __name__ == "__main__":
     CONF_PATH = os.path.join(HOME, 'conf', 'settings.conf')
     CONFIG.read(CONF_PATH)
 
+    # enable/disable debug output
+    verbose = CONFIG.getboolean('bot', 'verbose') if CONFIG.has_option('bot', 'verbose') else False
+    # logging format
+    formatter = logging.Formatter('[%(asctime)s] %(levelname)-8s %(message)s', datefmt='%d.%m.%Y %H:%M:%S')
+    # console logging
+    console = logging.StreamHandler()
+    if not verbose:
+        console.setLevel(logging.INFO)
+    console.setFormatter(formatter)
+    # devel.log file
+    devel_log = logging.handlers.RotatingFileHandler(filename=os.path.join(HOME, 'devel.log'), maxBytes=2097152, backupCount=1, encoding='utf8')
+    devel_log.setLevel(logging.INFO)
+    devel_log.setFormatter(formatter)
+    # add logging handler
+    logger.addHandler(console)
+    logger.addHandler(devel_log)
+
+    logger.info("*** Spunky Bot v%s : www.spunkybot.de ***", __version__)
+    logger.info("Loading config file   : %s", CONF_PATH)
     # create tables if not exists
     curs.execute('CREATE TABLE IF NOT EXISTS xlrstats (id INTEGER PRIMARY KEY NOT NULL, guid TEXT NOT NULL, name TEXT NOT NULL, ip_address TEXT NOT NULL, first_seen DATETIME, last_played DATETIME, num_played INTEGER DEFAULT 1, kills INTEGER DEFAULT 0, deaths INTEGER DEFAULT 0, headshots INTEGER DEFAULT 0, team_kills INTEGER DEFAULT 0, team_death INTEGER DEFAULT 0, max_kill_streak INTEGER DEFAULT 0, suicides INTEGER DEFAULT 0, ratio REAL DEFAULT 0, rounds INTEGER DEFAULT 0, admin_role INTEGER DEFAULT 1)')
     curs.execute('CREATE TABLE IF NOT EXISTS player (id INTEGER PRIMARY KEY NOT NULL, guid TEXT NOT NULL, name TEXT NOT NULL, ip_address TEXT NOT NULL, time_joined DATETIME, aliases TEXT)')
