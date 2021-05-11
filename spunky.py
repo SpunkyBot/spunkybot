@@ -3929,7 +3929,7 @@ class Game(object):
         if self.live:
             with self.rcon_lock:
                 try:
-                    ret_val = self.quake.rcon(value)[1].split(':')[1].split('^7')[0].lstrip('"')
+                    ret_val = self.quake.rcon(value)[1].split(':', 1)[1].split('^7')[0].lstrip('"')
                 except IndexError:
                     ret_val = None
                 time.sleep(RCON_DELAY)
@@ -3947,8 +3947,11 @@ class Game(object):
         get the full path of mapcycle.txt file
         """
         maplist = []
+        self.get_cvar('')
         # get path of fs_homepath and fs_basepath
         fs_homepath = self.get_cvar('fs_homepath')
+        if not fs_homepath:
+            fs_homepath = self.get_cvar('fs_homepath')
         logger.debug("fs_homepath           : %s", fs_homepath)
         fs_basepath = self.get_cvar('fs_basepath')
         logger.debug("fs_basepath           : %s", fs_basepath)
