@@ -15,10 +15,15 @@ jobs:
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         stale-issue-message: 'This issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.'
+        close-issue-message: 'This issue was closed because it has been stalled for several days with no activity.'
+        stale-pr-message: 'This PR is stale because it has been open for weeks with no activity.'
         days-before-stale: 60
         days-before-close: 7
+        days-before-pr-close: -1
         stale-issue-label: 'wontfix'
         exempt-issue-labels: 'backlog,confirmed,enhancement,security'
-        #stale-pr-message: 'Stale pull request message'
+        exempt-issue-milestones: 'future,backlog'
+        exempt-pr-milestones: 'bugfix,improvement'
+        exempt-all-pr-milestones: true
         #stale-pr-label: 'no-pr-activity'
         #exempt-pr-labels: 'awaiting-approval,work-in-progress'
