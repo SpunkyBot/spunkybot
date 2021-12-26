@@ -88,6 +88,10 @@
 * **spec** - move yourself to spectator
   * Usage: `!spec`
   * Short: `!sp`
+* **startdemo** - start recording of server-side demos
+  * Usage: `!startdemo <name|id|all>`
+* **stopdemo** - stop recording of server-side demos
+  * Usage: `!stopdemo <name|id|all>`
 * **warn** - warn player
   * Usage: `!warn <name|id> [<reason>]`
   * Short: `!w <name|id> [<reason>]`

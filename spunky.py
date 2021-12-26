@@ -90,6 +90,8 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'seen': {'desc': 'display when a player was last seen', 'syntax': '^7Usage: ^2!seen ^7<name>', 'level': 20},
             'shuffleteams': {'desc': 'shuffle the teams', 'syntax': '^7Usage: ^2!shuffleteams', 'level': 20, 'short': 'shuffle'},
             'spec': {'desc': 'move yourself to spectator', 'syntax': '^7Usage: ^2!spec', 'level': 20, 'short': 'sp'},
+            'startdemo': {'desc': 'start recording of serverside demo', 'syntax': '^7Usage: ^2!startdemo ^7<name>', 'level': 20},
+            'stopdemo': {'desc': 'stop recording of serverside demo', 'syntax': '^7Usage: ^2!stopdemo ^7<name>', 'level': 20},
             'warn': {'desc': 'warn player', 'syntax': '^7Usage: ^2!warn ^7<name> [<reason>]', 'level': 20, 'short': 'w'},
             'warninfo': {'desc': 'display how many warnings a player has', 'syntax': '^7Usage: ^2!warninfo ^7<name>', 'level': 20, 'short': 'wi'},
             'warnremove': {'desc': "remove a player's last warning", 'syntax': '^7Usage: ^2!warnremove ^7<name>', 'level': 20, 'short': 'wr'},
@@ -1807,6 +1809,30 @@ class LogParser(object):
                 else:
                     warning = 'behave yourself'
                 self.game.rcon_tell(sar['player_num'], "^2TEST: ^1WARNING ^7[^31^7]: ^4%s" % warning)
+
+            # startdemo - start recording of server-side demos
+            elif sar['command'] == '!startdemo' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['startdemo']['level']:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
+                    arg = "all"
+                    found, victim, msg = self.player_found(user)
+                    if not found and user.upper() != "ALL":
+                        self.game.rcon_tell(sar['player_num'], msg)
+                    else:
+                        arg = victim.get_player_num()
+                    self.game.send_rcon('startserverdemo %s' % arg)
+
+            # stopdemo - stop recording of server-side demos
+            elif sar['command'] == '!stopdemo' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['stopdemo']['level']:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
+                    arg = "all"
+                    found, victim, msg = self.player_found(user)
+                    if not found and user.upper() != "ALL":
+                        self.game.rcon_tell(sar['player_num'], msg)
+                    else:
+                        arg = victim.get_player_num()
+                    self.game.send_rcon('stopserverdemo %s' % arg)
 
 ## admin level 40
             # admins - list all the online admins
