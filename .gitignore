@@ -28,6 +28,9 @@ MD5SUMS
 .idea
 .iml
 
+# Visual Studio Code
+.vscode/
+
 # OSX
 .DS_Store
 
