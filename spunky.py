@@ -301,6 +301,7 @@ class LogParser(object):
         self.spawnkill_autokick = CONFIG.getboolean('bot', 'spawnkill_autokick') if CONFIG.has_option('bot', 'spawnkill_autokick') else False
         self.kill_spawnkiller = CONFIG.getboolean('bot', 'instant_kill_spawnkiller') if CONFIG.has_option('bot', 'instant_kill_spawnkiller') else False
         self.spawnkill_warn_time = CONFIG.getint('bot', 'spawnkill_warn_time') if CONFIG.has_option('bot', 'spawnkill_warn_time') else 3
+        self.admin_immunity = CONFIG.getint('bot', 'admin_immunity') if CONFIG.has_option('bot', 'admin_immunity') else 40
         # set the maximum allowed ping
         self.max_ping = CONFIG.getint('bot', 'max_ping') if CONFIG.has_option('bot', 'max_ping') else 200
         # kick spectator on full server
@@ -617,7 +618,7 @@ class LogParser(object):
                 except KeyError:
                     continue
                 else:
-                    if self.max_ping < ping_value < 999 and gameplayer.get_admin_role() < 40:
+                    if self.max_ping < ping_value < 999 and gameplayer.get_admin_role() < self.admin_immunity:
                         gameplayer.add_high_ping(ping_value)
                         self.game.rcon_tell(player.num, "^1WARNING ^7[^3%d^7]: Your ping is too high [^4%d^7]. ^3The maximum allowed ping is %d." % (gameplayer.get_warning(), ping_value, self.max_ping), False)
                     else:
@@ -1083,7 +1084,7 @@ class LogParser(object):
                         else:
                             killer.add_warning('stop team killing')
                             self.game.rcon_tell(killer_id, "^1WARNING ^7[^3%d^7]: ^7For team killing you will get kicked" % killer.get_warning(), False)
-                            if killer.get_warning() == 3 and killer.get_admin_role() < 40:
+                            if killer.get_warning() == 3 and killer.get_admin_role() < self.admin_immunity:
                                 self.game.rcon_say("^1ALERT: ^2%s ^7auto-kick from warnings if not forgiven. Type ^3!forgive %s ^7to forgive" % (killer_name, killer_id))
 
             suicide_reason = ['UT_MOD_SUICIDE', 'MOD_FALLING', 'MOD_WATER', 'MOD_LAVA', 'MOD_TRIGGER_HURT',
@@ -1101,7 +1102,7 @@ class LogParser(object):
                 killer.kill()
 
                 # spawn killing - warn/kick or instant kill
-                if (self.spawnkill_autokick or self.kill_spawnkiller) and self.spawnkill_warn_time and killer.get_admin_role() < 40:
+                if (self.spawnkill_autokick or self.kill_spawnkiller) and self.spawnkill_warn_time and killer.get_admin_role() < self.admin_immunity:
                     # Spawn Protection time between players deaths in seconds to issue a warning
                     if victim.get_respawn_time() + self.spawnkill_warn_time > time.time():
                         if killer.get_ip_address() != '0.0.0.0':
@@ -2829,7 +2830,7 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7Unknown command ^3%s" % sar['command'])
 
 ## bad words
-            elif self.bad_words_autokick and [sample for sample in bad_words if sample in line.lower()] and self.game.players[sar['player_num']].get_admin_role() < 40:
+            elif self.bad_words_autokick and [sample for sample in bad_words if sample in line.lower()] and self.game.players[sar['player_num']].get_admin_role() < self.admin_immunity:
                 victim = self.game.players[sar['player_num']]
                 victim.add_warning('bad language')
                 self.kick_high_warns(victim, 'bad language', 'Behave, stop using bad language')
