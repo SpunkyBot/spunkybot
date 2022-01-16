@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Added Magnum and MAC11 option to command `!gear`
 * Added banpoints for racism and camp warning types
 
-### Improved
+### Changed
 
 * Show hint to register for saving player stats
 * Show more messages for higher headshot counts
