@@ -64,6 +64,8 @@
   * Usage: `!country <name|id>`
 * **lastmaps** - list the last played maps
   * Usage: `!lastmaps`
+* **lastvote** - display information about the last called vote
+  * Usage: `!lastvote`
 * **leveltest** - get the admin level for a given player or myself
   * Usage: `!leveltest [<name|id>]`
   * Short: `!lt [<name|id>]`
@@ -86,6 +88,10 @@
 * **spec** - move yourself to spectator
   * Usage: `!spec`
   * Short: `!sp`
+* **startdemo** - start recording of server-side demos
+  * Usage: `!startdemo <name|id|all>`
+* **stopdemo** - stop recording of server-side demos
+  * Usage: `!stopdemo <name|id|all>`
 * **warn** - warn player
   * Usage: `!warn <name|id> [<reason>]`
   * Short: `!w <name|id> [<reason>]`
@@ -182,7 +188,7 @@
 
 ### Senior Admin [80]
 
-* **addbots** - add bots to the game (requires `!bots on` first)
+* **addbots** - add up to 4 bots to the game (requires `!bots on` first)
   * Usage: `!addbots`
 * **banall** - ban all players matching pattern
   * Usage: `!banall <pattern> [<reason>]`
@@ -196,7 +202,7 @@
 * **exec** - execute given config file
   * Usage: `!exec <filename>`
 * **gear** - set allowed weapons
-  * Usage: `!gear <default/all/knife/pistol/shotgun/sniper>`
+  * Usage: `!gear <default/all/knife/pistol/shotgun/sniper/magnum/mac>`
 * **instagib** - set Instagib mode
   * Usage: `!instagib <on/off>`
 * **kickall** - kick all players matching pattern
@@ -207,6 +213,8 @@
   * Alias: `!kiss`
 * **kill** - kill a player
   * Usage: `!kill <name|id>`
+* **lastadmin** - display the last disconnected admin
+  * Usage: `!lastadmin`
 * **lastbans** - list the last 4 bans
   * Usage: `!lastbans`
   * Short: `!bans`

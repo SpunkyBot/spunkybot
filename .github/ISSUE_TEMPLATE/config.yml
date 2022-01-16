@@ -8,3 +8,6 @@ contact_links:
 - name: 💬 Spunky Bot Mailing List / Users Forum
   url: https://groups.google.com/forum/#!forum/spunkybot
   about: Ask and discuss questions with community members
+- name: 💭 Ask a question
+  url: https://github.com/SpunkyBot/spunkybot/discussions/new
+  about: Start a discussion to connect with other members

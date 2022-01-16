@@ -23,7 +23,7 @@ Modify the files '/conf/settings.conf' and '/conf/rules.conf'
 Run the bot: python spunky.py
 """
 
-__version__ = '1.12.2'
+__version__ = '1.13.0'
 
 
 ### IMPORTS
@@ -80,6 +80,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'admintest': {'desc': 'display current admin status', 'syntax': '^7Usage: ^2!admintest', 'level': 20},
             'country': {'desc': 'get the country of a player', 'syntax': '^7Usage: ^2!country ^7<name>', 'level': 20},
             'lastmaps': {'desc': 'list the last played maps', 'syntax': '^7Usage: ^2!lastmaps', 'level': 20},
+            'lastvote': {'desc': 'display information about the last called vote', 'syntax': '^7Usage: ^2!lastvote', 'level': 20},
             'leveltest': {'desc': 'get the admin level for a given player or myself', 'syntax': '^7Usage: ^2!leveltest ^7[<name>]', 'level': 20, 'short': 'lt'},
             'list': {'desc': 'list all connected players', 'syntax': '^7Usage: ^2!list', 'level': 20},
             'locate': {'desc': 'display geolocation info of a player', 'syntax': '^7Usage: ^2!locate ^7<name>', 'level': 20, 'short': 'lc'},
@@ -89,6 +90,8 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'seen': {'desc': 'display when a player was last seen', 'syntax': '^7Usage: ^2!seen ^7<name>', 'level': 20},
             'shuffleteams': {'desc': 'shuffle the teams', 'syntax': '^7Usage: ^2!shuffleteams', 'level': 20, 'short': 'shuffle'},
             'spec': {'desc': 'move yourself to spectator', 'syntax': '^7Usage: ^2!spec', 'level': 20, 'short': 'sp'},
+            'startdemo': {'desc': 'start recording of serverside demo', 'syntax': '^7Usage: ^2!startdemo ^7<name>', 'level': 20},
+            'stopdemo': {'desc': 'stop recording of serverside demo', 'syntax': '^7Usage: ^2!stopdemo ^7<name>', 'level': 20},
             'warn': {'desc': 'warn player', 'syntax': '^7Usage: ^2!warn ^7<name> [<reason>]', 'level': 20, 'short': 'w'},
             'warninfo': {'desc': 'display how many warnings a player has', 'syntax': '^7Usage: ^2!warninfo ^7<name>', 'level': 20, 'short': 'wi'},
             'warnremove': {'desc': "remove a player's last warning", 'syntax': '^7Usage: ^2!warnremove ^7<name>', 'level': 20, 'short': 'wr'},
@@ -126,17 +129,18 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'version': {'desc': 'display the version of the bot', 'syntax': '^7Usage: ^2!version', 'level': 60},
             'veto': {'desc': 'stop voting process', 'syntax': '^7Usage: ^2!veto', 'level': 60},
             # senioradmin commands, level 80
-            'addbots': {'desc': 'add bots to the game', 'syntax': '^7Usage: ^2!addbots', 'level': 80},
+            'addbots': {'desc': 'add up to 4 bots to the game', 'syntax': '^7Usage: ^2!addbots', 'level': 80},
             'banall': {'desc': 'ban all players matching pattern', 'syntax': '^7Usage: ^2!banall ^7<pattern> [<reason>]', 'level': 80, 'short': 'ball'},
             'banlist': {'desc': 'display the last active 10 bans', 'syntax': '^7Usage: ^2!banlist', 'level': 80},
             'bots': {'desc': 'enables or disables bot support', 'syntax': '^7Usage: ^2!bots ^7<on/off>', 'level': 80},
             'cyclemap': {'desc': 'cycle to the next map', 'syntax': '^7Usage: ^2!cyclemap', 'level': 80},
             'exec': {'desc': 'execute given config file', 'syntax': '^7Usage: ^2!exec ^7<filename>', 'level': 80},
-            'gear': {'desc': 'set allowed weapons', 'syntax': '^7Usage: ^2!gear ^7<default/all/knife/pistol/shotgun/sniper>', 'level': 80},
+            'gear': {'desc': 'set allowed weapons', 'syntax': '^7Usage: ^2!gear ^7<default/all/knife/pistol/shotgun/sniper/magnum/mac>', 'level': 80},
             'instagib': {'desc': 'set Instagib mode', 'syntax': '^7Usage: ^2!instagib ^7<on/off>', 'level': 80},
             'kickall': {'desc': 'kick all players matching pattern', 'syntax': '^7Usage: ^2!kickall ^7<pattern> [<reason>]', 'level': 80, 'short': 'kall'},
             'kill': {'desc': 'kill a player', 'syntax': '^7Usage: ^2!kill ^7<name>', 'level': 80},
             'clear': {'desc': 'clear all player warnings', 'syntax': '^7Usage: ^2!clear', 'level': 80, 'short': 'kiss'},
+            'lastadmin': {'desc': 'display the last disconnected admin', 'syntax': '^7Usage: ^2!lastadmin', 'level': 80},
             'lastbans': {'desc': 'list the last 4 bans', 'syntax': '^7Usage: ^2!lastbans', 'level': 80, 'short': 'bans'},
             'lookup': {'desc': 'search for a player in the database', 'syntax': '^7Usage: ^2!lookup ^7<name>', 'level': 80, 'short': 'l'},
             'makereg': {'desc': 'make a player a regular (Level 2) user', 'syntax': '^7Usage: ^2!makereg ^7<name>', 'level': 80, 'short': 'mr'},
@@ -194,12 +198,9 @@ class LogParser(object):
     """
     log file parser
     """
-    def __init__(self, config_file):
+    def __init__(self):
         """
         create a new instance of LogParser
-
-        @param config_file: The full path of the bot configuration file
-        @type  config_file: String
         """
         # hit zone support for UrT > 4.2.013
         self.hit_points = {0: "HEAD", 1: "HEAD", 2: "HELMET", 3: "TORSO", 4: "VEST", 5: "LEFT_ARM", 6: "RIGHT_ARM",
@@ -267,34 +268,8 @@ class LogParser(object):
         self.senioradmin_cmds.sort()
         self.superadmin_cmds.sort()
 
-        self.config_file = config_file
-        config = ConfigParser.ConfigParser()
-        config.read(config_file)
-
-        # enable/disable debug output
-        verbose = config.getboolean('bot', 'verbose') if config.has_option('bot', 'verbose') else False
-        # logging format
-        formatter = logging.Formatter('[%(asctime)s] %(levelname)-8s %(message)s', datefmt='%d.%m.%Y %H:%M:%S')
-        # console logging
-        console = logging.StreamHandler()
-        if not verbose:
-            console.setLevel(logging.INFO)
-        console.setFormatter(formatter)
-
-        # devel.log file
-        devel_log = logging.handlers.RotatingFileHandler(filename=os.path.join(HOME, 'devel.log'), maxBytes=2097152, backupCount=1, encoding='utf8')
-        devel_log.setLevel(logging.INFO)
-        devel_log.setFormatter(formatter)
-
-        # add logging handler
-        logger.addHandler(console)
-        logger.addHandler(devel_log)
-
-        logger.info("*** Spunky Bot v%s : www.spunkybot.de ***", __version__)
         logger.info("Starting logging      : OK")
-        logger.info("Loading config file   : %s", config_file)
-
-        games_log = config.get('server', 'log_file')
+        games_log = CONFIG.get('server', 'log_file')
 
         self.ffa_lms_gametype = False
         self.ctf_gametype = False
@@ -312,62 +287,65 @@ class LogParser(object):
         self.firstknifekill = False
         self.firstteamkill = False
         self.last_disconnected_player = None
+        self.last_admin = None
         self.allow_nextmap_vote = True
         self.failed_vote_timer = 0
+        self.last_vote = ''
         self.default_gear = ''
 
         # enable/disable autokick for team killing
-        self.tk_autokick = config.getboolean('bot', 'teamkill_autokick') if config.has_option('bot', 'teamkill_autokick') else True
-        self.allow_tk_bots = config.getboolean('bot', 'allow_teamkill_bots') if config.has_option('bot', 'allow_teamkill_bots') else False
+        self.tk_autokick = CONFIG.getboolean('bot', 'teamkill_autokick') if CONFIG.has_option('bot', 'teamkill_autokick') else True
+        self.allow_tk_bots = CONFIG.getboolean('bot', 'allow_teamkill_bots') if CONFIG.has_option('bot', 'allow_teamkill_bots') else False
         # enable/disable autokick of players with low score
-        self.noob_autokick = config.getboolean('bot', 'noob_autokick') if config.has_option('bot', 'noob_autokick') else False
-        self.spawnkill_autokick = config.getboolean('bot', 'spawnkill_autokick') if config.has_option('bot', 'spawnkill_autokick') else False
-        self.kill_spawnkiller = config.getboolean('bot', 'instant_kill_spawnkiller') if config.has_option('bot', 'instant_kill_spawnkiller') else False
-        self.spawnkill_warn_time = config.getint('bot', 'spawnkill_warn_time') if config.has_option('bot', 'spawnkill_warn_time') else 3
+        self.noob_autokick = CONFIG.getboolean('bot', 'noob_autokick') if CONFIG.has_option('bot', 'noob_autokick') else False
+        self.spawnkill_autokick = CONFIG.getboolean('bot', 'spawnkill_autokick') if CONFIG.has_option('bot', 'spawnkill_autokick') else False
+        self.kill_spawnkiller = CONFIG.getboolean('bot', 'instant_kill_spawnkiller') if CONFIG.has_option('bot', 'instant_kill_spawnkiller') else False
+        self.spawnkill_warn_time = CONFIG.getint('bot', 'spawnkill_warn_time') if CONFIG.has_option('bot', 'spawnkill_warn_time') else 3
+        self.admin_immunity = CONFIG.getint('bot', 'admin_immunity') if CONFIG.has_option('bot', 'admin_immunity') else 40
         # set the maximum allowed ping
-        self.max_ping = config.getint('bot', 'max_ping') if config.has_option('bot', 'max_ping') else 200
+        self.max_ping = CONFIG.getint('bot', 'max_ping') if CONFIG.has_option('bot', 'max_ping') else 200
         # kick spectator on full server
-        self.num_kick_specs = config.getint('bot', 'kick_spec_full_server') if config.has_option('bot', 'kick_spec_full_server') else 10
+        self.num_kick_specs = CONFIG.getint('bot', 'kick_spec_full_server') if CONFIG.has_option('bot', 'kick_spec_full_server') else 10
         # set task frequency
-        self.task_frequency = config.getint('bot', 'task_frequency') if config.has_option('bot', 'task_frequency') else 60
-        self.warn_expiration = config.getint('bot', 'warn_expiration') if config.has_option('bot', 'warn_expiration') else 240
-        self.bad_words_autokick = config.getint('bot', 'bad_words_autokick') if config.has_option('bot', 'bad_words_autokick') else 0
+        self.task_frequency = CONFIG.getint('bot', 'task_frequency') if CONFIG.has_option('bot', 'task_frequency') else 60
+        self.warn_expiration = CONFIG.getint('bot', 'warn_expiration') if CONFIG.has_option('bot', 'warn_expiration') else 240
+        self.bad_words_autokick = CONFIG.getint('bot', 'bad_words_autokick') if CONFIG.has_option('bot', 'bad_words_autokick') else 0
         # enable/disable message 'Player connected from...'
-        self.show_country_on_connect = config.getboolean('bot', 'show_country_on_connect') if config.has_option('bot', 'show_country_on_connect') else True
+        self.show_country_on_connect = CONFIG.getboolean('bot', 'show_country_on_connect') if CONFIG.has_option('bot', 'show_country_on_connect') else True
         # enable/disable message 'Firstblood / first nade kill...'
-        self.show_first_kill_msg = config.getboolean('bot', 'show_first_kill') if config.has_option('bot', 'show_first_kill') else True
-        self.show_hit_stats_msg = config.getboolean('bot', 'show_hit_stats_respawn') if config.has_option('bot', 'show_hit_stats_respawn') else True
-        self.show_multikill_msg = config.getboolean('bot', 'show_multi_kill') if config.has_option('bot', 'show_multi_kill') else True
+        self.show_first_kill_msg = CONFIG.getboolean('bot', 'show_first_kill') if CONFIG.has_option('bot', 'show_first_kill') else True
+        self.show_hit_stats_msg = CONFIG.getboolean('bot', 'show_hit_stats_respawn') if CONFIG.has_option('bot', 'show_hit_stats_respawn') else True
+        self.show_multikill_msg = CONFIG.getboolean('bot', 'show_multi_kill') if CONFIG.has_option('bot', 'show_multi_kill') else True
         # set teams autobalancer
-        self.teams_autobalancer = config.getboolean('bot', 'autobalancer') if config.has_option('bot', 'autobalancer') else False
-        self.allow_cmd_teams_round_end = config.getboolean('bot', 'allow_teams_round_end') if config.has_option('bot', 'allow_teams_round_end') else False
-        self.limit_nextmap_votes = config.getboolean('bot', 'limit_nextmap_votes') if config.has_option('bot', 'limit_nextmap_votes') else False
-        self.vote_delay = config.getint('bot', 'vote_delay') if config.has_option('bot', 'vote_delay') else 0
-        self.spam_bomb_planted_msg = config.getboolean('bot', 'spam_bomb_planted') if config.has_option('bot', 'spam_bomb_planted') else False
-        self.kill_survived_opponents = config.getboolean('bot', 'kill_survived_opponents') if config.has_option('bot', 'kill_survived_opponents') else False
-        self.spam_knife_kills_msg = config.getboolean('bot', 'spam_knife_kills') if config.has_option('bot', 'spam_knife_kills') else False
-        self.spam_nade_kills_msg = config.getboolean('bot', 'spam_nade_kills') if config.has_option('bot', 'spam_nade_kills') else False
-        self.spam_headshot_hits_msg = config.getboolean('bot', 'spam_headshot_hits') if config.has_option('bot', 'spam_headshot_hits') else False
-        self.reset_headshot_hits_mapcycle = config.getboolean('bot', 'reset_headshot_hits_mapcycle') if config.has_option('bot', 'reset_headshot_hits_mapcycle') else True
-        self.reset_kill_spree_mapcycle = config.getboolean('bot', 'reset_kill_spree_mapcycle') if config.has_option('bot', 'reset_kill_spree_mapcycle') else True
-        ban_duration = config.getint('bot', 'ban_duration') if config.has_option('bot', 'ban_duration') else 7
+        self.teams_autobalancer = CONFIG.getboolean('bot', 'autobalancer') if CONFIG.has_option('bot', 'autobalancer') else False
+        self.allow_cmd_teams_round_end = CONFIG.getboolean('bot', 'allow_teams_round_end') if CONFIG.has_option('bot', 'allow_teams_round_end') else False
+        self.limit_nextmap_votes = CONFIG.getboolean('bot', 'limit_nextmap_votes') if CONFIG.has_option('bot', 'limit_nextmap_votes') else False
+        self.vote_delay = CONFIG.getint('bot', 'vote_delay') if CONFIG.has_option('bot', 'vote_delay') else 0
+        self.spam_bomb_planted_msg = CONFIG.getboolean('bot', 'spam_bomb_planted') if CONFIG.has_option('bot', 'spam_bomb_planted') else False
+        self.kill_survived_opponents = CONFIG.getboolean('bot', 'kill_survived_opponents') if CONFIG.has_option('bot', 'kill_survived_opponents') else False
+        self.spam_knife_kills_msg = CONFIG.getboolean('bot', 'spam_knife_kills') if CONFIG.has_option('bot', 'spam_knife_kills') else False
+        self.spam_nade_kills_msg = CONFIG.getboolean('bot', 'spam_nade_kills') if CONFIG.has_option('bot', 'spam_nade_kills') else False
+        self.spam_headshot_hits_msg = CONFIG.getboolean('bot', 'spam_headshot_hits') if CONFIG.has_option('bot', 'spam_headshot_hits') else False
+        self.reset_headshot_hits_mapcycle = CONFIG.getboolean('bot', 'reset_headshot_hits_mapcycle') if CONFIG.has_option('bot', 'reset_headshot_hits_mapcycle') else True
+        self.reset_kill_spree_mapcycle = CONFIG.getboolean('bot', 'reset_kill_spree_mapcycle') if CONFIG.has_option('bot', 'reset_kill_spree_mapcycle') else True
+        ban_duration = CONFIG.getint('bot', 'ban_duration') if CONFIG.has_option('bot', 'ban_duration') else 7
         self.ban_duration = ban_duration if ban_duration > 0 else 1
         # support for low gravity server
-        self.support_lowgravity = config.getboolean('lowgrav', 'support_lowgravity') if config.has_option('lowgrav', 'support_lowgravity') else False
-        self.gravity = config.getint('lowgrav', 'gravity') if config.has_option('lowgrav', 'gravity') else 800
+        self.support_lowgravity = CONFIG.getboolean('lowgrav', 'support_lowgravity') if CONFIG.has_option('lowgrav', 'support_lowgravity') else False
+        self.gravity = CONFIG.getint('lowgrav', 'gravity') if CONFIG.has_option('lowgrav', 'gravity') else 800
         self.explode_time = "40"
         # log that the configuration file has been loaded
         logger.info("Configuration loaded  : OK")
         # enable/disable option to get Head Admin by checking existence of head admin in database
         curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `admin_role` = 100")
-        self.iamgod = True if curs.fetchone()[0] < 1 else False
+        self.iamgod = True if int(curs.fetchone()[0]) < 1 else False
         logger.info("Connecting to Database: OK")
         logger.debug("Cmd !iamgod available : %s", self.iamgod)
         self.uptime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         # Rotating Messages and Rules
-        if config.has_option('rules', 'show_rules') and config.getboolean('rules', 'show_rules'):
-            self.output_rules = config.get('rules', 'display') if config.has_option('rules', 'display') else "chat"
-            rules_frequency = config.getint('rules', 'rules_frequency') if config.has_option('rules', 'rules_frequency') else 90
+        if CONFIG.has_option('rules', 'show_rules') and CONFIG.getboolean('rules', 'show_rules'):
+            self.output_rules = CONFIG.get('rules', 'display') if CONFIG.has_option('rules', 'display') else "chat"
+            rules_frequency = CONFIG.getint('rules', 'rules_frequency') if CONFIG.has_option('rules', 'rules_frequency') else 90
             self.rules_file = os.path.join(HOME, 'conf', 'rules.conf')
             self.rules_frequency = rules_frequency if rules_frequency > 0 else 10
             if os.path.isfile(self.rules_file):
@@ -413,6 +391,8 @@ class LogParser(object):
                 with self.players_lock:
                     if "@admins" in line:
                         self.game.rcon_say(self.get_admins_online())
+                    elif "@admincount" in line:
+                        self.game.rcon_say(self.get_admin_count())
                     elif "@nextmap" in line:
                         self.game.rcon_say(self.get_nextmap())
                     elif "@time" in line:
@@ -500,8 +480,7 @@ class LogParser(object):
                 cur_pos = start_pos - seek_amount
                 end_pos = start_pos
                 start_pos = cur_pos
-                if start_pos < 0:
-                    start_pos = 0
+                start_pos = max(start_pos, 0)
                 self.log_file.seek(start_pos)
 
     def read_log(self):
@@ -521,7 +500,7 @@ class LogParser(object):
         self.find_game_start()
 
         # create instance of Game
-        self.game = Game(self.config_file, self.urt_modversion)
+        self.game = Game(self.urt_modversion)
 
         self.log_file.seek(0, 2)
         while self.log_file:
@@ -538,10 +517,8 @@ class LogParser(object):
         """
         delete expired ban points
         """
-        timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-        values = (timestamp,)
         # remove expired ban_points
-        curs.execute("DELETE FROM `ban_points` WHERE `expires` < ?", values)
+        curs.execute("DELETE FROM `ban_points` WHERE `expires` < '{}'".format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))))
         conn.commit()
 
     def taskmanager(self):
@@ -641,7 +618,7 @@ class LogParser(object):
                 except KeyError:
                     continue
                 else:
-                    if self.max_ping < ping_value < 999 and gameplayer.get_admin_role() < 40:
+                    if self.max_ping < ping_value < 999 and gameplayer.get_admin_role() < self.admin_immunity:
                         gameplayer.add_high_ping(ping_value)
                         self.game.rcon_tell(player.num, "^1WARNING ^7[^3%d^7]: Your ping is too high [^4%d^7]. ^3The maximum allowed ping is %d." % (gameplayer.get_warning(), ping_value, self.max_ping), False)
                     else:
@@ -730,13 +707,19 @@ class LogParser(object):
         """
         handle callvote
         """
+        if "g_nextmap" in line:
+            self.last_vote = "nextmap"
+        elif "cyclemap" in line:
+            self.last_vote = "cyclemap"
+        elif "clientkickreason" in line:
+            self.last_vote = "kick"
+
         spam_msg = True
         now = time.time()
-        if "g_nextmap" in line:
-            if self.limit_nextmap_votes and not self.allow_nextmap_vote:
-                self.game.send_rcon('veto')
-                self.game.rcon_say("^7Voting for Next Map is disabled until the end of this map")
-                spam_msg = False
+        if "g_nextmap" in line and self.limit_nextmap_votes and not self.allow_nextmap_vote:
+            self.game.send_rcon('veto')
+            self.game.rcon_say("^7Voting for Next Map is disabled until the end of this map")
+            spam_msg = False
         if "map" in line and self.failed_vote_timer > now:
             remaining_time = int(self.failed_vote_timer - now)
             self.game.send_rcon('veto')
@@ -774,7 +757,7 @@ class LogParser(object):
         if self.bomb_gametype:
             # bomb detonation timer
             detonation_timer = self.game.get_cvar('g_bombexplodetime')
-            self.explode_time = detonation_timer if detonation_timer else "40"
+            self.explode_time = detonation_timer or "40"
 
         # reset list of player who left server
         self.last_disconnected_player = None
@@ -867,7 +850,7 @@ class LogParser(object):
             player_num = int(line[:2].strip())
             line = line[2:].lstrip("\\").lstrip()
             values = self.explode_line(line)
-            challenge = True if 'challenge' in values else False
+            challenge = 'challenge' in values
             name = values['name'] if 'name' in values else "UnnamedPlayer"
             ip_port = values['ip'] if 'ip' in values else "0.0.0.0:0"
             auth = values['authl'] if 'authl' in values else ""
@@ -979,7 +962,7 @@ class LogParser(object):
                 # disable welcome message for next rounds
                 player.disable_welcome_msg()
             elif not player.get_registered_user() and not player.get_first_time() and player.get_welcome_msg():
-                self.game.rcon_tell(player_num, "^7Welcome back %s, you are player ^3#%s^7. ^3Type ^2!register ^3in chat to register" % (player_name, player_id))
+                self.game.rcon_tell(player_num, "^7Welcome back %s, you are player ^3#%s^7. ^3Type ^2!register ^3in chat to register and save your stats" % (player_name, player_id))
                 player.disable_welcome_msg()
             elif player.get_first_time() and player.get_welcome_msg():
                 self.game.rcon_tell(player_num, "^7Welcome %s, this must be your first visit, you are player ^3#%s^7. ^3Type ^2!help ^3in chat for help" % (player_name, player_id))
@@ -997,6 +980,8 @@ class LogParser(object):
             player.save_info()
             player.reset()
             self.last_disconnected_player = player
+            if player.get_admin_role() >= 40:
+                self.last_admin = player
             del self.game.players[player_num]
             for player in self.game.players.itervalues():
                 player.clear_tk(player_num)
@@ -1032,7 +1017,11 @@ class LogParser(object):
                               15: 'unbelievable!',
                               20: '^1MANIAC!',
                               25: '^2AIMBOT?',
-                              30: 'stop that'}
+                              30: 'stop that',
+                              35: 'stop that ^5NOW',
+                              40: '^6OMG ^7stop it',
+                              45: 'no mercy',
+                              50: '^2HEAD RIPPER'}
                     if self.spam_headshot_hits_msg and hitter_hs_count in hs_msg:
                         self.game.rcon_bigtext("^3%s: ^2%d ^7HeadShots, %s" % (hitter_name, hitter_hs_count, hs_msg[hitter_hs_count]))
                     hs_plural = "headshots" if hitter_hs_count > 1 else "headshot"
@@ -1095,7 +1084,7 @@ class LogParser(object):
                         else:
                             killer.add_warning('stop team killing')
                             self.game.rcon_tell(killer_id, "^1WARNING ^7[^3%d^7]: ^7For team killing you will get kicked" % killer.get_warning(), False)
-                            if killer.get_warning() == 3 and killer.get_admin_role() < 40:
+                            if killer.get_warning() == 3 and killer.get_admin_role() < self.admin_immunity:
                                 self.game.rcon_say("^1ALERT: ^2%s ^7auto-kick from warnings if not forgiven. Type ^3!forgive %s ^7to forgive" % (killer_name, killer_id))
 
             suicide_reason = ['UT_MOD_SUICIDE', 'MOD_FALLING', 'MOD_WATER', 'MOD_LAVA', 'MOD_TRIGGER_HURT',
@@ -1113,7 +1102,7 @@ class LogParser(object):
                 killer.kill()
 
                 # spawn killing - warn/kick or instant kill
-                if (self.spawnkill_autokick or self.kill_spawnkiller) and self.spawnkill_warn_time and killer.get_admin_role() < 40:
+                if (self.spawnkill_autokick or self.kill_spawnkiller) and self.spawnkill_warn_time and killer.get_admin_role() < self.admin_immunity:
                     # Spawn Protection time between players deaths in seconds to issue a warning
                     if victim.get_respawn_time() + self.spawnkill_warn_time > time.time():
                         if killer.get_ip_address() != '0.0.0.0':
@@ -1247,8 +1236,7 @@ class LogParser(object):
         """
         player_id = user_id.lstrip('@')
         if player_id.isdigit() and int(player_id) > 1:
-            values = (player_id,)
-            curs.execute("SELECT `guid`,`name`,`ip_address` FROM `player` WHERE `id` = ?", values)
+            curs.execute("SELECT `guid`,`name`,`ip_address` FROM `player` WHERE `id` = {}".format(int(player_id)))
             result = curs.fetchone()
             if result:
                 victim = Player(player_num=1023, ip_address=str(result[2]), guid=str(result[0]), name=str(result[1]))
@@ -1510,8 +1498,8 @@ class LogParser(object):
 
             # xlrtopstats
             elif (sar['command'] in ('!xlrtopstats', '!topstats')) and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['xlrtopstats']['level']:
-                values = (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime((time.time() - 10368000))),)  # last played within the last 120 days
-                result = curs.execute("SELECT name FROM `xlrstats` WHERE (`rounds` > 35 or `kills` > 500) and `last_played` > ? ORDER BY `ratio` DESC LIMIT 3", values).fetchall()
+                curs.execute("SELECT name FROM `xlrstats` WHERE (`rounds` > 35 or `kills` > 500) and `last_played` > '{}' ORDER BY `ratio` DESC LIMIT 3".format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime((time.time() - 10368000)))))  # last played within the last 120 days
+                result = curs.fetchall()
                 toplist = ['^1#%s ^7%s' % (index + 1, result[index][0]) for index in xrange(len(result))]
                 msg = "^3Top players: %s" % str(", ".join(toplist)) if toplist else "^3Awards still available"
                 self.game.rcon_tell(sar['player_num'], msg)
@@ -1651,6 +1639,13 @@ class LogParser(object):
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7No maps have been played since Spunky Bot started")
 
+            # lastvote - display information about the last called vote
+            elif sar['command'] == "!lastvote" and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['lastvote']['level']:
+                if self.last_vote:
+                    self.game.rcon_tell(sar['player_num'], "^7Last vote: ^2%s" % self.last_vote)
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7No votes have been called since Spunky Bot started")
+
             # list - list all connected players
             elif sar['command'] == '!list' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['list']['level']:
                 msg = "^7Players online: %s" % ", ".join(["^3%s [^2%d^3]" % (player.get_name(), player.get_player_num()) for player in self.game.players.itervalues() if player.get_player_num() != BOT_PLAYER_NUM])
@@ -1753,13 +1748,19 @@ class LogParser(object):
                                     if reason in REASONS:
                                         warning = REASONS[reason]
                                         if reason == 'tk' and victim.get_warning() > 1:
-                                            ban_duration = victim.add_ban_point('tk, ban by %s' % self.game.players[sar['player_num']].get_name(), 600)
+                                            ban_duration = victim.add_ban_point('tk, ban by %s' % self.game.players[sar['player_num']].get_name(), 900)
                                         elif reason == 'lang' and victim.get_warning() > 1:
                                             ban_duration = victim.add_ban_point('lang', 300)
                                         elif reason == 'spam' and victim.get_warning() > 1:
                                             ban_duration = victim.add_ban_point('spam', 300)
-                                        elif reason == 'racism' and victim.get_warning() > 1:
-                                            ban_duration = victim.add_ban_point('racism', 300)
+                                        elif reason == 'racism':
+                                            ban_duration = victim.add_ban_point('racism', 900)
+                                        elif reason == 'name' and victim.get_warning() > 1:
+                                            ban_duration = victim.add_ban_point('name', 900)
+                                        elif reason == 'sk' and victim.get_warning() > 1:
+                                            ban_duration = victim.add_ban_point('sk', 900)
+                                        elif reason == 'camp':
+                                            ban_duration = victim.add_ban_point('camp', 900)
                                     else:
                                         warning = reason
                                     victim.add_warning(warning)
@@ -1809,6 +1810,30 @@ class LogParser(object):
                 else:
                     warning = 'behave yourself'
                 self.game.rcon_tell(sar['player_num'], "^2TEST: ^1WARNING ^7[^31^7]: ^4%s" % warning)
+
+            # startdemo - start recording of server-side demos
+            elif sar['command'] == '!startdemo' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['startdemo']['level']:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
+                    arg = "all"
+                    found, victim, msg = self.player_found(user)
+                    if not found and user.upper() != "ALL":
+                        self.game.rcon_tell(sar['player_num'], msg)
+                    else:
+                        arg = victim.get_player_num()
+                    self.game.send_rcon('startserverdemo %s' % arg)
+
+            # stopdemo - stop recording of server-side demos
+            elif sar['command'] == '!stopdemo' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['stopdemo']['level']:
+                if line.split(sar['command'])[1]:
+                    user = line.split(sar['command'])[1].strip()
+                    arg = "all"
+                    found, victim, msg = self.player_found(user)
+                    if not found and user.upper() != "ALL":
+                        self.game.rcon_tell(sar['player_num'], msg)
+                    else:
+                        arg = victim.get_player_num()
+                    self.game.send_rcon('stopserverdemo %s' % arg)
 
 ## admin level 40
             # admins - list all the online admins
@@ -2176,7 +2201,7 @@ class LogParser(object):
 
             # status - report the status of the bot
             elif sar['command'] == '!status' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['status']['level']:
-                curs.execute("PRAGMA database_list")
+                curs.execute("SELECT 1 FROM player LIMIT 1;")
                 msg = "^7Database is ^2UP^7 and Bot started at ^2%s" % self.uptime if curs.fetchall() else "^7Database appears to be ^1DOWN"
                 self.game.rcon_tell(sar['player_num'], msg)
 
@@ -2255,10 +2280,7 @@ class LogParser(object):
                     if not found:
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
-                        timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-                        guid = victim.get_guid()
-                        values = (timestamp, guid)
-                        curs.execute("SELECT `expires` FROM `ban_list` WHERE `expires` > ? AND `guid` = ?", values)
+                        curs.execute("SELECT `expires` FROM `ban_list` WHERE `expires` > '{}' AND `guid` = '{}'".format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())), victim.get_guid()))
                         result = curs.fetchone()
                         if result:
                             self.game.rcon_tell(sar['player_num'], "^3%s ^7has an active ban until [^1%s^7]" % (victim.get_name(), str(result[0])))
@@ -2328,10 +2350,16 @@ class LogParser(object):
 
             # !addbots
             elif sar['command'] == '!addbots' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['addbots']['level']:
-                self.game.send_rcon('addbot boa 3 blue 50 BOT1')
-                self.game.send_rcon('addbot python 4 blue 50 BOT2')
-                self.game.send_rcon('addbot cheetah 3 red 50 BOT3')
-                self.game.send_rcon('addbot cobra 4 red 50 BOT4')
+                self.game.send_rcon('addbot boa 4 blue 50 BOT_1')
+                self.game.send_rcon('addbot cheetah 4 red 50 BOT_2')
+                game_data = self.game.get_gamestats()
+                if game_data[Player.teams[1]] > game_data[Player.teams[2]]:
+                    self.game.send_rcon('addbot mantis 4 blue 50 BOT_3')
+                elif game_data[Player.teams[1]] < game_data[Player.teams[2]]:
+                    self.game.send_rcon('addbot chicken 4 red 50 BOT_4')
+                else:
+                    self.game.send_rcon('addbot python 4 blue 50 BOT_3')
+                    self.game.send_rcon('addbot cobra 4 red 50 BOT_4')
 
             # !bots on/off
             elif sar['command'] == '!bots' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['bots']['level']:
@@ -2505,6 +2533,12 @@ class LogParser(object):
                     elif "sniper" in arg:
                         self.game.send_rcon('g_gear "%s"' % 'FGHIJKLMacefghjklOQ' if self.urt_modversion > 41 else '61')
                         self.game.rcon_say("^7Gear: ^2Sniper rifles only")
+                    elif "magnum" in arg and self.urt_modversion > 42:
+                        self.game.send_rcon('g_gear FGHIJKLMNZacefghijkOQRSTUVWX')
+                        self.game.rcon_say("^7Gear: ^2Magnums only")
+                    elif "mac" in arg and self.urt_modversion > 42:
+                        self.game.send_rcon('g_gear FGHIJKLMNZacefgijklOQ')
+                        self.game.rcon_say("^7Gear: ^2MAC11 only")
                     else:
                         self.game.rcon_tell(sar['player_num'], COMMANDS['gear']['syntax'])
                 else:
@@ -2528,13 +2562,17 @@ class LogParser(object):
                 else:
                     self.game.rcon_tell(sar['player_num'], "^7The command ^3!kill ^7is not supported")
 
+            # lastadmin - display the last disconnected admin
+            elif sar['command'] == '!lastadmin' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['lastadmin']['level']:
+                msg = "^7Last disconnected admin: ^3%s [^2%d^3]" % (self.last_admin.get_name(), self.last_admin.get_admin_role()) if self.last_admin else "^3No admin left the server yet"
+                self.game.rcon_tell(sar['player_num'], msg)
+
             # lookup - search for player in database
             elif (sar['command'] == '!lookup' or sar['command'] == '!l') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['lookup']['level']:
                 if line.split(sar['command'])[1]:
                     arg = line.split(sar['command'])[1].strip()
-                    search = '%' + arg + '%'
-                    lookup = (search,)
-                    result = curs.execute("SELECT `id`,`name`,`time_joined` FROM `player` WHERE `name` like ? ORDER BY `time_joined` DESC LIMIT 8", lookup).fetchall()
+                    curs.execute("SELECT `id`,`name`,`time_joined` FROM `player` WHERE `name` like '%{}%' ORDER BY `time_joined` DESC LIMIT 8".format(arg))
+                    result = curs.fetchall()
                     for row in result:
                         self.game.rcon_tell(sar['player_num'], "^7[^2@%s^7] %s ^7[^1%s^7]" % (str(row[0]), str(row[1]), str(row[2])), False)
                     if not result:
@@ -2663,36 +2701,38 @@ class LogParser(object):
 
             # banlist - display the last active 10 bans
             elif sar['command'] == '!banlist' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['banlist']['level']:
-                values = (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())),)
-                result = curs.execute("SELECT `id`,`name` FROM `ban_list` WHERE `expires` > ? ORDER BY `timestamp` DESC LIMIT 10", values).fetchall()
+                curs.execute("SELECT `id`,`name` FROM `ban_list` WHERE `expires` > '{}' ORDER BY `timestamp` DESC LIMIT 10".format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))))
+                result = curs.fetchall()
                 banlist = ['^7[^2@%s^7] %s' % (row[0], row[1]) for row in result]
                 msg = 'Currently no one is banned' if not banlist else str(", ".join(banlist))
                 self.game.rcon_tell(sar['player_num'], "^7Banlist: %s" % msg)
 
             # lastbans - list the last 4 bans
             elif (sar['command'] == '!lastbans' or sar['command'] == '!bans') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['lastbans']['level']:
-                result = curs.execute("SELECT id,name,expires FROM `ban_list` ORDER BY `timestamp` DESC LIMIT 4").fetchall()
+                curs.execute("SELECT `id`,`name`,`expires` FROM `ban_list` ORDER BY `timestamp` DESC LIMIT 4")
+                result = curs.fetchall()
                 lastbanlist = ['^3[^2@%s^3] ^7%s ^3(^1%s^3)' % (row[0], row[1], row[2]) for row in result]
-                for item in lastbanlist:
-                    self.game.rcon_tell(sar['player_num'], str(item))
+                if result:
+                    for item in lastbanlist:
+                        self.game.rcon_tell(sar['player_num'], str(item))
+                else:
+                    self.game.rcon_tell(sar['player_num'], "^7Currently no one is banned")
 
             # unban - unban a player from the database via ID
             elif sar['command'] == '!unban' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['unban']['level']:
                 if line.split(sar['command'])[1]:
                     arg = line.split(sar['command'])[1].strip().lstrip('@')
                     if arg.isdigit():
-                        values = (int(arg),)
-                        curs.execute("SELECT `guid`,`name`,`ip_address` FROM `ban_list` WHERE `id` = ?", values)
+                        curs.execute("SELECT `guid`,`name`,`ip_address` FROM `ban_list` WHERE `id` = {}".format(int(arg)))
                         result = curs.fetchone()
                         if result:
                             guid = result[0]
                             name = str(result[1])
                             ip_addr = str(result[2])
-                            curs.execute("DELETE FROM `ban_list` WHERE `id` = ?", values)
+                            curs.execute("DELETE FROM `ban_list` WHERE `id` = {}".format(int(arg)))
                             conn.commit()
                             self.game.rcon_tell(sar['player_num'], "^7Player ^2%s ^7unbanned" % name)
-                            values = (guid, ip_addr)
-                            curs.execute("DELETE FROM `ban_list` WHERE `guid` = ? OR ip_address = ?", values)
+                            curs.execute("DELETE FROM `ban_list` WHERE `guid` = '{}' OR ip_address = '{}'".format(guid, ip_addr))
                             conn.commit()
                             self.game.rcon_tell(sar['player_num'], "^7Try to remove duplicates of [^1%s^7]" % ip_addr)
                         else:
@@ -2790,7 +2830,7 @@ class LogParser(object):
                     self.game.rcon_tell(sar['player_num'], "^7Unknown command ^3%s" % sar['command'])
 
 ## bad words
-            elif self.bad_words_autokick and [sample for sample in bad_words if sample in line.lower()] and self.game.players[sar['player_num']].get_admin_role() < 40:
+            elif self.bad_words_autokick and [sample for sample in bad_words if sample in line.lower()] and self.game.players[sar['player_num']].get_admin_role() < self.admin_immunity:
                 victim = self.game.players[sar['player_num']]
                 victim.add_warning('bad language')
                 self.kick_high_warns(victim, 'bad language', 'Behave, stop using bad language')
@@ -2810,6 +2850,13 @@ class LogParser(object):
         """
         liste = "%s" % ", ".join(["^3%s [^2%d^3]" % (player.get_name(), player.get_admin_role()) for player in self.game.players.itervalues() if player.get_admin_role() >= 20])
         return "^7Admins online: %s" % liste if liste else "^7No admins online"
+
+    def get_admin_count(self):
+        """
+        return number of Admins online
+        """
+        counter = sum(1 for player in self.game.players.itervalues() if player.get_admin_role() >= 20)
+        return "^7%d Admin%s online" % (counter, 's' if counter > 1 else '')
 
     def get_nextmap(self):
         """
@@ -3230,15 +3277,13 @@ class Player(object):
 
         # check ban_list
         now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(self.time_joined))
-        values = (self.guid, now)
-        curs.execute("SELECT `id`,`reason` FROM `ban_list` WHERE `guid` = ? AND `expires` > ?", values)
+        curs.execute("SELECT `id`,`reason` FROM `ban_list` WHERE `guid` = '{}' AND `expires` > '{}'".format(self.guid, now))
         result = curs.fetchone()
         if result:
             self.ban_id = result[0]
             self.ban_msg = str(result[1]).split(',')[0]
         else:
-            values = (self.address, now)
-            curs.execute("SELECT `id`,`reason` FROM `ban_list` WHERE `ip_address` = ? AND `expires` > ?", values)
+            curs.execute("SELECT `id`,`reason` FROM `ban_list` WHERE `ip_address` = '{}' AND `expires` > '{}'".format(self.address, now))
             result = curs.fetchone()
             if result:
                 self.ban_id = result[0]
@@ -3252,24 +3297,20 @@ class Player(object):
         except ValueError:
             expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(2147483647))
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-        values = (self.guid,)
-        curs.execute("SELECT `expires` FROM `ban_list` WHERE `guid` = ?", values)
+        curs.execute("SELECT `expires` FROM `ban_list` WHERE `guid` = '{}'".format(self.guid))
         result = curs.fetchone()
         if result:
             if result[0] < expire_date:
                 # update already existing ban
-                values = (self.address, expire_date, reason, self.guid)
-                curs.execute("UPDATE `ban_list` SET `ip_address` = ?,`expires` = ?,`reason` = ? WHERE `guid` = ?", values)
+                curs.execute("UPDATE `ban_list` SET `ip_address` = '{}',`expires` = '{}',`reason` = '{}' WHERE `guid` = '{}'".format(self.address, expire_date, reason, self.guid))
                 conn.commit()
                 return True
-            values = (self.address, self.guid)
             # update IP address of existing ban
-            curs.execute("UPDATE `ban_list` SET `ip_address` = ? WHERE `guid` = ?", values)
+            curs.execute("UPDATE `ban_list` SET `ip_address` = '{}' WHERE `guid` = '{}'".format(self.address, self.guid))
             conn.commit()
             return False
         # create new ban
-        values = (self.player_id, self.guid, self.name, self.address, expire_date, timestamp, reason)
-        curs.execute("INSERT INTO `ban_list` (`id`,`guid`,`name`,`ip_address`,`expires`,`timestamp`,`reason`) VALUES (?,?,?,?,?,?,?)", values)
+        curs.execute("INSERT INTO `ban_list` (`id`,`guid`,`name`,`ip_address`,`expires`,`timestamp`,`reason`) VALUES ({},'{}','{}','{}','{}','{}','{}')".format(self.player_id, self.guid, self.name, self.address, expire_date, timestamp, reason))
         conn.commit()
         return True
 
@@ -3278,18 +3319,16 @@ class Player(object):
             expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() + duration))
         except ValueError:
             expire_date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(2147483647))
-        values = (self.guid, point_type, expire_date)
         # add ban_point to database
-        curs.execute("INSERT INTO `ban_points` (`guid`,`point_type`,`expires`) VALUES (?,?,?)", values)
+        curs.execute("INSERT INTO `ban_points` (`guid`,`point_type`,`expires`) VALUES ('{}','{}','{}')".format(self.guid, point_type, expire_date))
         conn.commit()
         # check amount of ban_points
-        values = (self.guid, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
-        curs.execute("SELECT COUNT(*) FROM `ban_points` WHERE `guid` = ? AND `expires` > ?", values)
-        # ban player when he gets more than 1 ban_point
-        if curs.fetchone()[0] > 1:
-            # ban duration multiplied by 3
+        curs.execute("SELECT COUNT(*) FROM `ban_points` WHERE `guid` = '{}' AND `expires` > '{}'".format(self.guid, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))))
+        # ban player when he gets more than 2 ban_points
+        if int(curs.fetchone()[0]) > 2:
+            # ban duration = 3 * expiration time
             ban_duration = duration * 3
-            self.ban(duration=ban_duration, reason=point_type)
+            self.ban(duration=ban_duration, reason=point_type, admin='bot')
             return ban_duration / 60
         return 0
 
@@ -3335,55 +3374,45 @@ class Player(object):
     def save_info(self):
         if self.registered_user:
             ratio = round(float(self.db_kills) / float(self.db_deaths), 2) if self.db_deaths > 0 else 1.0
-            values = (self.db_kills, self.db_deaths, self.db_head_shots, self.db_tk_count, self.db_team_death, self.db_killing_streak, self.db_suicide, ratio, self.guid)
-            curs.execute("UPDATE `xlrstats` SET `kills` = ?,`deaths` = ?,`headshots` = ?,`team_kills` = ?,`team_death` = ?,`max_kill_streak` = ?,`suicides` = ?,`rounds` = `rounds` + 1,`ratio` = ? WHERE `guid` = ?", values)
+            curs.execute("UPDATE `xlrstats` SET `kills` = {},`deaths` = {},`headshots` = {},`team_kills` = {},`team_death` = {},`max_kill_streak` = {},`suicides` = {},`rounds` = `rounds` + 1,`ratio` = {} WHERE `guid` = '{}'".format(self.db_kills, self.db_deaths, self.db_head_shots, self.db_tk_count, self.db_team_death, self.db_killing_streak, self.db_suicide, ratio, self.guid))
             conn.commit()
 
     def check_database(self):
         now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
         # check player table
-        values = (self.guid,)
-        curs.execute("SELECT COUNT(*) FROM `player` WHERE `guid` = ?", values)
-        if curs.fetchone()[0] == 0:
+        curs.execute("SELECT COUNT(*) FROM `player` WHERE `guid` = '{}'".format(self.guid))
+        if int(curs.fetchone()[0]) == 0:
             # add new player to database
-            values = (self.guid, self.name, self.address, now, self.name)
-            curs.execute("INSERT INTO `player` (`guid`,`name`,`ip_address`,`time_joined`,`aliases`) VALUES (?,?,?,?,?)", values)
+            curs.execute("INSERT INTO `player` (`guid`,`name`,`ip_address`,`time_joined`,`aliases`) VALUES ('{}','{}','{}','{}','{}')".format(self.guid, self.name, self.address, now, self.name))
             conn.commit()
             self.aliases.append(self.name)
             self.first_time = True
         else:
             # update name, IP address and last join date
-            values = (self.name, self.address, now, self.guid)
-            curs.execute("UPDATE `player` SET `name` = ?,`ip_address` = ?,`time_joined` = ? WHERE `guid` = ?", values)
+            curs.execute("UPDATE `player` SET `name` = '{}',`ip_address` = '{}',`time_joined` = '{}' WHERE `guid` = '{}'".format(self.name, self.address, now, self.guid))
             conn.commit()
             # get known aliases
-            values = (self.guid,)
-            curs.execute("SELECT `aliases` FROM `player` WHERE `guid` = ?", values)
+            curs.execute("SELECT `aliases` FROM `player` WHERE `guid` = '{}'".format(self.guid))
             result = curs.fetchone()
             # create list of aliases
             self.aliases = result[0].split(', ')
-            if self.name not in self.aliases:
-                # add new alias to list
-                if len(self.aliases) < 15:
-                    self.aliases.append(self.name)
-                    alias_string = ', '.join(self.aliases)
-                    values = (alias_string, self.guid)
-                    curs.execute("UPDATE `player` SET `aliases` = ? WHERE `guid` = ?", values)
-                    conn.commit()
+            # add new alias to list
+            if self.name not in self.aliases and len(self.aliases) < 15:
+                self.aliases.append(self.name)
+                alias_string = ', '.join(self.aliases)
+                curs.execute("UPDATE `player` SET `aliases` = '{}' WHERE `guid` = '{}'".format(alias_string, self.guid))
+                conn.commit()
         # get player-id
-        values = (self.guid,)
-        curs.execute("SELECT `id` FROM `player` WHERE `guid` = ?", values)
+        curs.execute("SELECT `id` FROM `player` WHERE `guid` = '{}'".format(self.guid))
         self.player_id = curs.fetchone()[0]
         # check XLRSTATS table
-        values = (self.guid,)
-        curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `guid` = ?", values)
-        if curs.fetchone()[0] == 0:
+        curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `guid` = '{}'".format(self.guid))
+        if int(curs.fetchone()[0]) == 0:
             self.registered_user = False
         else:
             self.registered_user = True
             # get DB DATA for XLRSTATS
-            values = (self.guid,)
-            curs.execute("SELECT `last_played`,`num_played`,`kills`,`deaths`,`headshots`,`team_kills`,`team_death`,`max_kill_streak`,`suicides`,`admin_role`,`first_seen` FROM `xlrstats` WHERE `guid` = ?", values)
+            curs.execute("SELECT `last_played`,`num_played`,`kills`,`deaths`,`headshots`,`team_kills`,`team_death`,`max_kill_streak`,`suicides`,`admin_role`,`first_seen` FROM `xlrstats` WHERE `guid` = '{}'".format(self.guid))
             result = curs.fetchone()
             self.last_visit = result[0]
             self.num_played = result[1]
@@ -3397,24 +3426,22 @@ class Player(object):
             self.admin_role = result[9]
             self.first_seen = result[10]
             # update name, last_played and increase num_played counter
-            values = (self.name, now, self.guid)
-            curs.execute("UPDATE `xlrstats` SET `name` = ?,`last_played` = ?,`num_played` = `num_played` + 1 WHERE `guid` = ?", values)
+            curs.execute("UPDATE `xlrstats` SET `name` = '{}',`last_played` = '{}',`num_played` = `num_played` + 1 WHERE `guid` = '{}'".format(self.name, now, self.guid))
             conn.commit()
 
     def define_offline_player(self, player_id):
         self.player_id = player_id
-        values = (self.guid,)
         # get known aliases
-        curs.execute("SELECT `aliases` FROM `player` WHERE `guid` = ?", values)
+        curs.execute("SELECT `aliases` FROM `player` WHERE `guid` = '{}'".format(self.guid))
         result = curs.fetchone()
         # create list of aliases
         self.aliases = result[0].split(', ')
-        curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `guid` = ?", values)
-        if curs.fetchone()[0] == 0:
+        curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `guid` = '{}'".format(self.guid))
+        if int(curs.fetchone()[0]) == 0:
             self.admin_role = 0
             self.registered_user = False
         else:
-            curs.execute("SELECT `last_played`,`admin_role` FROM `xlrstats` WHERE `guid` = ?", values)
+            curs.execute("SELECT `last_played`,`admin_role` FROM `xlrstats` WHERE `guid` = '{}'".format(self.guid))
             result = curs.fetchone()
             self.last_visit = result[0]
             self.admin_role = result[1]
@@ -3423,8 +3450,7 @@ class Player(object):
     def register_user_db(self, role=1):
         if not self.registered_user:
             now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-            values = (self.guid, self.name, self.address, now, now, role)
-            curs.execute("INSERT INTO `xlrstats` (`guid`,`name`,`ip_address`,`first_seen`,`last_played`,`num_played`,`admin_role`) VALUES (?,?,?,?,?,1,?)", values)
+            curs.execute("INSERT INTO `xlrstats` (`guid`,`name`,`ip_address`,`first_seen`,`last_played`,`num_played`,`admin_role`) VALUES ('{}','{}','{}','{}','{}',1,{})".format(self.guid, self.name, self.address, now, now, role))
             conn.commit()
             self.registered_user = True
             self.admin_role = role
@@ -3433,8 +3459,7 @@ class Player(object):
             self.last_visit = now
 
     def update_db_admin_role(self, role):
-        values = (role, self.guid)
-        curs.execute("UPDATE `xlrstats` SET `admin_role` = ? WHERE `guid` = ?", values)
+        curs.execute("UPDATE `xlrstats` SET `admin_role` = {} WHERE `guid` = '{}'".format(role, self.guid))
         conn.commit()
         # overwrite admin role in game, no reconnect of player required
         self.set_admin_role(role)
@@ -3712,9 +3737,7 @@ class Player(object):
         self.tk_killer_names = []
         self.last_warn_time = 0
         # clear ban_points
-        now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-        values = (self.guid, now)
-        curs.execute("DELETE FROM `ban_points` WHERE `guid` = ? and `expires` > ?", values)
+        curs.execute("DELETE FROM `ban_points` WHERE `guid` = '{}' and `expires` > '{}'".format(self.guid, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))))
         conn.commit()
 
     def team_death(self):
@@ -3802,12 +3825,9 @@ class Game(object):
     """
     Game class
     """
-    def __init__(self, config_file, urt_modversion):
+    def __init__(self, urt_modversion):
         """
         create a new instance of Game
-
-        @param config_file: The full path of the bot configuration file
-        @type  config_file: String
         """
         self.all_maps_list = []
         self.next_mapname = ''
@@ -3817,20 +3837,18 @@ class Game(object):
         self.players = {}
         self.live = False
         self.urt_modversion = urt_modversion
-        game_cfg = ConfigParser.ConfigParser()
-        game_cfg.read(config_file)
-        self.quake = PyQuake3("%s:%s" % (game_cfg.get('server', 'server_ip'), game_cfg.get('server', 'server_port')), game_cfg.get('server', 'rcon_password'))
+        self.quake = PyQuake3("%s:%s" % (CONFIG.get('server', 'server_ip'), CONFIG.get('server', 'server_port')), CONFIG.get('server', 'rcon_password'))
         self.queue = Queue()
         self.rcon_lock = RLock()
         self.thread_rcon()
         logger.info("Opening RCON socket   : OK")
 
         # dynamic mapcycle
-        self.dynamic_mapcycle = game_cfg.getboolean('mapcycle', 'dynamic_mapcycle') if game_cfg.has_option('mapcycle', 'dynamic_mapcycle') else False
+        self.dynamic_mapcycle = CONFIG.getboolean('mapcycle', 'dynamic_mapcycle') if CONFIG.has_option('mapcycle', 'dynamic_mapcycle') else False
         if self.dynamic_mapcycle:
-            self.switch_count = game_cfg.getint('mapcycle', 'switch_count') if game_cfg.has_option('mapcycle', 'switch_count') else 4
-            self.big_cycle = filter(None, game_cfg.get('mapcycle', 'big_cycle').replace(' ', '').split(',')) if game_cfg.has_option('mapcycle', 'big_cycle') else []
-            self.small_cycle = filter(None, game_cfg.get('mapcycle', 'small_cycle').replace(' ', '').split(',')) if game_cfg.has_option('mapcycle', 'small_cycle') else []
+            self.switch_count = CONFIG.getint('mapcycle', 'switch_count') if CONFIG.has_option('mapcycle', 'switch_count') else 4
+            self.big_cycle = filter(None, CONFIG.get('mapcycle', 'big_cycle').replace(' ', '').split(',')) if CONFIG.has_option('mapcycle', 'big_cycle') else []
+            self.small_cycle = filter(None, CONFIG.get('mapcycle', 'small_cycle').replace(' ', '').split(',')) if CONFIG.has_option('mapcycle', 'small_cycle') else []
 
         # add Spunky Bot as player 'World' to the game
         spunky_bot = Player(BOT_PLAYER_NUM, '127.0.0.1', 'NONE', 'World')
@@ -3901,7 +3919,7 @@ class Game(object):
         if self.live:
             with self.rcon_lock:
                 try:
-                    ret_val = self.quake.rcon(value)[1].split(':')[1].split('^7')[0].lstrip('"')
+                    ret_val = self.quake.rcon(value)[1].split(':', 1)[1].split('^7')[0].lstrip('"')
                 except IndexError:
                     ret_val = None
                 time.sleep(RCON_DELAY)
@@ -3919,8 +3937,11 @@ class Game(object):
         get the full path of mapcycle.txt file
         """
         maplist = []
+        self.get_cvar('')
         # get path of fs_homepath and fs_basepath
         fs_homepath = self.get_cvar('fs_homepath')
+        if not fs_homepath:
+            fs_homepath = self.get_cvar('fs_homepath')
         logger.debug("fs_homepath           : %s", fs_homepath)
         fs_basepath = self.get_cvar('fs_basepath')
         logger.debug("fs_basepath           : %s", fs_basepath)
@@ -4048,6 +4069,9 @@ class Game(object):
         logger.info("Total number of maps  : %s", len(self.get_all_maps()))
         logger.info("Server CVAR g_logsync : %s", self.get_cvar('g_logsync'))
         logger.info("Server CVAR g_loghits : %s", self.get_cvar('g_loghits'))
+
+        if self.get_cvar('g_logsync') == '0':
+            logger.error("Server CVAR 'g_logsync' is set to '0' but must be '1' to support interaction with the bot")
 
     def set_current_map(self):
         """
@@ -4178,7 +4202,29 @@ if __name__ == "__main__":
     # connect to database
     conn = sqlite3.connect(os.path.join(HOME, 'data.sqlite'))
     curs = conn.cursor()
+    CONFIG = ConfigParser.ConfigParser()
+    CONF_PATH = os.path.join(HOME, 'conf', 'settings.conf')
+    CONFIG.read(CONF_PATH)
 
+    # enable/disable debug output
+    verbose = CONFIG.getboolean('bot', 'verbose') if CONFIG.has_option('bot', 'verbose') else False
+    # logging format
+    formatter = logging.Formatter('[%(asctime)s] %(levelname)-8s %(message)s', datefmt='%d.%m.%Y %H:%M:%S')
+    # console logging
+    console = logging.StreamHandler()
+    if not verbose:
+        console.setLevel(logging.INFO)
+    console.setFormatter(formatter)
+    # devel.log file
+    devel_log = logging.handlers.RotatingFileHandler(filename=os.path.join(HOME, 'devel.log'), maxBytes=2097152, backupCount=1, encoding='utf8')
+    devel_log.setLevel(logging.INFO)
+    devel_log.setFormatter(formatter)
+    # add logging handler
+    logger.addHandler(console)
+    logger.addHandler(devel_log)
+
+    logger.info("*** Spunky Bot v%s : www.spunkybot.de ***", __version__)
+    logger.info("Loading config file   : %s", CONF_PATH)
     # create tables if not exists
     curs.execute('CREATE TABLE IF NOT EXISTS xlrstats (id INTEGER PRIMARY KEY NOT NULL, guid TEXT NOT NULL, name TEXT NOT NULL, ip_address TEXT NOT NULL, first_seen DATETIME, last_played DATETIME, num_played INTEGER DEFAULT 1, kills INTEGER DEFAULT 0, deaths INTEGER DEFAULT 0, headshots INTEGER DEFAULT 0, team_kills INTEGER DEFAULT 0, team_death INTEGER DEFAULT 0, max_kill_streak INTEGER DEFAULT 0, suicides INTEGER DEFAULT 0, ratio REAL DEFAULT 0, rounds INTEGER DEFAULT 0, admin_role INTEGER DEFAULT 1)')
     curs.execute('CREATE TABLE IF NOT EXISTS player (id INTEGER PRIMARY KEY NOT NULL, guid TEXT NOT NULL, name TEXT NOT NULL, ip_address TEXT NOT NULL, time_joined DATETIME, aliases TEXT)')
@@ -4186,7 +4232,7 @@ if __name__ == "__main__":
     curs.execute('CREATE TABLE IF NOT EXISTS ban_points (id INTEGER PRIMARY KEY NOT NULL, guid TEXT NOT NULL, point_type TEXT, expires DATETIME)')
 
     # create instance of LogParser
-    LogParser(os.path.join(HOME, 'conf', 'settings.conf'))
+    LogParser()
 
     # close database connection
     conn.close()
