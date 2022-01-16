@@ -5,7 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/SpunkyBot/spunkybot/compare/1.12.2...develop)
+## [Unreleased](https://github.com/SpunkyBot/spunkybot/compare/1.13.0...develop)
+
+## [1.13.0](https://github.com/SpunkyBot/spunkybot/compare/1.12.2...1.13.0) - 2022-01-16
+
+### Added
+
+* Added command `!lastvote` to display the last called vote
+* Added command `!lastadmin` to display the last disconnected admin
+* Added option to show number of admins online in rotating messages
+* Added Magnum and MAC11 option to command `!gear`
+* Added banpoints for racism and camp warning types
+
+### Improved
+
+* Show hint to register for saving player stats
+* Show more messages for higher headshot counts
+* Show additional hints for command `!exit`
+* Show message if no one is listed in the banlist
+
+### Fixed
+
+* Fixed #70: Additional warning types lead to automated temp-ban
+* Fixed #75: Warn in logfile if g_logsync is not set correctly
+* Fixed #85: Add command `!lastadmin` to display the last disconnected admin
+* Fixed #93: Add config item to set which adminlevel is punished for spawn/teamkills
+* Fixed #110: Command `!nextmap` supports >52 maps on Windows server
+* Fixed #127: Add support for recording serverside demos
+* Various minor bug fixes
 
 ## [1.12.2](https://github.com/SpunkyBot/spunkybot/compare/1.12.0...1.12.2) - 2020-07-24
 
