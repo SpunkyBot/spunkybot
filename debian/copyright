@@ -4,7 +4,7 @@ Upstream-Contact: Spunky Bot <feedback@spunkybot.de>
 Source: https://github.com/SpunkyBot/spunkybot
 
 Files: *
-Copyright: 2013-2020 Spunky Bot <feedback@spunkybot.de>
+Copyright: 2013-2022 Spunky Bot <feedback@spunkybot.de>
 License: MIT
 
 Files: lib/pyquake3.py
