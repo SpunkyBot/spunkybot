@@ -241,29 +241,22 @@ class LogParser(object):
                 self.admin_cmds.append(key)
                 self.fulladmin_cmds.append(key)
                 self.senioradmin_cmds.append(key)
-                self.superadmin_cmds.append(key)
             elif value['level'] == 40:
                 self.admin_cmds.append(key)
                 self.fulladmin_cmds.append(key)
                 self.senioradmin_cmds.append(key)
-                self.superadmin_cmds.append(key)
             elif value['level'] == 60:
                 self.fulladmin_cmds.append(key)
                 self.senioradmin_cmds.append(key)
-                self.superadmin_cmds.append(key)
             elif value['level'] == 80:
                 self.senioradmin_cmds.append(key)
-                self.superadmin_cmds.append(key)
-            elif value['level'] >= 90:
-                self.superadmin_cmds.append(key)
-            else:
+            elif value['level'] < 90:
                 self.user_cmds.append(key)
                 self.mod_cmds.append(key)
                 self.admin_cmds.append(key)
                 self.fulladmin_cmds.append(key)
                 self.senioradmin_cmds.append(key)
-                self.superadmin_cmds.append(key)
-
+            self.superadmin_cmds.append(key)
         # alphabetic sort of the commands
         self.user_cmds.sort()
         self.mod_cmds.sort()
@@ -342,7 +335,7 @@ class LogParser(object):
         logger.info("Configuration loaded  : OK")
         # enable/disable option to get Head Admin by checking existence of head admin in database
         curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `admin_role` = 100")
-        self.iamgod = True if int(curs.fetchone()[0]) < 1 else False
+        self.iamgod = int(curs.fetchone()[0]) < 1
         logger.info("Connecting to Database: OK")
         logger.debug("Cmd !iamgod available : %s", self.iamgod)
         self.uptime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
