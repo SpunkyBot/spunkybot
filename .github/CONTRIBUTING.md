@@ -6,7 +6,7 @@ If you want to get involved, whether in terms of asking a question, helping othe
 
 The Spunky Bot project keeps its source on GitHub at [github.com/SpunkyBot/spunkybot](https://github.com/SpunkyBot/spunkybot).
 
-The project takes contributions through GitHub [pull requests](https://help.github.com/articles/using-pull-requests).
+The project takes contributions through GitHub pull requests.
 
 In order to keep the history clean and better audit of incoming code, we will require resubmission of pull requests that contain merge commits. Use "git pull -rebase" vs "git pull" and "git rebase" vs "git merge". Also make sure to use topic branches to keep your additions on different branches, such that they will not make conflicting commits later.
 
