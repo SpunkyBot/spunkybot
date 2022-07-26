@@ -3241,7 +3241,7 @@ class Player(object):
         """
         self.player_num = player_num
         self.guid = guid
-        self.name = ''
+        self.name = ""
         self.authname = auth
         self.player_id = 0
         self.aliases = []
@@ -3340,7 +3340,7 @@ class Player(object):
             conn.commit()
             return False
         # create new ban
-        curs.execute("INSERT INTO `ban_list` (`id`,`guid`,`name`,`ip_address`,`expires`,`timestamp`,`reason`) VALUES ({},'{}','{}','{}','{}','{}','{}')".format(self.player_id, self.guid, self.name, self.address, expire_date, timestamp, reason))
+        curs.execute('INSERT INTO `ban_list` (`id`,`guid`,`name`,`ip_address`,`expires`,`timestamp`,`reason`) VALUES ({},"{}","{}","{}","{}","{}","{}")'.format(self.player_id, self.guid, self.name, self.address, expire_date, timestamp, reason))
         conn.commit()
         return True
 
@@ -3413,24 +3413,24 @@ class Player(object):
         curs.execute("SELECT COUNT(*) FROM `player` WHERE `guid` = '{}'".format(self.guid))
         if int(curs.fetchone()[0]) == 0:
             # add new player to database
-            curs.execute("INSERT INTO `player` (`guid`,`name`,`ip_address`,`time_joined`,`aliases`) VALUES ('{}','{}','{}','{}','{}')".format(self.guid, self.name, self.address, now, self.name))
+            curs.execute('INSERT INTO `player` (`guid`,`name`,`ip_address`,`time_joined`,`aliases`) VALUES ("{}","{}","{}","{}","{}")'.format(self.guid, self.name, self.address, now, self.name))
             conn.commit()
             self.aliases.append(self.name)
             self.first_time = True
         else:
             # update name, IP address and last join date
-            curs.execute("UPDATE `player` SET `name` = '{}',`ip_address` = '{}',`time_joined` = '{}' WHERE `guid` = '{}'".format(self.name, self.address, now, self.guid))
+            curs.execute('UPDATE `player` SET `name` = "{}",`ip_address` = "{}",`time_joined` = "{}" WHERE `guid` = "{}"'.format(self.name, self.address, now, self.guid))
             conn.commit()
             # get known aliases
-            curs.execute("SELECT `aliases` FROM `player` WHERE `guid` = '{}'".format(self.guid))
+            curs.execute('SELECT `aliases` FROM `player` WHERE `guid` = "{}"'.format(self.guid))
             result = curs.fetchone()
             # create list of aliases
-            self.aliases = result[0].split(', ')
+            self.aliases = result[0].split(", ")
             # add new alias to list
             if self.name not in self.aliases and len(self.aliases) < 15:
                 self.aliases.append(self.name)
                 alias_string = ', '.join(self.aliases)
-                curs.execute("UPDATE `player` SET `aliases` = '{}' WHERE `guid` = '{}'".format(alias_string, self.guid))
+                curs.execute('UPDATE `player` SET `aliases` = "{}" WHERE `guid` = "{}"'.format(alias_string, self.guid))
                 conn.commit()
         # get player-id
         curs.execute("SELECT `id` FROM `player` WHERE `guid` = '{}'".format(self.guid))
@@ -3456,7 +3456,7 @@ class Player(object):
             self.admin_role = result[9]
             self.first_seen = result[10]
             # update name, last_played and increase num_played counter
-            curs.execute("UPDATE `xlrstats` SET `name` = '{}',`last_played` = '{}',`num_played` = `num_played` + 1 WHERE `guid` = '{}'".format(self.name, now, self.guid))
+            curs.execute('UPDATE `xlrstats` SET `name` = "{}",`last_played` = "{}",`num_played` = `num_played` + 1 WHERE `guid` = "{}"'.format(self.name, now, self.guid))
             conn.commit()
 
     def define_offline_player(self, player_id):
@@ -3465,7 +3465,7 @@ class Player(object):
         curs.execute("SELECT `aliases` FROM `player` WHERE `guid` = '{}'".format(self.guid))
         result = curs.fetchone()
         # create list of aliases
-        self.aliases = result[0].split(', ')
+        self.aliases = result[0].split(", ")
         curs.execute("SELECT COUNT(*) FROM `xlrstats` WHERE `guid` = '{}'".format(self.guid))
         if int(curs.fetchone()[0]) == 0:
             self.admin_role = 0
@@ -3480,7 +3480,7 @@ class Player(object):
     def register_user_db(self, role=1):
         if not self.registered_user:
             now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
-            curs.execute("INSERT INTO `xlrstats` (`guid`,`name`,`ip_address`,`first_seen`,`last_played`,`num_played`,`admin_role`) VALUES ('{}','{}','{}','{}','{}',1,{})".format(self.guid, self.name, self.address, now, now, role))
+            curs.execute('INSERT INTO `xlrstats` (`guid`,`name`,`ip_address`,`first_seen`,`last_played`,`num_played`,`admin_role`) VALUES ("{}","{}","{}","{}","{}",1,{})'.format(self.guid, self.name, self.address, now, now, role))
             conn.commit()
             self.registered_user = True
             self.admin_role = role
@@ -3505,10 +3505,10 @@ class Player(object):
 
     def set_name(self, name):
         # remove whitespaces
-        self.name = name.replace(' ', '')
+        self.name = name.replace(" ", "")
         # remove color character
         for item in xrange(10):
-            self.name = self.name.replace('^%d' % item, '')
+            self.name = self.name.replace("^%d" % item, "")
         # limit length of name to 20 character
         self.name = self.name[:20]
 
