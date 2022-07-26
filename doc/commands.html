@@ -8,8 +8,8 @@
     <meta name="keywords" content="Spunky Bot, Commands, Documentation">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="author" content="Alexander Kress">
-    <link rel="dns-prefetch" href="https://stackpath.bootstrapcdn.com">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
 </head>
 <body>
   <div class="container py-4">
@@ -123,6 +123,10 @@
 </li>
 <li><strong>lastmaps</strong> - list the last played maps<ul>
 <li>Usage: <code>!lastmaps</code></li>
+</ul>
+</li>
+<li><strong>lastvote</strong> - display information about the last called vote<ul>
+<li>Usage: <code>!lastvote</code></li>
 </ul>
 </li>
 <li><strong>leveltest</strong> - get the admin level for a given player or myself<ul>
@@ -337,7 +341,7 @@
 </ul>
 <h3>Senior Admin [80]</h3>
 <ul>
-<li><strong>addbots</strong> - add bots to the game (requires <code>!bots on</code> first)<ul>
+<li><strong>addbots</strong> - add up to 4 bots to the game (requires <code>!bots on</code> first)<ul>
 <li>Usage: <code>!addbots</code></li>
 </ul>
 </li>
@@ -363,7 +367,7 @@
 </ul>
 </li>
 <li><strong>gear</strong> - set allowed weapons<ul>
-<li>Usage: <code>!gear &lt;default/all/knife/pistol/shotgun/sniper&gt;</code></li>
+<li>Usage: <code>!gear &lt;default/all/knife/pistol/shotgun/sniper/magnum/mac&gt;</code></li>
 </ul>
 </li>
 <li><strong>instagib</strong> - set Instagib mode<ul>
@@ -382,6 +386,10 @@
 </li>
 <li><strong>kill</strong> - kill a player<ul>
 <li>Usage: <code>!kill &lt;name|id&gt;</code></li>
+</ul>
+</li>
+<li><strong>lastadmin</strong> - display the last disconnected admin<ul>
+<li>Usage: <code>!lastadmin</code></li>
 </ul>
 </li>
 <li><strong>lastbans</strong> - list the last 4 bans<ul>
