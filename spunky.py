@@ -611,7 +611,7 @@ class LogParser(object):
         if self.max_ping > 0:
             # rcon update status
             self.game.quake.rcon_update()
-            for player in self.game.quake.players:
+            for player in self.game.quake.players or []:
                 # if ping is too high, increase warn counter, Admins or higher levels will not get the warning
                 try:
                     ping_value = player.ping
@@ -1323,13 +1323,17 @@ class LogParser(object):
             try:
                 divider = line.split(": ", 1)
                 number = divider[0].split(" ", 1)[0]
+                name_saycmd = divider[0].split(" ", 1)[1]
                 cmd = divider[1].split()[0]
-
                 sar = {'player_num': int(number), 'command': cmd}
             except IndexError:
                 sar = {'player_num': BOT_PLAYER_NUM, 'command': ''}
             except ValueError:
                 sar = {'player_num': 0, 'command': str(line.split(": ", 1)).split(" ", 1)[0]}
+
+            # when haunting player and entering command, the haunted player is the caller, therefore ignore command
+            if self.game.players[sar['player_num']].get_name() != name_saycmd:
+                sar = {'player_num': BOT_PLAYER_NUM, 'command': ''}
 
             if sar['command'] == '!mapstats':
                 self.game.rcon_tell(sar['player_num'], "^2%d ^7kills - ^2%d ^7deaths" % (self.game.players[sar['player_num']].get_kills(), self.game.players[sar['player_num']].get_deaths()))
@@ -3200,6 +3204,7 @@ class LogParser(object):
             # Bomb statistics
             if most_planted > 1 or most_defused > 1:
                 self.game.rcon_say("^2Top Objectives: ^7%s [^1%s^7]" % ((planted_by, most_planted) if most_planted > most_defused else (defused_by, most_defused)))
+
             # CTF statistics
             if most_flags > 1:
                 self.game.rcon_say("^2Top Objectives: ^7%s [^1%s^7]" % (flagrunner, most_flags))
@@ -3608,7 +3613,7 @@ class Player(object):
         if now - self.monsterkill['time'] < 5:
             self.monsterkill['kills'] += 1
         else:
-            self.monsterkill['time'] = now
+            self.monsterkill['time'] = int(now)
             self.monsterkill['kills'] = 1
 
     def die(self):
