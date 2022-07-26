@@ -161,6 +161,7 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'bomb': {'desc': 'change gametype to Bomb', 'syntax': '^7Usage: ^2!bomb', 'level': 90},
             'ctf': {'desc': 'change gametype to Capture the Flag', 'syntax': '^7Usage: ^2!ctf', 'level': 90},
             'ffa': {'desc': 'change gametype to Free For All', 'syntax': '^7Usage: ^2!ffa', 'level': 90},
+            'gametype': {'desc': 'set game type', 'syntax': '^7Usage: ^2!gametype ^7<bomb/ctf/ffa/tdm/ts>', 'level': 90},
             'gungame': {'desc': 'change gametype to Gun Game', 'syntax': '^7Usage: ^2!gungame', 'level': 90},
             'jump': {'desc': 'change gametype to Jump', 'syntax': '^7Usage: ^2!jump', 'level': 90},
             'lms': {'desc': 'change gametype to Last Man Standing', 'syntax': '^7Usage: ^2!lms', 'level': 90},
@@ -2772,6 +2773,30 @@ class LogParser(object):
                             self.game.rcon_tell(sar['player_num'], "^3Sorry, you cannot put %s in group User" % victim.get_name())
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['ungroup']['syntax'])
+
+            # !gametype <mode> - set gametype
+            elif sar['command'] == '!gametype' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['gametype']['level']:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].strip()
+                    if arg == "ffa":
+                        self.game.send_rcon('g_gametype 0')
+                        self.game.rcon_say("^1FFA ^7next round")
+                    elif arg == "tdm":
+                        self.game.send_rcon('g_gametype 3')
+                        self.game.rcon_say("^1TDM ^7next round")
+                    elif arg == "ts":
+                        self.game.send_rcon('g_gametype 4')
+                        self.game.rcon_say("^1TS ^7next round")
+                    elif arg == "ctf":
+                        self.game.send_rcon('g_gametype 7')
+                        self.game.rcon_say("^1CTF ^7next round")
+                    elif arg == "bomb":
+                        self.game.send_rcon('g_gametype 8')
+                        self.game.rcon_say("^1BOMB ^7next round")
+                    else:
+                        self.game.rcon_tell(sar['player_num'], COMMANDS['gametype']['syntax'])
+                else:
+                    self.game.rcon_tell(sar['player_num'], COMMANDS['gametype']['syntax'])
 
             # switch to gametype
             elif sar['command'] == '!ffa' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['ffa']['level']:

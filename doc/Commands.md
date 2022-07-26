@@ -263,6 +263,8 @@
   * Usage: `!ctf`
 * **ffa** - change gametype to Free For All
   * Usage: `!ffa`
+* **gametype** - set gametype
+  * Usage: `!gametype <bomb|ctf|ffa|tdm|ts>`
 * **gungame** - change gametype to Gun Game
   * Usage: `!gungame`
 * **jump** - change gametype to Jump
