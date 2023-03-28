@@ -40,6 +40,9 @@ from threading import Thread
 from threading import RLock
 import lib.pygeoip as pygeoip
 import lib.schedule as schedule
+
+##SK
+from array import *
 from lib.pyquake3 import PyQuake3
 
 
@@ -168,6 +171,10 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'ts': {'desc': 'change gametype to Team Survivor', 'syntax': '^7Usage: ^2!ts', 'level': 90},
             'ungroup': {'desc': 'remove admin level from a player', 'syntax': '^7Usage: ^2!ungroup ^7<name>', 'level': 90},
             'password': {'desc': 'set private server password', 'syntax': '^7Usage: ^2!password ^7[<password>]', 'level': 90},
+##SK
+            'sk':{'desc':'shuffle teams to match skill level','syntax':'^7Usage: ^2!sk', 'level':90},
+##rmap
+            'rmap':{'desc':'changes the current map to a randomly selected one from the maplist','syntax':'^7Usage: ^2!rmap','level':90},
             'reload': {'desc': 'reload map', 'syntax': '^7Usage: ^2!reload', 'level': 90}}
 
 REASONS = {'obj': 'go for objective',
@@ -399,6 +406,16 @@ class LogParser(object):
                         self.game.rcon_say("^7Time: %s" % time.strftime("%H:%M", time.localtime(time.time())))
                     elif "@bigtext" in line:
                         self.game.rcon_bigtext("^7%s" % line.split('@bigtext')[-1].strip())
+                    ##Random slap START
+                    elif "@randomslap" in line:
+                        player_list = [player for player in self.game.players.itervalues() if player.get_team() == 1 or player.get_team()==2 and not player.get_team_lock() and player.get_alive()]
+                        victima=random.choice(player_list)
+                        self.game.send_rcon("slap %d" % victima.get_player_num())
+                        self.game.rcon_say("^1Slap winner is: %s" % victima.get_name())
+                        self.game.rcon_say("^2Slap winner is: %s" % victima.get_name())
+                        self.game.rcon_say("^3Slap winner is: %s" % victima.get_name())
+                        self.game.rcon_say("^5Slap winner is: %s" % victima.get_name())
+                        ##Random slap END
                     else:
                         if self.output_rules == 'chat':
                             self.game.rcon_say("^2%s" % line.strip())
@@ -1694,9 +1711,78 @@ class LogParser(object):
             # shuffleteams
             elif (sar['command'] == '!shuffleteams' or sar['command'] == '!shuffle') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['shuffleteams']['level']:
                 if not self.ffa_lms_gametype:
-                    self.game.send_rcon('shuffleteams')
+#                    self.game.send_rcon('shuffleteams')
+#                else:
+#                    self.game.rcon_tell(sar['player_num'], "^7Command is disabled for this game mode")
+# Malondon's codeBlock START
+                    game_data = self.game.get_gamestats()
+                    if (game_data[Player.teams[1]] - game_data[Player.teams[2]]) >= 0:
+                        team1 = 1
+                        team2 = 2
+                    elif (game_data[Player.teams[2]] - game_data[Player.teams[1]]) > 0:
+                        team1 = 2
+                        team2 = 1
+                        self.game.rcon_say("Shuffling macaques...")
+                        player_list1 = [player for player in self.game.players.itervalues() if player.get_team() == team1 and not player.get_team_lock()]
+                        player_list2 = [player for player in self.game.players.itervalues() if player.get_team() == team2 and not player.get_team_lock()]
+                        if team1 > team2:
+                            pasar=math.floor(len(player_list2)/2)
+                        else:
+                            pasar=math.floor(len(player_list1)/2)
+                            for x in range(int(pasar)):
+                                self.game.rcon_forceteam(player_list1[x].get_player_num(), Player.teams[team2])
+                                self.game.rcon_forceteam(player_list2[x].get_player_num(), Player.teams[team1])
+                            pass
+                            self.game.rcon_bigtext("^7Macaques are now shuffled!")
+                    else:
+                        self.game.rcon_tell(sar['player_num'], "^7Command is disabled for this game mode.")
+# Malondon's codeBlock END
+
+##SK START
+            elif (sar['command'] == '!sk') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['sk']['level']:
+                if not self.ffa_lms_gametype:
+                    game_data = self.game.get_gamestats()
+                    #Defino array para tener [player,ratio]
+                    plst=[]
+                    #Obtengo lista de player del team rojo y azul
+                    player_list = [player for player in self.game.players.itervalues() if player.get_team() == 1 or player.get_team()==2 and not player.get_team_lock()]
+                    #Calculo diferencia
+                    diff=abs(sum((player.dame_ratio()) for player in self.game.players.itervalues() if player.get_team() == 1 and not player.get_team_lock())-sum((player.dame_ratio()) for player in self.game.players.itervalues() if player.get_team() == 2 and not player.get_team_lock()))
+                    #Si la diferencia es mayor a 1 reordeno
+                    if diff > 1.0:                            
+                        #Lleno el array con [player,ratio]
+                        for i in player_list:
+                            plst.insert(player_list.index(i),[i,i.dame_ratio()])
+                        #Ordeno el array por ratio, de mayor a menor
+                        plst.sort(key=lambda x: x[1], reverse=True)
+                        #Reparto macacos miti miti
+                        for q in plst:
+                            #q[0]
+                            if (plst.index(q)%2)==0:
+                                if q[0].get_team()==2:
+                                    self.game.rcon_forceteam(q[0].get_player_num(), Player.teams[1])
+                            else:
+                                if q[0].get_team()==1:
+                                    self.game.rcon_forceteam(q[0].get_player_num(), Player.teams[2])
+                    #Obtengo lista de player del team rojo y azul
+                    plater_list = []
+                    player_list = [player for player in self.game.players.itervalues() if player.get_team() == 1 or player.get_team()==2 and not player.get_team_lock()]
+                    diff2=abs(sum((player.dame_ratio()) for player in self.game.players.itervalues() if player.get_team() == 1 and not player.get_team_lock())-sum((player.dame_ratio()) for player in self.game.players.itervalues() if player.get_team() == 2 and not player.get_team_lock()))
+                    self.game.rcon_say("^0Skill difference Was ^1%s" % (diff))
+                    self.game.rcon_say("^0Skill difference Is ^2%s" % (diff2))
                 else:
-                    self.game.rcon_tell(sar['player_num'], "^7Command is disabled for this game mode")
+                    self.game.rcon_say("^0No need to !sk (^5%s^0)" % diff)
+##SK END
+
+#rmap
+            elif sar['command'] == '!rmap' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['rmap']['level']:
+                self.game.rcon_say("^7Random map!! Don't like it? go cry to your mama!")
+                map_lista = self.game.get_all_maps()
+                newmapa=random.choice(map_lista)
+                self.game.send_rcon('g_nextmap %s' % newmapa)
+                self.game.next_mapname = newmapa
+                self.game.rcon_say("^7Changing Map to: ^3%s" % newmapa)
+                self.game.send_rcon('cyclemap')
 
             # spec - move yourself to spectator
             elif sar['command'] in ('!spec', '!sp') and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['spec']['level']:
@@ -1993,7 +2079,7 @@ class LogParser(object):
                         else:
                             if sar['player_num'] == victim.get_player_num():
                                 self.game.rcon_tell(sar['player_num'], "^7You cannot kick yourself")
-                            elif victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
+                            elif victim.get_admin_role() > self.game.players[sar['player_num']].get_admin_role():
                                 self.game.rcon_tell(sar['player_num'], "^3Insufficient privileges to kick an admin")
                             else:
                                 msg = "^2%s ^7was kicked by %s" % (victim.get_name(), self.game.players[sar['player_num']].get_name())
@@ -2156,7 +2242,7 @@ class LogParser(object):
                     if not found:
                         self.game.rcon_tell(sar['player_num'], msg)
                     else:
-                        if victim.get_admin_role() >= self.game.players[sar['player_num']].get_admin_role():
+                        if victim.get_admin_role() > self.game.players[sar['player_num']].get_admin_role():
                             self.game.rcon_tell(sar['player_num'], "^3Insufficient privileges to slap an admin")
                         else:
                             for _ in xrange(0, number):
@@ -3513,6 +3599,17 @@ class Player(object):
 
     def get_team(self):
         return self.team
+
+#SK
+    def dame_ratio(self):
+        if self.get_registered_user():
+            if float(self.get_db_deaths()) > 0:
+                ratio = round(float(self.get_db_kills()) / float(self.get_db_deaths()), 2) if self.get_db_deaths() > 0 else 1.0
+            else:
+                ratio = 1.0
+        else:
+            ratio = 1.0
+        return ratio
 
     def get_team_lock(self):
         return self.team_lock
