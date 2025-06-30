@@ -1,5 +1,3 @@
-This README is just a quick start document. You can find more detailed documentation of Spunky Bot at [https://spunkybot.de](https://spunkybot.de).
-
 # What is Spunky Bot?
 
 **Spunky Bot** is a lightweight game server administration bot and RCON tool.
@@ -14,12 +12,6 @@ The code of Spunky Bot is inspired by the eb2k9 bot by Shawn Haggard, which was 
 [![PyPI version](https://img.shields.io/pypi/v/spunkybot.svg)](https://pypi.python.org/pypi/spunkybot)
 [![Python version](https://img.shields.io/pypi/pyversions/spunkybot?color=yellow)](https://pypi.org/project/spunkybot)
 [![GitHub Downloads](https://img.shields.io/github/downloads/SpunkyBot/spunkybot/total?color=yellowgreen)](https://github.com/SpunkyBot/spunkybot/releases)
-
-If you want to know more, this is a list of selected starting points:
-
-* Introduction to [Spunky Bot](https://spunkybot.de)
-* The full list of [commands](https://spunkybot.de/docs/commands)
-* There is much more inside the [official documentation](https://docs.spunkybot.de)
 
 ## Features
 
@@ -39,13 +31,6 @@ If you want to know more, this is a list of selected starting points:
 * SQLite 3 database
 * Cross-platform (tested on Debian 6 - 10, Ubuntu 10.04 - 20.04, CentOS 6 / 7, macOS 10.13, Windows 7 / 10)
 * Supporting 32-bit and 64-bit operating systems
-
-## Quickstart
-
-It's easy to get started with Spunky Bot:
-
-* Download the [latest release](https://spunkybot.de/download)
-* Read our [quickstart guide](https://spunkybot.de/docs/start) to get up and running
 
 ### Configuration
 
@@ -68,21 +53,15 @@ seta g_friendlyfire "2"
 
 * Connect to your game server and type `!iamgod` in the global chat to get the admin level "Head Admin". This command is only once available.
 
-## Documentation
-
-You can find all details in the latest [documentation](https://docs.spunkybot.de).
-
 ### Bot Commands
 
 The description of all available [commands](https://github.com/SpunkyBot/spunkybot/blob/develop/doc/Commands.md) as well as the admin levels and rights is located under the subfolder `/doc`.
 
 ## Resources
 
-* [Documentation](https://docs.spunkybot.de)
 * [Bug Tracker](https://github.com/SpunkyBot/spunkybot/issues)
 * [Mailing List](https://groups.google.com/group/spunkybot)
 * [Source Code](https://github.com/SpunkyBot/spunkybot)
-* [Homepage](https://spunkybot.de)
 
 ## Changelog
 
@@ -93,8 +72,6 @@ You can keep up-to-date with the changes that we have made via our [releases pag
 Spunky Bot is currently maintained under the [Semantic Versioning](http://semver.org) guidelines. Releases will be numbered with the following format: `<major>.<minor>.<patch>`
 
 ## Additional Information
-
-For additional information, visit the Spunky Bot website at [https://www.spunkybot.de](https://www.spunkybot.de).
 
 If you have any questions about Spunky Bot or need help, please use the [mailing list](https://groups.google.com/group/spunkybot).
 
