@@ -124,6 +124,8 @@ COMMANDS = {'help': {'desc': 'display all available commands', 'syntax': '^7Usag
             'rain': {'desc': 'enables or disables rain', 'syntax': '^7Usage: ^2!rain ^7<on/off>', 'level': 60},
             'scream': {'desc': 'scream a message in different colors to all players', 'syntax': '^7Usage: ^2!scream ^7<text>', 'level': 60},
             'slap': {'desc': 'slap a player (a number of times)', 'syntax': '^7Usage: ^2!slap ^7<name> [<amount>]', 'level': 60},
+            'slapy': {'desc': 'enables or disables random auto-slap to players', 'syntax': '^7Usage: ^2!slapy ^7<on/off> [<seconds>]', 'level': 60},
+            'nuky': {'desc': 'enables or disables random auto-nuke to players', 'syntax': '^7Usage: ^2!nuky ^7<on/off> [<seconds>]', 'level': 60},
             'status': {'desc': 'report the status of the bot', 'syntax': '^7Usage: ^2!status', 'level': 60},
             'swap': {'desc': 'swap teams for player A and B', 'syntax': '^7Usage: ^2!swap ^7<name1> [<name2>]', 'level': 60},
             'version': {'desc': 'display the version of the bot', 'syntax': '^7Usage: ^2!version', 'level': 60},
@@ -343,6 +345,14 @@ class LogParser(object):
         logger.info("Connecting to Database: OK")
         logger.debug("Cmd !iamgod available : %s", self.iamgod)
         self.uptime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time()))
+        # Slapy initial settings
+        self.slapy_enabled = False
+        self.slapy_seconds = 10
+        self.thread_slapy()
+        # Nuky initial settings
+        self.nuky_enabled = False
+        self.nuky_seconds = 10
+        self.thread_nuky()
         # Rotating Messages and Rules
         if CONFIG.has_option('rules', 'show_rules') and CONFIG.getboolean('rules', 'show_rules'):
             self.output_rules = CONFIG.get('rules', 'display') if CONFIG.has_option('rules', 'display') else "chat"
@@ -375,6 +385,58 @@ class LogParser(object):
         processor = Thread(target=self.rotating_messages)
         processor.setDaemon(True)
         processor.start()
+
+    def thread_slapy(self):
+        """
+        Thread process for handling slapy command
+        """
+        processor = Thread(target=self.slapy_execute)
+        processor.setDaemon(True)
+        processor.start()
+
+    def thread_nuky(self):
+        """
+        Thread process for handling nuky command
+        """
+        processor = Thread(target=self.nuky_execute)
+        processor.setDaemon(True)
+        processor.start()
+
+    def slapy_execute(self):
+        """
+        slap main process
+        """
+        # initial wait
+        time.sleep(10)
+        while 1:
+            self.game.quake.rcon_update()
+            player_keys = self.game.players.keys()
+            if not self.slapy_enabled or len(player_keys) == 0:
+                time.sleep(1)
+                continue 
+            print(player_keys)
+            player = self.game.players[random.choice(player_keys)]
+            self.game.send_rcon("slap %d" % player.get_player_num())
+            time_to_wait = random.uniform(0, self.slapy_seconds)
+            time.sleep(time_to_wait)
+
+    def nuky_execute(self):
+        """
+        nuky main process
+        """
+        # initial wait
+        time.sleep(10)
+        while 1:
+            self.game.quake.rcon_update()
+            player_keys = self.game.players.keys()
+            if not self.nuky_enabled or len(player_keys) == 0:
+                time.sleep(1)
+                continue 
+            print(player_keys)
+            player = self.game.players[random.choice(player_keys)]
+            self.game.send_rcon("nuke %d" % player.get_player_num())
+            time_to_wait = random.uniform(0, self.nuky_seconds)
+            time.sleep(time_to_wait)
 
     def rotating_messages(self):
         """
@@ -2168,6 +2230,50 @@ class LogParser(object):
                                 self.game.send_rcon("slap %d" % victim.get_player_num())
                 else:
                     self.game.rcon_tell(sar['player_num'], COMMANDS['slap']['syntax'])
+
+            # slapy - enable or disable player random auto-slap
+            elif sar['command'] == '!slapy' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['slapy']['level']:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].split()
+                    if len(arg) > 1:
+                        status = arg[0]
+                        seconds = arg[1]
+                        if not seconds.isdigit():
+                            seconds = 10
+                        else:
+                            seconds = int(seconds)
+                    else:
+                        status = arg[0]
+                        seconds = 10
+                    if status == 'on':
+                        self.slapy_enabled = True
+                    else:
+                        self.slapy_enabled = False
+                    self.slapy_seconds = seconds
+                else:
+                    self.game.rcon_tell(sar['player_num'], COMMANDS['slapy']['syntax'])
+
+            # nuky - enable or disable player random auto-nuke
+            elif sar['command'] == '!nuky' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['nuky']['level']:
+                if line.split(sar['command'])[1]:
+                    arg = line.split(sar['command'])[1].split()
+                    if len(arg) > 1:
+                        status = arg[0]
+                        seconds = arg[1]
+                        if not seconds.isdigit():
+                            seconds = 10
+                        else:
+                            seconds = int(seconds)
+                    else:
+                        status = arg[0]
+                        seconds = 10
+                    if status == 'on':
+                        self.nuky_enabled = True
+                    else:
+                        self.nuky_enabled = False
+                    self.nuky_seconds = seconds
+                else:
+                    self.game.rcon_tell(sar['player_num'], COMMANDS['nuky']['syntax'])
 
             # swap - swap teams for player 1 and 2 (if in different teams)
             elif sar['command'] == '!swap' and self.game.players[sar['player_num']].get_admin_role() >= COMMANDS['swap']['level']:
